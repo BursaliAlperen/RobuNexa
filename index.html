@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robunexa | Robux Kazan</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome (Genel İkonlar) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: Gotham Benzeri -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- 🛡️ GÜVENLİK (ANTI-INSPECT) -->
+    <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) return false;
+            if(e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0))) return false;
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        }
+        setInterval(() => { console.clear(); }, 2000);
+    </script>
+
+    <!-- CONFIG -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        light: {
+                            bg: '#f3f4f6',      // Açık Gri Arkaplan
+                            card: '#ffffff',    // Beyaz Kartlar
+                            text: '#111827',    // Koyu Yazı
+                            sub: '#6b7280'      // Gri Alt Yazı
+                        },
+                        rbx: {
+                            blue: '#0074e0',    // Orijinal Roblox Mavisi
+                            dark: '#1e293b',
+                            gold: '#f59e0b'     // Orijinal Altın Rengi
+                        }
+                    },
+                    fontFamily: { sans: ['Montserrat', 'sans-serif'] },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(0, 116, 224, 0.3)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #f3f4f6; color: #1f2937; overflow-x: hidden; }
+        
+        /* Sidebar & Cards */
+        .sidebar-glass {
+            background: #ffffff;
+            border-right: 1px solid #e5e7eb;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 1.5rem;
+            border: 1px solid #f3f4f6;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover { transform: translateY(-3px); box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.08); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Robux Icon SVG Class */
+        .robux-icon { width: 1.2em; height: 1.2em; display: inline-block; vertical-align: middle; fill: currentColor; }
+    </style>
+</head>
+<body class="bg-light-bg min-h-screen relative font-sans">
+
+    <!-- ÖZEL SVG IKONLAR (ROBUX SEMBOLÜ) -->
+    <svg style="display: none;">
+        <symbol id="icon-robux" viewBox="0 0 24 24">
+            <path d="M12 2L4.5 6.33V17.67L12 22L19.5 17.67V6.33L12 2ZM12 4.31L17.5 7.49V16.51L12 19.69L6.5 16.51V7.49L12 4.31ZM12 8.5C10.07 8.5 8.5 10.07 8.5 12C8.5 13.93 10.07 15.5 12 15.5C13.93 15.5 15.5 13.93 15.5 12C15.5 10.07 13.93 8.5 12 8.5ZM12 10.5C12.83 10.5 13.5 11.17 13.5 12C13.5 12.83 12.83 13.5 12 13.5C11.17 13.5 10.5 12.83 10.5 12C10.5 11.17 11.17 10.5 12 10.5Z" />
+        </symbol>
+    </svg>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[60] flex flex-col gap-3"></div>
+
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="relative">
+            <svg class="w-16 h-16 text-rbx-gold animate-bounce" viewBox="0 0 24 24" fill="currentColor"><use href="#icon-robux"></use></svg>
+        </div>
+        <h2 class="mt-4 text-2xl font-extrabold text-gray-800 tracking-wider">ROBUNEXA</h2>
+    </div>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="hidden fixed inset-0 z-40 flex items-center justify-center p-4 bg-gray-50">
+        <div class="bg-white w-full max-w-md p-10 rounded-3xl shadow-2xl relative border border-gray-100">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gray-100 rounded-2xl mx-auto flex items-center justify-center mb-4">
+                    <svg class="w-10 h-10 text-rbx-blue" fill="currentColor"><use href="#icon-robux"></use></svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900">Giriş Yap</h1>
+                <p class="text-gray-500 mt-2 text-sm">Robux kazanmaya başlamak için e-posta yeterli.</p>
+            </div>
+
+            <form id="login-form" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">E-Posta Adresi</label>
+                    <input type="email" id="email-input" 
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 px-4 text-gray-800 focus:bg-white focus:border-rbx-blue focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium" 
+                        placeholder="adiniz@ornek.com" required>
+                </div>
+                <button type="submit" id="btn-login" class="w-full bg-rbx-blue hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/30 transition-all transform active:scale-95 flex items-center justify-center gap-2">
+                    Giriş Bağlantısı Gönder
+                </button>
+            </form>
+            <div class="mt-6 flex items-center justify-center gap-2 text-xs text-gray-400">
+                <i class="fas fa-shield-alt"></i> Güvenli & Şifresiz Giriş
+            </div>
+        </div>
+    </div>
+
+    <!-- APP SCREEN -->
+    <div id="app-screen" class="hidden flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside class="w-72 sidebar-glass hidden md:flex flex-col z-20 shadow-sm">
+            <div class="p-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-rbx-blue rounded-xl flex items-center justify-center text-white shadow-glow">
+                        <svg class="w-6 h-6" fill="currentColor"><use href="#icon-robux"></use></svg>
+                    </div>
+                    <span class="text-2xl font-extrabold text-gray-800 tracking-tight">Robunexa</span>
+                </div>
+            </div>
+
+            <div class="px-6 mb-2">
+                <div class="text-xs font-bold text-gray-400 uppercase px-4 mb-2">Menü</div>
+                <nav class="space-y-1">
+                    <button id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-600 hover:bg-gray-100 hover:text-rbx-blue transition-all group font-semibold">
+                        <i class="fas fa-chart-pie w-6 text-center text-gray-400 group-hover:text-rbx-blue"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <button id="nav-earn" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-600 hover:bg-gray-100 hover:text-rbx-gold transition-all group font-semibold">
+                        <i class="fas fa-tags w-6 text-center text-gray-400 group-hover:text-rbx-gold"></i>
+                        <span>Promosyon</span>
+                    </button>
+                    <button id="nav-admin" class="hidden w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-600 hover:bg-red-50 hover:text-red-500 transition-all group font-semibold mt-4">
+                        <i class="fas fa-lock w-6 text-center text-gray-400 group-hover:text-red-500"></i>
+                        <span>Yönetici</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="mt-auto p-6 border-t border-gray-100">
+                <button id="btn-logout" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors text-sm font-semibold">
+                    <i class="fas fa-sign-out-alt w-6"></i>
+                    <span>Çıkış Yap</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col relative overflow-hidden bg-[#f8fafc]">
+            <!-- Header -->
+            <header class="h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-30">
+                <div class="text-gray-500 text-sm font-medium">
+                    <span id="current-date">...</span>
+                </div>
+                
+                <div class="flex items-center gap-6">
+                    <!-- Bakiye Göstergesi -->
+                    <div class="bg-white border border-gray-200 pl-2 pr-4 py-1.5 rounded-full flex items-center gap-3 shadow-sm">
+                        <div class="bg-gray-100 p-1.5 rounded-full">
+                             <svg class="w-5 h-5 text-rbx-gold" fill="currentColor"><use href="#icon-robux"></use></svg>
+                        </div>
+                        <div class="flex flex-col leading-none">
+                            <span class="text-[10px] text-gray-400 font-bold uppercase">Bakiye</span>
+                            <span class="text-gray-800 font-bold"><span id="header-balance">0.00</span> R$</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Profil -->
+                    <div class="flex items-center gap-3 pl-6 border-l border-gray-200">
+                        <div class="text-right hidden sm:block">
+                            <div id="display-email" class="text-sm font-bold text-gray-800">...</div>
+                            <div class="text-xs text-rbx-blue font-medium">Kullanıcı</div>
+                        </div>
+                        <img id="user-avatar" src="https://tr.rbxcdn.com/30DAY-Avatar-Headshot-Placeholder.png" class="w-10 h-10 rounded-full border border-gray-200 bg-gray-50">
+                    </div>
+                </div>
+            </header>
+
+            <!-- İçerik -->
+            <div class="flex-1 overflow-y-auto p-8 relative">
+                
+                <!-- DASHBOARD -->
+                <div id="view-dashboard" class="space-y-8 animate-fade-in">
+                    <!-- Banner -->
+                    <div class="w-full bg-gradient-to-r from-rbx-blue to-blue-600 rounded-3xl p-10 text-white relative overflow-hidden shadow-lg shadow-blue-500/20">
+                        <div class="relative z-10 max-w-lg">
+                            <h2 class="text-3xl font-extrabold mb-3">Hoş Geldin! 👋</h2>
+                            <p class="text-blue-100 font-medium">Yeni promosyon kodları aktif edildi. Hemen aşağıdaki kodu gir ve ödülünü kap.</p>
+                        </div>
+                        <!-- Background decoration -->
+                        <div class="absolute right-0 top-0 opacity-10 transform translate-x-12 -translate-y-6">
+                            <svg class="w-64 h-64" fill="currentColor"><use href="#icon-robux"></use></svg>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Balance -->
+                        <div class="card p-6">
+                            <div class="flex justify-between items-start mb-6">
+                                <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-600">
+                                    <i class="fas fa-wallet text-xl"></i>
+                                </div>
+                                <span class="bg-green-100 text-green-600 text-xs font-bold px-2 py-1 rounded-lg">+ Aktif</span>
+                            </div>
+                            <p class="text-gray-500 text-sm font-semibold">Toplam Kazanç</p>
+                            <h3 class="text-3xl font-bold text-gray-800 flex items-center gap-2 mt-1">
+                                <svg class="w-6 h-6 text-rbx-gold" fill="currentColor"><use href="#icon-robux"></use></svg>
+                                <span id="dash-balance">0</span>
+                            </h3>
+                            <button class="mt-4 w-full py-2.5 bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-bold rounded-xl transition-colors text-sm">Çekim Yap</button>
+                        </div>
+
+                        <!-- Referrals -->
+                        <div class="card p-6">
+                            <div class="flex justify-between items-start mb-6">
+                                <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-600">
+                                    <i class="fas fa-users text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="text-gray-500 text-sm font-semibold">Referans Sistemi</p>
+                            <div class="mt-2 bg-gray-50 border border-gray-200 p-3 rounded-xl flex items-center justify-between">
+                                <code id="ref-code" class="text-xs text-gray-500 font-mono truncate">Yükleniyor...</code>
+                                <button id="btn-copy-ref" class="text-rbx-blue hover:text-blue-700 transition-colors"><i class="far fa-copy"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Daily Reward -->
+                        <div class="card p-6 border-l-4 border-l-rbx-blue">
+                            <div class="flex justify-between items-start mb-6">
+                                <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-rbx-blue">
+                                    <i class="fas fa-gift text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="text-gray-500 text-sm font-semibold">Günlük Ödül</p>
+                            <h3 class="text-xl font-bold text-gray-800 mt-1">5.00 R$</h3>
+                            <button class="mt-4 w-full py-2.5 bg-rbx-blue hover:bg-blue-700 text-white font-bold rounded-xl transition-colors text-sm shadow-lg shadow-blue-500/20">Ödülü Al</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EARN -->
+                <div id="view-earn" class="hidden flex flex-col items-center justify-center min-h-[50vh]">
+                    <div class="card w-full max-w-lg p-10 text-center relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-rbx-gold to-transparent"></div>
+                        
+                        <div class="w-20 h-20 bg-yellow-50 rounded-full mx-auto flex items-center justify-center mb-6">
+                            <svg class="w-10 h-10 text-rbx-gold" fill="currentColor"><use href="#icon-robux"></use></svg>
+                        </div>
+                        
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Promosyon Kodu</h2>
+                        <p class="text-gray-500 text-sm mb-8">Kodu aşağıya gir ve anında Robux kazan.</p>
+
+                        <div class="relative">
+                            <input id="promo-code-input" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 pl-5 pr-32 text-gray-800 font-bold placeholder-gray-400 focus:bg-white focus:border-rbx-gold outline-none transition-all" placeholder="KODU GİR">
+                            <button id="btn-redeem" class="absolute right-2 top-2 bottom-2 bg-rbx-gold hover:bg-yellow-500 text-white font-bold px-6 rounded-lg shadow-md transition-transform active:scale-95">
+                                KULLAN
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADMIN -->
+                <div id="view-admin" class="hidden space-y-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-gray-800">Yönetici Paneli</h2>
+                        <span class="bg-red-50 text-red-500 px-3 py-1 rounded-lg text-xs font-bold border border-red-100">🔒 GÜVENLİ</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Kod Oluştur -->
+                        <div class="card p-8">
+                            <h3 class="font-bold text-gray-700 mb-6 flex items-center gap-2">
+                                <i class="fas fa-plus-circle text-green-500"></i> Yeni Kod Ekle
+                            </h3>
+                            <div class="space-y-4">
+                                <input id="admin-code" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-800 focus:border-green-500 outline-none font-medium" placeholder="Kod Adı (Örn: YAZ2024)">
+                                <input id="admin-val" type="number" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-800 focus:border-green-500 outline-none font-medium" placeholder="Değer (R$)">
+                                <button id="btn-create-code" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-green-500/20">Oluştur</button>
+                            </div>
+                        </div>
+
+                        <!-- Kullanıcılar -->
+                        <div class="card p-8 flex flex-col h-[400px]">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-gray-700">Kullanıcılar</h3>
+                                <button onclick="loadAdminData()" class="text-gray-400 hover:text-rbx-blue"><i class="fas fa-sync"></i></button>
+                            </div>
+                            <div class="flex-1 overflow-y-auto pr-2">
+                                <ul id="admin-user-list" class="space-y-2"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs, addDoc, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyCUUceDxrNY2y7OEbJ6EX0QEXVFVBp1JgM",
+            authDomain: "robunexa.firebaseapp.com",
+            projectId: "robunexa",
+            storageBucket: "robunexa.firebasestorage.app",
+            messagingSenderId: "212565926554",
+            appId: "1:212565926554:web:8b82d702f0ef9dc04cf523",
+            measurementId: "G-6FR21407E6"
+        };
+
+        const ADMIN_EMAIL = "adanalironaldo131@gmail.com";
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // UI Selectors
+        const ui = {
+            loading: document.getElementById('loading-screen'),
+            login: document.getElementById('login-screen'),
+            app: document.getElementById('app-screen'),
+            navs: {
+                dashboard: document.getElementById('nav-dashboard'),
+                earn: document.getElementById('nav-earn'),
+                admin: document.getElementById('nav-admin')
+            },
+            views: {
+                dashboard: document.getElementById('view-dashboard'),
+                earn: document.getElementById('view-earn'),
+                admin: document.getElementById('view-admin')
+            }
+        };
+
+        // Date
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' });
+
+        // Toast
+        window.showToast = (msg, type = 'success') => {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            const bg = type === 'success' ? 'bg-white border-green-500 text-gray-800' : 'bg-white border-red-500 text-gray-800';
+            const icon = type === 'success' ? 'text-green-500 fa-check-circle' : 'text-red-500 fa-exclamation-circle';
+            
+            el.className = `${bg} border-l-4 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 transform transition-all duration-300 translate-x-full font-medium`;
+            el.innerHTML = `<i class="fas ${icon} text-lg"></i> <span>${msg}</span>`;
+            
+            container.appendChild(el);
+            requestAnimationFrame(() => el.classList.remove('translate-x-full'));
+            setTimeout(() => { el.classList.add('translate-x-full', 'opacity-0'); setTimeout(() => el.remove(), 300); }, 3000);
+        };
+
+        // Auth
+        let currentUser = null, userData = null;
+
+        onAuthStateChanged(auth, async (user) => {
+            setTimeout(() => ui.loading.classList.add('opacity-0', 'pointer-events-none'), 500);
+            if (user) {
+                currentUser = user;
+                await loadUser();
+                ui.login.classList.add('hidden');
+                ui.app.classList.remove('hidden');
+                switchView('dashboard');
+            } else {
+                ui.login.classList.remove('hidden');
+                ui.app.classList.add('hidden');
+            }
+        });
+
+        // Login Logic
+        document.getElementById('btn-login').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email-input').value;
+            if(!email) return showToast('E-Posta gerekli', 'error');
+
+            const btn = document.getElementById('btn-login');
+            btn.innerHTML = 'Gönderiliyor...';
+            
+            try {
+                await sendSignInLinkToEmail(auth, email, { url: window.location.href, handleCodeInApp: true });
+                window.localStorage.setItem('emailForSignIn', email);
+                showToast('Giriş linki gönderildi!', 'success');
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                btn.innerHTML = 'Giriş Bağlantısı Gönder';
+            }
+        });
+
+        if (isSignInWithEmailLink(auth, window.location.href)) {
+            let email = window.localStorage.getItem('emailForSignIn');
+            if (!email) email = window.prompt('E-Postanızı doğrulayın');
+            signInWithEmailLink(auth, email, window.location.href)
+                .then(() => {
+                    window.localStorage.removeItem('emailForSignIn');
+                    window.history.replaceState({}, '', '/');
+                    showToast('Giriş Başarılı');
+                })
+                .catch(err => showToast(err.message, 'error'));
+        }
+
+        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
+        // Data
+        async function loadUser() {
+            const ref = doc(db, "users", currentUser.uid);
+            const snap = await getDoc(ref);
+            if(snap.exists()) userData = snap.data();
+            else {
+                userData = { email: currentUser.email, balance: 0, referralCode: Math.random().toString(36).substr(2, 8), createdAt: serverTimestamp() };
+                await setDoc(ref, userData);
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('header-balance').innerText = userData.balance.toFixed(2);
+            document.getElementById('dash-balance').innerText = userData.balance.toFixed(2);
+            document.getElementById('display-email').innerText = currentUser.email.split('@')[0];
+            document.getElementById('ref-code').innerText = `${window.location.host}/?ref=${userData.referralCode}`;
+            if(currentUser.email === ADMIN_EMAIL) ui.navs.admin.classList.remove('hidden');
+        }
+
+        // Navigation
+        function switchView(name) {
+            Object.values(ui.views).forEach(el => el.classList.add('hidden'));
+            Object.values(ui.navs).forEach(el => {
+                el.classList.remove('bg-gray-100', 'text-rbx-blue', 'text-rbx-gold');
+                el.classList.add('text-gray-600');
+            });
+
+            ui.views[name].classList.remove('hidden');
+            const nav = ui.navs[name];
+            if(nav) {
+                nav.classList.add('bg-gray-100');
+                if(name === 'earn') nav.classList.add('text-rbx-gold');
+                else nav.classList.add('text-rbx-blue');
+            }
+            if(name === 'admin' && currentUser.email === ADMIN_EMAIL) loadAdminData();
+        }
+
+        ui.navs.dashboard.addEventListener('click', () => switchView('dashboard'));
+        ui.navs.earn.addEventListener('click', () => switchView('earn'));
+        ui.navs.admin.addEventListener('click', () => switchView('admin'));
+
+        // Features
+        document.getElementById('btn-redeem').addEventListener('click', async () => {
+            const code = document.getElementById('promo-code-input').value;
+            if(!code) return showToast('Kod giriniz', 'error');
+
+            const q = query(collection(db, 'promo_codes'), where('code', '==', code));
+            const snap = await getDocs(q);
+
+            if(!snap.empty) {
+                const d = snap.docs[0].data();
+                if(d.active) {
+                    await updateDoc(doc(db, 'users', currentUser.uid), { balance: increment(d.value) });
+                    showToast(`${d.value} R$ Eklendi!`, 'success');
+                    loadUser();
+                } else showToast('Kod süresi dolmuş', 'error');
+            } else showToast('Geçersiz Kod', 'error');
+        });
+
+        document.getElementById('btn-copy-ref').addEventListener('click', () => {
+            navigator.clipboard.writeText(document.getElementById('ref-code').innerText);
+            showToast('Kopyalandı!');
+        });
+
+        // Admin
+        window.loadAdminData = async () => {
+            if (currentUser.email !== ADMIN_EMAIL) return;
+            const snaps = await getDocs(collection(db, "users"));
+            const list = document.getElementById('admin-user-list');
+            list.innerHTML = '';
+            snaps.forEach(d => {
+                const u = d.data();
+                list.innerHTML += `<li class="flex justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 mb-2"><span class="text-xs font-bold text-gray-600">${u.email}</span><span class="text-xs font-bold text-rbx-gold">${u.balance} R$</span></li>`;
+            });
+        };
+
+        document.getElementById('btn-create-code').addEventListener('click', async () => {
+            if (currentUser.email !== ADMIN_EMAIL) return;
+            const name = document.getElementById('admin-code').value;
+            const val = Number(document.getElementById('admin-val').value);
+            if(name && val) {
+                await addDoc(collection(db, 'promo_codes'), { code: name, value: val, active: true });
+                showToast('Kod Oluşturuldu');
+            }
+        });
+    </script>
+</body>
+</html>
