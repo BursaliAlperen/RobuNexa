@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Robunexa | Bedava Robux</title>
+    <title>Robunexa | Earn Free Robux</title>
     
     <!-- FAVICON (YUVARLAK YEŞİL R$) -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%2302b757'/%3E%3Ctext x='50' y='72' font-family='Arial' font-weight='900' font-size='60' text-anchor='middle' fill='white'%3ER$%3C/text%3E%3C/svg%3E">
@@ -15,13 +15,11 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
     <script>
-        // DARK MODE INIT
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
-
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) { if(e.keyCode == 123) return false; }
         
@@ -32,12 +30,7 @@
                     colors: {
                         light: { bg: '#f0f4f8', card: '#ffffff', text: '#1e293b' },
                         dark: { bg: '#0f172a', card: '#1e293b', text: '#f1f5f9' },
-                        rbx: { 
-                            blue: '#3b82f6', 
-                            gold: '#F59E0B', 
-                            green: '#02b757', // Robux Green
-                            greenDark: '#028a42' 
-                        } 
+                        rbx: { blue: '#3b82f6', gold: '#F59E0B', green: '#02b757', greenDark: '#028a42' } 
                     },
                     fontFamily: { sans: ['Outfit', 'sans-serif'] },
                     animation: { 'float': 'float 6s ease-in-out infinite' },
@@ -51,39 +44,32 @@
         body { transition: background-color 0.3s, color 0.3s; }
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.5); }
         .dark .glass { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); }
-        
         #right-drawer { transition: transform 0.3s ease-in-out; }
         #right-drawer.open { transform: translateX(0); }
         #right-drawer.closed { transform: translateX(100%); }
-
         .modal { transition: opacity 0.3s ease-in-out; pointer-events: none; opacity: 0; }
         .modal.active { pointer-events: auto; opacity: 1; }
         .modal-content { transform: scale(0.95); transition: transform 0.3s ease; }
         .modal.active .modal-content { transform: scale(1); }
-
         .lang-dropdown { opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s; }
         .lang-dropdown.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        
+        /* FAQ Detayları */
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] summary ~ * { animation: sweep .3s ease-in-out; }
+        @keyframes sweep { 0% {opacity: 0; transform: translateY(-10px)} 100% {opacity: 1; transform: translateY(0)} }
     </style>
 </head>
 <body class="antialiased min-h-screen bg-light-bg text-light-text dark:bg-dark-bg dark:text-dark-text font-sans">
 
     <!-- SVG ICONS -->
     <svg style="display: none;">
-        <!-- YUVARLAK YEŞİL R$ İKONU -->
         <symbol id="icon-robux-round" viewBox="0 0 100 100">
-            <!-- Yeşil Daire -->
             <circle cx="50" cy="50" r="48" fill="#02b757"/>
-            <!-- Hafif Parlama Efekti -->
             <circle cx="50" cy="50" r="48" fill="url(#gradShine)" opacity="0.3"/>
-            <!-- R$ Yazısı -->
             <text x="50" y="72" font-family="Arial, sans-serif" font-weight="900" font-size="65" text-anchor="middle" fill="white" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">R$</text>
-            
-            <defs>
-                <linearGradient id="gradShine" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="white" stop-opacity="0.5"/>
-                    <stop offset="100%" stop-color="white" stop-opacity="0"/>
-                </linearGradient>
-            </defs>
+            <defs><linearGradient id="gradShine" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="white" stop-opacity="0.5"/><stop offset="100%" stop-color="white" stop-opacity="0"/></linearGradient></defs>
         </symbol>
     </svg>
 
@@ -96,64 +82,35 @@
     <!-- TOAST -->
     <div id="toast-container" class="fixed top-5 right-5 z-[80] flex flex-col gap-3"></div>
 
-    <!-- SAĞ MENÜ -->
+    <!-- RIGHT DRAWER -->
     <div id="drawer-overlay" onclick="toggleDrawer()" class="fixed inset-0 bg-black/50 z-[60] hidden backdrop-blur-sm transition-opacity"></div>
     <div id="right-drawer" class="closed fixed top-0 right-0 h-full w-80 bg-white dark:bg-dark-card shadow-2xl z-[70] p-6 flex flex-col border-l border-gray-100 dark:border-gray-700 overflow-y-auto">
         <div class="flex justify-between items-center mb-8">
             <h2 class="text-xl font-bold dark:text-white" data-i18n="menu_title">Menü</h2>
             <button onclick="toggleDrawer()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times text-2xl"></i></button>
         </div>
-
         <div class="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl mb-6">
             <img src="https://tr.rbxcdn.com/30DAY-Avatar-Headshot-Placeholder.png" class="w-10 h-10 rounded-full bg-white">
-            <div>
-                <div id="drawer-email" class="text-sm font-bold truncate w-40">...</div>
-                <div class="text-xs text-green-500 font-bold" data-i18n="status_online">Çevrimiçi</div>
-            </div>
+            <div><div id="drawer-email" class="text-sm font-bold truncate w-40">...</div><div class="text-xs text-green-500 font-bold" data-i18n="status_online">Çevrimiçi</div></div>
         </div>
-
         <div class="space-y-2 mb-6">
             <label class="text-xs font-bold text-gray-400 uppercase ml-2" data-i18n="lbl_nav">Navigasyon</label>
-            <button onclick="switchView('dashboard'); toggleDrawer()" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-700 dark:text-gray-200 font-medium transition">
-                <div class="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-lg flex items-center justify-center text-rbx-blue dark:text-blue-300"><i class="fas fa-home"></i></div>
-                <span data-i18n="nav_dashboard">Ana Sayfa</span>
-            </button>
-            <button onclick="switchView('earn'); toggleDrawer()" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-yellow-50 dark:hover:bg-yellow-900/20 text-gray-700 dark:text-gray-200 font-medium transition">
-                <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-800 rounded-lg flex items-center justify-center text-rbx-gold dark:text-yellow-300"><i class="fas fa-ticket-alt"></i></div>
-                <span data-i18n="nav_earn">Kod & Referans</span>
-            </button>
-            <button id="drawer-admin-btn" onclick="switchView('admin'); toggleDrawer()" class="hidden w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 font-bold transition border border-red-100 dark:border-red-900">
-                <div class="w-8 h-8 bg-red-100 dark:bg-red-800 rounded-lg flex items-center justify-center"><i class="fas fa-shield-alt"></i></div>
-                <span data-i18n="nav_admin">Yönetici Paneli</span>
-            </button>
+            <button onclick="switchView('dashboard'); toggleDrawer()" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-700 dark:text-gray-200 font-medium transition"><div class="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-lg flex items-center justify-center text-rbx-blue dark:text-blue-300"><i class="fas fa-home"></i></div><span data-i18n="nav_dashboard">Ana Sayfa</span></button>
+            <button onclick="switchView('earn'); toggleDrawer()" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-yellow-50 dark:hover:bg-yellow-900/20 text-gray-700 dark:text-gray-200 font-medium transition"><div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-800 rounded-lg flex items-center justify-center text-rbx-gold dark:text-yellow-300"><i class="fas fa-ticket-alt"></i></div><span data-i18n="nav_earn">Kod & Referans</span></button>
+            <button id="drawer-admin-btn" onclick="switchView('admin'); toggleDrawer()" class="hidden w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 font-bold transition border border-red-100 dark:border-red-900"><div class="w-8 h-8 bg-red-100 dark:bg-red-800 rounded-lg flex items-center justify-center"><i class="fas fa-shield-alt"></i></div><span data-i18n="nav_admin">Yönetici Paneli</span></button>
         </div>
-
         <div class="space-y-4 mb-auto">
             <label class="text-xs font-bold text-gray-400 uppercase ml-2" data-i18n="lbl_settings">Ayarlar</label>
             <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-600 dark:text-yellow-400"><i id="theme-icon" class="fas fa-sun"></i></div>
-                    <span class="font-medium" data-i18n="dark_mode">Karanlık Mod</span>
-                </div>
-                <button onclick="toggleTheme()" class="w-12 h-6 rounded-full bg-gray-300 dark:bg-green-500 relative transition-colors">
-                    <div class="w-4 h-4 bg-white rounded-full absolute top-1 left-1 dark:left-7 transition-all"></div>
-                </button>
+                <div class="flex items-center gap-3"><div class="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-600 dark:text-yellow-400"><i id="theme-icon" class="fas fa-sun"></i></div><span class="font-medium" data-i18n="dark_mode">Karanlık Mod</span></div>
+                <button onclick="toggleTheme()" class="w-12 h-6 rounded-full bg-gray-300 dark:bg-green-500 relative transition-colors"><div class="w-4 h-4 bg-white rounded-full absolute top-1 left-1 dark:left-7 transition-all"></div></button>
             </div>
             <div class="relative">
-                <button onclick="toggleLangMenu('lang-menu-drawer')" class="w-full flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                    <div class="flex items-center gap-3">
-                        <img id="current-flag-drawer" src="https://flagcdn.com/w40/tr.png" class="w-6 h-auto rounded shadow-sm">
-                        <span class="font-medium" data-i18n="language">Dil</span>
-                    </div>
-                    <i class="fas fa-chevron-down text-gray-400"></i>
-                </button>
+                <button onclick="toggleLangMenu('lang-menu-drawer')" class="w-full flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700"><div class="flex items-center gap-3"><img id="current-flag-drawer" src="https://flagcdn.com/w40/tr.png" class="w-6 h-auto rounded shadow-sm"><span class="font-medium" data-i18n="language">Dil</span></div><i class="fas fa-chevron-down text-gray-400"></i></button>
                 <div id="lang-menu-drawer" class="lang-dropdown absolute bottom-12 w-full bg-white dark:bg-dark-card shadow-xl rounded-xl p-2 grid grid-cols-2 gap-2 border border-gray-100 dark:border-gray-700 z-50 max-h-48 overflow-y-auto"></div>
             </div>
         </div>
-
-        <button id="btn-logout-drawer" class="w-full bg-gray-100 dark:bg-gray-800 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 text-gray-600 dark:text-gray-300 font-bold py-3 rounded-xl transition flex justify-center items-center gap-2">
-            <i class="fas fa-sign-out-alt"></i> <span data-i18n="btn_logout">Çıkış Yap</span>
-        </button>
+        <button id="btn-logout-drawer" class="w-full bg-gray-100 dark:bg-gray-800 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 text-gray-600 dark:text-gray-300 font-bold py-3 rounded-xl transition flex justify-center items-center gap-2"><i class="fas fa-sign-out-alt"></i> <span data-i18n="btn_logout">Çıkış Yap</span></button>
     </div>
 
     <!-- WITHDRAW MODAL -->
@@ -166,7 +123,7 @@
             </div>
             <div class="space-y-4">
                 <input id="w-gamepass" type="text" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 outline-none focus:ring-2 focus:ring-rbx-blue transition dark:text-white" placeholder="Gamepass ID / Link">
-                <input id="w-amount" type="number" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 outline-none font-bold focus:ring-2 focus:ring-rbx-blue transition dark:text-white" placeholder="Miktar (Min 5 R$)">
+                <input id="w-amount" type="number" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 outline-none font-bold focus:ring-2 focus:ring-rbx-blue transition dark:text-white" placeholder="Min: 5">
                 <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-900/50 p-4 rounded-xl">
                     <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300 mb-1"><span data-i18n="modal_gross">Çekilen:</span><span class="font-bold"><span id="calc-gross">0</span> R$</span></div>
                     <div class="flex justify-between text-sm text-red-500 mb-2 border-b border-yellow-200 dark:border-yellow-800 pb-2"><span>Fee (%40):</span><span>-<span id="calc-fee">0</span> R$</span></div>
@@ -177,207 +134,88 @@
         </div>
     </div>
 
-    <!-- LANDING PAGE / LOGIN SCREEN -->
+    <!-- LANDING PAGE / LOGIN -->
     <div id="login-screen" class="hidden min-h-screen flex flex-col relative overflow-x-hidden bg-white dark:bg-dark-bg">
-        <!-- Header -->
         <nav class="w-full py-6 px-8 flex justify-between items-center z-20">
             <div class="flex items-center gap-3">
-                <!-- Header Icon -->
-                <svg class="w-10 h-10 drop-shadow-md"><use href="#icon-robux-round"></use></svg>
+                <div class="bg-rbx-green p-2 rounded-lg shadow-lg rotate-3"><svg class="w-6 h-6 text-white"><use href="#icon-robux-round"></use></svg></div>
                 <span class="text-2xl font-black text-gray-800 dark:text-white tracking-tight">ROBUNEXA</span>
             </div>
-            
-            <!-- Language Selector Login -->
             <div class="relative">
-                <button onclick="toggleLangMenu('lang-menu-login')" class="glass px-4 py-2 rounded-full flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-white hover:bg-white/50 transition shadow-sm">
-                    <img id="current-flag-login" src="https://flagcdn.com/w40/tr.png" class="w-5 h-auto rounded shadow-sm">
-                    <span id="current-lang-login">TR</span>
-                    <i class="fas fa-chevron-down text-xs ml-1"></i>
-                </button>
+                <button onclick="toggleLangMenu('lang-menu-login')" class="glass px-4 py-2 rounded-full flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-white hover:bg-white/50 transition shadow-sm"><img id="current-flag-login" src="https://flagcdn.com/w40/tr.png" class="w-5 h-auto rounded shadow-sm"><span id="current-lang-login">TR</span><i class="fas fa-chevron-down text-xs ml-1"></i></button>
                 <div id="lang-menu-login" class="lang-dropdown absolute right-0 top-12 bg-white/90 dark:bg-dark-card/90 backdrop-blur-md shadow-2xl rounded-2xl p-2 w-64 grid grid-cols-2 gap-2 border border-gray-100 dark:border-gray-700 z-50 max-h-60 overflow-y-auto"></div>
             </div>
         </nav>
-
         <section class="flex-1 flex flex-col items-center justify-center relative z-10 px-6 pt-10 pb-20">
-            <!-- Background Shapes (Green Theme) -->
             <div class="absolute top-0 -left-4 w-96 h-96 bg-green-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"></div>
             <div class="absolute bottom-0 -right-4 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float" style="animation-delay: 2s;"></div>
-            
             <div class="glass w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl border border-white/60 dark:border-gray-700 relative" data-aos="zoom-in">
-                
-                <!-- Floating GREEN ROUND Icon -->
-                <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 animate-float">
-                    <svg class="w-28 h-28 drop-shadow-2xl"><use href="#icon-robux-round"></use></svg>
-                </div>
-
+                <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 animate-float"><svg class="w-28 h-28 drop-shadow-2xl"><use href="#icon-robux-round"></use></svg></div>
                 <div class="text-center mt-12 mb-8">
                     <h1 class="text-4xl font-black text-gray-900 dark:text-white mb-2" data-i18n="hero_title">Robux Kazan</h1>
                     <p class="text-gray-500 dark:text-gray-400 font-medium" data-i18n="hero_sub">Şifresiz, güvenli ve anında teslimat.</p>
                 </div>
                 <form id="login-form" class="space-y-5">
                     <input type="email" id="email-input" class="w-full bg-white/50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl py-4 px-6 outline-none focus:ring-2 focus:ring-rbx-green transition font-semibold dark:text-white placeholder-gray-400" placeholder="E-Mail" required>
-                    <button type="submit" id="btn-login" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 rounded-2xl shadow-lg transition transform hover:scale-[1.02]" data-i18n="btn_login_link">
-                        Giriş Yap
-                    </button>
+                    <button type="submit" id="btn-login" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 rounded-2xl shadow-lg transition transform hover:scale-[1.02]" data-i18n="btn_login_link">Giriş Yap</button>
                 </form>
             </div>
-            
-            <div class="mt-8 animate-bounce text-gray-400 cursor-pointer" onclick="document.getElementById('section-how').scrollIntoView({behavior: 'smooth'})">
-                <i class="fas fa-chevron-down text-2xl"></i>
-            </div>
+            <div class="mt-8 animate-bounce text-gray-400 cursor-pointer" onclick="document.getElementById('section-how').scrollIntoView({behavior: 'smooth'})"><i class="fas fa-chevron-down text-2xl"></i></div>
         </section>
 
-        <!-- Stats Bar -->
-        <section class="py-10 bg-white dark:bg-dark-card border-y border-gray-100 dark:border-gray-800">
-            <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                <div data-aos="fade-up">
-                    <div class="text-3xl font-black text-gray-900 dark:text-white">10,000+</div>
-                    <div class="text-gray-400 text-xs font-bold uppercase">Mutlu Üye</div>
-                </div>
-                <div data-aos="fade-up" data-aos-delay="100">
-                    <div class="text-3xl font-black text-rbx-green flex justify-center items-center gap-2">
-                        <svg class="w-8 h-8"><use href="#icon-robux-round"></use></svg> 500k+
-                    </div>
-                    <div class="text-gray-400 text-xs font-bold uppercase">Dağıtılan Miktar</div>
-                </div>
-                <div data-aos="fade-up" data-aos-delay="200">
-                    <div class="text-3xl font-black text-blue-500">7/24</div>
-                    <div class="text-gray-400 text-xs font-bold uppercase">Otomatik Sistem</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- How It Works -->
-        <section id="section-how" class="py-20 bg-gray-50 dark:bg-dark-bg">
-            <div class="container mx-auto px-6">
-                <h2 class="text-3xl font-black text-center text-gray-900 dark:text-white mb-16" data-aos="fade-up">Nasıl Çalışır?</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="bg-white dark:bg-dark-card p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 text-center" data-aos="fade-up">
-                        <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6 text-rbx-green text-2xl"><i class="fas fa-user-plus"></i></div>
-                        <h3 class="text-xl font-bold mb-3 dark:text-white">1. Kayıt Ol</h3>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Sadece e-posta adresinle giriş yap. Şifre yok.</p>
-                    </div>
-                    <div class="bg-white dark:bg-dark-card p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 text-center" data-aos="fade-up" data-aos-delay="100">
-                        <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6 text-blue-500 text-2xl"><i class="fas fa-tasks"></i></div>
-                        <h3 class="text-xl font-bold mb-3 dark:text-white">2. Görev Yap</h3>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Linkleri geç, kodları kullan ve puanları topla.</p>
-                    </div>
-                    <div class="bg-white dark:bg-dark-card p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 text-center" data-aos="fade-up" data-aos-delay="200">
-                        <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6 text-yellow-500 text-2xl"><i class="fas fa-wallet"></i></div>
-                        <h3 class="text-xl font-bold mb-3 dark:text-white">3. Çekim Yap</h3>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Kazancını Gamepass yöntemiyle anında hesabına al.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- About Us -->
-        <section class="py-20 bg-white dark:bg-dark-card">
-            <div class="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
-                <div class="flex-1" data-aos="fade-right">
-                    <h2 class="text-3xl font-black text-gray-900 dark:text-white mb-6">Hakkımızda</h2>
-                    <p class="text-gray-500 dark:text-gray-300 leading-relaxed mb-4">
-                        Robunexa, kullanıcılarına basit görevler karşılığında ödüller sunan güvenilir bir platformdur. 
-                        Amacımız, topluluğumuza şeffaf, hızlı ve güvenli bir kazanç ortamı sağlamaktır.
-                    </p>
-                    <p class="text-gray-500 dark:text-gray-300 leading-relaxed">
-                        Hiçbir zaman şifrenizi istemeyiz. Sistemimiz tamamen Gamepass ve Grup ödemeleri üzerine kuruludur.
+        <!-- About & FAQ Section (Landing Page) -->
+        <section id="section-how" class="py-20 bg-gray-50 dark:bg-dark-card border-t border-gray-100 dark:border-gray-800">
+            <div class="container mx-auto px-6 max-w-4xl">
+                <!-- About -->
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-3xl font-black text-gray-900 dark:text-white mb-6" data-i18n="about_title">Hakkımızda</h2>
+                    <p class="text-gray-500 dark:text-gray-300 leading-relaxed text-lg" data-i18n="about_desc">
+                        Robunexa, kullanıcılarına basit görevler yaparak güvenli bir şekilde Robux kazanma fırsatı sunar. Sistemimiz tamamen otomatiktir ve şifre gerektirmez. Topluluğumuzla birlikte büyüyor ve kazandırıyoruz.
                     </p>
                 </div>
-                <div class="flex-1 flex justify-center" data-aos="fade-left">
-                    <div class="w-64 h-64 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center animate-float">
-                        <svg class="w-48 h-48"><use href="#icon-robux-round"></use></svg>
-                    </div>
-                </div>
-            </div>
-        </section>
 
-        <!-- FAQ (S.S.S) -->
-        <section class="py-20 bg-gray-50 dark:bg-dark-bg">
-            <div class="container mx-auto px-6 max-w-3xl">
-                <h2 class="text-3xl font-black text-center text-gray-900 dark:text-white mb-12" data-aos="fade-up">Sıkça Sorulan Sorular</h2>
-                
+                <!-- FAQ -->
+                <h2 class="text-3xl font-black text-center text-gray-900 dark:text-white mb-10" data-aos="fade-up" data-i18n="faq_title">Sıkça Sorulan Sorular</h2>
                 <div class="space-y-4" data-aos="fade-up">
-                    <details class="group bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer">
-                        <summary class="flex justify-between items-center font-bold text-gray-800 dark:text-white list-none">
-                            <span>Sistem güvenli mi?</span>
-                            <span class="transition group-open:rotate-180"><i class="fas fa-chevron-down"></i></span>
-                        </summary>
-                        <p class="text-gray-500 dark:text-gray-400 mt-4 text-sm leading-relaxed">
-                            Kesinlikle. Robunexa sizden asla hesap şifrenizi istemez. Tüm işlemler sadece kullanıcı adınız ve Gamepass ID'niz üzerinden yürütülür.
-                        </p>
+                    <details class="group bg-white dark:bg-dark-bg p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer">
+                        <summary class="flex justify-between items-center font-bold text-gray-800 dark:text-white text-lg list-none"><span data-i18n="faq_q1">Sistem güvenli mi?</span><span class="transition group-open:rotate-180"><i class="fas fa-chevron-down"></i></span></summary>
+                        <p class="text-gray-500 dark:text-gray-400 mt-4 leading-relaxed" data-i18n="faq_a1">Evet! Asla şifrenizi istemiyoruz. Tüm işlemler sadece kullanıcı adınız üzerinden yapılır.</p>
                     </details>
-
-                    <details class="group bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer">
-                        <summary class="flex justify-between items-center font-bold text-gray-800 dark:text-white list-none">
-                            <span>Ödemeler ne zaman yatar?</span>
-                            <span class="transition group-open:rotate-180"><i class="fas fa-chevron-down"></i></span>
-                        </summary>
-                        <p class="text-gray-500 dark:text-gray-400 mt-4 text-sm leading-relaxed">
-                            Çekim talebiniz onaylandıktan sonra Roblox'un "Pending Robux" (Bekleyen Robux) sürecine girer. Bu süreç genellikle 3-7 gün sürer.
-                        </p>
+                    <details class="group bg-white dark:bg-dark-bg p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer">
+                        <summary class="flex justify-between items-center font-bold text-gray-800 dark:text-white text-lg list-none"><span data-i18n="faq_q2">Ne zaman gelir?</span><span class="transition group-open:rotate-180"><i class="fas fa-chevron-down"></i></span></summary>
+                        <p class="text-gray-500 dark:text-gray-400 mt-4 leading-relaxed" data-i18n="faq_a2">Çekim talepleri Gamepass yöntemiyle yapılır. Genellikle 3-7 gün içinde "Pending Robux" olarak hesabınıza yansır.</p>
                     </details>
-
-                    <details class="group bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer">
-                        <summary class="flex justify-between items-center font-bold text-gray-800 dark:text-white list-none">
-                            <span>Nasıl daha fazla kazanırım?</span>
-                            <span class="transition group-open:rotate-180"><i class="fas fa-chevron-down"></i></span>
-                        </summary>
-                        <p class="text-gray-500 dark:text-gray-400 mt-4 text-sm leading-relaxed">
-                            Referans linkini arkadaşlarınla paylaşarak onların kazancından %10 pay alabilirsin. Ayrıca sosyal medya hesaplarımızı takip ederek promosyon kodlarını yakalayabilirsin.
-                        </p>
+                    <details class="group bg-white dark:bg-dark-bg p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer">
+                        <summary class="flex justify-between items-center font-bold text-gray-800 dark:text-white text-lg list-none"><span data-i18n="faq_q3">Nasıl kazanırım?</span><span class="transition group-open:rotate-180"><i class="fas fa-chevron-down"></i></span></summary>
+                        <p class="text-gray-500 dark:text-gray-400 mt-4 leading-relaxed" data-i18n="faq_a3">Linkleri geçerek, promosyon kodlarını kullanarak ve arkadaşlarını davet ederek puan kazanabilirsin.</p>
                     </details>
                 </div>
             </div>
         </section>
-
-        <!-- Footer -->
-        <footer class="py-10 bg-white dark:bg-dark-card border-t border-gray-100 dark:border-gray-700 text-center">
-            <div class="flex justify-center gap-6 mb-6">
-                <a href="#" class="text-gray-400 hover:text-rbx-green text-2xl transition"><i class="fab fa-discord"></i></a>
-                <a href="#" class="text-gray-400 hover:text-blue-400 text-2xl transition"><i class="fab fa-twitter"></i></a>
-                <a href="#" class="text-gray-400 hover:text-red-500 text-2xl transition"><i class="fab fa-youtube"></i></a>
-            </div>
-            <p class="text-gray-400 text-sm">© 2025 Robunexa. Not affiliated with Roblox Corporation.</p>
-        </footer>
     </div>
 
     <!-- APP SCREEN -->
     <div id="app-screen" class="hidden flex h-screen overflow-hidden bg-light-bg dark:bg-dark-bg">
-        
-        <!-- SIDEBAR (DESKTOP) -->
         <aside class="w-72 bg-white dark:bg-dark-card border-r border-gray-100 dark:border-gray-800 hidden md:flex flex-col z-20">
             <div class="h-24 flex items-center px-8 border-b border-gray-50 dark:border-gray-800">
-                <!-- Sidebar Icon -->
-                <svg class="w-8 h-8 mr-3"><use href="#icon-robux-round"></use></svg>
+                <div class="bg-rbx-green text-white rounded-lg px-3 py-1 font-black text-xl mr-3">R</div>
                 <span class="text-xl font-extrabold text-gray-800 dark:text-white">ROBUNEXA</span>
             </div>
             <nav class="flex-1 p-6 space-y-2">
-                <button onclick="switchView('dashboard')" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-rbx-green transition-all font-semibold nav-active group">
-                    <i class="fas fa-home w-5 text-center group-hover:scale-110 transition"></i> <span data-i18n="nav_dashboard">Dashboard</span>
-                </button>
-                <button onclick="switchView('earn')" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-rbx-gold transition-all font-semibold group">
-                    <i class="fas fa-bolt w-5 text-center group-hover:scale-110 transition"></i> <span data-i18n="nav_earn">Kazan</span>
-                </button>
+                <button onclick="switchView('dashboard')" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-rbx-green transition-all font-semibold nav-active group"><i class="fas fa-home w-5 text-center group-hover:scale-110 transition"></i> <span data-i18n="nav_dashboard">Dashboard</span></button>
+                <button onclick="switchView('earn')" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-rbx-gold transition-all font-semibold group"><i class="fas fa-bolt w-5 text-center group-hover:scale-110 transition"></i> <span data-i18n="nav_earn">Kazan</span></button>
             </nav>
         </aside>
 
-        <!-- MAIN -->
         <main class="flex-1 flex flex-col relative overflow-hidden">
             <header class="h-24 bg-white/80 dark:bg-dark-card/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-10 sticky top-0 z-30">
+                <div class="flex items-center gap-4"><div class="text-gray-400 font-medium text-sm" id="date-display">...</div></div>
                 <div class="flex items-center gap-4">
-                    <div class="text-gray-400 font-medium text-sm" id="date-display">...</div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <!-- Bakiye (Klasik Yeşil) -->
                     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full px-5 py-2 flex items-center gap-3 shadow-sm hover:shadow-md transition">
                         <svg class="w-6 h-6"><use href="#icon-robux-round"></use></svg>
                         <span class="font-extrabold text-gray-800 dark:text-white text-lg"><span id="header-balance">0.00</span> R$</span>
                     </div>
-                    <!-- Hamburger -->
-                    <button onclick="toggleDrawer()" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-white hover:bg-rbx-green hover:text-white transition">
-                        <i class="fas fa-bars"></i>
-                    </button>
+                    <button onclick="toggleDrawer()" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-white hover:bg-rbx-green hover:text-white transition"><i class="fas fa-bars"></i></button>
                 </div>
             </header>
 
@@ -386,76 +224,81 @@
                 <!-- DASHBOARD -->
                 <div id="view-dashboard" class="space-y-8 animate-fade-in">
                     <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-[2rem] p-10 text-white shadow-2xl relative overflow-hidden group">
-                        <div class="relative z-10">
-                            <h2 class="text-4xl font-black mb-3">Hoş Geldin!</h2>
-                            <p class="text-green-100 font-medium text-lg">Görevleri tamamla, 1 R$ günlük ödülünü al.</p>
-                        </div>
-                        <div class="absolute right-0 bottom-[-20px] opacity-20 transform rotate-12 group-hover:scale-110 transition duration-700">
-                             <svg class="w-48 h-48"><use href="#icon-robux-round"></use></svg>
-                        </div>
+                        <div class="relative z-10"><h2 class="text-4xl font-black mb-3" data-i18n="dash_welcome">Hoş Geldin!</h2><p class="text-green-100 font-medium text-lg" data-i18n="dash_subtitle">Görevleri tamamla, 1 R$ günlük ödülünü al.</p></div>
+                        <div class="absolute right-0 bottom-[-20px] opacity-20 transform rotate-12 group-hover:scale-110 transition duration-700"><svg class="w-48 h-48"><use href="#icon-robux-round"></use></svg></div>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div class="bg-white dark:bg-dark-card p-8 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-xl transition transform hover:-translate-y-2">
                             <span class="text-xs font-bold uppercase tracking-wider text-gray-400" data-i18n="card_balance">Bakiye</span>
-                            <div class="flex items-center gap-3 mt-4 mb-6">
-                                <svg class="w-10 h-10"><use href="#icon-robux-round"></use></svg>
-                                <span class="text-4xl font-black text-gray-900 dark:text-white" id="dash-balance">0.00</span>
-                            </div>
+                            <div class="flex items-center gap-3 mt-4 mb-6"><svg class="w-10 h-10"><use href="#icon-robux-round"></use></svg><span class="text-4xl font-black text-gray-900 dark:text-white" id="dash-balance">0.00</span></div>
                             <button onclick="toggleModal('withdraw-modal')" class="w-full bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 text-white font-bold py-3 rounded-xl transition" data-i18n="btn_withdraw">Çekim Yap</button>
                         </div>
-
                         <div class="bg-white dark:bg-dark-card p-8 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-xl transition transform hover:-translate-y-2">
                             <span class="text-xs font-bold uppercase tracking-wider text-gray-400" data-i18n="card_referral">Referans</span>
-                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl flex justify-between items-center border border-gray-200 dark:border-gray-700 mt-4 cursor-pointer" onclick="document.getElementById('btn-copy').click()">
-                                <code id="ref-code" class="text-sm text-gray-500 dark:text-gray-400 truncate font-semibold">...</code>
-                                <button id="btn-copy" class="text-rbx-green"><i class="far fa-copy"></i></button>
-                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl flex justify-between items-center border border-gray-200 dark:border-gray-700 mt-4 cursor-pointer" onclick="document.getElementById('btn-copy').click()"><code id="ref-code" class="text-sm text-gray-500 dark:text-gray-400 truncate font-semibold">...</code><button id="btn-copy" class="text-rbx-green"><i class="far fa-copy"></i></button></div>
                             <p class="text-xs text-gray-400 mt-4" data-i18n="ref_text">Arkadaşlarını davet et, %10 kazan!</p>
                         </div>
-
                         <div class="bg-white dark:bg-dark-card p-8 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-800 border-l-[6px] border-l-rbx-green hover:shadow-xl transition transform hover:-translate-y-2">
                              <span class="text-xs font-bold uppercase tracking-wider text-gray-400" data-i18n="card_daily">Günlük Ödül</span>
                              <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 mt-4">+1.00 R$</h3>
-                             <button id="btn-daily-claim" class="w-full bg-green-50 dark:bg-green-900/50 hover:bg-green-100 text-rbx-green font-bold py-3 rounded-xl transition" data-i18n="btn_daily">Ödülü Al</button>
+                             <button id="btn-daily-claim" class="w-full bg-green-50 dark:bg-green-900/50 hover:bg-green-100 text-rbx-green font-bold py-3 rounded-xl transition disabled:opacity-50" disabled>Yükleniyor...</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- EARN -->
+                <!-- VIEW: EARN -->
                 <div id="view-earn" class="hidden space-y-10 animate-fade-in">
-                    <button onclick="switchView('dashboard')" class="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-rbx-green font-bold transition mb-4">
-                        <i class="fas fa-arrow-left"></i> <span data-i18n="btn_back">Geri Dön</span>
-                    </button>
+                    <button onclick="switchView('dashboard')" class="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-rbx-green font-bold transition mb-4"><i class="fas fa-arrow-left"></i> <span data-i18n="btn_back">Geri Dön</span></button>
 
                     <div class="bg-white dark:bg-dark-card p-10 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-800 max-w-3xl mx-auto text-center">
                         <div class="w-20 h-20 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6"><svg class="w-12 h-12"><use href="#icon-robux-round"></use></svg></div>
                         <h2 class="text-2xl font-black text-gray-900 dark:text-white mb-6" data-i18n="promo_title">Promosyon Kodu</h2>
-                        <div class="flex gap-4 max-w-md mx-auto">
-                            <input id="promo-input" class="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-2xl text-center font-bold outline-none focus:ring-2 focus:ring-rbx-green uppercase dark:text-white" placeholder="CODE">
-                            <button id="btn-redeem" class="bg-rbx-green hover:bg-green-600 text-white font-bold px-8 rounded-2xl shadow-lg transition active:scale-95" data-i18n="btn_redeem">KULLAN</button>
+                        <div class="flex flex-col md:flex-row gap-4 max-w-md mx-auto">
+                            <input id="promo-input" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-2xl text-center font-bold outline-none focus:ring-2 focus:ring-rbx-green uppercase dark:text-white" placeholder="CODE">
+                            <button id="btn-redeem" class="w-full md:w-auto bg-rbx-green hover:bg-green-600 text-white font-bold px-8 py-4 rounded-2xl shadow-lg transition active:scale-95" data-i18n="btn_redeem">KULLAN</button>
                         </div>
                     </div>
 
                     <div class="max-w-5xl mx-auto">
                         <h2 class="text-2xl font-black text-gray-800 dark:text-white mb-6" data-i18n="tasks_title">Görevler</h2>
-                        <div id="user-pages-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex justify-between items-center hover:shadow-lg transition transform hover:-translate-y-1">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center text-red-600 text-xl"><i class="fab fa-youtube"></i></div>
+                                    <div><h3 class="font-bold text-gray-800 dark:text-white text-lg">YouTube Abone Ol</h3><span class="text-sm text-green-500 font-bold">+1.00 R$</span></div>
+                                </div>
+                                <button onclick="claimYoutubeReward()" id="btn-yt-claim" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-red-700 transition">Git</button>
+                            </div>
+                            <div id="user-pages-list" class="contents"></div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- ADMIN -->
+                <!-- VIEW: ADMIN -->
                 <div id="view-admin" class="hidden space-y-10 animate-fade-in">
                     <button onclick="switchView('dashboard')" class="flex items-center gap-2 text-gray-500 font-bold transition mb-4"><i class="fas fa-arrow-left"></i> Geri Dön</button>
                     <h2 class="text-3xl font-black text-gray-900 dark:text-white">Yönetici Paneli</h2>
-                    
-                    <div class="bg-white dark:bg-dark-card p-6 rounded-2xl border dark:border-gray-700">
+                    <div class="flex flex-wrap gap-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+                        <button onclick="switchAdminTab('withdrawals')" class="px-4 py-2 font-bold text-rbx-blue border-b-2 border-rbx-blue">Çekimler</button>
+                        <button onclick="switchAdminTab('users')" class="px-4 py-2 font-bold text-gray-500 hover:text-rbx-blue">Kullanıcılar</button>
+                        <button onclick="switchAdminTab('pages')" class="px-4 py-2 font-bold text-gray-500 hover:text-rbx-blue">Sayfalar</button>
+                    </div>
+                    <div id="admin-sec-withdrawals" class="bg-white dark:bg-dark-card p-6 rounded-2xl border dark:border-gray-700">
                         <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-gray-700 dark:text-white">Çekim Talepleri</h3><button onclick="loadAdminStats()" class="text-blue-500"><i class="fas fa-sync"></i></button></div>
                         <div class="overflow-x-auto"><table class="w-full text-left text-sm dark:text-gray-300"><tbody id="admin-withdraw-list" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
                     </div>
-                    
-                    <div class="bg-white dark:bg-dark-card p-6 rounded-2xl border dark:border-gray-700">
+                    <div id="admin-sec-users" class="hidden bg-white dark:bg-dark-card p-6 rounded-2xl border dark:border-gray-700">
+                        <h3 class="font-bold mb-4 dark:text-white">Kayıtlı Kullanıcılar</h3>
+                        <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                            <table class="w-full text-left text-sm dark:text-gray-300">
+                                <thead class="bg-gray-50 dark:bg-gray-800 font-bold sticky top-0"><tr><th class="p-3">Email</th><th class="p-3">Bakiye</th><th class="p-3">Görev</th></tr></thead>
+                                <tbody id="admin-user-list" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="admin-sec-pages" class="hidden bg-white dark:bg-dark-card p-6 rounded-2xl border dark:border-gray-700">
                         <h3 class="font-bold mb-4 dark:text-white">Yeni Sayfa</h3>
-                        <div class="flex gap-4"><input id="page-name" placeholder="Ad" class="flex-1 bg-gray-50 dark:bg-gray-800 p-3 rounded dark:text-white"><input id="page-slug" placeholder="Slug" class="flex-1 bg-gray-50 dark:bg-gray-800 p-3 rounded dark:text-white"><button onclick="createPage()" class="bg-green-500 text-white px-6 rounded font-bold">Ekle</button></div>
+                        <div class="flex flex-col md:flex-row gap-4"><input id="page-name" placeholder="Ad" class="flex-1 bg-gray-50 dark:bg-gray-800 p-3 rounded dark:text-white"><input id="page-slug" placeholder="Slug" class="flex-1 bg-gray-50 dark:bg-gray-800 p-3 rounded dark:text-white"><button onclick="createPage()" class="w-full md:w-auto bg-green-500 text-white px-6 py-3 rounded font-bold">Ekle</button></div>
                         <div id="admin-pages-list" class="mt-4 space-y-2"></div>
                     </div>
                 </div>
@@ -501,97 +344,48 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- LANGUAGE SYSTEM ---
+        // --- 14 LANGUAGES & FULL TRANSLATIONS ---
         const languages = [
-            { code: 'tr', name: 'Türkçe', flag: 'tr' },
-            { code: 'en', name: 'English', flag: 'us' },
-            { code: 'es', name: 'Español', flag: 'es' },
-            { code: 'pt', name: 'Português', flag: 'br' },
-            { code: 'de', name: 'Deutsch', flag: 'de' },
-            { code: 'fr', name: 'Français', flag: 'fr' },
-            { code: 'it', name: 'Italiano', flag: 'it' },
-            { code: 'ru', name: 'Русский', flag: 'ru' },
-            { code: 'pl', name: 'Polski', flag: 'pl' },
-            { code: 'id', name: 'Indonesia', flag: 'id' },
-            { code: 'vn', name: 'Tiếng Việt', flag: 'vn' },
-            { code: 'th', name: 'ไทย', flag: 'th' },
-            { code: 'jp', name: '日本語', flag: 'jp' },
-            { code: 'kr', name: '한국어', flag: 'kr' }
+            { code: 'en', name: 'English', flag: 'us' }, { code: 'tr', name: 'Türkçe', flag: 'tr' }, { code: 'es', name: 'Español', flag: 'es' },
+            { code: 'pt', name: 'Português', flag: 'br' }, { code: 'de', name: 'Deutsch', flag: 'de' }, { code: 'fr', name: 'Français', flag: 'fr' },
+            { code: 'it', name: 'Italiano', flag: 'it' }, { code: 'ru', name: 'Русский', flag: 'ru' }, { code: 'pl', name: 'Polski', flag: 'pl' },
+            { code: 'id', name: 'Indonesia', flag: 'id' }, { code: 'vn', name: 'Tiếng Việt', flag: 'vn' }, { code: 'th', name: 'ไทย', flag: 'th' },
+            { code: 'jp', name: '日本語', flag: 'jp' }, { code: 'kr', name: '한국어', flag: 'kr' }
         ];
 
         const translations = {
-            tr: { hero_title: "Bedava Robux Kazan", hero_sub: "Şifresiz, güvenli ve anında teslimat.", btn_login_link: "Giriş Yap", nav_dashboard: "Panel", nav_earn: "Kazan", nav_admin: "Yönetici", btn_logout: "Çıkış Yap", dash_welcome: "Hoş Geldin!", dash_subtitle: "Görevleri tamamla, Robux kazan.", card_balance: "Bakiye", card_referral: "Referans", card_daily: "Günlük Ödül", btn_withdraw: "Çekim Yap", btn_daily: "Ödülü Al", promo_title: "Promosyon Kodu", btn_redeem: "KULLAN", tasks_title: "Görevler", modal_withdraw_title: "Çekim Talebi", modal_gross: "Çekilen:", modal_net: "Alacağın:", btn_submit_req: "Onayla", menu_title: "Menü", status_online: "Çevrimiçi", lbl_nav: "Navigasyon", lbl_settings: "Ayarlar", dark_mode: "Karanlık Mod", language: "Dil", ref_text: "Arkadaşlarını davet et, %10 kazan!", btn_back: "Geri Dön" },
-            en: { hero_title: "Earn Free Robux", hero_sub: "No password, secure, instant delivery.", btn_login_link: "Login", nav_dashboard: "Dashboard", nav_earn: "Earn", nav_admin: "Admin", btn_logout: "Logout", dash_welcome: "Welcome!", dash_subtitle: "Complete tasks, earn Robux.", card_balance: "Balance", card_referral: "Referral", card_daily: "Daily Reward", btn_withdraw: "Withdraw", btn_daily: "Claim Reward", promo_title: "Promo Code", btn_redeem: "REDEEM", tasks_title: "Tasks", modal_withdraw_title: "Withdraw Request", modal_gross: "Amount:", modal_net: "You Receive:", btn_submit_req: "Confirm", menu_title: "Menu", status_online: "Online", lbl_nav: "Navigation", lbl_settings: "Settings", dark_mode: "Dark Mode", language: "Language", ref_text: "Invite friends, earn 10%!", btn_back: "Go Back" },
-            // Diğer diller için varsayılan olarak İngilizce (en) dönecek şekilde ayarlanabilir veya buraya eklenebilir. Basitlik için sadece TR/EN örneği tam.
+            en: { hero_title: "Earn Free Robux", hero_sub: "No password, secure, instant delivery.", btn_login_link: "Login", nav_dashboard: "Dashboard", nav_earn: "Earn", nav_admin: "Admin", btn_logout: "Logout", dash_welcome: "Welcome!", dash_subtitle: "Complete tasks, earn Robux.", card_balance: "Balance", card_referral: "Referral", card_daily: "Daily Reward", btn_withdraw: "Withdraw", btn_daily: "Claim Reward", promo_title: "Promo Code", btn_redeem: "REDEEM", tasks_title: "Tasks", modal_withdraw_title: "Withdraw Request", modal_gross: "Amount:", modal_net: "You Receive:", btn_submit_req: "Confirm", menu_title: "Menu", status_online: "Online", lbl_nav: "Navigation", lbl_settings: "Settings", dark_mode: "Dark Mode", language: "Language", ref_text: "Invite friends, earn 10%!", btn_back: "Go Back", about_title: "About Us", about_desc: "Robunexa offers a secure platform to earn Robux by completing simple tasks. No passwords required.", faq_title: "FAQ", faq_q1: "Is it safe?", faq_a1: "Yes! We never ask for your password.", faq_q2: "When do I get paid?", faq_a2: "Payments are sent via Gamepass and usually arrive in 3-7 days as Pending Robux.", faq_q3: "How to earn more?", faq_a3: "Use referral links and promo codes." },
+            tr: { hero_title: "Bedava Robux Kazan", hero_sub: "Şifresiz, güvenli ve anında teslimat.", btn_login_link: "Giriş Yap", nav_dashboard: "Panel", nav_earn: "Kazan", nav_admin: "Yönetici", btn_logout: "Çıkış Yap", dash_welcome: "Hoş Geldin!", dash_subtitle: "Görevleri tamamla, Robux kazan.", card_balance: "Bakiye", card_referral: "Referans", card_daily: "Günlük Ödül", btn_withdraw: "Çekim Yap", btn_daily: "Ödülü Al", promo_title: "Promosyon Kodu", btn_redeem: "KULLAN", tasks_title: "Görevler", modal_withdraw_title: "Çekim Talebi", modal_gross: "Çekilen:", modal_net: "Alacağın:", btn_submit_req: "Onayla", menu_title: "Menü", status_online: "Çevrimiçi", lbl_nav: "Navigasyon", lbl_settings: "Ayarlar", dark_mode: "Karanlık Mod", language: "Dil", ref_text: "Arkadaşlarını davet et, %10 kazan!", btn_back: "Geri Dön", about_title: "Hakkımızda", about_desc: "Robunexa, basit görevler yaparak güvenli bir şekilde Robux kazanma fırsatı sunar. Şifre gerektirmez.", faq_title: "Sıkça Sorulan Sorular", faq_q1: "Sistem güvenli mi?", faq_a1: "Evet! Asla şifrenizi istemiyoruz.", faq_q2: "Ne zaman gelir?", faq_a2: "Çekimler Gamepass ile yapılır, 3-7 gün içinde gelir.", faq_q3: "Nasıl kazanırım?", faq_a3: "Linkleri geçerek ve davet ederek." },
+            es: { hero_title: "Gana Robux Gratis", hero_sub: "Sin contraseña, seguro.", btn_login_link: "Entrar", nav_dashboard: "Tablero", nav_earn: "Ganar", nav_admin: "Admin", btn_logout: "Salir", dash_welcome: "¡Bienvenido!", dash_subtitle: "Completa tareas.", card_balance: "Saldo", card_referral: "Referencia", card_daily: "Diario", btn_withdraw: "Retirar", btn_daily: "Reclamar", promo_title: "Código Promo", btn_redeem: "CANJEAR", tasks_title: "Tareas", modal_withdraw_title: "Retiro", modal_gross: "Monto:", modal_net: "Recibes:", btn_submit_req: "Confirmar", menu_title: "Menú", status_online: "En línea", lbl_nav: "Navegación", lbl_settings: "Ajustes", dark_mode: "Modo Oscuro", language: "Idioma", ref_text: "Invita amigos!", btn_back: "Volver", about_title: "Sobre Nosotros", about_desc: "Gana Robux seguros sin contraseña.", faq_title: "Preguntas", faq_q1: "¿Es seguro?", faq_a1: "¡Sí! Sin contraseñas.", faq_q2: "¿Cuándo pagan?", faq_a2: "3-7 días vía Gamepass.", faq_q3: "¿Cómo ganar?", faq_a3: "Enlaces y códigos." },
+            // ... (Other languages follow same pattern, defaulting to EN if missing keys for brevity in this response block, but full logic handles them)
+            pt: { hero_title: "Ganhe Robux Grátis", hero_sub: "Sem senha, seguro.", btn_login_link: "Entrar", nav_dashboard: "Painel", nav_earn: "Ganhar", btn_logout: "Sair", dash_welcome: "Bem-vindo!", dash_subtitle: "Complete tarefas.", card_balance: "Saldo", card_daily: "Diário", btn_withdraw: "Sacar", btn_daily: "Pegar", promo_title: "Código", btn_redeem: "USAR", tasks_title: "Tarefas", modal_withdraw_title: "Saque", modal_gross: "Quantia:", modal_net: "Recebe:", btn_submit_req: "Confirmar", menu_title: "Menu", status_online: "Online", lbl_nav: "Navegação", lbl_settings: "Config", dark_mode: "Modo Escuro", language: "Idioma", ref_text: "Convide amigos!", btn_back: "Voltar", about_title: "Sobre", about_desc: "Plataforma segura.", faq_title: "FAQ", faq_q1: "É seguro?", faq_a1: "Sim!", faq_q2: "Pagamento?", faq_a2: "3-7 dias.", faq_q3: "Ganhar mais?", faq_a3: "Convites." },
+            de: { hero_title: "Gratis Robux", btn_login_link: "Anmelden", nav_dashboard: "Dashboard", nav_earn: "Verdienen", btn_logout: "Ausloggen", dash_welcome: "Willkommen!", card_balance: "Guthaben", card_daily: "Täglich", btn_withdraw: "Abheben", btn_daily: "Holen", promo_title: "Code", btn_redeem: "EINLÖSEN", tasks_title: "Aufgaben", modal_withdraw_title: "Auszahlung", modal_gross: "Betrag:", modal_net: "Du erhältst:", btn_submit_req: "Bestätigen", menu_title: "Menü", status_online: "Online", lbl_nav: "Navigation", lbl_settings: "Einstellungen", dark_mode: "Dunkelmodus", language: "Sprache", ref_text: "Freunde einladen!", btn_back: "Zurück", about_title: "Über uns", about_desc: "Sicher Robux verdienen.", faq_title: "FAQ", faq_q1: "Sicher?", faq_a1: "Ja!", faq_q2: "Wann?", faq_a2: "3-7 Tage.", faq_q3: "Mehr?", faq_a3: "Codes." },
+            fr: { hero_title: "Robux Gratuits", btn_login_link: "Connexion", nav_dashboard: "Tableau de bord", nav_earn: "Gagner", btn_logout: "Déconnexion", dash_welcome: "Bienvenue!", card_balance: "Solde", card_daily: "Quotidien", btn_withdraw: "Retirer", btn_daily: "Réclamer", promo_title: "Code Promo", btn_redeem: "UTILISER", tasks_title: "Tâches", modal_withdraw_title: "Retrait", modal_gross: "Montant:", modal_net: "Reçu:", btn_submit_req: "Confirmer", menu_title: "Menu", status_online: "En ligne", lbl_nav: "Navigation", lbl_settings: "Paramètres", dark_mode: "Mode Sombre", language: "Langue", ref_text: "Invitez des amis!", btn_back: "Retour", about_title: "À propos", about_desc: "Gagnez des Robux en toute sécurité.", faq_title: "FAQ", faq_q1: "Sûr?", faq_a1: "Oui!", faq_q2: "Quand?", faq_a2: "3-7 jours.", faq_q3: "Plus?", faq_a3: "Codes." },
+            it: { hero_title: "Robux Gratis", btn_login_link: "Accedi", nav_dashboard: "Dashboard", nav_earn: "Guadagna", btn_logout: "Esci", dash_welcome: "Benvenuto!", card_balance: "Saldo", card_daily: "Giornaliero", btn_withdraw: "Preleva", btn_daily: "Riscatta", promo_title: "Codice", btn_redeem: "USA", tasks_title: "Compiti", modal_withdraw_title: "Prelievo", modal_gross: "Importo:", modal_net: "Ricevi:", btn_submit_req: "Conferma", menu_title: "Menu", status_online: "Online", lbl_nav: "Navigazione", lbl_settings: "Impostazioni", dark_mode: "Modo Scuro", language: "Lingua", ref_text: "Invita amici!", btn_back: "Indietro", about_title: "Chi siamo", about_desc: "Guadagna Robux sicuri.", faq_title: "FAQ", faq_q1: "Sicuro?", faq_a1: "Sì!", faq_q2: "Quando?", faq_a2: "3-7 giorni.", faq_q3: "Di più?", faq_a3: "Codici." },
+            ru: { hero_title: "Бесплатные Robux", btn_login_link: "Войти", nav_dashboard: "Панель", nav_earn: "Заработать", btn_logout: "Выйти", dash_welcome: "Добро пожаловать!", card_balance: "Баланс", card_daily: "Ежедневно", btn_withdraw: "Вывести", btn_daily: "Получить", promo_title: "Промокод", btn_redeem: "ИСПОЛЬЗОВАТЬ", tasks_title: "Задания", modal_withdraw_title: "Вывод", modal_gross: "Сумма:", modal_net: "Получите:", btn_submit_req: "Подтвердить", menu_title: "Меню", status_online: "Онлайн", lbl_nav: "Навигация", lbl_settings: "Настройки", dark_mode: "Темная тема", language: "Язык", ref_text: "Пригласи друзей!", btn_back: "Назад", about_title: "О нас", about_desc: "Зарабатывай Robux безопасно.", faq_title: "FAQ", faq_q1: "Безопасно?", faq_a1: "Да!", faq_q2: "Когда?", faq_a2: "3-7 дней.", faq_q3: "Больше?", faq_a3: "Коды." },
+            pl: { hero_title: "Darmowe Robux", btn_login_link: "Zaloguj", nav_dashboard: "Panel", nav_earn: "Zarabiaj", btn_logout: "Wyloguj", dash_welcome: "Witaj!", card_balance: "Saldo", card_daily: "Dzienne", btn_withdraw: "Wypłać", btn_daily: "Odbierz", promo_title: "Kod", btn_redeem: "UŻYJ", tasks_title: "Zadania", modal_withdraw_title: "Wypłata", modal_gross: "Kwota:", modal_net: "Otrzymasz:", btn_submit_req: "Potwierdź", menu_title: "Menu", status_online: "Online", lbl_nav: "Nawigacja", lbl_settings: "Ustawienia", dark_mode: "Ciemny tryb", language: "Język", ref_text: "Zaproś znajomych!", btn_back: "Wróć", about_title: "O nas", about_desc: "Zarabiaj bezpiecznie.", faq_title: "FAQ", faq_q1: "Bezpieczne?", faq_a1: "Tak!", faq_q2: "Kiedy?", faq_a2: "3-7 dni.", faq_q3: "Więcej?", faq_a3: "Kody." },
+            id: { hero_title: "Robux Gratis", btn_login_link: "Masuk", nav_dashboard: "Dasbor", nav_earn: "Hasilkan", btn_logout: "Keluar", dash_welcome: "Selamat Datang!", card_balance: "Saldo", card_daily: "Harian", btn_withdraw: "Tarik", btn_daily: "Klaim", promo_title: "Kode", btn_redeem: "GUNAKAN", tasks_title: "Tugas", modal_withdraw_title: "Penarikan", modal_gross: "Jumlah:", modal_net: "Diterima:", btn_submit_req: "Konfirmasi", menu_title: "Menu", status_online: "Online", lbl_nav: "Navigasi", lbl_settings: "Pengaturan", dark_mode: "Mode Gelap", language: "Bahasa", ref_text: "Undang teman!", btn_back: "Kembali", about_title: "Tentang", about_desc: "Hasilkan Robux aman.", faq_title: "FAQ", faq_q1: "Aman?", faq_a1: "Ya!", faq_q2: "Kapan?", faq_a2: "3-7 hari.", faq_q3: "Lebih?", faq_a3: "Kode." },
+            vn: { hero_title: "Robux Miễn Phí", btn_login_link: "Đăng nhập", nav_dashboard: "Bảng điều khiển", nav_earn: "Kiếm", btn_logout: "Đăng xuất", dash_welcome: "Chào mừng!", card_balance: "Số dư", card_daily: "Hàng ngày", btn_withdraw: "Rút", btn_daily: "Nhận", promo_title: "Mã", btn_redeem: "DÙNG", tasks_title: "Nhiệm vụ", modal_withdraw_title: "Rút tiền", modal_gross: "Số lượng:", modal_net: "Nhận:", btn_submit_req: "Xác nhận", menu_title: "Menu", status_online: "Trực tuyến", lbl_nav: "Điều hướng", lbl_settings: "Cài đặt", dark_mode: "Chế độ tối", language: "Ngôn ngữ", ref_text: "Mời bạn bè!", btn_back: "Quay lại", about_title: "Về chúng tôi", about_desc: "Kiếm Robux an toàn.", faq_title: "FAQ", faq_q1: "An toàn?", faq_a1: "Có!", faq_q2: "Khi nào?", faq_a2: "3-7 ngày.", faq_q3: "Thêm?", faq_a3: "Mã." },
+            th: { hero_title: "รับ Robux ฟรี", btn_login_link: "เข้าสู่ระบบ", nav_dashboard: "แดชบอร์ด", nav_earn: "รับ", btn_logout: "ออกจากระบบ", dash_welcome: "ยินดีต้อนรับ!", card_balance: "ยอดคงเหลือ", card_daily: "รายวัน", btn_withdraw: "ถอน", btn_daily: "รับรางวัล", promo_title: "รหัส", btn_redeem: "ใช้", tasks_title: "งาน", modal_withdraw_title: "ถอนเงิน", modal_gross: "จำนวน:", modal_net: "ได้รับ:", btn_submit_req: "ยืนยัน", menu_title: "เมนู", status_online: "ออนไลน์", lbl_nav: "นำทาง", lbl_settings: "ตั้งค่า", dark_mode: "โหมดมืด", language: "ภาษา", ref_text: "เชิญเพื่อน!", btn_back: "กลับ", about_title: "เกี่ยวกับ", about_desc: "รับ Robux ปลอดภัย", faq_title: "FAQ", faq_q1: "ปลอดภัยไหม?", faq_a1: "ใช่!", faq_q2: "เมื่อไหร่?", faq_a2: "3-7 วัน", faq_q3: "เพิ่ม?", faq_a3: "รหัส" },
+            jp: { hero_title: "無料Robux", btn_login_link: "ログイン", nav_dashboard: "ダッシュボード", nav_earn: "稼ぐ", btn_logout: "ログアウト", dash_welcome: "ようこそ！", card_balance: "残高", card_daily: "デイリー", btn_withdraw: "出金", btn_daily: "受け取る", promo_title: "コード", btn_redeem: "使用", tasks_title: "タスク", modal_withdraw_title: "出金リクエスト", modal_gross: "金額:", modal_net: "受取:", btn_submit_req: "確認", menu_title: "メニュー", status_online: "オンライン", lbl_nav: "ナビゲーション", lbl_settings: "設定", dark_mode: "ダークモード", language: "言語", ref_text: "友達を招待！", btn_back: "戻る", about_title: "私たちについて", about_desc: "安全にRobuxを稼ぐ。", faq_title: "FAQ", faq_q1: "安全？", faq_a1: "はい！", faq_q2: "いつ？", faq_a2: "3-7日。", faq_q3: "もっと？", faq_a3: "コード。" },
+            kr: { hero_title: "무료 Robux", btn_login_link: "로그인", nav_dashboard: "대시보드", nav_earn: "벌기", btn_logout: "로그아웃", dash_welcome: "환영합니다!", card_balance: "잔액", card_daily: "매일", btn_withdraw: "출금", btn_daily: "받기", promo_title: "코드", btn_redeem: "사용", tasks_title: "작업", modal_withdraw_title: "출금 요청", modal_gross: "금액:", modal_net: "수령:", btn_submit_req: "확인", menu_title: "메뉴", status_online: "온라인", lbl_nav: "탐색", lbl_settings: "설정", dark_mode: "다크 모드", language: "언어", ref_text: "친구 초대!", btn_back: "뒤로", about_title: "소개", about_desc: "안전하게 Robux 벌기.", faq_title: "FAQ", faq_q1: "안전한가요?", faq_a1: "네!", faq_q2: "언제?", faq_a2: "3-7일.", faq_q3: "더?", faq_a3: "코드." }
         };
 
         let currentLang = localStorage.getItem('robunexa_lang') || 'tr';
-
         window.toggleLangMenu = (id) => document.getElementById(id).classList.toggle('show');
-
-        window.setLanguage = (lang) => {
-            currentLang = lang;
-            localStorage.setItem('robunexa_lang', lang);
-            updateTranslations();
-            document.querySelectorAll('.lang-dropdown').forEach(el => el.classList.remove('show'));
-        };
-
-        function updateTranslations() {
-            const langData = languages.find(l=>l.code===currentLang);
-            const flagUrl = `https://flagcdn.com/w40/${langData.flag}.png`;
-            
-            // Update UI Flags/Text
-            document.getElementById('current-flag-login').src = flagUrl;
-            document.getElementById('current-lang-login').innerText = langData.name.substring(0,2).toUpperCase();
-            
-            if(document.getElementById('current-flag-drawer')) {
-                document.getElementById('current-flag-drawer').src = flagUrl;
-            }
-
-            // Translate Text
-            const dict = translations[currentLang] || translations['en'];
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if(dict[key]) el.innerText = dict[key];
-            });
-        }
-
-        function initLanguage() {
-            const html = languages.map(l => `
-                <button onclick="setLanguage('${l.code}')" class="flex items-center gap-3 p-3 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-xl text-sm font-bold text-gray-700 dark:text-white w-full text-left transition">
-                    <img src="https://flagcdn.com/w40/${l.flag}.png" class="w-6 h-auto rounded shadow-sm">
-                    ${l.name}
-                </button>
-            `).join('');
-            
-            document.getElementById('lang-menu-login').innerHTML = html;
-            document.getElementById('lang-menu-drawer').innerHTML = html;
-            updateTranslations();
-        }
+        window.setLanguage = (lang) => { currentLang = lang; localStorage.setItem('robunexa_lang', lang); updateTranslations(); document.querySelectorAll('.lang-dropdown').forEach(el => el.classList.remove('show')); };
+        function updateTranslations() { const langData = languages.find(l=>l.code===currentLang); const flagUrl = `https://flagcdn.com/w40/${langData.flag}.png`; document.getElementById('current-flag-login').src = flagUrl; document.getElementById('current-lang-login').innerText = langData.name.substring(0,2).toUpperCase(); if(document.getElementById('current-flag-drawer')) document.getElementById('current-flag-drawer').src = flagUrl; const dict = translations[currentLang] || translations['en']; document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if(dict[key]) el.innerText = dict[key]; }); }
+        function initLanguage() { const html = languages.map(l => `<button onclick="setLanguage('${l.code}')" class="flex items-center gap-3 p-3 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-xl text-sm font-bold text-gray-700 dark:text-white w-full text-left transition"><img src="https://flagcdn.com/w40/${l.flag}.png" class="w-6 h-auto rounded shadow-sm">${l.name}</button>`).join(''); document.getElementById('lang-menu-login').innerHTML = html; document.getElementById('lang-menu-drawer').innerHTML = html; updateTranslations(); }
 
         const ui = { loading: document.getElementById('loading-screen'), login: document.getElementById('login-screen'), app: document.getElementById('app-screen'), views: { dashboard: document.getElementById('view-dashboard'), earn: document.getElementById('view-earn'), admin: document.getElementById('view-admin') } };
         document.getElementById('date-display').innerText = new Date().toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'long'});
         
         window.toggleModal = (id) => document.getElementById(id).classList.toggle('active');
-        window.toggleDrawer = () => {
-            const d = document.getElementById('right-drawer'); const o = document.getElementById('drawer-overlay');
-            if (d.classList.contains('closed')) { d.classList.remove('closed'); d.classList.add('open'); o.classList.remove('hidden'); }
-            else { d.classList.remove('open'); d.classList.add('closed'); o.classList.add('hidden'); }
-        };
-        window.toggleTheme = () => {
-            if (document.documentElement.classList.contains('dark')) { document.documentElement.classList.remove('dark'); localStorage.setItem('color-theme', 'light'); document.getElementById('theme-icon').className = 'fas fa-sun'; document.getElementById('landing-theme-icon').className = 'fas fa-sun'; }
-            else { document.documentElement.classList.add('dark'); localStorage.setItem('color-theme', 'dark'); document.getElementById('theme-icon').className = 'fas fa-moon'; document.getElementById('landing-theme-icon').className = 'fas fa-moon'; }
-        };
-        if(document.documentElement.classList.contains('dark')) { document.getElementById('theme-icon').className = 'fas fa-moon'; document.getElementById('landing-theme-icon').className = 'fas fa-moon'; }
+        window.toggleDrawer = () => { const d = document.getElementById('right-drawer'); const o = document.getElementById('drawer-overlay'); if (d.classList.contains('closed')) { d.classList.remove('closed'); d.classList.add('open'); o.classList.remove('hidden'); } else { d.classList.remove('open'); d.classList.add('closed'); o.classList.add('hidden'); } };
+        window.toggleTheme = () => { if (document.documentElement.classList.contains('dark')) { document.documentElement.classList.remove('dark'); localStorage.setItem('color-theme', 'light'); document.getElementById('theme-icon').className = 'fas fa-sun'; } else { document.documentElement.classList.add('dark'); localStorage.setItem('color-theme', 'dark'); document.getElementById('theme-icon').className = 'fas fa-moon'; } };
+        if(document.documentElement.classList.contains('dark')) document.getElementById('theme-icon').className = 'fas fa-moon';
 
-        window.showToast = (msg, type='success') => {
-            const container = document.getElementById('toast-container');
-            const el = document.createElement('div');
-            const cls = type==='success' ? 'bg-white border-green-500 text-green-700' : 'bg-white border-red-500 text-red-700';
-            el.className = `${cls} border-l-4 px-6 py-4 rounded-xl shadow-2xl font-bold flex items-center gap-3 transform transition-all duration-300 translate-x-full z-[80]`;
-            el.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-exclamation-circle'} text-xl"></i> ${msg}`;
-            container.appendChild(el); requestAnimationFrame(()=>el.classList.remove('translate-x-full')); setTimeout(()=>el.remove(), 3000);
-        };
+        window.showToast = (msg, type='success') => { const container = document.getElementById('toast-container'); const el = document.createElement('div'); const cls = type==='success' ? 'bg-white border-green-500 text-green-700' : 'bg-white border-red-500 text-red-700'; el.className = `${cls} border-l-4 px-6 py-4 rounded-xl shadow-2xl font-bold flex items-center gap-3 transform transition-all duration-300 translate-x-full z-[80]`; el.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-exclamation-circle'} text-xl"></i> ${msg}`; container.appendChild(el); requestAnimationFrame(()=>el.classList.remove('translate-x-full')); setTimeout(()=>el.remove(), 3000); };
 
         const urlParams = new URLSearchParams(window.location.search);
         const refCodeFromUrl = urlParams.get('ref');
@@ -599,92 +393,46 @@
 
         let currentUser = null, userData = null;
         onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                try { await loadUser(); } catch(e) {}
-                ui.loading.classList.add('hidden'); ui.login.classList.add('hidden'); ui.app.classList.remove('hidden'); ui.app.style.display = 'flex';
-                switchView('dashboard');
-                if(user.email === ADMIN_EMAIL) document.getElementById('drawer-admin-btn').classList.remove('hidden');
-                document.getElementById('drawer-email').innerText = user.email;
-            } else {
-                ui.loading.classList.add('hidden'); ui.app.classList.add('hidden'); ui.login.classList.remove('hidden');
-                initLanguage();
-            }
+            if (user) { currentUser = user; try { await loadUser(); } catch(e) {} ui.loading.classList.add('hidden'); ui.login.classList.add('hidden'); ui.app.classList.remove('hidden'); ui.app.style.display = 'flex'; switchView('dashboard'); if(user.email === ADMIN_EMAIL) document.getElementById('drawer-admin-btn').classList.remove('hidden'); document.getElementById('drawer-email').innerText = user.email; }
+            else { ui.loading.classList.add('hidden'); ui.app.classList.add('hidden'); ui.login.classList.remove('hidden'); initLanguage(); }
         });
 
-        async function loadUser() {
-            const ref = doc(db, "users", currentUser.uid);
-            const snap = await getDoc(ref);
-            if (snap.exists()) { userData = snap.data(); }
-            else { const refCode = localStorage.getItem('robunexa_ref'); userData = { email: currentUser.email, balance: 0, referralCode: Math.random().toString(36).substr(2, 8), referredBy: refCode, createdAt: serverTimestamp(), lastDaily: null }; await setDoc(ref, userData); }
-            updateDOM();
-        }
+        async function loadUser() { const ref = doc(db, "users", currentUser.uid); const snap = await getDoc(ref); if (snap.exists()) { userData = snap.data(); } else { const refCode = localStorage.getItem('robunexa_ref'); userData = { email: currentUser.email, balance: 0, referralCode: Math.random().toString(36).substr(2, 8), referredBy: refCode, createdAt: serverTimestamp(), lastDaily: null, hasYoutubeReward: false, tasksCompleted: 0 }; await setDoc(ref, userData); } updateDOM(); }
+        function updateDOM() { document.getElementById('header-balance').innerText = userData.balance.toFixed(2); document.getElementById('dash-balance').innerText = userData.balance.toFixed(2); document.getElementById('ref-code').innerText = window.location.host + "/?ref=" + userData.referralCode; checkDailyStatus(); initLanguage(); }
+        window.switchView = (name) => { Object.values(ui.views).forEach(el => el.classList.add('hidden')); ui.views[name].classList.remove('hidden'); if(name === 'admin') loadAdminStats(); if(name === 'earn') loadUserPages(); }
 
-        function updateDOM() {
-            document.getElementById('header-balance').innerText = userData.balance.toFixed(2);
-            document.getElementById('dash-balance').innerText = userData.balance.toFixed(2);
-            document.getElementById('ref-code').innerText = window.location.host + "/?ref=" + userData.referralCode;
-            checkDailyStatus();
-            initLanguage();
-        }
-
-        window.switchView = (name) => {
-            Object.values(ui.views).forEach(el => el.classList.add('hidden')); ui.views[name].classList.remove('hidden');
-            if(name === 'admin') loadAdminStats(); if(name === 'earn') loadUserPages();
-        }
-
-        function checkDailyStatus() {
-            const btn = document.getElementById('btn-daily-claim');
-            const now = Date.now(); const last = userData.lastDaily ? userData.lastDaily.toMillis() : 0;
+        function checkDailyStatus() { const btn = document.getElementById('btn-daily-claim'); const now = Date.now(); const last = userData.lastDaily ? userData.lastDaily.toMillis() : 0; const tasks = userData.tasksCompleted || 0; 
             if(now - last < 86400000) { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); btn.innerText = "Yarın Gel"; }
-            else { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); btn.innerText = "1 R$ Al"; }
+            else if(tasks < 10) { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); btn.innerText = `Görev Yap (${tasks}/10)`; }
+            else { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); btn.innerText = "1 R$ Al"; } 
         }
+        document.getElementById('btn-daily-claim').addEventListener('click', async () => { const now = Date.now(); const last = userData.lastDaily ? userData.lastDaily.toMillis() : 0; if(now - last < 86400000) return showToast("Zaman dolmadı!", "error"); if(userData.tasksCompleted < 10) return showToast("10 Görev yapmalısın!", "error"); try { await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(1), lastDaily: serverTimestamp() }); userData.balance += 1; userData.lastDaily = { toMillis: () => Date.now() }; updateDOM(); showToast("1 R$ Eklendi!"); } catch(e) { showToast(e.message, "error"); } });
 
-        document.getElementById('btn-daily-claim').addEventListener('click', async () => {
-            const now = Date.now(); const last = userData.lastDaily ? userData.lastDaily.toMillis() : 0;
-            if(now - last < 86400000) return showToast("Zaman dolmadı!", "error");
-            try { await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(1), lastDaily: serverTimestamp() }); userData.balance += 1; userData.lastDaily = { toMillis: () => Date.now() }; updateDOM(); showToast("1 R$ Eklendi!"); } catch(e) { showToast(e.message, "error"); }
-        });
+        const wAmount = document.getElementById('w-amount'); wAmount.addEventListener('input', () => { const val = parseFloat(wAmount.value) || 0; const fee = val * 0.40; document.getElementById('calc-gross').innerText = val.toFixed(2); document.getElementById('calc-fee').innerText = fee.toFixed(2); document.getElementById('calc-net').innerText = (val - fee).toFixed(2); });
+        document.getElementById('btn-submit-withdraw').addEventListener('click', async () => { const amount = parseFloat(wAmount.value); const gp = document.getElementById('w-gamepass').value; if(!amount || amount < 5) return showToast("Min 5 R$", "error"); if(amount > userData.balance) return showToast("Yetersiz Bakiye", "error"); try { await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) }); await addDoc(collection(db, "withdrawals"), { userId: currentUser.uid, email: currentUser.email, gamepassId: gp, amount: amount, netAmount: amount * 0.60, status: 'pending', createdAt: serverTimestamp() }); showToast("Talep Oluşturuldu"); toggleModal('withdraw-modal'); loadUser(); } catch(e) { showToast(e.message, "error"); } });
 
-        const wAmount = document.getElementById('w-amount');
-        wAmount.addEventListener('input', () => {
-            const val = parseFloat(wAmount.value) || 0; const fee = val * 0.40;
-            document.getElementById('calc-gross').innerText = val.toFixed(2); document.getElementById('calc-fee').innerText = fee.toFixed(2); document.getElementById('calc-net').innerText = (val - fee).toFixed(2);
-        });
+        window.claimYoutubeReward = async () => { if(userData.hasYoutubeReward) return showToast("Bu ödülü zaten aldın!", "error"); window.open("https://youtube.com/@robunexa", "_blank"); try { await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(1), hasYoutubeReward: true, tasksCompleted: increment(1) }); userData.balance += 1; userData.hasYoutubeReward = true; userData.tasksCompleted += 1; updateDOM(); showToast("1 R$ Eklendi!"); } catch(e) { showToast("Hata oluştu", "error"); } };
 
-        document.getElementById('btn-submit-withdraw').addEventListener('click', async () => {
-            const amount = parseFloat(wAmount.value); const gp = document.getElementById('w-gamepass').value;
-            if(!amount || amount < 5) return showToast("Min 5 R$", "error");
-            if(amount > userData.balance) return showToast("Yetersiz Bakiye", "error");
-            try {
-                await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
-                await addDoc(collection(db, "withdrawals"), { userId: currentUser.uid, email: currentUser.email, gamepassId: gp, amount: amount, netAmount: amount * 0.60, status: 'pending', createdAt: serverTimestamp() });
-                showToast("Talep Oluşturuldu"); toggleModal('withdraw-modal'); loadUser();
-            } catch(e) { showToast(e.message, "error"); }
-        });
-
-        window.loadAdminStats = async () => {
-            if(currentUser.email !== ADMIN_EMAIL) return;
-            const wList = document.getElementById('admin-withdraw-list'); wList.innerHTML = '';
-            const wSnap = await getDocs(query(collection(db, "withdrawals"), orderBy("createdAt", "desc")));
-            wSnap.forEach(d => {
-                const w = d.data();
-                wList.innerHTML += `<tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"><td class="p-4 font-medium dark:text-gray-300">${w.email}</td><td class="p-4 font-mono text-blue-600 dark:text-blue-400 font-bold">${w.gamepassId}</td><td class="p-4 font-bold dark:text-white">${w.amount} R$</td><td class="p-4 text-green-500 font-bold text-right">${w.netAmount.toFixed(1)} R$</td></tr>`;
-            });
-            loadAdminPages();
-        };
-
+        window.switchAdminTab = (tab) => { ['withdrawals','users','pages'].forEach(t => document.getElementById('admin-sec-'+t).classList.add('hidden')); document.getElementById('admin-sec-'+tab).classList.remove('hidden'); };
+        window.loadAdminStats = async () => { if(currentUser.email !== ADMIN_EMAIL) return; const wList = document.getElementById('admin-withdraw-list'); wList.innerHTML = ''; const wSnap = await getDocs(query(collection(db, "withdrawals"), orderBy("createdAt", "desc"))); wSnap.forEach(d => { const w = d.data(); wList.innerHTML += `<tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"><td class="p-4 font-medium dark:text-gray-300">${w.email}</td><td class="p-4 font-mono text-blue-600 dark:text-blue-400 font-bold">${w.gamepassId}</td><td class="p-4 font-bold dark:text-white">${w.amount} R$</td><td class="p-4 text-green-500 font-bold text-right">${w.netAmount.toFixed(1)} R$</td></tr>`; }); const uList = document.getElementById('admin-user-list'); uList.innerHTML = ''; const uSnap = await getDocs(collection(db, "users")); uSnap.forEach(d => { const u = d.data(); uList.innerHTML += `<tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"><td class="p-3">${u.email}</td><td class="p-3 font-bold text-rbx-green">${u.balance}</td><td class="p-3 text-xs text-gray-500">${u.tasksCompleted || 0}</td></tr>`; }); loadAdminPages(); };
         window.createPage = async () => { const name = document.getElementById('page-name').value; const slug = document.getElementById('page-slug').value; if(name && slug) { await addDoc(collection(db, "pages"), { name, slug, shortlinkUrl: "", reward: 0, createdAt: serverTimestamp() }); showToast("Oluşturuldu"); loadAdminPages(); } };
         async function loadAdminPages() { const list = document.getElementById('admin-pages-list'); list.innerHTML = ''; const snap = await getDocs(collection(db, "pages")); snap.forEach(d => { const p = d.data(); list.innerHTML += `<div class="flex justify-between items-center bg-gray-50 dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700"><div><div class="font-bold text-lg dark:text-white">${p.name}</div><div class="text-sm text-gray-400 mt-1">Shortlink: ${p.shortlinkUrl ? 'Aktif' : 'Yok'} | Ödül: ${p.reward} R$</div></div><button onclick="openEditPage('${d.id}', '${p.shortlinkUrl||''}', ${p.reward||0})" class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-4 py-2 rounded-lg text-sm font-bold dark:text-white hover:bg-gray-100 transition shadow-sm">Düzenle</button></div>`; }); }
         window.openEditPage = (id, url, reward) => { document.getElementById('edit-page-id').value = id; document.getElementById('edit-page-url').value = url; document.getElementById('edit-page-reward').value = reward; toggleModal('edit-page-modal'); };
         window.savePageDetails = async () => { const id = document.getElementById('edit-page-id').value; await updateDoc(doc(db, "pages", id), { shortlinkUrl: document.getElementById('edit-page-url').value, reward: Number(document.getElementById('edit-page-reward').value) }); showToast("Kaydedildi"); toggleModal('edit-page-modal'); loadAdminPages(); };
-        async function loadUserPages() { const cont = document.getElementById('user-pages-list'); cont.innerHTML = '<div class="loader mx-auto"></div>'; const s = await getDocs(collection(db, "pages")); cont.innerHTML = ''; s.forEach(d => { const p = d.data(); if(p.shortlinkUrl) cont.innerHTML += `<div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex justify-between items-center hover:shadow-lg transition transform hover:-translate-y-1"><div><h3 class="font-bold text-gray-800 dark:text-white text-lg">${p.name}</h3><span class="text-sm text-green-500 font-bold bg-green-50 dark:bg-green-900/30 px-3 py-1 rounded-lg mt-1 inline-block">+${p.reward} R$</span></div><a href="${p.shortlinkUrl}" target="_blank" class="bg-rbx-gold text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-yellow-200 dark:shadow-none hover:bg-yellow-600 transition">Git</a></div>`; }); }
+        async function loadUserPages() { const cont = document.getElementById('user-pages-list'); cont.innerHTML = ''; const s = await getDocs(collection(db, "pages")); s.forEach(d => { const p = d.data(); if(p.shortlinkUrl) cont.innerHTML += `<div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex justify-between items-center hover:shadow-lg transition transform hover:-translate-y-1"><div><h3 class="font-bold text-gray-800 dark:text-white text-lg">${p.name}</h3><span class="text-sm text-green-500 font-bold bg-green-50 dark:bg-green-900/30 px-3 py-1 rounded-lg mt-1 inline-block">+${p.reward} R$</span></div><a href="${p.shortlinkUrl}" target="_blank" onclick="completeTask()" class="bg-rbx-green text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-green-200 dark:shadow-none hover:bg-green-600 transition">Git</a></div>`; }); }
+        window.completeTask = async () => { try { await updateDoc(doc(db, "users", currentUser.uid), { tasksCompleted: increment(1) }); userData.tasksCompleted += 1; updateDOM(); } catch(e){} };
 
         document.getElementById('btn-login').addEventListener('click', async (e) => { e.preventDefault(); const email = document.getElementById('email-input').value; try { await sendSignInLinkToEmail(auth, email, { url: window.location.href, handleCodeInApp: true }); window.localStorage.setItem('emailForSignIn', email); showToast("Link Gönderildi"); } catch(e) { showToast(e.message, "error"); } });
         if (isSignInWithEmailLink(auth, window.location.href)) { let email = window.localStorage.getItem('emailForSignIn'); if (!email) email = window.prompt('Email?'); signInWithEmailLink(auth, email, window.location.href).then(() => { window.localStorage.removeItem('emailForSignIn'); window.history.replaceState({}, '', '/'); }).catch(e => showToast(e.message, "error")); }
-        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth)); document.getElementById('btn-logout-drawer').addEventListener('click', () => signOut(auth));
-        document.getElementById('btn-redeem').addEventListener('click', async () => { const code = document.getElementById('promo-input').value; const snap = await getDocs(query(collection(db, 'promo_codes'), where('code', '==', code))); if(!snap.empty && snap.docs[0].data().active) { await updateDoc(doc(db, 'users', currentUser.uid), { balance: increment(snap.docs[0].data().value) }); showToast("Kazanıldı!"); loadUser(); } else showToast("Geçersiz Kod", "error"); });
+        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth).then(()=>window.location.reload())); document.getElementById('btn-logout-drawer').addEventListener('click', () => signOut(auth).then(()=>window.location.reload()));
+        document.getElementById('btn-redeem').addEventListener('click', async () => { const code = document.getElementById('promo-input').value; const snap = await getDocs(query(collection(db, 'promo_codes'), where('code', '==', code))); if(!snap.empty && snap.docs[0].data().active) { await updateDoc(doc(db, 'users', currentUser.uid), { balance: increment(snap.docs[0].data().value), tasksCompleted: increment(1) }); showToast("Kazanıldı!"); loadUser(); } else showToast("Geçersiz Kod", "error"); });
         document.getElementById('btn-copy').addEventListener('click', () => { navigator.clipboard.writeText(document.getElementById('ref-code').innerText); showToast("Kopyalandı"); });
     </script>
+    <footer class="py-10 bg-white dark:bg-dark-card border-t border-gray-100 dark:border-gray-700 text-center">
+        <div class="flex justify-center gap-6 mb-6">
+            <a href="https://youtube.com/@robunexa" class="text-gray-400 hover:text-red-500 text-2xl transition"><i class="fab fa-youtube"></i></a>
+        </div>
+        <p class="text-gray-400 text-sm">© 2025 Robunexa. Not affiliated with Roblox Corporation.</p>
+    </footer>
 </body>
 </html>
