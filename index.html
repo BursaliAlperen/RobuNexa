@@ -18,8 +18,7 @@
                         surface: '#09090b',
                         primary: '#FACC15', 
                         accent: '#EA580C', 
-                        torso: '#3B82F6',   
-                        leg: '#4ADE80',     
+                        robux: '#00b06f', // Özel Robux Yeşili
                         success: '#10B981',
                         error: '#EF4444'
                     },
@@ -29,6 +28,7 @@
                     animation: {
                         'float': 'float 4s ease-in-out infinite',
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 3s linear infinite',
                     },
                     keyframes: {
                         float: {
@@ -43,7 +43,7 @@
 
     <!-- Icons & Fonts & Flags -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.11.0/css/flag-icons.min.css"> <!-- Real Flag Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.11.0/css/flag-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
@@ -54,8 +54,11 @@
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
-            user-select: none; /* Metin seçimi engellendi */
+            /* TAM KORUMA: Seçim ve Kopyalama Yasak */
+            user-select: none;
             -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
         /* Moving Math Grid Background */
@@ -90,7 +93,9 @@
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
         }
 
-        /* Full Noob SVG Style */
+        /* Robux Coin Shine */
+        .robux-icon { filter: drop-shadow(0 0 5px rgba(0, 176, 111, 0.5)); }
+
         .noob-full { filter: drop-shadow(0 0 15px rgba(250, 204, 21, 0.2)); }
 
         /* Scrollbar */
@@ -108,50 +113,35 @@
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
 
         /* Overlays */
-        #transition-overlay, #lang-modal { transition: opacity 0.3s ease; pointer-events: none; opacity: 0; }
-        #transition-overlay.active, #lang-modal.active { opacity: 1; pointer-events: all; }
+        #transition-overlay, #lang-modal, #promo-modal { transition: opacity 0.3s ease; pointer-events: none; opacity: 0; }
+        #transition-overlay.active, #lang-modal.active, #promo-modal.active { opacity: 1; pointer-events: all; }
         
-        /* FAQ Accordion */
         .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
         .faq-item.active .faq-content { max-height: 200px; }
         .faq-item.active i { transform: rotate(180deg); }
     </style>
 </head>
-<body oncontextmenu="return false;"> <!-- Basic HTML Attribute Block -->
+<body oncontextmenu="return false;" oncopy="return false" oncut="return false" onpaste="return false" onselectstart="return false">
 
-    <!-- SECURITY SCRIPT (Anti-Inspect & Anti-Bypass) -->
+    <!-- SECURITY SCRIPT -->
     <script>
-        // 1. Disable Right Click & Key Combos
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', function(e) {
-            // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-            if (e.key === 'F12' || 
-                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
-                (e.ctrlKey && e.key === 'U')) {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) {
                 e.preventDefault();
-                alert("Security Alert: Developer tools are disabled.");
                 return false;
             }
         });
-
-        // 2. Debugger Trap (Dondurucu)
-        // Eğer DevTools açılırsa bu loop çalışır ve sayfayı kilitler.
-        // Normal kullanıcı etkilenmez, sadece inspect yapan etkilenir.
         setInterval(function(){
             const startTime = performance.now();
-            debugger; // Burası DevTools açıksa duraksar
-            if (performance.now() - startTime > 100) {
-                // DevTools tespit edildi
-                document.body.innerHTML = '<div style="background:black;color:red;height:100vh;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:24px;">SECURITY VIOLATION DETECTED<br>PLEASE CLOSE DEVTOOLS</div>';
-            }
+            // Debugger kaldırıldı: Kullanıcı deneyimini bozmamak için sadece console clear.
         }, 1000);
-
-        // 3. Clear Console
         setInterval(() => { console.clear(); }, 2000);
     </script>
 
-    <!-- SVG Sprites (FULL BODY NOOB) -->
+    <!-- SVG Sprites -->
     <svg style="display: none;">
+        <!-- Full Noob -->
         <symbol id="icon-full-noob" viewBox="0 0 100 120">
             <rect x="5" y="35" width="20" height="40" rx="5" fill="#FACC15" stroke="black" stroke-width="2"/>
             <rect x="75" y="35" width="20" height="40" rx="5" fill="#FACC15" stroke="black" stroke-width="2"/>
@@ -164,6 +154,11 @@
                 <circle cx="57" cy="20" r="3" fill="black"/>
                 <path d="M 45 28 Q 50 32 55 28" stroke="black" stroke-width="2" fill="none" stroke-linecap="round"/>
             </g>
+        </symbol>
+        <!-- Custom Round Green Robux Icon -->
+        <symbol id="icon-robux" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="11" fill="#00b06f" stroke="#008050" stroke-width="1"/>
+            <path d="M12 6v12M8.5 8.5h7l-3.5 3.5 3.5 3.5h-7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
         </symbol>
     </svg>
 
@@ -181,8 +176,27 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto" id="lang-grid">
-                <!-- Injected via JS -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto" id="lang-grid"></div>
+        </div>
+    </div>
+
+    <!-- PROMO CODE MODAL -->
+    <div id="promo-modal" class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm hidden">
+        <div class="glass w-full max-w-sm rounded-2xl p-6 border border-white/10 relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
+            <div class="flex justify-between items-center mb-6 relative z-10">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-ticket text-primary"></i> <span data-t="promo_title">Promo Code</span>
+                </h3>
+                <button onclick="togglePromoModal(false)" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-4 relative z-10">
+                <input type="text" id="promo-input" placeholder="ENTER CODE" class="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-center text-white font-mono uppercase tracking-widest focus:border-primary outline-none">
+                <button onclick="redeemCode()" class="w-full bg-primary text-black font-bold py-3 rounded-xl click-bounce shadow-lg shadow-primary/20">
+                    REDEEM
+                </button>
             </div>
         </div>
     </div>
@@ -206,8 +220,6 @@
 
     <!-- AUTH SCREEN -->
     <section id="auth-view" class="hidden min-h-screen flex flex-col items-center justify-center p-6 relative z-10 py-12">
-        
-        <!-- Top Right Language -->
         <button onclick="toggleLangModal()" class="absolute top-6 right-6 w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-white/10 transition z-20 overflow-hidden">
             <span id="auth-flag-icon" class="fi fi-us rounded-full text-xl"></span>
         </button>
@@ -225,45 +237,24 @@
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
                 <span data-t="login_btn">Login with Google</span>
             </button>
-            
             <p class="mt-6 text-[10px] text-gray-600" data-t="auth_footer">Secure • Instant • No Password Required</p>
         </div>
 
-        <!-- FAQ SECTION -->
         <div class="w-full max-w-sm space-y-3">
             <h3 class="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-4" data-t="faq_title">FAQ & Help</h3>
-            
-            <!-- Q1 -->
             <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer" onclick="toggleFaq(this)">
                 <div class="p-4 flex justify-between items-center hover:bg-white/5 transition">
                     <span class="text-sm font-bold text-white" data-t="q1">Is this free?</span>
                     <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i>
                 </div>
-                <div class="faq-content bg-black/20">
-                    <p class="p-4 text-xs text-gray-400 pt-0" data-t="a1">Yes! We generate revenue from ads and use it to buy Robux for you.</p>
-                </div>
+                <div class="faq-content bg-black/20"><p class="p-4 text-xs text-gray-400 pt-0" data-t="a1">Yes! We generate revenue from ads and use it to buy Robux for you.</p></div>
             </div>
-
-            <!-- Q2 -->
             <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer" onclick="toggleFaq(this)">
                 <div class="p-4 flex justify-between items-center hover:bg-white/5 transition">
                     <span class="text-sm font-bold text-white" data-t="q2">Is it safe?</span>
                     <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i>
                 </div>
-                <div class="faq-content bg-black/20">
-                    <p class="p-4 text-xs text-gray-400 pt-0" data-t="a2">100% Safe. We NEVER ask for your password. We only need your username to send gifts.</p>
-                </div>
-            </div>
-
-            <!-- Q3 -->
-            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer" onclick="toggleFaq(this)">
-                <div class="p-4 flex justify-between items-center hover:bg-white/5 transition">
-                    <span class="text-sm font-bold text-white" data-t="q3">When do I get paid?</span>
-                    <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i>
-                </div>
-                <div class="faq-content bg-black/20">
-                    <p class="p-4 text-xs text-gray-400 pt-0" data-t="a3">Withdrawals are manually reviewed and sent within 24-48 hours to prevent fraud.</p>
-                </div>
+                <div class="faq-content bg-black/20"><p class="p-4 text-xs text-gray-400 pt-0" data-t="a2">100% Safe. We NEVER ask for your password.</p></div>
             </div>
         </div>
     </section>
@@ -273,10 +264,11 @@
         
         <!-- Sidebar (Desktop) -->
         <aside class="hidden md:flex flex-col w-72 h-screen glass fixed left-0 top-0 border-r border-white/5 z-20">
-            <div class="p-8 flex items-center gap-3 justify-center border-b border-white/5">
+            <!-- LOGO CLICK TO HOME -->
+            <button onclick="router.navigate('home')" class="p-8 flex items-center gap-3 justify-center border-b border-white/5 hover:bg-white/5 transition cursor-pointer w-full">
                 <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-black font-bold text-xl">R</div>
                 <span class="font-bold text-xl tracking-tight">Robu<span class="text-primary">Nexa</span></span>
-            </div>
+            </button>
             
             <div class="flex-1 px-4 py-6 space-y-2">
                 <button onclick="router.navigate('home')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3">
@@ -294,6 +286,11 @@
                 <button onclick="router.navigate('profile')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3">
                     <i class="fa-solid fa-user w-6"></i> <span data-t="menu_profile">Profile</span>
                 </button>
+                
+                <!-- ADMIN MENU ITEM (Hidden by default) -->
+                <button id="menu-admin" onclick="router.navigate('admin')" class="hidden w-full text-left px-4 py-3 rounded-xl bg-red-900/10 text-red-500 hover:bg-red-900/30 transition flex items-center gap-3 mt-4 border border-red-500/20">
+                    <i class="fa-solid fa-shield-halved w-6"></i> <span>Admin Panel</span>
+                </button>
             </div>
 
             <div class="p-6 border-t border-white/5">
@@ -308,15 +305,16 @@
             
             <!-- Mobile Header -->
             <header class="glass sticky top-0 z-30 px-4 py-3 flex justify-between items-center border-b border-white/5 md:hidden">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2" onclick="router.navigate('home')">
                     <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/50">
                         <i class="fa-solid fa-cube text-primary text-sm"></i>
                     </div>
                     <span class="font-bold text-lg">Robu<span class="text-primary">Nexa</span></span>
                 </div>
+                <!-- LIVE BALANCE MOBILE -->
                 <div class="bg-surface/90 px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2 shadow-inner shadow-black/50">
-                    <i class="fa-solid fa-coins text-primary text-xs"></i>
-                    <span id="header-balance" class="font-mono font-bold text-sm">0.00</span>
+                    <svg class="w-4 h-4 robux-icon"><use href="#icon-robux"></use></svg>
+                    <span id="header-balance" class="font-mono font-bold text-sm text-white">0.00</span>
                 </div>
             </header>
 
@@ -327,9 +325,10 @@
                     <p class="text-xs text-gray-500" data-t="welcome">Welcome back, Earner.</p>
                 </div>
                 <div class="flex items-center gap-6">
-                    <div class="bg-surface/80 px-5 py-2 rounded-full border border-white/10 flex items-center gap-3 shadow-lg shadow-black/20 hover:border-primary/50 transition-colors cursor-pointer">
-                        <i class="fa-solid fa-coins text-primary text-lg"></i>
-                        <span id="desktop-balance" class="font-mono font-bold text-xl">0.00</span>
+                    <!-- LIVE BALANCE DESKTOP -->
+                    <div class="bg-surface/80 px-5 py-2 rounded-full border border-white/10 flex items-center gap-3 shadow-lg shadow-black/20 hover:border-robux/50 transition-colors cursor-pointer group">
+                        <svg class="w-7 h-7 robux-icon group-hover:scale-110 transition-transform"><use href="#icon-robux"></use></svg>
+                        <span id="desktop-balance" class="font-mono font-bold text-xl text-white">0.00</span>
                     </div>
                     <img id="user-avatar" src="" class="w-10 h-10 rounded-full border-2 border-white/10 hover:border-primary transition-colors">
                 </div>
@@ -377,35 +376,39 @@
                 <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div class="text-center md:text-left">
                         <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 block" data-t="total_bal">Total Balance</span>
-                        <div class="flex items-baseline justify-center md:justify-start gap-1 mb-4">
+                        <div class="flex items-baseline justify-center md:justify-start gap-3 mb-4">
+                            <!-- ROUND GREEN ICON -->
+                            <svg class="w-10 h-10 md:w-14 md:h-14 robux-icon"><use href="#icon-robux"></use></svg>
                             <span class="text-5xl md:text-6xl font-black text-white tracking-tighter" id="home-big-balance">0.00</span>
-                            <span class="text-primary font-bold text-2xl">R$</span>
                         </div>
-                        <button onclick="router.navigate('earn')" class="bg-gradient-to-r from-primary to-accent text-black font-bold py-3 px-8 rounded-xl click-bounce shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
-                            <span data-t="start_earn">Start Earning Now</span> <i class="fa-solid fa-arrow-right ml-2"></i>
-                        </button>
+                        <div class="flex gap-2 justify-center md:justify-start">
+                            <button onclick="router.navigate('earn')" class="bg-gradient-to-r from-primary to-accent text-black font-bold py-3 px-8 rounded-xl click-bounce shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
+                                <span data-t="start_earn">Start Earning</span>
+                            </button>
+                            <button onclick="togglePromoModal(true)" class="glass border border-white/20 text-white font-bold py-3 px-4 rounded-xl click-bounce hover:bg-white/10">
+                                <i class="fa-solid fa-ticket"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="hidden md:block">
                         <svg class="w-40 h-40 animate-float noob-full"><use href="#icon-full-noob"></use></svg>
                     </div>
                 </div>
             </div>
+            
             <div class="grid grid-cols-2 gap-3 md:gap-6">
                 <div class="glass p-5 rounded-2xl border border-white/5">
-                    <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3 text-blue-400">
-                        <i class="fa-solid fa-list-check text-xl"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3 text-blue-400"><i class="fa-solid fa-list-check text-xl"></i></div>
                     <p class="text-xs text-gray-400 uppercase tracking-wider" data-t="completed_stat">Completed</p>
                     <p class="text-2xl font-bold text-white mt-1" id="home-tasks">0</p>
                 </div>
                 <div class="glass p-5 rounded-2xl border border-white/5">
-                    <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mb-3 text-purple-400">
-                        <i class="fa-solid fa-bolt text-xl"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mb-3 text-purple-400"><i class="fa-solid fa-bolt text-xl"></i></div>
                     <p class="text-xs text-gray-400 uppercase tracking-wider">XP Level</p>
                     <p class="text-2xl font-bold text-white mt-1" id="home-xp">0</p>
                 </div>
             </div>
+
             <div class="glass rounded-2xl p-4 border border-white/5">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
@@ -422,23 +425,24 @@
     <!-- 2. EARN -->
     <template id="tpl-earn">
         <div class="fade-in pb-10">
+            <!-- Promo Banner -->
+            <div onclick="togglePromoModal(true)" class="glass p-4 rounded-xl mb-6 border border-dashed border-primary/30 flex justify-between items-center cursor-pointer hover:bg-primary/5 transition">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary"><i class="fa-solid fa-gift"></i></div>
+                    <div>
+                        <h4 class="font-bold text-white text-sm" data-t="promo_title">Have a Code?</h4>
+                        <p class="text-[10px] text-gray-400">Redeem for instant R$</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-gray-500 text-xs"></i>
+            </div>
+
             <h3 class="text-xl font-bold mb-4 flex items-center gap-2" data-t="hot_tasks">Hot Tasks</h3>
             <div id="task-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="col-span-full text-center py-12 glass rounded-xl">
                     <i class="fa-solid fa-circle-notch fa-spin text-primary text-3xl"></i>
                     <p class="text-gray-500 text-xs mt-3 uppercase tracking-widest" data-t="loading">Fetching Tasks...</p>
                 </div>
-            </div>
-            <!-- Admin Hidden -->
-            <div id="admin-task-ui" class="hidden mt-12 border-t border-white/10 pt-8">
-                 <form id="add-task-form" class="glass p-6 rounded-xl border border-red-500/30 space-y-4">
-                    <h3 class="text-red-500 font-bold text-sm uppercase">Admin Panel</h3>
-                    <input type="text" id="t-title" placeholder="Title" class="w-full bg-black/50 p-2 text-white border border-white/10 rounded">
-                    <input type="text" id="t-desc" placeholder="Desc" class="w-full bg-black/50 p-2 text-white border border-white/10 rounded">
-                    <input type="number" id="t-reward" placeholder="Reward" class="w-full bg-black/50 p-2 text-white border border-white/10 rounded">
-                    <input type="number" id="t-cooldown" placeholder="Cooldown" class="w-full bg-black/50 p-2 text-white border border-white/10 rounded">
-                    <button class="bg-red-600 text-white w-full py-2 rounded">Add Task</button>
-                 </form>
             </div>
         </div>
     </template>
@@ -458,8 +462,8 @@
                 <div>
                     <label class="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider" data-t="amount_label">Amount (Min 50 R$)</label>
                     <div class="relative mt-2">
-                        <i class="fa-solid fa-coins absolute left-4 top-4 text-gray-500 text-sm"></i>
-                        <input type="number" id="w-amount" min="50" class="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 pl-10 pr-4 text-white focus:border-primary outline-none transition-all placeholder-gray-700 font-mono" placeholder="50">
+                        <div class="absolute left-4 top-3.5"><svg class="w-5 h-5 robux-icon"><use href="#icon-robux"></use></svg></div>
+                        <input type="number" id="w-amount" min="50" class="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white focus:border-primary outline-none transition-all placeholder-gray-700 font-mono" placeholder="50">
                     </div>
                 </div>
                 <div>
@@ -476,10 +480,6 @@
             <div class="space-y-3">
                 <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1" data-t="trans_history">Transaction History</h3>
                 <div id="withdraw-history" class="space-y-2"></div>
-            </div>
-            <!-- Admin -->
-            <div id="admin-withdraw-ui" class="hidden mt-8 pt-6 border-t border-white/10">
-                <div id="admin-withdraw-list" class="grid gap-3"></div>
             </div>
         </div>
     </template>
@@ -533,6 +533,35 @@
         </div>
     </template>
 
+    <!-- 6. ADMIN PANEL -->
+    <template id="tpl-admin">
+        <div class="fade-in space-y-8 pb-12">
+            <h2 class="text-3xl font-bold text-white border-l-4 border-red-600 pl-4">Admin Console</h2>
+            
+            <!-- ADD TASK -->
+            <div class="glass p-6 rounded-2xl border border-white/10">
+                <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-plus-circle text-primary"></i> Add New Task</h3>
+                <form id="add-task-form" class="space-y-4">
+                    <input type="text" id="t-title" placeholder="Task Title" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                    <input type="text" id="t-desc" placeholder="Task Description" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="number" id="t-reward" placeholder="Reward (R$)" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                        <input type="number" id="t-cooldown" placeholder="Cooldown (sec)" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                    </div>
+                    <button class="bg-primary text-black w-full py-3 rounded-xl font-bold hover:bg-yellow-400 transition">Create Task</button>
+                </form>
+            </div>
+
+            <!-- WITHDRAWAL REQUESTS -->
+            <div class="glass p-6 rounded-2xl border border-white/10">
+                <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-money-bill-transfer text-primary"></i> Pending Withdrawals</h3>
+                <div id="admin-withdraw-list" class="grid gap-4">
+                    <p class="text-gray-500 text-sm">Loading requests...</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <!-- LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -556,22 +585,22 @@
         const provider = new GoogleAuthProvider();
         const ADMIN_EMAIL = "adanalironaldo131@gmail.com";
 
-        // --- GLOBAL STATE ---
         let state = { user: null, data: null, isAdmin: false };
+        let prevBalance = 0; // For CountUp Animation
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        // --- LANGUAGE SYSTEM (ISO CODES FOR FLAGS) ---
         const langData = {
             en: {
                 code: "us", name: "English",
                 login_btn: "Login with Google", auth_desc: "Join the Elite. Earn Real Robux.", auth_footer: "Secure • Instant • No Password",
                 menu_home: "Dashboard", menu_tasks: "Earn", menu_withdraw: "Withdraw", menu_top: "Leaderboard", menu_profile: "Me",
-                welcome: "Welcome back, Earner.", total_bal: "Total Balance", start_earn: "Start Earning Now", completed_stat: "Completed",
+                welcome: "Welcome back, Earner.", total_bal: "Total Balance", start_earn: "Start Earning", completed_stat: "Completed",
                 live_drops: "Live Drops", hot_tasks: "Hot Tasks", loading: "Loading...",
                 withdraw_rules_title: "Withdrawal Rules", withdraw_rules_desc: "Cover 30% tax (Amount / 0.7).",
                 amount_label: "Amount (Min 50 R$)", link_label: "Gamepass Link", req_payout: "Request Payout", trans_history: "Transaction History",
                 top_20: "Top 20 Earners", user: "User", sign_out: "Sign Out", select_lang: "Select Language",
-                faq_title: "FAQ & Help", q1: "Is this free?", a1: "Yes! We generate revenue from ads.", q2: "Is it safe?", a2: "100% Safe. No passwords needed.", q3: "When do I get paid?", a3: "Within 24-48 hours."
+                faq_title: "FAQ & Help", q1: "Is this free?", a1: "Yes! We generate revenue from ads.", q2: "Is it safe?", a2: "100% Safe. No passwords needed.",
+                promo_title: "Promo Code"
             },
             tr: {
                 code: "tr", name: "Türkçe",
@@ -582,57 +611,26 @@
                 withdraw_rules_title: "Çekim Kuralları", withdraw_rules_desc: "%30 vergiyi karşıla (Miktar / 0.7).",
                 amount_label: "Miktar (Min 50 R$)", link_label: "Gamepass Linki", req_payout: "Ödeme İste", trans_history: "İşlem Geçmişi",
                 top_20: "En Çok Kazananlar", user: "Kullanıcı", sign_out: "Çıkış Yap", select_lang: "Dil Seç",
-                faq_title: "Sıkça Sorulan Sorular", q1: "Bu ücretsiz mi?", a1: "Evet! Reklam gelirleriyle size ödeme yapıyoruz.", q2: "Güvenli mi?", a2: "%100 Güvenli. Şifre asla istemeyiz.", q3: "Ne zaman gelir?", a3: "24-48 saat içinde gönderilir."
-            },
-            de: { code: "de", name: "Deutsch", login_btn: "Mit Google anmelden", auth_desc: "Verdiene echtes Robux.", menu_tasks: "Aufgaben", menu_withdraw: "Auszahlen", q1: "Ist das kostenlos?", a1: "Ja, wir nutzen Werbeeinnahmen." },
-            fr: { code: "fr", name: "Français", login_btn: "Se connecter", auth_desc: "Gagnez des Robux réels.", menu_tasks: "Gagner", menu_withdraw: "Retrait", q1: "Est-ce gratuit?", a1: "Oui, grâce aux publicités." },
-            es: { code: "es", name: "Español", login_btn: "Iniciar sesión", auth_desc: "Gana Robux reales.", menu_tasks: "Tareas", menu_withdraw: "Retirar", q1: "¿Es gratis?", a1: "¡Sí! Usamos ingresos publicitarios." },
-            pt: { code: "pt", name: "Português", login_btn: "Entrar com Google", auth_desc: "Ganhe Robux reais.", menu_tasks: "Tarefas", menu_withdraw: "Sacar", q1: "É grátis?", a1: "Sim, usamos receita de anúncios." },
-            it: { code: "it", name: "Italiano", login_btn: "Accedi con Google", auth_desc: "Guadagna Robux reali.", menu_tasks: "Compiti", menu_withdraw: "Preleva" },
-            ru: { code: "ru", name: "Русский", login_btn: "Войти через Google", auth_desc: "Заработай реальные Robux.", menu_tasks: "Задания", menu_withdraw: "Вывод" },
-            pl: { code: "pl", name: "Polski", login_btn: "Zaloguj przez Google", auth_desc: "Zarabiaj prawdziwe Robux.", menu_tasks: "Zadania", menu_withdraw: "Wypłata" },
-            id: { code: "id", name: "Bahasa Indo", login_btn: "Masuk dengan Google", auth_desc: "Dapatkan Robux nyata.", menu_tasks: "Tugas", menu_withdraw: "Tarik" },
-            vn: { code: "vn", name: "Tiếng Việt", login_btn: "Đăng nhập Google", auth_desc: "Kiếm Robux thật.", menu_tasks: "Nhiệm vụ", menu_withdraw: "Rút tiền" },
-            th: { code: "th", name: "ไทย", login_btn: "เข้าสู่ระบบด้วย Google", auth_desc: "รับ Robux จริง", menu_tasks: "งาน", menu_withdraw: "ถอนเงิน" },
-            jp: { code: "jp", name: "日本語", login_btn: "Googleでログイン", auth_desc: "本物のRobuxを稼ごう。", menu_tasks: "タスク", menu_withdraw: "出金" },
-            kr: { code: "kr", name: "한국어", login_btn: "Google로 로그인", auth_desc: "진짜 Robux를 얻으세요.", menu_tasks: "미션", menu_withdraw: "출금" },
-            cn: { code: "cn", name: "中国人", login_btn: "使用 Google 登录", auth_desc: "赚取真正的 Robux。", menu_tasks: "任务", menu_withdraw: "提取" },
-            ar: { code: "sa", name: "العربية", login_btn: "تسجيل الدخول", auth_desc: "اكسب Robux حقيقي.", menu_tasks: "مهام", menu_withdraw: "سحب" },
-            hi: { code: "in", name: "हिन्दी", login_btn: "Google से लॉगिन करें", auth_desc: "असली Robux कमाएं।", menu_tasks: "कार्य", menu_withdraw: "निकालना" }
+                faq_title: "Sıkça Sorulan Sorular", q1: "Bu ücretsiz mi?", a1: "Evet! Reklam gelirleriyle size ödeme yapıyoruz.", q2: "Güvenli mi?", a2: "%100 Güvenli. Şifre asla istemeyiz.",
+                promo_title: "Promosyon Kodu"
+            }
         };
 
         let curLang = localStorage.getItem('robu_lang') || 'en';
-
-        // Helper to get text (falls back to EN if missing)
-        const t = (key) => {
-            return langData[curLang]?.[key] || langData['en'][key] || key;
-        };
+        const t = (key) => langData[curLang]?.[key] || langData['en'][key] || key;
 
         const updateLanguage = (lang) => {
             curLang = lang;
             localStorage.setItem('robu_lang', lang);
-            
-            // Update DOM text
-            document.querySelectorAll('[data-t]').forEach(el => {
-                const key = el.getAttribute('data-t');
-                el.textContent = t(key);
-            });
-            
-            // Update Auth Flag & Sidebar Flag
+            document.querySelectorAll('[data-t]').forEach(el => el.textContent = t(el.getAttribute('data-t')));
             const flagClass = `fi fi-${langData[lang].code}`;
-            const authFlag = document.getElementById('auth-flag-icon');
-            if(authFlag) authFlag.className = `${flagClass} rounded-full text-xl`;
-
-            const sbFlag = document.getElementById('sidebar-flag-icon');
-            if(sbFlag) sbFlag.className = `${flagClass} rounded-sm`;
-            
-            const langNameEl = document.getElementById('current-lang-name');
-            if(langNameEl && langData[lang]) langNameEl.innerText = langData[lang].name;
-
+            if(document.getElementById('auth-flag-icon')) document.getElementById('auth-flag-icon').className = `${flagClass} rounded-full text-xl`;
+            if(document.getElementById('sidebar-flag-icon')) document.getElementById('sidebar-flag-icon').className = `${flagClass} rounded-sm`;
+            if(document.getElementById('current-lang-name')) document.getElementById('current-lang-name').innerText = langData[lang].name;
             toggleLangModal(false);
         };
 
-        // Make functions global for HTML onClick
+        // UI Helpers
         window.toggleLangModal = (show = null) => {
             const m = document.getElementById('lang-modal');
             if(show === false || (show === null && m.classList.contains('active'))) {
@@ -640,7 +638,6 @@
                 setTimeout(()=>m.style.display='none',300);
             } else {
                 m.style.display='flex';
-                // Build Grid if empty
                 const grid = document.getElementById('lang-grid');
                 if(grid.innerHTML.trim() === '') {
                     Object.keys(langData).forEach(k => {
@@ -655,12 +652,14 @@
             }
         };
 
-        window.toggleFaq = (el) => {
-            el.classList.toggle('active');
-            state.audio && playSound('click');
+        window.togglePromoModal = (show) => {
+            const m = document.getElementById('promo-modal');
+            if(!show) { m.classList.remove('active'); setTimeout(()=>m.classList.add('hidden'),300); }
+            else { m.classList.remove('hidden'); requestAnimationFrame(()=>m.classList.add('active')); }
         };
 
-        // --- AUDIO & UTILS ---
+        window.toggleFaq = (el) => { el.classList.toggle('active'); playSound('click'); };
+
         const playSound = (type) => {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
@@ -685,7 +684,20 @@
             setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3000);
         };
 
-        // --- ROUTER & LOGIC ---
+        // Live Count Animation
+        const animateValue = (obj, start, end, duration) => {
+            if(!obj) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = (start + progress * (end - start)).toFixed(2);
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        };
+
+        // --- ROUTER ---
         const router = {
             navigate: (view) => {
                 playSound('click');
@@ -698,13 +710,18 @@
                         content.innerHTML = '';
                         content.appendChild(tpl.content.cloneNode(true));
                         
+                        // Update Header Title
+                        const titles = { home:'Dashboard', earn:'Earn Tasks', withdraw:'Withdraw', leaderboard:'Leaderboard', profile:'My Profile', admin:'Admin Panel' };
+                        const pt = document.getElementById('page-title');
+                        if(pt) pt.innerText = titles[view] || 'App';
+
                         if(view === 'home') initHome();
                         if(view === 'earn') initEarn();
                         if(view === 'withdraw') initWithdraw();
                         if(view === 'leaderboard') initLeaderboard();
                         if(view === 'profile') initProfile();
+                        if(view === 'admin') initAdmin();
 
-                        // Re-apply language
                         updateLanguage(curLang);
                         window.scrollTo(0,0);
                     }
@@ -713,10 +730,11 @@
             }
         };
 
-        // Logic Functions
+        // View Functions
         const initHome = () => {
             if(!state.data) return;
-            document.getElementById('home-big-balance').innerText = state.data.balance.toFixed(2);
+            const balEl = document.getElementById('home-big-balance');
+            if(balEl) balEl.innerText = state.data.balance.toFixed(2);
             document.getElementById('home-tasks').innerText = (state.data.completedTasks || []).length;
             document.getElementById('home-xp').innerText = state.data.xp || 0;
             const feed = document.getElementById('live-feed');
@@ -738,18 +756,18 @@
                 const el = document.createElement('div');
                 el.className = `glass p-4 rounded-2xl border ${isDone?'border-green-500/20':'border-white/10'} transition-all`;
                 el.innerHTML = `
-                    <div class="flex justify-between mb-2"><span class="text-primary font-bold">+${tData.reward} R$</span></div>
+                    <div class="flex justify-between mb-2"><span class="text-primary font-bold flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i> ${tData.reward} R$</span></div>
                     <h4 class="font-bold text-sm text-white">${tData.title}</h4>
                     <p class="text-[10px] text-gray-500 mb-3">${tData.description}</p>
-                    <button class="btn-start w-full py-2 rounded text-xs font-bold ${isDone?'bg-white/5 text-gray-500':'bg-white/10 text-white hover:bg-white/20'}" data-id="${d.id}" data-r="${tData.reward}" ${isDone?'disabled':''}>${isDone?'DONE':'START'}</button>
+                    <button class="btn-start w-full py-2 rounded-lg text-xs font-bold ${isDone?'bg-white/5 text-gray-500':'bg-white/10 text-white hover:bg-white/20'}" data-id="${d.id}" data-r="${tData.reward}" ${isDone?'disabled':''}>${isDone?'COMPLETED':'START TASK'}</button>
                 `;
                 list.appendChild(el);
             });
-            // Task Handlers
+
             document.querySelectorAll('.btn-start').forEach(b => {
                 b.onclick = async () => {
                     if(state.data.lastTaskAt && (Date.now()-state.data.lastTaskAt.seconds*1000)/1000 < 15) return toast('Wait 15s', 'error');
-                    window.open('https://google.com','_blank');
+                    window.open('https://google.com','_blank'); // Demo link
                     toast('Verifying...', 'info');
                     setTimeout(async()=>{
                         await updateDoc(doc(db,"users",state.user.uid), { balance: increment(Number(b.dataset.r)), xp: increment(10), completedTasks:[...state.data.completedTasks||[], b.dataset.id], lastTaskAt: serverTimestamp() });
@@ -757,18 +775,32 @@
                     },4000);
                 }
             });
-            // Admin
-            if(state.isAdmin) {
-                document.getElementById('admin-task-ui').classList.remove('hidden');
-                document.getElementById('add-task-form').onsubmit = async (e) => {
-                    e.preventDefault();
-                    await addDoc(collection(db,"pages"),{
-                        title: document.getElementById('t-title').value, description: document.getElementById('t-desc').value,
-                        reward: Number(document.getElementById('t-reward').value), cooldown: Number(document.getElementById('t-cooldown').value),
-                        active: true, createdAt: serverTimestamp()
-                    });
-                    toast('Task Added','success'); initEarn();
-                };
+        };
+
+        // PROMO CODE LOGIC
+        window.redeemCode = async () => {
+            const input = document.getElementById('promo-input');
+            const code = input.value.trim().toUpperCase();
+            if(!code) return toast("Enter a code", "error");
+            
+            togglePromoModal(false);
+            toast("Checking code...", "info");
+
+            // Simple Local Demo Logic (In production, query a 'codes' collection)
+            const demoCodes = { "WELCOME100": 100, "ROBUX2024": 50 };
+            
+            if(state.data.usedCodes && state.data.usedCodes.includes(code)) {
+                return toast("Code already used!", "error");
+            }
+
+            if(demoCodes[code]) {
+                await updateDoc(doc(db, "users", state.user.uid), {
+                    balance: increment(demoCodes[code]),
+                    usedCodes: [...(state.data.usedCodes || []), code]
+                });
+                toast(`Redeemed ${demoCodes[code]} R$!`, "success");
+            } else {
+                toast("Invalid Code", "error");
             }
         };
 
@@ -778,31 +810,58 @@
             hist.innerHTML = '';
             snaps.forEach(s => {
                 const d = s.data();
-                hist.innerHTML += `<div class="flex justify-between p-3 bg-white/5 rounded-xl text-xs border border-white/5"><span class="text-white font-bold">${d.amount} R$</span><span class="text-gray-500 uppercase">${d.status}</span></div>`;
+                hist.innerHTML += `<div class="flex justify-between p-3 bg-white/5 rounded-xl text-xs border border-white/5"><span class="text-white font-bold">${d.amount} R$</span><span class="text-gray-500 uppercase ${d.status==='approved'?'text-green-500':d.status==='rejected'?'text-red-500':'text-yellow-500'}">${d.status}</span></div>`;
             });
             document.getElementById('withdraw-form').onsubmit = async (e) => {
                 e.preventDefault();
                 const amt = Number(document.getElementById('w-amount').value);
-                if(amt<50 || state.data.balance<amt) return toast('Invalid Amount','error');
+                if(amt<50 || state.data.balance<amt) return toast('Invalid Amount / Balance','error');
                 await updateDoc(doc(db,"users",state.user.uid),{balance:increment(-amt), lastWithdrawAt:serverTimestamp()});
                 await addDoc(collection(db,"withdrawals"),{uid:state.user.uid, amount:amt, gamepassLink:document.getElementById('w-link').value, status:'pending', createdAt:serverTimestamp(), email:state.user.email});
                 toast('Sent!','success'); initWithdraw();
             };
-            if(state.isAdmin) {
-                document.getElementById('admin-withdraw-ui').classList.remove('hidden');
-                const list = document.getElementById('admin-withdraw-list');
-                const pSnaps = await getDocs(query(collection(db,"withdrawals"), where("status","==","pending")));
-                list.innerHTML='';
-                pSnaps.forEach(s => {
-                    const d = s.data();
-                    const div = document.createElement('div');
-                    div.className="glass p-3 rounded text-xs";
-                    div.innerHTML=`${d.amount} R$ - ${d.email} <br> <a href="${d.gamepassLink}" target="_blank" class="text-blue-400">Link</a> <div class="mt-2 flex gap-2"><button class="bg-green-500 px-2 py-1 rounded text-black b-a">Approve</button><button class="bg-red-500 px-2 py-1 rounded text-white b-r">Reject</button></div>`;
-                    div.querySelector('.b-a').onclick=async()=>{ await updateDoc(doc(db,"withdrawals",s.id),{status:'approved'}); div.remove(); };
-                    div.querySelector('.b-r').onclick=async()=>{ await updateDoc(doc(db,"withdrawals",s.id),{status:'rejected'}); await updateDoc(doc(db,"users",d.uid),{balance:increment(d.amount)}); div.remove(); };
-                    list.appendChild(div);
+        };
+
+        const initAdmin = async () => {
+            if(!state.isAdmin) return router.navigate('home');
+            
+            // Add Task
+            document.getElementById('add-task-form').onsubmit = async (e) => {
+                e.preventDefault();
+                await addDoc(collection(db,"pages"),{
+                    title: document.getElementById('t-title').value, description: document.getElementById('t-desc').value,
+                    reward: Number(document.getElementById('t-reward').value), cooldown: Number(document.getElementById('t-cooldown').value),
+                    active: true, createdAt: serverTimestamp()
                 });
-            }
+                toast('Task Added','success');
+                e.target.reset();
+            };
+
+            // Withdraw List
+            const list = document.getElementById('admin-withdraw-list');
+            const pSnaps = await getDocs(query(collection(db,"withdrawals"), where("status","==","pending")));
+            list.innerHTML='';
+            if(pSnaps.empty) list.innerHTML = '<p class="text-gray-500">No pending requests.</p>';
+            
+            pSnaps.forEach(s => {
+                const d = s.data();
+                const div = document.createElement('div');
+                div.className="glass p-4 rounded-xl text-xs border border-white/10";
+                div.innerHTML=`
+                    <div class="flex justify-between mb-2">
+                        <span class="text-white font-bold text-lg">${d.amount} R$</span>
+                        <span class="text-gray-400 font-mono">${d.email}</span>
+                    </div>
+                    <a href="${d.gamepassLink}" target="_blank" class="text-blue-400 hover:underline mb-3 block truncate"><i class="fa-solid fa-external-link"></i> ${d.gamepassLink}</a>
+                    <div class="flex gap-2">
+                        <button class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg font-bold flex-1 b-a">Approve</button>
+                        <button class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-bold flex-1 b-r">Reject</button>
+                    </div>`;
+                
+                div.querySelector('.b-a').onclick=async()=>{ await updateDoc(doc(db,"withdrawals",s.id),{status:'approved'}); div.remove(); toast('Approved','success'); };
+                div.querySelector('.b-r').onclick=async()=>{ await updateDoc(doc(db,"withdrawals",s.id),{status:'rejected'}); await updateDoc(doc(db,"users",d.uid),{balance:increment(d.amount)}); div.remove(); toast('Rejected & Refunded','info'); };
+                list.appendChild(div);
+            });
         };
 
         const initLeaderboard = async () => {
@@ -824,24 +883,40 @@
             document.getElementById('btn-logout').onclick = () => { signOut(auth); location.reload(); };
         };
 
-        // --- AUTH ---
+        // --- AUTH & MAIN LOOP ---
         onAuthStateChanged(auth, async (user) => {
             const loader = document.getElementById('app-loader');
             if (user) {
                 state.user = user;
                 state.isAdmin = (user.email === ADMIN_EMAIL);
+                
+                if(state.isAdmin) {
+                    document.getElementById('menu-admin').classList.remove('hidden');
+                }
+
                 const ref = doc(db,"users",user.uid);
                 const snap = await getDoc(ref);
                 if(!snap.exists()) {
-                    await setDoc(ref,{uid:user.uid, email:user.email, balance:0, xp:0, photoURL:user.photoURL, completedTasks:[], createdAt:serverTimestamp()});
-                    state.data = {balance:0, completedTasks:[]};
+                    await setDoc(ref,{uid:user.uid, email:user.email, balance:0, xp:0, photoURL:user.photoURL, completedTasks:[], usedCodes:[], createdAt:serverTimestamp()});
+                    state.data = {balance:0, completedTasks:[], usedCodes:[]};
                 } else state.data = snap.data();
                 
+                // Realtime Balance Listener with Animation
                 onSnapshot(ref, (d) => {
                     if(d.exists()) {
-                        state.data = d.data();
-                        document.querySelectorAll('#header-balance, #desktop-balance').forEach(el=>el.innerText=state.data.balance.toFixed(2));
-                        if(document.getElementById('home-big-balance')) document.getElementById('home-big-balance').innerText=state.data.balance.toFixed(2);
+                        const newData = d.data();
+                        const newBal = newData.balance;
+                        
+                        // Update Header
+                        animateValue(document.getElementById('header-balance'), prevBalance, newBal, 1000);
+                        animateValue(document.getElementById('desktop-balance'), prevBalance, newBal, 1000);
+                        
+                        // Update Home Big Display if active
+                        const homeBig = document.getElementById('home-big-balance');
+                        if(homeBig) animateValue(homeBig, prevBalance, newBal, 1000);
+
+                        prevBalance = newBal;
+                        state.data = newData;
                     }
                 });
                 
@@ -854,7 +929,7 @@
                 state = {user:null, data:null};
                 document.getElementById('main-view').classList.add('hidden');
                 document.getElementById('auth-view').classList.remove('hidden');
-                updateLanguage(curLang); // Update auth texts
+                updateLanguage(curLang);
             }
             setTimeout(() => { loader.style.opacity='0'; setTimeout(()=>loader.remove(),500); }, 1000);
         });
