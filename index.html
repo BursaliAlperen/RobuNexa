@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RobuNexa | Shortlink Rewards</title>
+    <title>RobuNexa | Earn Robux</title>
     <meta name="theme-color" content="#050505">
     
+    <!-- FAVICON (Noob Icon) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 120'%3E%3Crect x='5' y='35' width='20' height='40' rx='5' fill='%23FACC15' stroke='black' stroke-width='2'/%3E%3Crect x='75' y='35' width='20' height='40' rx='5' fill='%23FACC15' stroke='black' stroke-width='2'/%3E%3Crect x='28' y='75' width='18' height='40' rx='4' fill='%234ADE80' stroke='black' stroke-width='2'/%3E%3Crect x='54' y='75' width='18' height='40' rx='4' fill='%234ADE80' stroke='black' stroke-width='2'/%3E%3Crect x='25' y='35' width='50' height='45' rx='5' fill='%233B82F6' stroke='black' stroke-width='2'/%3E%3Cg%3E%3Crect x='30' y='5' width='40' height='35' rx='8' fill='%23FACC15' stroke='black' stroke-width='2'/%3E%3Ccircle cx='43' cy='20' r='3' fill='black'/%3E%3Ccircle cx='57' cy='20' r='3' fill='black'/%3E%3Cpath d='M 45 28 Q 50 32 55 28' stroke='black' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -89,22 +92,23 @@
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #555; }
 
-        #lang-modal, #promo-modal { transition: opacity 0.3s ease; pointer-events: none; opacity: 0; }
-        #lang-modal.active, #promo-modal.active { opacity: 1; pointer-events: all; }
-
-        #transition-overlay {
-            position: fixed; inset: 0; z-index: 9999;
-            background: #050505;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        /* HAMBURGER MENU OVERLAY */
+        #mobile-menu {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100;
+            background: rgba(5, 5, 5, 0.6); backdrop-filter: blur(10px);
             opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
-        #transition-overlay.active { opacity: 1; pointer-events: all; }
+        #mobile-menu.active { opacity: 1; pointer-events: all; }
         
-        .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .faq-item.active .faq-content { max-height: 1000px; }
-        .faq-item.active i { transform: rotate(180deg); color: #FACC15; }
+        #mobile-menu-content {
+            position: absolute; top: 0; left: 0; bottom: 0; width: 80%; max-width: 300px;
+            background: #0F1115; border-right: 1px solid rgba(255,255,255,0.1);
+            transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; flex-direction: column;
+        }
+        #mobile-menu.active #mobile-menu-content { transform: translateX(0); }
 
-        /* LIVE TICKER ANIMATION */
+        /* LIVE TICKER */
         .ticker-wrap {
             position: fixed; top: 0; left: 0; width: 100%; overflow: hidden; height: 32px; 
             background: rgba(250, 204, 21, 0.1); border-bottom: 1px solid rgba(250, 204, 21, 0.2);
@@ -117,13 +121,25 @@
             color: #FACC15; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; font-weight: bold; 
         }
         .ticker-item span { color: #fff; opacity: 0.8; }
-        
         @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        
+        /* TRANSITIONS */
+        #transition-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: #050505;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        #transition-overlay.active { opacity: 1; pointer-events: all; }
+
+        .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .faq-item.active .faq-content { max-height: 1000px; }
+        .faq-item.active i { transform: rotate(180deg); color: #FACC15; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <!-- SECURITY & UTILS -->
+    <!-- SECURITY -->
     <script>
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', function(e) {
@@ -158,22 +174,47 @@
 
     <!-- LIVE TICKER -->
     <div class="ticker-wrap hidden md:flex">
-        <div class="ticker" id="ticker-content">
-            <!-- JS Will Fill This with Infinite Unique Users -->
-        </div>
+        <div class="ticker" id="ticker-content"></div>
     </div>
 
-    <!-- MODALS -->
-    <div id="lang-modal" class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="glass w-full max-w-lg rounded-2xl p-6 border border-white/10 flex flex-col max-h-[80vh]">
-            <div class="flex justify-between items-center mb-4 flex-shrink-0">
-                <h3 class="text-white font-bold text-lg" data-t="select_lang">Select Language</h3>
-                <button onclick="toggleLangModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center click-bounce"><i class="fa-solid fa-xmark"></i></button>
+    <!-- MOBILE HAMBURGER MENU (EVERYTHING IS HERE) -->
+    <div id="mobile-menu">
+        <div id="mobile-menu-content">
+            <!-- Menu Header -->
+            <div class="p-6 border-b border-white/10 flex justify-between items-center">
+                <span class="font-bold text-xl tracking-tight">Robu<span class="text-primary">Nexa</span></span>
+                <button onclick="toggleMenu(false)" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 overflow-y-auto p-1" id="lang-grid"></div>
+            
+            <!-- Menu Links -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-2">
+                <button onclick="router.navigate('home'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-house w-6 text-center"></i> <span data-t="menu_home">Dashboard</span></button>
+                <button onclick="router.navigate('earn'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-link w-6 text-center"></i> <span data-t="menu_tasks">Shortlinks</span></button>
+                <button onclick="router.navigate('chat'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-comments w-6 text-center"></i> <span data-t="menu_chat">Chat</span></button>
+                <button onclick="router.navigate('withdraw'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-money-bill-transfer w-6 text-center"></i> <span data-t="menu_withdraw">Withdraw</span></button>
+                <button onclick="router.navigate('leaderboard'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-trophy w-6 text-center"></i> <span data-t="menu_top">Leaderboard</span></button>
+                <button onclick="router.navigate('profile'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-user w-6 text-center"></i> <span data-t="menu_profile">Profile</span></button>
+                
+                <!-- Admin Button (Hidden by default) -->
+                <button id="mob-nav-admin" onclick="router.navigate('admin'); toggleMenu(false)" class="hidden w-full text-left px-4 py-3 rounded-xl bg-red-900/20 text-red-500 border border-red-500/20 flex items-center gap-3 mt-4"><i class="fa-solid fa-shield-halved w-6 text-center"></i> <span data-t="menu_admin">Admin Panel</span></button>
+            </div>
+
+            <!-- Language Selector Footer -->
+            <div class="p-4 border-t border-white/10 bg-black/20">
+                <p class="text-xs text-gray-500 mb-3 font-bold uppercase tracking-wider" data-t="select_lang">Select Language</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="updateLanguage('en')" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-center gap-2">
+                        <span class="fi fi-us rounded-sm"></span> <span class="text-xs font-bold">ENG</span>
+                    </button>
+                    <button onclick="updateLanguage('tr')" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-center gap-2">
+                        <span class="fi fi-tr rounded-sm"></span> <span class="text-xs font-bold">TR</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- PROMO MODAL -->
     <div id="promo-modal" class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm hidden">
         <div class="glass w-full max-w-sm rounded-2xl p-6 border border-white/10 relative overflow-hidden">
             <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl animate-pulse-slow"></div>
@@ -205,9 +246,6 @@
 
     <!-- AUTH SCREEN -->
     <section id="auth-view" class="hidden min-h-screen flex flex-col items-center justify-center p-6 relative z-10 py-12">
-        <button onclick="toggleLangModal()" class="absolute top-6 right-6 w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-white/10 transition z-20 overflow-hidden click-bounce">
-            <span id="auth-flag-icon" class="fi fi-us rounded-full text-xl"></span>
-        </button>
         <div class="glass p-8 rounded-3xl w-full max-w-sm text-center border-t border-primary/20 shadow-2xl shadow-primary/5 mb-8 transform transition hover:scale-[1.01]">
             <svg class="w-24 h-24 mx-auto mb-4 animate-float"><use href="#icon-full-noob"></use></svg>
             <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight">Robu<span class="text-primary">Nexa</span></h1>
@@ -216,7 +254,13 @@
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> <span data-t="login_btn">Login with Google</span>
             </button>
         </div>
-        <!-- FAQ -->
+        
+        <!-- Language Select for Auth -->
+        <div class="flex gap-4 justify-center mb-8">
+             <button onclick="updateLanguage('en')" class="text-gray-400 hover:text-white text-sm font-bold flex items-center gap-2"><span class="fi fi-us"></span> ENG</button>
+             <button onclick="updateLanguage('tr')" class="text-gray-400 hover:text-white text-sm font-bold flex items-center gap-2"><span class="fi fi-tr"></span> TR</button>
+        </div>
+
         <div class="w-full max-w-lg space-y-3 pb-8">
             <h3 class="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-4" data-t="faq_title">FAQ & Help</h3>
             <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer group" onclick="toggleFaq(this)">
@@ -228,7 +272,7 @@
 
     <!-- MAIN INTERFACE -->
     <div id="main-view" class="hidden min-h-screen relative z-10 flex flex-col md:flex-row pt-[32px] md:pt-[32px]">
-        <!-- Sidebar -->
+        <!-- Desktop Sidebar -->
         <aside class="hidden md:flex flex-col w-64 h-screen glass fixed left-0 top-0 border-r border-white/5 z-20 pt-[32px]">
             <button onclick="router.navigate('home')" class="p-6 flex items-center gap-3 justify-center border-b border-white/5 hover:bg-white/5 transition cursor-pointer w-full group">
                 <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-black font-bold text-lg group-hover:rotate-12 transition-transform">R</div>
@@ -237,27 +281,26 @@
             <div class="flex-1 px-3 py-4 space-y-1">
                 <button onclick="router.navigate('home')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="home"><i class="fa-solid fa-house w-5"></i> <span data-t="menu_home" class="text-sm">Dashboard</span></button>
                 <button onclick="router.navigate('earn')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="earn"><i class="fa-solid fa-link w-5"></i> <span data-t="menu_tasks" class="text-sm">Shortlinks</span></button>
-                <button onclick="router.navigate('chat')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="chat"><i class="fa-solid fa-comments w-5"></i> <span data-t="menu_chat" class="text-sm">Global Chat</span></button>
+                <button onclick="router.navigate('chat')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="chat"><i class="fa-solid fa-comments w-5"></i> <span data-t="menu_chat" class="text-sm">Chat</span></button>
                 <button onclick="router.navigate('withdraw')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="withdraw"><i class="fa-solid fa-money-bill-transfer w-5"></i> <span data-t="menu_withdraw" class="text-sm">Withdraw</span></button>
                 <button onclick="router.navigate('leaderboard')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="leaderboard"><i class="fa-solid fa-trophy w-5"></i> <span data-t="menu_top" class="text-sm">Leaderboard</span></button>
                 <button onclick="router.navigate('profile')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="profile"><i class="fa-solid fa-user w-5"></i> <span data-t="menu_profile" class="text-sm">Profile</span></button>
-                <button id="nav-admin" onclick="router.navigate('admin')" class="hidden w-full text-left px-4 py-3 rounded-xl bg-red-900/10 text-red-500 hover:bg-red-900/30 transition flex items-center gap-3 border border-red-500/20 mt-4"><i class="fa-solid fa-shield-halved w-5"></i> <span data-t="menu_admin" class="text-sm">Admin Panel</span></button>
-            </div>
-            <div class="p-4 border-t border-white/5">
-                 <button onclick="toggleLangModal()" class="w-full glass py-2 rounded-lg text-xs text-gray-400 hover:text-white flex items-center justify-center gap-2 click-bounce">
-                    <span id="sidebar-flag-icon" class="fi fi-us rounded-sm"></span> <span id="current-lang-name">English</span>
-                </button>
+                <button id="desk-nav-admin" onclick="router.navigate('admin')" class="hidden w-full text-left px-4 py-3 rounded-xl bg-red-900/10 text-red-500 hover:bg-red-900/30 transition flex items-center gap-3 border border-red-500/20 mt-4"><i class="fa-solid fa-shield-halved w-5"></i> <span data-t="menu_admin" class="text-sm">Admin Panel</span></button>
             </div>
         </aside>
 
-        <!-- Content -->
-        <div class="flex-1 md:ml-64 pb-24 md:pb-0">
-            <!-- Mobile Header -->
+        <!-- Content Area -->
+        <div class="flex-1 md:ml-64">
+            <!-- Mobile Header with Hamburger -->
             <header class="glass sticky top-[32px] md:top-0 z-30 px-4 py-3 flex justify-between items-center border-b border-white/5 md:hidden backdrop-blur-xl">
+                <button onclick="toggleMenu(true)" class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 click-bounce">
+                    <i class="fa-solid fa-bars text-lg text-white"></i>
+                </button>
+                
                 <div class="flex items-center gap-2" onclick="router.navigate('home')">
-                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/50"><i class="fa-solid fa-cube text-primary text-sm"></i></div>
                     <span class="font-bold text-lg">Robu<span class="text-primary">Nexa</span></span>
                 </div>
+                
                 <div class="bg-surface/90 px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2 shadow-inner shadow-black/50">
                     <svg class="w-5 h-5 robux-icon"><use href="#icon-robux"></use></svg>
                     <span id="header-balance" class="font-mono font-bold text-sm text-white">0.00</span>
@@ -281,29 +324,6 @@
 
             <main id="app-content" class="p-4 md:p-8 max-w-6xl mx-auto"></main>
         </div>
-
-        <!-- Mobile Bottom Nav -->
-        <nav class="fixed bottom-0 left-0 w-full glass border-t border-white/5 z-40 md:hidden pb-safe">
-            <div class="grid grid-cols-5 h-16 items-center justify-items-center relative">
-                <button onclick="router.navigate('home')" class="nav-item group flex flex-col items-center gap-1 w-full" data-target="home">
-                    <i class="fa-solid fa-house text-lg text-gray-500 transition-colors"></i> <span class="text-[9px] text-gray-500" data-t="menu_home">Home</span>
-                </button>
-                <button onclick="router.navigate('earn')" class="nav-item group flex flex-col items-center gap-1 w-full" data-target="earn">
-                    <i class="fa-solid fa-link text-lg text-gray-500 transition-colors"></i> <span class="text-[9px] text-gray-500" data-t="menu_tasks">Tasks</span>
-                </button>
-                <button onclick="router.navigate('chat')" class="relative -top-6 click-bounce">
-                    <div class="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(250,204,21,0.4)] border-4 border-[#050505] z-50">
-                        <i class="fa-solid fa-comments text-black text-xl"></i>
-                    </div>
-                </button>
-                <button onclick="router.navigate('leaderboard')" class="nav-item group flex flex-col items-center gap-1 w-full" data-target="leaderboard">
-                    <i class="fa-solid fa-trophy text-lg text-gray-500 transition-colors"></i> <span class="text-[9px] text-gray-500" data-t="menu_top">Top</span>
-                </button>
-                <button onclick="router.navigate('profile')" class="nav-item group flex flex-col items-center gap-1 w-full" data-target="profile">
-                    <i class="fa-solid fa-user text-lg text-gray-500 transition-colors"></i> <span class="text-[9px] text-gray-500" data-t="menu_profile">Me</span>
-                </button>
-            </div>
-        </nav>
     </div>
 
     <!-- TEMPLATES -->
@@ -342,18 +362,6 @@
                 </div>
                 <button class="bg-yellow-500 text-black font-bold px-3 py-1 rounded text-xs click-bounce">CLAIM</button>
             </div>
-            <div class="grid grid-cols-2 gap-3 md:gap-6">
-                <div class="glass p-5 rounded-2xl border border-white/5 hover:border-blue-500/30 transition-colors">
-                    <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3 text-blue-400"><i class="fa-solid fa-check-circle text-xl"></i></div>
-                    <p class="text-xs text-gray-400 uppercase tracking-wider font-mono" data-t="completed_stat">Completed</p>
-                    <p class="text-2xl font-bold text-white mt-1" id="home-tasks">0</p>
-                </div>
-                <div class="glass p-5 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-colors">
-                    <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mb-3 text-purple-400"><i class="fa-solid fa-bolt text-xl"></i></div>
-                    <p class="text-xs text-gray-400 uppercase tracking-wider font-mono" data-t="xp_level">XP Level</p>
-                    <p class="text-2xl font-bold text-white mt-1" id="home-xp">0</p>
-                </div>
-            </div>
         </div>
     </template>
 
@@ -370,13 +378,13 @@
     </template>
 
     <template id="tpl-chat">
-        <div class="fade-in h-[calc(100vh-180px)] md:h-[calc(100vh-200px)] flex flex-col glass rounded-2xl border border-white/5 overflow-hidden">
+        <div class="fade-in h-[calc(100vh-140px)] flex flex-col glass rounded-2xl border border-white/5 overflow-hidden">
             <div class="p-4 bg-white/5 border-b border-white/5 flex justify-between items-center">
                 <h3 class="font-bold text-white flex items-center gap-2"><i class="fa-solid fa-earth-americas text-blue-400"></i> Global Chat</h3>
                 <span class="text-xs text-green-400 font-mono flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online</span>
             </div>
             <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 scroll-smooth">
-                <div class="text-center text-gray-500 text-xs py-10">Loading chat history...</div>
+                <div class="text-center text-gray-500 text-xs py-10" id="chat-loader">Loading chat history...</div>
             </div>
             <div class="p-3 bg-black/40 border-t border-white/5 flex gap-2">
                 <input type="text" id="chat-input" placeholder="Type a message..." class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-primary outline-none" maxlength="100">
@@ -480,41 +488,24 @@
                     <h3 class="text-2xl font-bold text-primary mt-1" id="adm-pending-robux">-</h3>
                 </div>
             </div>
-            <div class="glass p-6 rounded-2xl border border-purple-500/20">
-                <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-user-gear text-purple-500"></i> User Manager</h3>
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="adm-user-search" placeholder="Enter Email or UID" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-purple-500">
-                    <button onclick="adminSearchUser()" class="bg-purple-600 text-white px-6 rounded-xl font-bold hover:bg-purple-500">Search</button>
-                </div>
-                <div id="adm-user-result" class="hidden bg-black/30 p-4 rounded-xl border border-white/5 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-400 text-xs font-mono" id="adm-res-uid">UID: ...</span>
-                        <span class="text-white font-bold" id="adm-res-email">...</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <label class="text-gray-400 text-xs">Balance:</label>
-                        <input type="number" id="adm-res-bal" class="bg-black/50 border border-white/10 rounded px-2 py-1 text-white w-24">
-                        <button onclick="adminUpdateBalance()" class="bg-green-600 text-xs px-3 py-1.5 rounded text-white font-bold">SAVE</button>
-                    </div>
-                </div>
-            </div>
-            <div class="glass p-6 rounded-2xl border border-white/10">
-                <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-link text-primary"></i> <span data-t="add_task">Add Shortlink Task</span></h3>
-                <form id="add-task-form" class="space-y-4">
-                    <input type="text" id="t-title" placeholder="Shortlink Name" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
-                    <input type="text" id="t-desc" placeholder="Instruction (e.g. Visit Link)" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="number" id="t-reward" placeholder="Reward (R$)" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
-                        <input type="number" id="t-cooldown" placeholder="Cooldown (sec)" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
-                    </div>
-                    <button class="bg-primary text-black w-full py-3 rounded-xl font-bold hover:bg-yellow-400 transition" data-t="create_task_btn">Create Task</button>
-                </form>
-            </div>
             <div class="glass p-6 rounded-2xl border border-white/10">
                 <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-money-bill-transfer text-primary"></i> <span data-t="pending_withdraws">Pending Withdrawals</span></h3>
                 <div id="admin-withdraw-list" class="grid gap-4">
                     <p class="text-gray-500 text-sm" data-t="loading">Loading...</p>
                 </div>
+            </div>
+            <!-- Task Adder -->
+            <div class="glass p-6 rounded-2xl border border-white/10">
+                <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-link text-primary"></i> <span data-t="add_task">Add Shortlink Task</span></h3>
+                <form id="add-task-form" class="space-y-4">
+                    <input type="text" id="t-title" placeholder="Name" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                    <input type="text" id="t-desc" placeholder="Desc" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="number" id="t-reward" placeholder="Reward" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                        <input type="number" id="t-cooldown" placeholder="Cooldown" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                    </div>
+                    <button class="bg-primary text-black w-full py-3 rounded-xl font-bold hover:bg-yellow-400 transition" data-t="create_task_btn">Create Task</button>
+                </form>
             </div>
         </div>
     </template>
@@ -524,7 +515,7 @@
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, orderBy, limit, addDoc, getDocs, onSnapshot, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-        // FIREBASE CONFIG
+        // CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyCUUceDxrNY2y7OEbJ6EX0QEXVFVBp1JgM",
             authDomain: "robunexa.firebaseapp.com",
@@ -540,7 +531,7 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
         
-        // ADMIN EMAILS
+        // !!! ADMIN EMAILS !!!
         const ADMIN_EMAILS = ["adanalironaldo131@gmail.com"];
         
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -571,7 +562,7 @@
         let prevBalance = 0;
         let chatUnsub = null;
 
-        // FAKE USER GENERATOR (10,000+ Combinations)
+        // FAKE USER GENERATOR
         const generateRandomUser = () => {
             const prefixes = ["xX", "Pro", "The", "iAm", "Super", "Real", "Big", "Lil", "Dr", "Mr", "Dark", "Iron", "Gold", "TR_", "Ghost"];
             const names = ["Wolf", "Gamer", "Slayer", "Player", "Ahmet", "Mehmet", "Ali", "Ayse", "Fatma", "Can", "Cem", "King", "Queen", "Noob", "Ninja", "Turk", "Baba", "Reis", "Yigit", "Efe"];
@@ -580,8 +571,6 @@
             const p = prefixes[Math.floor(Math.random() * prefixes.length)];
             const n = names[Math.floor(Math.random() * names.length)];
             const s = suffixes[Math.floor(Math.random() * suffixes.length)];
-            
-            // Randomly combine patterns
             const rand = Math.random();
             if(rand < 0.33) return `${p}_${n}`;
             if(rand < 0.66) return `${n}${s}`;
@@ -603,36 +592,23 @@
             return `<i class="fa-solid ${act.i} ${act.c}"></i> <span>${user}</span> ${act.t} <span class="text-white font-bold">${val}</span>`;
         };
 
-        // Populate Ticker
         const populateTicker = (realEvent = null) => {
             const container = document.getElementById('ticker-content');
             if(!container) return;
-            
             let html = '';
-            
-            // If there's a real event (User withdrew), put it first
-            if(realEvent) {
-                html += `<div class="ticker-item bg-primary/20 rounded-full border border-primary/50">${realEvent}</div>`;
-            }
-
-            // Add 20 fake events
-            for(let i=0; i<30; i++) {
-                html += `<div class="ticker-item">${generateFakeActivity()}</div>`;
-            }
+            if(realEvent) html += `<div class="ticker-item bg-primary/20 rounded-full border border-primary/50">${realEvent}</div>`;
+            for(let i=0; i<30; i++) html += `<div class="ticker-item">${generateFakeActivity()}</div>`;
             container.innerHTML = html;
         };
 
-        // Initialize Ticker on Load
-        setInterval(() => {
-            if(document.visibilityState === 'visible') populateTicker();
-        }, 45000); // Refresh every 45s to keep names fresh
+        setInterval(() => { if(document.visibilityState === 'visible') populateTicker(); }, 45000);
 
         // LANG DATA
         const langData = {
             en: { 
                 code: "us", name: "English", 
                 login_btn: "Login with Google", auth_desc: "Join the Elite. Earn Real Robux.", 
-                menu_home: "Dashboard", menu_tasks: "Shortlinks", menu_chat: "Global Chat", menu_withdraw: "Withdraw", menu_top: "Top", menu_profile: "Me", menu_admin: "Admin Console",
+                menu_home: "Dashboard", menu_tasks: "Shortlinks", menu_chat: "Chat", menu_withdraw: "Withdraw", menu_top: "Top", menu_profile: "Me", menu_admin: "Admin Panel",
                 total_bal: "Total Balance", start_earn: "Start Earning", code_btn: "Code", completed_stat: "Completed", xp_level: "XP Level",
                 promo_title: "Promo Code", promo_desc: "Redeem for instant R$", hot_tasks: "Shortlinks & Walls", loading: "Loading...",
                 withdraw_rules_title: "Important Rule", withdraw_rules_desc: "Cover 30% tax (Amount / 0.7).", amount_label: "Amount (Min 50 R$)", link_label: "Gamepass Link", req_payout: "Request Payout", trans_history: "Transaction History",
@@ -647,7 +623,7 @@
             tr: { 
                 code: "tr", name: "Türkçe", 
                 login_btn: "Google ile Giriş", auth_desc: "Elitlere Katıl. Gerçek Robux Kazan.", 
-                menu_home: "Ana Sayfa", menu_tasks: "Shortlink", menu_chat: "Genel Sohbet", menu_withdraw: "Çekim", menu_top: "Sıralama", menu_profile: "Profil", menu_admin: "Yönetici Paneli",
+                menu_home: "Ana Sayfa", menu_tasks: "Shortlink", menu_chat: "Sohbet", menu_withdraw: "Çekim", menu_top: "Sıralama", menu_profile: "Profil", menu_admin: "Yönetici Paneli",
                 total_bal: "Toplam Bakiye", start_earn: "Kazanmaya Başla", code_btn: "Kod", completed_stat: "Tamamlanan", xp_level: "XP Seviyesi",
                 promo_title: "Promosyon Kodu", promo_desc: "Anında R$ kazanmak için gir", hot_tasks: "Shortlink & Görevler", loading: "Yükleniyor...",
                 withdraw_rules_title: "Önemli Kural", withdraw_rules_desc: "%30 vergiyi ekle (Miktar / 0.7).", amount_label: "Miktar (Min 50 R$)", link_label: "Gamepass Linki", req_payout: "Ödeme İste", trans_history: "İşlem Geçmişi",
@@ -664,35 +640,19 @@
         let curLang = localStorage.getItem('robu_lang') || 'tr';
         const t = (key) => langData[curLang]?.[key] || langData['en'][key] || key;
 
-        const updateLanguage = (lang) => {
+        window.updateLanguage = (lang) => {
             curLang = lang; localStorage.setItem('robu_lang', lang);
             document.querySelectorAll('[data-t]').forEach(el => { const k = el.getAttribute('data-t'); if(k) el.textContent = t(k); });
             const placeholders = { 'w-amount': 'amount_label', 'w-link': 'link_label', 'promo-input': 'code_btn', 't-title': 'add_task', 't-desc': 'hot_tasks', 't-reward': 'amount_label', 'chat-input': 'menu_chat' };
             Object.keys(placeholders).forEach(id => { const el = document.getElementById(id); if(el) el.placeholder = t(placeholders[id]) + "..."; });
-            const flagClass = `fi fi-${langData[lang].code}`;
-            if(document.getElementById('auth-flag-icon')) document.getElementById('auth-flag-icon').className = `${flagClass} rounded-full text-xl`;
-            if(document.getElementById('sidebar-flag-icon')) document.getElementById('sidebar-flag-icon').className = `${flagClass} rounded-sm`;
             if(document.getElementById('current-lang-name')) document.getElementById('current-lang-name').innerText = langData[lang].name;
-            toggleLangModal(false);
+            toggleMenu(false); // Close menu on select
         };
 
-        window.toggleLangModal = (show = null) => {
-            const m = document.getElementById('lang-modal');
-            if(show === false || (show === null && m.classList.contains('active'))) { m.classList.remove('active'); setTimeout(()=>m.style.display='none',300); }
-            else {
-                m.style.display='flex';
-                const grid = document.getElementById('lang-grid');
-                if(grid.innerHTML.trim() === '') {
-                    Object.keys(langData).forEach(k => {
-                        const btn = document.createElement('button');
-                        btn.className = `glass p-3 rounded-xl flex items-center gap-3 hover:bg-white/10 transition ${curLang===k ? 'border-primary' : 'border-white/5'}`;
-                        btn.innerHTML = `<span class="fi fi-${langData[k].code} text-xl rounded shadow-sm"></span> <span class="text-sm font-bold text-gray-200">${langData[k].name}</span>`;
-                        btn.onclick = () => updateLanguage(k);
-                        grid.appendChild(btn);
-                    });
-                }
-                requestAnimationFrame(()=>m.classList.add('active'));
-            }
+        window.toggleMenu = (show) => {
+            const m = document.getElementById('mobile-menu');
+            if(show) m.classList.add('active');
+            else m.classList.remove('active');
         };
 
         window.togglePromoModal = (show) => { const m = document.getElementById('promo-modal'); if(!show) { m.classList.remove('active'); setTimeout(()=>m.classList.add('hidden'),300); } else { m.classList.remove('hidden'); requestAnimationFrame(()=>m.classList.add('active')); } };
@@ -745,10 +705,7 @@
 
                 if(chatUnsub) { chatUnsub(); chatUnsub = null; }
 
-                document.querySelectorAll('.nav-item i').forEach(el => el.className = el.className.replace('text-primary','text-gray-500'));
-                document.querySelectorAll('.nav-item span').forEach(el => el.classList.remove('text-primary'));
-                const activeBtn = document.querySelector(`.nav-item[data-target="${view}"] i`);
-                if(activeBtn) { activeBtn.classList.remove('text-gray-500'); activeBtn.classList.add('text-primary'); activeBtn.nextElementSibling?.classList.add('text-primary'); }
+                // Desktop sidebar active state
                 document.querySelectorAll('.nav-btn').forEach(el => { el.classList.remove('bg-white/10','text-white'); el.classList.add('text-gray-400'); });
                 const deskBtn = document.querySelector(`.nav-btn[data-target="${view}"]`);
                 if(deskBtn) { deskBtn.classList.remove('text-gray-400'); deskBtn.classList.add('bg-white/10','text-white'); }
@@ -784,8 +741,6 @@
             if(!state.data) return;
             const balEl = document.getElementById('home-big-balance');
             if(balEl) balEl.innerText = state.data.balance.toFixed(2);
-            document.getElementById('home-tasks').innerText = (state.data.completedTasks || []).length;
-            document.getElementById('home-xp').innerText = state.data.xp || 0;
         };
 
         const initEarn = async () => {
@@ -833,7 +788,11 @@
             const q = query(collection(db, "messages"), orderBy("createdAt", "desc"), limit(30));
             
             chatUnsub = onSnapshot(q, (snapshot) => {
-                chatDiv.innerHTML = '';
+                chatDiv.innerHTML = ''; // CLEAR LOADING TEXT IMMEDIATELY
+                if(snapshot.empty) {
+                    chatDiv.innerHTML = `<div class="text-center text-gray-500 text-xs py-10">No messages yet.</div>`;
+                    return;
+                }
                 const msgs = [];
                 snapshot.forEach(doc => msgs.push(doc.data()));
                 msgs.reverse().forEach(m => {
@@ -884,11 +843,9 @@
                 const amt = Number(document.getElementById('w-amount').value);
                 if(amt<50 || state.data.balance<amt) return toast('Insufficient Funds (Min 50)', 'error');
                 
-                // Process Withdrawal
                 await updateDoc(doc(db,"users",state.user.uid),{balance:increment(-amt), lastWithdrawAt:serverTimestamp()});
                 await addDoc(collection(db,"withdrawals"),{uid:state.user.uid, amount:amt, gamepassLink:document.getElementById('w-link').value, status:'pending', createdAt:serverTimestamp(), email:state.user.email});
                 
-                // TRIGGER LIVE TICKER UPDATE
                 const userName = state.user.displayName || "You";
                 const eventHtml = `<i class="fa-solid fa-circle-check text-success"></i> <span>${userName}</span> just withdrew <span class="text-white font-bold">${amt} R$</span>`;
                 populateTicker(eventHtml);
@@ -900,28 +857,6 @@
         const initAdmin = async () => {
             if(!state.isAdmin) return router.navigate('home');
             
-            window.adminSearchUser = async () => {
-                const val = document.getElementById('adm-user-search').value.trim();
-                if(!val) return toast("Enter Email or UID", "error");
-                let q = query(collection(db, "users"), where("email", "==", val));
-                let snaps = await getDocs(q);
-                if(snaps.empty) { q = query(collection(db, "users"), where("uid", "==", val)); snaps = await getDocs(q); }
-                if(snaps.empty) return toast("User not found", "error");
-                const d = snaps.docs[0];
-                window.selectedAdminUser = { id: d.id, ...d.data() };
-                document.getElementById('adm-res-uid').innerText = "UID: " + d.id;
-                document.getElementById('adm-res-email').innerText = window.selectedAdminUser.email;
-                document.getElementById('adm-res-bal').value = window.selectedAdminUser.balance;
-                document.getElementById('adm-user-result').classList.remove('hidden');
-            };
-
-            window.adminUpdateBalance = async () => {
-                if(!window.selectedAdminUser) return;
-                const newBal = Number(document.getElementById('adm-res-bal').value);
-                await updateDoc(doc(db, "users", window.selectedAdminUser.id), { balance: newBal });
-                toast("Balance Updated!", "success");
-            };
-
             // Withdrawals
             const list = document.getElementById('admin-withdraw-list');
             const pSnaps = await getDocs(query(collection(db,"withdrawals"), where("status","==","pending")));
@@ -944,7 +879,6 @@
                 list.appendChild(div);
             });
             
-            // Stats
             const usersSnap = await getDocs(collection(db, "users"));
             document.getElementById('adm-total-users').innerText = usersSnap.size;
             
@@ -1003,7 +937,8 @@
                 state.user = user;
                 if (ADMIN_EMAILS.includes(user.email)) {
                     state.isAdmin = true;
-                    document.getElementById('nav-admin').classList.remove('hidden');
+                    document.getElementById('desk-nav-admin').classList.remove('hidden');
+                    document.getElementById('mob-nav-admin').classList.remove('hidden');
                 }
 
                 const ref = doc(db,"users",user.uid);
@@ -1027,10 +962,9 @@
                     }
                 });
                 
-                document.getElementById('user-avatar').src = user.photoURL;
                 document.getElementById('auth-view').classList.add('hidden');
                 document.getElementById('main-view').classList.remove('hidden');
-                populateTicker(); // START FAKE STREAM
+                populateTicker(); 
                 updateLanguage(curLang);
                 router.navigate('home');
             } else {
