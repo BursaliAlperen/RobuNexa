@@ -42,10 +42,10 @@
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #0f172a; } ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
 
         .ticker-wrap { position: fixed; top: 0; left: 0; width: 100%; overflow: hidden; height: 32px; background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid rgba(56, 189, 248, 0.2); z-index: 50; display: flex; align-items: center; backdrop-filter: blur(4px); }
-        .ticker { display: flex; white-space: nowrap; animation: ticker 90s linear infinite; }
+        .ticker { display: flex; white-space: nowrap; animation: ticker 45s linear infinite; }
         .ticker-item { display: inline-flex; align-items: center; gap: 6px; padding: 0 1.5rem; color: #38bdf8; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; font-weight: bold; }
         .ticker-item span { color: #f1f5f9; opacity: 0.9; }
-        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
 
         #mobile-menu { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #mobile-menu.active { opacity: 1; pointer-events: all; }
@@ -96,16 +96,13 @@
     
     <!-- REAL-TIME TICKER -->
     <div class="ticker-wrap"><div class="ticker" id="ticker-content">
-        <!-- Initial placeholder if empty -->
         <div class="ticker-item text-gray-500">Waiting for live activity...</div>
     </div></div>
 
     <!-- VERIFICATION PAGE -->
     <section id="verify-view">
         <div class="glass p-8 rounded-3xl w-full max-w-md border border-primary/30 relative">
-            <div class="absolute -top-10 left-1/2 transform -translate-x-1/2">
-                <svg class="w-20 h-20"><use href="#icon-full-noob"></use></svg>
-            </div>
+            <div class="absolute -top-10 left-1/2 transform -translate-x-1/2"><svg class="w-20 h-20"><use href="#icon-full-noob"></use></svg></div>
             <h2 class="text-2xl font-bold text-white mt-8 mb-2">Security Verification</h2>
             <p class="text-gray-400 text-xs mb-6">Complete the verification to receive your code.</p>
             <div class="bg-black/50 p-6 rounded-xl border border-white/10 mb-6 relative overflow-hidden group">
@@ -114,12 +111,8 @@
                 <h1 id="generated-code" class="text-4xl font-black text-primary tracking-widest font-mono select-all">LOADING</h1>
             </div>
             <p class="text-xs text-red-400 mb-6"><i class="fa-solid fa-triangle-exclamation"></i> Do not close this tab until you copy the code.</p>
-            <button onclick="copyVerifyCode()" class="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-gray-200 transition click-bounce mb-3">
-                <i class="fa-regular fa-copy"></i> COPY CODE
-            </button>
-            <button onclick="window.close()" class="w-full bg-white/5 text-gray-400 font-bold py-3 rounded-xl hover:bg-white/10 transition">
-                Close Page
-            </button>
+            <button onclick="copyVerifyCode()" class="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-gray-200 transition click-bounce mb-3"><i class="fa-regular fa-copy"></i> COPY CODE</button>
+            <button onclick="window.close()" class="w-full bg-white/5 text-gray-400 font-bold py-3 rounded-xl hover:bg-white/10 transition">Close Page</button>
         </div>
     </section>
 
@@ -145,21 +138,6 @@
                     <button onclick="updateLanguage('en')" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-center gap-2"><span class="fi fi-us rounded-sm"></span> <span class="text-xs font-bold text-gray-300">ENG</span></button>
                     <button onclick="updateLanguage('tr')" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-center gap-2"><span class="fi fi-tr rounded-sm"></span> <span class="text-xs font-bold text-gray-300">TR</span></button>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- PROMO MODAL -->
-    <div id="promo-modal" class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm hidden">
-        <div class="glass w-full max-w-sm rounded-2xl p-6 border border-white/10 relative overflow-hidden">
-            <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl animate-pulse-slow"></div>
-            <div class="flex justify-between items-center mb-6 relative z-10">
-                <h3 class="text-white font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-ticket text-primary"></i> <span data-t="promo_title">Promo Code</span></h3>
-                <button onclick="togglePromoModal(false)" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center click-bounce"><i class="fa-solid fa-xmark text-white"></i></button>
-            </div>
-            <div class="space-y-4 relative z-10">
-                <input type="text" id="promo-input" placeholder="CODE" class="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-center text-white font-mono uppercase tracking-widest focus:border-primary outline-none transition-colors">
-                <button onclick="redeemCode()" class="w-full bg-primary text-black font-bold py-3 rounded-xl click-bounce shadow-lg shadow-primary/20" data-t="redeem_btn">REDEEM</button>
             </div>
         </div>
     </div>
@@ -202,10 +180,10 @@
             </button>
             <div class="flex-1 px-3 py-4 space-y-1">
                 <button onclick="router.navigate('home')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="home"><i class="fa-solid fa-house w-5"></i> <span data-t="menu_home" class="text-sm">Dashboard</span></button>
-                <button onclick="router.navigate('earn')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="earn"><i class="fa-solid fa-link w-5"></i> <span data-t="menu_tasks" class="text-sm">Shortlinks</span></button>
-                <button onclick="router.navigate('withdraw')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="withdraw"><i class="fa-solid fa-money-bill-transfer w-5"></i> <span data-t="menu_withdraw" class="text-sm">Withdraw</span></button>
-                <button onclick="router.navigate('leaderboard')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="leaderboard"><i class="fa-solid fa-trophy w-5"></i> <span data-t="menu_top" class="text-sm">Leaderboard</span></button>
-                <button onclick="router.navigate('profile')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="profile"><i class="fa-solid fa-user w-5"></i> <span data-t="menu_profile" class="text-sm">Profile</span></button>
+                <button onclick="router.navigate('earn')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="earn"><i class="fa-solid fa-link w-5"></i> <span data-t="menu_tasks">Shortlinks</span></button>
+                <button onclick="router.navigate('withdraw')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="withdraw"><i class="fa-solid fa-money-bill-transfer w-5"></i> <span data-t="menu_withdraw">Withdraw</span></button>
+                <button onclick="router.navigate('leaderboard')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="leaderboard"><i class="fa-solid fa-trophy w-5"></i> <span data-t="menu_top">Leaderboard</span></button>
+                <button onclick="router.navigate('profile')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="profile"><i class="fa-solid fa-user w-5"></i> <span data-t="menu_profile">Profile</span></button>
                 <button id="desk-nav-yt" onclick="claimYouTube()" class="hidden w-full text-left px-4 py-3 rounded-xl bg-red-600/10 text-red-500 border border-red-500/20 hover:bg-red-600/20 flex items-center gap-3 mt-4"><i class="fa-brands fa-youtube w-5"></i> <span class="text-sm">Subscribe (+3 R$)</span></button>
                 <button id="desk-nav-admin" onclick="router.navigate('admin')" class="hidden w-full text-left px-4 py-3 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center gap-3 mt-2"><i class="fa-solid fa-shield-halved w-5"></i> <span data-t="menu_admin" class="text-sm">Admin Panel</span></button>
             </div>
@@ -239,7 +217,6 @@
                         <div class="flex items-center justify-center md:justify-start gap-3 mb-6"><svg class="w-12 h-12 md:w-16 md:h-16 robux-icon animate-pulse-slow"><use href="#icon-robux"></use></svg><span class="text-5xl md:text-6xl font-black text-white tracking-tighter" id="home-big-balance">0.00</span></div>
                         <div class="flex gap-3 justify-center md:justify-start">
                             <button onclick="router.navigate('earn')" class="bg-gradient-to-r from-primary to-accent text-black font-bold py-3.5 px-8 rounded-xl click-bounce shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow"><span data-t="start_earn">Start Earning</span></button>
-                            <button onclick="togglePromoModal(true)" class="glass border border-white/20 text-white font-bold py-3 px-5 rounded-xl click-bounce hover:bg-white/10 flex items-center gap-2"><i class="fa-solid fa-ticket text-primary"></i> <span class="hidden md:inline" data-t="code_btn">Code</span></button>
                         </div>
                     </div>
                     <div class="hidden md:block relative"><svg class="w-40 h-40 animate-float relative z-10"><use href="#icon-full-noob"></use></svg></div>
@@ -295,7 +272,6 @@
                 <button onclick="switchAdminTab('users')" class="admin-tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-colors" id="tab-btn-users">Users</button>
                 <button onclick="switchAdminTab('withdraw')" class="admin-tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-colors" id="tab-btn-withdraw">Withdraws</button>
                 <button onclick="switchAdminTab('tasks')" class="admin-tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-colors" id="tab-btn-tasks">Tasks</button>
-                <button onclick="switchAdminTab('codes')" class="admin-tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-colors" id="tab-btn-codes">Codes</button>
             </div>
             
             <!-- 1. STATS TAB -->
@@ -379,29 +355,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- 5. PROMO CODES TAB -->
-            <div id="admin-tab-codes" class="hidden space-y-4">
-                <!-- Add Code -->
-                <div class="glass p-6 rounded-2xl border border-white/10">
-                    <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-ticket text-primary"></i> Create Promo Code</h3>
-                    <form id="add-code-form" class="space-y-4">
-                        <input type="text" id="pc-name" placeholder="Code Name (e.g. SUMMER24)" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary uppercase font-mono">
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="number" id="pc-reward" placeholder="Reward (R$)" step="0.01" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
-                            <input type="number" id="pc-req" placeholder="Min Tasks Req." class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
-                        </div>
-                        <button class="bg-primary text-black w-full py-3 rounded-xl font-bold hover:bg-emerald-400 transition">Create Code</button>
-                    </form>
-                </div>
-                <!-- List Codes -->
-                <div class="glass p-6 rounded-2xl border border-white/10">
-                    <h3 class="text-white font-bold mb-4">Active Codes</h3>
-                    <div id="admin-codes-list" class="space-y-2">
-                        <p class="text-gray-500 text-xs">Loading codes...</p>
-                    </div>
-                </div>
-            </div>
         </div>
     </template>
 
@@ -443,7 +396,7 @@
         const logActivity = async (html) => {
             await addDoc(collection(db, "global_activities"), {
                 text: html,
-                createdAt: serverTimestamp()
+                createdAt: Date.now() // Use simple timestamp for client sorting
             });
         };
 
@@ -451,28 +404,27 @@
         const initTicker = () => {
             const container = document.getElementById('ticker-content');
             // Listen to REAL global activities
-            onSnapshot(query(collection(db, "global_activities"), orderBy("createdAt", "desc"), limit(20)), (snap) => {
+            onSnapshot(collection(db, "global_activities"), (snap) => {
                 container.innerHTML = '';
                 if(snap.empty) {
                     container.innerHTML = '<div class="ticker-item text-gray-500">Waiting for activity...</div>';
                     return;
                 }
-                snap.forEach(d => {
-                    const data = d.data();
+                // Client-side Sort
+                let docs = [];
+                snap.forEach(d => docs.push(d.data()));
+                docs.sort((a,b) => b.createdAt - a.createdAt);
+
+                docs.slice(0, 20).forEach(data => {
                     const item = document.createElement('div');
                     item.className = 'ticker-item';
                     item.innerHTML = data.text;
                     container.appendChild(item);
                 });
-            }, (error) => {
-                // Fallback if index missing: just show static msg
-                console.log("Ticker Index Error (Expected if new):", error);
-                container.innerHTML = '<div class="ticker-item text-gray-500">Real-time feed initializing...</div>';
             });
         };
         // Start Ticker
         initTicker();
-
 
         const langData = { en: { code: "us", name: "English", login_btn: "Login with Google", auth_desc: "Join the Elite. Earn Real Robux.", menu_home: "Dashboard", menu_tasks: "Shortlinks", menu_chat: "Chat", menu_withdraw: "Withdraw", menu_top: "Top", menu_profile: "Me", menu_admin: "Admin Panel", total_bal: "Total Balance", start_earn: "Start Earning", code_btn: "Code", completed_stat: "Completed", xp_level: "XP Level", promo_title: "Promo Code", promo_desc: "Redeem for instant R$", hot_tasks: "Shortlinks & Walls", loading: "Loading...", withdraw_rules_title: "Important Rule", withdraw_rules_desc: "Cover 30% tax (Amount / 0.7).", amount_label: "Amount (Min 50 R$)", link_label: "Gamepass Link", req_payout: "Request Payout", trans_history: "Transaction History", top_20: "Top 20 Earners", user: "User", ref_sys: "Referral System", ref_desc: "Invite friends and earn 10% forever!", copy_btn: "COPY", sign_out: "Sign Out", admin_console: "Admin Console", add_task: "Add Shortlink Task", create_task_btn: "Create Task", pending_withdraws: "Pending Withdrawals", approve: "Approve", reject: "Reject", select_lang: "Select Language", redeem_btn: "REDEEM", daily_title: "Daily Bonus", daily_desc: "Claim +5 R$ every 24h", faq_title: "FAQ & Help", q1: "Is this free?", a1: "RobuNexa is completely free.", q2: "How to withdraw?", a2: "Go to the Withdraw tab, enter the amount you want (min 50 R$) and your Gamepass link.", q3: "When do I get paid?", a3: "Withdrawals are processed manually to ensure safety. It usually takes 24-72 hours.", q4: "How do Shortlinks work?", a4: "Click 'Start Task', visit the link, find the verification code on the destination site, and paste it back here to get paid.", q5: "Why is my balance 0?", a5: "New accounts start with 0. You can earn by completing tasks, inviting friends, or claiming daily bonuses.", q6: "Can I use multiple accounts?", a6: "No. Using multiple accounts or VPNs is strictly prohibited and will result in a permanent ban.", q7: "I didn't get Robux?", a7: "If your status is 'Approved' but you don't see Robux, check your Roblox 'Pending Robux' transactions.", btn_start: "START", btn_done: "COMPLETED", status_pending: "PENDING", status_approved: "APPROVED", status_rejected: "REJECTED" }, tr: { code: "tr", name: "Türkçe", login_btn: "Google ile Giriş", auth_desc: "Elitlere Katıl. Gerçek Robux Kazan.", menu_home: "Ana Sayfa", menu_tasks: "Shortlink", menu_chat: "Sohbet", menu_withdraw: "Çekim", menu_top: "Sıralama", menu_profile: "Profil", menu_admin: "Yönetici Paneli", total_bal: "Toplam Bakiye", start_earn: "Kazanmaya Başla", code_btn: "Kod", completed_stat: "Tamamlanan", xp_level: "XP Seviyesi", promo_title: "Promosyon Kodu", promo_desc: "Anında R$ kazanmak için gir", hot_tasks: "Shortlink & Görevler", loading: "Yükleniyor...", withdraw_rules_title: "Önemli Kural", withdraw_rules_desc: "%30 vergiyi ekle (Miktar / 0.7).", amount_label: "Miktar (Min 50 R$)", link_label: "Gamepass Linki", req_payout: "Ödeme İste", trans_history: "İşlem Geçmişi", top_20: "En Çok Kazananlar", user: "Kullanıcı", ref_sys: "Davet Sistemi", ref_desc: "Arkadaşlarını davet et, ömür boyu %10 kazan!", copy_btn: "KOPYALA", sign_out: "Çıkış Yap", admin_console: "Yönetici Konsolu", add_task: "Shortlink Görevi Ekle", create_task_btn: "Görev Oluştur", pending_withdraws: "Bekleyen Çekimler", approve: "Onayla", reject: "Reddet", select_lang: "Dil Seçiniz", redeem_btn: "KULLAN", daily_title: "Günlük Bonus", daily_desc: "Her 24 saatte +5 R$ Al", faq_title: "SSS & Yardım", q1: "Bu ücretsiz mi?", a1: "RobuNexa tamamen ücretsizdir.", q2: "Nasıl para çekerim?", a2: "Çekim sekmesine gidin, istediğiniz miktarı (min 50 R$) ve Gamepass linkinizi girin.", q3: "Ne zaman gelir?", a3: "Ödemeler güvenlik nedeniyle manuel işlenir. Genellikle 24-72 saat sürer.", q4: "Shortlinkler nasıl çalışır?", a4: "'Görevi Başlat'a tıklayın, linke gidin, hedef sitedeki doğrulama kodunu bulun ve buraya yapıştırıp ödülü alın.", q5: "Bakiyem neden 0?", a5: "Yeni hesaplar 0 ile başlar. Görev yaparak, arkadaş davet ederek veya günlük bonusla kazanabilirsiniz.", q6: "Çoklu hesap yasak mı?", a6: "Evet. VPN veya çoklu hesap (multi) kullanımı kalıcı ban sebebidir.", q7: "Robux gelmedi?", a7: "Durum 'Onaylandı' ise ancak Robux görünmüyorsa Roblox 'Bekleyen Robux' kısmına bakın.", btn_start: "BAŞLA", btn_done: "YAPILDI", status_pending: "BEKLİYOR", status_approved: "ONAYLANDI", status_rejected: "REDDEDİLDİ" } };
 
@@ -702,79 +654,12 @@
                 });
                 toast('Task Created!','success'); e.target.reset();
             };
-
-            // --- CODES ---
-            const codeList = document.getElementById('admin-codes-list');
-            const loadCodes = () => {
-                // REMOVED orderBy to prevent index errors
-                onSnapshot(collection(db, "codes"), (snap) => {
-                    codeList.innerHTML = '';
-                    if(snap.empty) { codeList.innerHTML='<p class="text-gray-500 text-xs">No active codes.</p>'; return; }
-                    snap.forEach(d => {
-                        const c = d.data();
-                        const el = document.createElement('div');
-                        el.className = 'glass p-3 rounded-xl flex justify-between items-center';
-                        el.innerHTML = `<div><span class="text-primary font-mono font-bold">${c.name}</span> <span class="text-xs text-gray-400">(${c.reward} R$ | Min ${c.reqTasks} tasks)</span></div><button class="text-red-500 hover:text-white" onclick="deleteCode('${d.id}')"><i class="fa-solid fa-trash"></i></button>`;
-                        codeList.appendChild(el);
-                    });
-                });
-            };
-            window.deleteCode = async (id) => { if(confirm('Delete this code?')) await deleteDoc(doc(db, "codes", id)); };
-            loadCodes();
-
-            document.getElementById('add-code-form').onsubmit = async (e) => {
-                e.preventDefault();
-                const name = document.getElementById('pc-name').value.trim().toUpperCase();
-                const reward = Number(document.getElementById('pc-reward').value);
-                const req = Number(document.getElementById('pc-req').value);
-                if(!name || !reward) return toast("Invalid Input", "error");
-                await addDoc(collection(db, "codes"), { name, reward, reqTasks: req || 0, createdAt: serverTimestamp() });
-                toast("Promo Code Created!", "success"); e.target.reset();
-            };
         };
 
+        // ... [Leaderboard, Profile, Redeem Code functions remain same] ...
         const initLeaderboard = async () => { const tb = document.getElementById('leaderboard-body'); const snaps = await getDocs(query(collection(db,"users"), orderBy("balance","desc"), limit(20))); tb.innerHTML = ''; let i=1; snaps.forEach(s => { const d = s.data(); tb.innerHTML += `<tr><td class="p-4 text-primary font-bold">${i++}</td><td class="p-4 flex gap-2 items-center"><img src="${d.photoURL}" class="w-6 h-6 rounded-full" onerror="this.src='https://ui-avatars.com/api/?name=U'"> ${d.email.slice(0,3)}...</td><td class="p-4 text-right font-bold text-white">${d.balance.toFixed(0)}</td></tr>`; }); };
         const initProfile = () => { document.getElementById('profile-img').src = state.user.photoURL; document.getElementById('profile-name').innerText = state.user.displayName || "User"; document.getElementById('profile-email').innerText = state.user.email; document.getElementById('profile-id').innerText = state.user.uid; document.getElementById('ref-link').value = `https://robunexa.onrender.com?ref=${state.user.uid}`; window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('ref-link').value); toast('Copied!', 'success'); }; document.getElementById('btn-logout').onclick = () => { playSound('click'); signOut(auth); location.reload(); }; };
-        
-        // REDEEM WITH LOGGING
-        window.redeemCode = async () => { 
-            playSound('click'); 
-            const c = document.getElementById('promo-input').value.trim().toUpperCase(); 
-            if(!c) return toast("Empty Code", "error"); 
-            togglePromoModal(false); 
-            
-            // Check Database for Code
-            const q = query(collection(db, "codes"), where("name", "==", c)); 
-            const snap = await getDocs(q); 
-            
-            if(snap.empty) { 
-                const h = { "ROBUX2024": 50 }; 
-                if(h[c]) { 
-                    if(state.data.usedCodes?.includes(c)) return toast("Already Used!", "error"); 
-                    await updateDoc(doc(db,"users",state.user.uid), { balance: increment(h[c]), usedCodes: [...(state.data.usedCodes||[]), c] }); 
-                    
-                    // LOG ACTIVITY
-                    const userName = state.user.displayName || "User";
-                    logActivity(`<i class="fa-solid fa-ticket text-primary"></i> <span>${userName}</span> redeemed code <span class="text-white font-bold">${c}</span> and got reward!`);
-                    
-                    return toast(`Redeemed ${h[c]} R$!`, "success"); 
-                } 
-                return toast("Invalid Code", "error"); 
-            } 
-            
-            const d = snap.docs[0].data(); 
-            if(state.data.usedCodes?.includes(c)) return toast("Already Used!", "error"); 
-            const ut = state.data.completedTasks?.length || 0; 
-            if(ut < d.reqTasks) return toast(`Complete ${d.reqTasks - ut} more tasks!`, "error"); 
-            
-            await updateDoc(doc(db,"users",state.user.uid), { balance: increment(d.reward), usedCodes: [...(state.data.usedCodes||[]), c] }); 
-            
-            // LOG ACTIVITY
-            const userName = state.user.displayName || "User";
-            logActivity(`<i class="fa-solid fa-ticket text-primary"></i> <span>${userName}</span> redeemed code <span class="text-white font-bold">${c}</span> and got reward!`);
-            
-            toast(`Redeemed ${d.reward} R$!`, "success"); 
-        };
+        window.redeemCode = async () => { playSound('click'); const c = document.getElementById('promo-input').value.trim().toUpperCase(); if(!c) return toast("Empty Code", "error"); togglePromoModal(false); const q = query(collection(db, "codes"), where("name", "==", c)); const snap = await getDocs(q); if(snap.empty) { const h = { "ROBUX2024": 50 }; if(h[c]) { if(state.data.usedCodes?.includes(c)) return toast("Already Used!", "error"); await updateDoc(doc(db,"users",state.user.uid), { balance: increment(h[c]), usedCodes: [...(state.data.usedCodes||[]), c] }); return toast(`Redeemed ${h[c]} R$!`, "success"); } return toast("Invalid Code", "error"); } const d = snap.docs[0].data(); if(state.data.usedCodes?.includes(c)) return toast("Already Used!", "error"); const ut = state.data.completedTasks?.length || 0; if(ut < d.reqTasks) return toast(`Complete ${d.reqTasks - ut} more tasks!`, "error"); await updateDoc(doc(db,"users",state.user.uid), { balance: increment(d.reward), usedCodes: [...(state.data.usedCodes||[]), c] }); toast(`Redeemed ${d.reward} R$!`, "success"); };
 
         // GENERATE VERIFICATION CODE
         const generateVerifyCode = () => {
