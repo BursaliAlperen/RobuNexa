@@ -15,20 +15,20 @@
                 extend: {
                     colors: {
                         bg: '#050505',
-                        surface: '#09090b',
+                        surface: '#0F1115',
                         primary: '#FACC15', 
                         accent: '#EA580C', 
-                        robux: '#00b06f', // Özel Robux Yeşili
+                        robux: '#00b06f',
                         success: '#10B981',
                         error: '#EF4444'
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
                     },
                     animation: {
                         'float': 'float 4s ease-in-out infinite',
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'spin-slow': 'spin 3s linear infinite',
                     },
                     keyframes: {
                         float: {
@@ -44,7 +44,7 @@
     <!-- Icons & Fonts & Flags -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.11.0/css/flag-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         /* Base Reset */
@@ -54,14 +54,11 @@
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
-            /* TAM KORUMA: Seçim ve Kopyalama Yasak */
             user-select: none;
             -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
         }
 
-        /* Moving Math Grid Background */
+        /* --- MATH GRID ANIMATED BACKGROUND --- */
         .math-grid {
             position: fixed;
             top: -50%;
@@ -69,79 +66,69 @@
             width: 200%;
             height: 200%;
             background-image: 
-                linear-gradient(rgba(250, 204, 21, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(250, 204, 21, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            transform: perspective(500px) rotateX(60deg);
-            animation: gridMove 20s linear infinite;
+                linear-gradient(rgba(59, 130, 246, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.07) 1px, transparent 1px),
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+            background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
+            transform: perspective(1000px) rotateX(20deg) rotateZ(-5deg);
+            animation: gridPan 60s linear infinite;
             z-index: -10;
             pointer-events: none;
         }
 
-        @keyframes gridMove {
-            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
-            100% { transform: perspective(500px) rotateX(60deg) translateY(40px); }
+        @keyframes gridPan {
+            0% { background-position: 0px 0px, 0px 0px, 0px 0px, 0px 0px; }
+            100% { background-position: 0px 100px, 0px 100px, 0px 20px, 0px 20px; }
         }
 
-        /* Vignette & Glass */
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 50%, #050505 100%); z-index: -9; pointer-events: none; }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle at center, transparent 0%, #050505 100%); z-index: -9; pointer-events: none; }
         .glass {
-            background: rgba(20, 20, 22, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            background: rgba(15, 17, 21, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
 
-        /* Robux Coin Shine */
-        .robux-icon { filter: drop-shadow(0 0 5px rgba(0, 176, 111, 0.5)); }
-
+        .robux-icon { filter: drop-shadow(0 0 8px rgba(0, 176, 111, 0.4)); }
         .noob-full { filter: drop-shadow(0 0 15px rgba(250, 204, 21, 0.2)); }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #09090b; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-
-        /* Animation & Toast */
         .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.99); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .click-bounce:active { transform: scale(0.95); }
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { transform: translateX(100%); transition: transform 0.3s ease; }
+        
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { pointer-events: all; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .toast.show { transform: translateX(0); }
+        
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
 
-        /* Overlays */
         #transition-overlay, #lang-modal, #promo-modal { transition: opacity 0.3s ease; pointer-events: none; opacity: 0; }
         #transition-overlay.active, #lang-modal.active, #promo-modal.active { opacity: 1; pointer-events: all; }
         
+        /* FAQ Animation */
         .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .faq-item.active .faq-content { max-height: 200px; }
-        .faq-item.active i { transform: rotate(180deg); }
+        .faq-item.active .faq-content { max-height: 1000px; /* Increased for long text */ }
+        .faq-item.active i { transform: rotate(180deg); color: #FACC15; }
     </style>
 </head>
-<body oncontextmenu="return false;" oncopy="return false" oncut="return false" onpaste="return false" onselectstart="return false">
+<body oncontextmenu="return false;">
 
-    <!-- SECURITY SCRIPT -->
+    <!-- SECURITY -->
     <script>
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', function(e) {
             if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) {
-                e.preventDefault();
-                return false;
+                e.preventDefault(); return false;
             }
         });
-        setInterval(function(){
-            const startTime = performance.now();
-            // Debugger kaldırıldı: Kullanıcı deneyimini bozmamak için sadece console clear.
-        }, 1000);
         setInterval(() => { console.clear(); }, 2000);
     </script>
 
     <!-- SVG Sprites -->
     <svg style="display: none;">
-        <!-- Full Noob -->
         <symbol id="icon-full-noob" viewBox="0 0 100 120">
             <rect x="5" y="35" width="20" height="40" rx="5" fill="#FACC15" stroke="black" stroke-width="2"/>
             <rect x="75" y="35" width="20" height="40" rx="5" fill="#FACC15" stroke="black" stroke-width="2"/>
@@ -155,53 +142,46 @@
                 <path d="M 45 28 Q 50 32 55 28" stroke="black" stroke-width="2" fill="none" stroke-linecap="round"/>
             </g>
         </symbol>
-        <!-- Custom Round Green Robux Icon -->
-        <symbol id="icon-robux" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="11" fill="#00b06f" stroke="#008050" stroke-width="1"/>
-            <path d="M12 6v12M8.5 8.5h7l-3.5 3.5 3.5 3.5h-7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <!-- R$ Icon -->
+        <symbol id="icon-robux" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="#00b06f" stroke="#008050" stroke-width="2"/>
+            <path d="M50 10 A40 40 0 0 1 50 90 A40 40 0 0 1 50 10" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="4"/>
+            <text x="50" y="65" font-family="'Inter', sans-serif" font-weight="900" font-size="45" text-anchor="middle" fill="white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);">R$</text>
         </symbol>
     </svg>
 
-    <!-- Background Elements -->
+    <!-- Background -->
     <div class="math-grid"></div>
     <div class="vignette"></div>
     <div id="toast-container"></div>
 
     <!-- LANGUAGE MODAL -->
     <div id="lang-modal" class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="glass w-full max-w-md rounded-2xl p-6 border border-white/10">
-            <div class="flex justify-between items-center mb-4">
+        <div class="glass w-full max-w-lg rounded-2xl p-6 border border-white/10 flex flex-col max-h-[80vh]">
+            <div class="flex justify-between items-center mb-4 flex-shrink-0">
                 <h3 class="text-white font-bold text-lg" data-t="select_lang">Select Language</h3>
-                <button onclick="toggleLangModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <button onclick="toggleLangModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center click-bounce"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto" id="lang-grid"></div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 overflow-y-auto p-1" id="lang-grid"></div>
         </div>
     </div>
 
-    <!-- PROMO CODE MODAL -->
+    <!-- PROMO MODAL -->
     <div id="promo-modal" class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm hidden">
         <div class="glass w-full max-w-sm rounded-2xl p-6 border border-white/10 relative overflow-hidden">
-            <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl animate-pulse-slow"></div>
             <div class="flex justify-between items-center mb-6 relative z-10">
-                <h3 class="text-white font-bold text-lg flex items-center gap-2">
-                    <i class="fa-solid fa-ticket text-primary"></i> <span data-t="promo_title">Promo Code</span>
-                </h3>
-                <button onclick="togglePromoModal(false)" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <h3 class="text-white font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-ticket text-primary"></i> <span data-t="promo_title">Promo Code</span></h3>
+                <button onclick="togglePromoModal(false)" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center click-bounce"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-4 relative z-10">
-                <input type="text" id="promo-input" placeholder="ENTER CODE" class="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-center text-white font-mono uppercase tracking-widest focus:border-primary outline-none">
-                <button onclick="redeemCode()" class="w-full bg-primary text-black font-bold py-3 rounded-xl click-bounce shadow-lg shadow-primary/20">
-                    REDEEM
-                </button>
+                <input type="text" id="promo-input" placeholder="CODE" class="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-center text-white font-mono uppercase tracking-widest focus:border-primary outline-none transition-colors">
+                <button onclick="redeemCode()" class="w-full bg-primary text-black font-bold py-3 rounded-xl click-bounce shadow-lg shadow-primary/20" data-t="redeem_btn">REDEEM</button>
             </div>
         </div>
     </div>
 
-    <!-- PAGE TRANSITION LOADER -->
+    <!-- PAGE LOADER -->
     <div id="transition-overlay" class="fixed inset-0 bg-[#050505] z-[150] flex flex-col items-center justify-center">
         <svg class="w-32 h-32 animate-float noob-full"><use href="#icon-full-noob"></use></svg>
         <div class="mt-6 flex items-center gap-2">
@@ -210,110 +190,83 @@
         </div>
     </div>
 
-    <!-- APP INITIAL LOADER -->
-    <div id="app-loader" class="fixed inset-0 bg-[#050505] z-[140] flex flex-col items-center justify-center transition-opacity duration-500">
-        <svg class="w-40 h-40 animate-float noob-full mb-6"><use href="#icon-full-noob"></use></svg>
-        <div class="w-24 h-1 bg-gray-800 rounded-full overflow-hidden">
-            <div class="h-full bg-primary animate-pulse-slow w-full"></div>
-        </div>
-    </div>
-
     <!-- AUTH SCREEN -->
     <section id="auth-view" class="hidden min-h-screen flex flex-col items-center justify-center p-6 relative z-10 py-12">
-        <button onclick="toggleLangModal()" class="absolute top-6 right-6 w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-white/10 transition z-20 overflow-hidden">
+        <button onclick="toggleLangModal()" class="absolute top-6 right-6 w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-white/10 transition z-20 overflow-hidden click-bounce">
             <span id="auth-flag-icon" class="fi fi-us rounded-full text-xl"></span>
         </button>
-
-        <div class="glass p-8 rounded-3xl w-full max-w-sm text-center border-t border-primary/20 shadow-2xl shadow-primary/5 mb-8">
+        <div class="glass p-8 rounded-3xl w-full max-w-sm text-center border-t border-primary/20 shadow-2xl shadow-primary/5 mb-8 transform transition hover:scale-[1.01]">
             <div class="mb-8 relative inline-block">
                 <div class="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse-slow"></div>
                 <svg class="w-32 h-32 animate-float relative z-10 noob-full"><use href="#icon-full-noob"></use></svg>
             </div>
-            
             <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight">Robu<span class="text-primary">Nexa</span></h1>
-            <p class="text-gray-400 text-sm mb-8 leading-relaxed" data-t="auth_desc">Join the Elite.<br>Earn Real Robux Instantly.</p>
-            
+            <p class="text-gray-400 text-sm mb-8 leading-relaxed font-mono" data-t="auth_desc">Join the Elite.<br>Earn Real Robux Instantly.</p>
             <button id="btn-login" class="w-full bg-white text-black font-bold py-3.5 px-6 rounded-xl flex items-center justify-center gap-3 hover:bg-gray-100 transition-all click-bounce shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
-                <span data-t="login_btn">Login with Google</span>
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> <span data-t="login_btn">Login with Google</span>
             </button>
-            <p class="mt-6 text-[10px] text-gray-600" data-t="auth_footer">Secure • Instant • No Password Required</p>
         </div>
-
-        <div class="w-full max-w-sm space-y-3">
+        
+        <!-- EXPANDED TEXT FAQ -->
+        <div class="w-full max-w-lg space-y-3 pb-8">
             <h3 class="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-4" data-t="faq_title">FAQ & Help</h3>
-            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer" onclick="toggleFaq(this)">
-                <div class="p-4 flex justify-between items-center hover:bg-white/5 transition">
-                    <span class="text-sm font-bold text-white" data-t="q1">Is this free?</span>
-                    <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i>
-                </div>
-                <div class="faq-content bg-black/20"><p class="p-4 text-xs text-gray-400 pt-0" data-t="a1">Yes! We generate revenue from ads and use it to buy Robux for you.</p></div>
+            
+            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer group" onclick="toggleFaq(this)">
+                <div class="p-4 flex justify-between items-center group-hover:bg-white/5 transition"><span class="text-sm font-bold text-white" data-t="q1">Is this free?</span> <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i></div>
+                <div class="faq-content bg-black/30"><p class="p-4 text-xs text-gray-400 font-mono leading-relaxed" data-t="a1">RobuNexa is a completely free platform. You never have to pay us. We generate revenue through our advertising partners when you complete tasks, surveys, or download apps. A portion of this revenue is then used to purchase official Robux gift cards or group funds, which we then distribute to you as rewards.</p></div>
             </div>
-            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer" onclick="toggleFaq(this)">
-                <div class="p-4 flex justify-between items-center hover:bg-white/5 transition">
-                    <span class="text-sm font-bold text-white" data-t="q2">Is it safe?</span>
-                    <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i>
-                </div>
-                <div class="faq-content bg-black/20"><p class="p-4 text-xs text-gray-400 pt-0" data-t="a2">100% Safe. We NEVER ask for your password.</p></div>
+            
+            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer group" onclick="toggleFaq(this)">
+                <div class="p-4 flex justify-between items-center group-hover:bg-white/5 transition"><span class="text-sm font-bold text-white" data-t="q2">Is it safe?</span> <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i></div>
+                <div class="faq-content bg-black/30"><p class="p-4 text-xs text-gray-400 font-mono leading-relaxed" data-t="a2">Your safety is our priority. We NEVER ask for your Roblox password or any sensitive personal information. We only require your Roblox Username to send payouts via Group Funds or Gamepass purchase. This method is 100% compliant with Roblox Terms of Service.</p></div>
+            </div>
+
+            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer group" onclick="toggleFaq(this)">
+                <div class="p-4 flex justify-between items-center group-hover:bg-white/5 transition"><span class="text-sm font-bold text-white" data-t="q3">When do I get paid?</span> <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i></div>
+                <div class="faq-content bg-black/30"><p class="p-4 text-xs text-gray-400 font-mono leading-relaxed" data-t="a3">To ensure the integrity of our system and prevent fraud, all withdrawal requests are manually reviewed by our staff. This process typically takes between 24 to 72 hours. Once approved, the Robux will be sent immediately to your account. Please be patient and do not span support.</p></div>
+            </div>
+
+            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer group" onclick="toggleFaq(this)">
+                <div class="p-4 flex justify-between items-center group-hover:bg-white/5 transition"><span class="text-sm font-bold text-white" data-t="q4">How to earn more?</span> <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i></div>
+                <div class="faq-content bg-black/30"><p class="p-4 text-xs text-gray-400 font-mono leading-relaxed" data-t="a4">There are several ways to maximize your earnings: 1. Complete high-paying surveys in the 'Earn' tab. 2. Invite your friends using your unique referral link to get 10% of their earnings forever. 3. Follow us on social media for exclusive promo codes. 4. Log in daily for the Daily Bonus reward.</p></div>
             </div>
         </div>
     </section>
 
-    <!-- MAIN APP INTERFACE -->
+    <!-- MAIN INTERFACE -->
     <div id="main-view" class="hidden min-h-screen relative z-10 flex flex-col md:flex-row">
-        
-        <!-- Sidebar (Desktop) -->
+        <!-- Sidebar -->
         <aside class="hidden md:flex flex-col w-72 h-screen glass fixed left-0 top-0 border-r border-white/5 z-20">
-            <!-- LOGO CLICK TO HOME -->
-            <button onclick="router.navigate('home')" class="p-8 flex items-center gap-3 justify-center border-b border-white/5 hover:bg-white/5 transition cursor-pointer w-full">
-                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-black font-bold text-xl">R</div>
+            <button onclick="router.navigate('home')" class="p-8 flex items-center gap-3 justify-center border-b border-white/5 hover:bg-white/5 transition cursor-pointer w-full group">
+                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-black font-bold text-xl group-hover:rotate-12 transition-transform">R</div>
                 <span class="font-bold text-xl tracking-tight">Robu<span class="text-primary">Nexa</span></span>
             </button>
-            
             <div class="flex-1 px-4 py-6 space-y-2">
-                <button onclick="router.navigate('home')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3">
-                    <i class="fa-solid fa-house w-6"></i> <span data-t="menu_home">Dashboard</span>
-                </button>
-                <button onclick="router.navigate('earn')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3">
-                    <i class="fa-solid fa-list-check w-6"></i> <span data-t="menu_tasks">Tasks</span>
-                </button>
-                <button onclick="router.navigate('withdraw')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3">
-                    <i class="fa-solid fa-money-bill-transfer w-6"></i> <span data-t="menu_withdraw">Withdraw</span>
-                </button>
-                <button onclick="router.navigate('leaderboard')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3">
-                    <i class="fa-solid fa-trophy w-6"></i> <span data-t="menu_top">Leaderboard</span>
-                </button>
-                <button onclick="router.navigate('profile')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3">
-                    <i class="fa-solid fa-user w-6"></i> <span data-t="menu_profile">Profile</span>
-                </button>
-                
-                <!-- ADMIN MENU ITEM (Hidden by default) -->
-                <button id="menu-admin" onclick="router.navigate('admin')" class="hidden w-full text-left px-4 py-3 rounded-xl bg-red-900/10 text-red-500 hover:bg-red-900/30 transition flex items-center gap-3 mt-4 border border-red-500/20">
-                    <i class="fa-solid fa-shield-halved w-6"></i> <span>Admin Panel</span>
-                </button>
+                <button onclick="router.navigate('home')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="home"><i class="fa-solid fa-house w-6"></i> <span data-t="menu_home">Dashboard</span></button>
+                <button onclick="router.navigate('earn')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="earn"><i class="fa-solid fa-list-check w-6"></i> <span data-t="menu_tasks">Tasks</span></button>
+                <button onclick="router.navigate('withdraw')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="withdraw"><i class="fa-solid fa-money-bill-transfer w-6"></i> <span data-t="menu_withdraw">Withdraw</span></button>
+                <button onclick="router.navigate('leaderboard')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="leaderboard"><i class="fa-solid fa-trophy w-6"></i> <span data-t="menu_top">Leaderboard</span></button>
+                <button onclick="router.navigate('profile')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="profile"><i class="fa-solid fa-user w-6"></i> <span data-t="menu_profile">Profile</span></button>
+                <!-- ADMIN BUTTON -->
+                <button id="nav-admin" onclick="router.navigate('admin')" class="hidden w-full text-left px-4 py-3 rounded-xl bg-red-900/10 text-red-500 hover:bg-red-900/30 transition flex items-center gap-3 border border-red-500/20 mt-4"><i class="fa-solid fa-shield-halved w-6"></i> <span data-t="menu_admin">Admin Panel</span></button>
             </div>
-
             <div class="p-6 border-t border-white/5">
-                 <button onclick="toggleLangModal()" class="w-full glass py-2 rounded-lg text-xs text-gray-400 hover:text-white flex items-center justify-center gap-2">
+                 <button onclick="toggleLangModal()" class="w-full glass py-2 rounded-lg text-xs text-gray-400 hover:text-white flex items-center justify-center gap-2 click-bounce">
                     <span id="sidebar-flag-icon" class="fi fi-us rounded-sm"></span> <span id="current-lang-name">English</span>
                 </button>
             </div>
         </aside>
 
-        <!-- Content Wrapper -->
+        <!-- Content -->
         <div class="flex-1 md:ml-72 pb-24 md:pb-0">
-            
             <!-- Mobile Header -->
-            <header class="glass sticky top-0 z-30 px-4 py-3 flex justify-between items-center border-b border-white/5 md:hidden">
+            <header class="glass sticky top-0 z-30 px-4 py-3 flex justify-between items-center border-b border-white/5 md:hidden backdrop-blur-xl">
                 <div class="flex items-center gap-2" onclick="router.navigate('home')">
-                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/50">
-                        <i class="fa-solid fa-cube text-primary text-sm"></i>
-                    </div>
+                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/50"><i class="fa-solid fa-cube text-primary text-sm"></i></div>
                     <span class="font-bold text-lg">Robu<span class="text-primary">Nexa</span></span>
                 </div>
-                <!-- LIVE BALANCE MOBILE -->
                 <div class="bg-surface/90 px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2 shadow-inner shadow-black/50">
-                    <svg class="w-4 h-4 robux-icon"><use href="#icon-robux"></use></svg>
+                    <svg class="w-5 h-5 robux-icon"><use href="#icon-robux"></use></svg>
                     <span id="header-balance" class="font-mono font-bold text-sm text-white">0.00</span>
                 </div>
             </header>
@@ -321,46 +274,40 @@
             <!-- Desktop Header -->
             <header class="hidden md:flex justify-between items-center px-8 py-6 glass sticky top-0 z-30 border-b border-white/5 backdrop-blur-xl">
                 <div>
-                    <h2 id="page-title" class="text-2xl font-bold text-white" data-t="menu_home">Dashboard</h2>
-                    <p class="text-xs text-gray-500" data-t="welcome">Welcome back, Earner.</p>
+                    <h2 id="page-title" class="text-2xl font-bold text-white">Dashboard</h2>
+                    <p class="text-xs text-gray-500 font-mono" data-t="welcome">Welcome back, Earner.</p>
                 </div>
                 <div class="flex items-center gap-6">
-                    <!-- LIVE BALANCE DESKTOP -->
-                    <div class="bg-surface/80 px-5 py-2 rounded-full border border-white/10 flex items-center gap-3 shadow-lg shadow-black/20 hover:border-robux/50 transition-colors cursor-pointer group">
-                        <svg class="w-7 h-7 robux-icon group-hover:scale-110 transition-transform"><use href="#icon-robux"></use></svg>
+                    <div class="bg-surface/80 px-5 py-2 rounded-full border border-white/10 flex items-center gap-3 shadow-lg shadow-black/20 hover:border-robux/50 transition-colors cursor-pointer group hover:bg-white/5">
+                        <svg class="w-8 h-8 robux-icon group-hover:scale-110 transition-transform"><use href="#icon-robux"></use></svg>
                         <span id="desktop-balance" class="font-mono font-bold text-xl text-white">0.00</span>
                     </div>
-                    <img id="user-avatar" src="" class="w-10 h-10 rounded-full border-2 border-white/10 hover:border-primary transition-colors">
+                    <img id="user-avatar" src="" referrerpolicy="no-referrer" onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'" class="w-10 h-10 rounded-full border-2 border-white/10 hover:border-primary transition-colors cursor-pointer" onclick="router.navigate('profile')">
                 </div>
             </header>
 
-            <!-- Dynamic View Container -->
             <main id="app-content" class="p-4 md:p-8 max-w-6xl mx-auto"></main>
         </div>
 
-        <!-- Bottom Navigation (Mobile) -->
+        <!-- Mobile Bottom Nav -->
         <nav class="fixed bottom-0 left-0 w-full glass border-t border-white/5 z-40 md:hidden pb-safe">
             <div class="grid grid-cols-5 h-16 items-center justify-items-center relative">
-                <button onclick="router.navigate('home')" class="nav-item group flex flex-col items-center gap-1 text-gray-500 w-full">
-                    <i class="fa-solid fa-house text-lg group-hover:text-primary transition-colors"></i>
-                    <span class="text-[9px]" data-t="menu_home">Home</span>
+                <button onclick="router.navigate('home')" class="nav-item group flex flex-col items-center gap-1 w-full" data-target="home">
+                    <i class="fa-solid fa-house text-lg text-gray-500 transition-colors"></i> <span class="text-[9px] text-gray-500" data-t="menu_home">Home</span>
                 </button>
-                <button onclick="router.navigate('earn')" class="nav-item group flex flex-col items-center gap-1 text-gray-500 w-full">
-                    <i class="fa-solid fa-list-check text-lg group-hover:text-primary transition-colors"></i>
-                    <span class="text-[9px]" data-t="menu_tasks">Earn</span>
+                <button onclick="router.navigate('earn')" class="nav-item group flex flex-col items-center gap-1 w-full" data-target="earn">
+                    <i class="fa-solid fa-list-check text-lg text-gray-500 transition-colors"></i> <span class="text-[9px] text-gray-500" data-t="menu_tasks">Earn</span>
                 </button>
-                <button onclick="router.navigate('withdraw')" class="relative -top-6">
-                    <div class="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(250,204,21,0.4)] border-4 border-[#050505] click-bounce z-50">
+                <button onclick="router.navigate('withdraw')" class="relative -top-6 click-bounce">
+                    <div class="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(250,204,21,0.4)] border-4 border-[#050505] z-50">
                         <i class="fa-solid fa-wallet text-black text-xl"></i>
                     </div>
                 </button>
-                <button onclick="router.navigate('leaderboard')" class="nav-item group flex flex-col items-center gap-1 text-gray-500 w-full">
-                    <i class="fa-solid fa-trophy text-lg group-hover:text-primary transition-colors"></i>
-                    <span class="text-[9px]" data-t="menu_top">Top</span>
+                <button onclick="router.navigate('leaderboard')" class="nav-item group flex flex-col items-center gap-1 w-full" data-target="leaderboard">
+                    <i class="fa-solid fa-trophy text-lg text-gray-500 transition-colors"></i> <span class="text-[9px] text-gray-500" data-t="menu_top">Top</span>
                 </button>
-                <button onclick="router.navigate('profile')" class="nav-item group flex flex-col items-center gap-1 text-gray-500 w-full">
-                    <i class="fa-solid fa-user text-lg group-hover:text-primary transition-colors"></i>
-                    <span class="text-[9px]" data-t="menu_profile">Me</span>
+                <button onclick="router.navigate('profile')" class="nav-item group flex flex-col items-center gap-1 w-full" data-target="profile">
+                    <i class="fa-solid fa-user text-lg text-gray-500 transition-colors"></i> <span class="text-[9px] text-gray-500" data-t="menu_profile">Me</span>
                 </button>
             </div>
         </nav>
@@ -376,47 +323,48 @@
                 <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div class="text-center md:text-left">
                         <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 block" data-t="total_bal">Total Balance</span>
-                        <div class="flex items-baseline justify-center md:justify-start gap-3 mb-4">
-                            <!-- ROUND GREEN ICON -->
-                            <svg class="w-10 h-10 md:w-14 md:h-14 robux-icon"><use href="#icon-robux"></use></svg>
+                        <div class="flex items-center justify-center md:justify-start gap-3 mb-6">
+                            <svg class="w-12 h-12 md:w-16 md:h-16 robux-icon animate-pulse-slow"><use href="#icon-robux"></use></svg>
                             <span class="text-5xl md:text-6xl font-black text-white tracking-tighter" id="home-big-balance">0.00</span>
                         </div>
-                        <div class="flex gap-2 justify-center md:justify-start">
-                            <button onclick="router.navigate('earn')" class="bg-gradient-to-r from-primary to-accent text-black font-bold py-3 px-8 rounded-xl click-bounce shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
+                        <div class="flex gap-3 justify-center md:justify-start">
+                            <button onclick="router.navigate('earn')" class="bg-gradient-to-r from-primary to-accent text-black font-bold py-3.5 px-8 rounded-xl click-bounce shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
                                 <span data-t="start_earn">Start Earning</span>
                             </button>
-                            <button onclick="togglePromoModal(true)" class="glass border border-white/20 text-white font-bold py-3 px-4 rounded-xl click-bounce hover:bg-white/10">
-                                <i class="fa-solid fa-ticket"></i>
+                            <button onclick="togglePromoModal(true)" class="glass border border-white/20 text-white font-bold py-3 px-5 rounded-xl click-bounce hover:bg-white/10 flex items-center gap-2">
+                                <i class="fa-solid fa-ticket text-primary"></i> <span class="hidden md:inline" data-t="code_btn">Code</span>
                             </button>
                         </div>
                     </div>
-                    <div class="hidden md:block">
-                        <svg class="w-40 h-40 animate-float noob-full"><use href="#icon-full-noob"></use></svg>
+                    <div class="hidden md:block relative">
+                         <div class="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
+                        <svg class="w-48 h-48 animate-float noob-full relative z-10"><use href="#icon-full-noob"></use></svg>
                     </div>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-3 md:gap-6">
-                <div class="glass p-5 rounded-2xl border border-white/5">
-                    <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3 text-blue-400"><i class="fa-solid fa-list-check text-xl"></i></div>
-                    <p class="text-xs text-gray-400 uppercase tracking-wider" data-t="completed_stat">Completed</p>
-                    <p class="text-2xl font-bold text-white mt-1" id="home-tasks">0</p>
-                </div>
-                <div class="glass p-5 rounded-2xl border border-white/5">
-                    <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mb-3 text-purple-400"><i class="fa-solid fa-bolt text-xl"></i></div>
-                    <p class="text-xs text-gray-400 uppercase tracking-wider">XP Level</p>
-                    <p class="text-2xl font-bold text-white mt-1" id="home-xp">0</p>
                 </div>
             </div>
 
-            <div class="glass rounded-2xl p-4 border border-white/5">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-tower-broadcast text-red-500 animate-pulse"></i> <span data-t="live_drops">Live Drops</span>
-                    </h3>
+            <!-- DAILY BONUS CARD -->
+            <div class="glass p-4 rounded-2xl border border-yellow-500/20 bg-yellow-900/10 flex justify-between items-center cursor-pointer hover:bg-yellow-900/20 transition" id="daily-bonus-card" onclick="claimDaily()">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-500 animate-pulse"><i class="fa-solid fa-calendar-check"></i></div>
+                    <div>
+                        <h4 class="font-bold text-white text-sm" data-t="daily_title">Daily Bonus</h4>
+                        <p class="text-[10px] text-gray-400 font-mono" id="daily-timer" data-t="daily_desc">Claim +10 R$ every 24h</p>
+                    </div>
                 </div>
-                <div id="live-feed" class="space-y-2 max-h-40 overflow-hidden relative">
-                    <div class="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-surface to-transparent z-10"></div>
+                <button class="bg-yellow-500 text-black font-bold px-3 py-1 rounded text-xs click-bounce">CLAIM</button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 md:gap-6">
+                <div class="glass p-5 rounded-2xl border border-white/5 hover:border-blue-500/30 transition-colors">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3 text-blue-400"><i class="fa-solid fa-list-check text-xl"></i></div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wider font-mono" data-t="completed_stat">Completed</p>
+                    <p class="text-2xl font-bold text-white mt-1" id="home-tasks">0</p>
+                </div>
+                <div class="glass p-5 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-colors">
+                    <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mb-3 text-purple-400"><i class="fa-solid fa-bolt text-xl"></i></div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wider font-mono" data-t="xp_level">XP Level</p>
+                    <p class="text-2xl font-bold text-white mt-1" id="home-xp">0</p>
                 </div>
             </div>
         </div>
@@ -425,23 +373,11 @@
     <!-- 2. EARN -->
     <template id="tpl-earn">
         <div class="fade-in pb-10">
-            <!-- Promo Banner -->
-            <div onclick="togglePromoModal(true)" class="glass p-4 rounded-xl mb-6 border border-dashed border-primary/30 flex justify-between items-center cursor-pointer hover:bg-primary/5 transition">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary"><i class="fa-solid fa-gift"></i></div>
-                    <div>
-                        <h4 class="font-bold text-white text-sm" data-t="promo_title">Have a Code?</h4>
-                        <p class="text-[10px] text-gray-400">Redeem for instant R$</p>
-                    </div>
-                </div>
-                <i class="fa-solid fa-chevron-right text-gray-500 text-xs"></i>
-            </div>
-
             <h3 class="text-xl font-bold mb-4 flex items-center gap-2" data-t="hot_tasks">Hot Tasks</h3>
             <div id="task-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="col-span-full text-center py-12 glass rounded-xl">
                     <i class="fa-solid fa-circle-notch fa-spin text-primary text-3xl"></i>
-                    <p class="text-gray-500 text-xs mt-3 uppercase tracking-widest" data-t="loading">Fetching Tasks...</p>
+                    <p class="text-gray-500 text-xs mt-3 uppercase tracking-widest font-mono" data-t="loading">Fetching Tasks...</p>
                 </div>
             </div>
         </div>
@@ -452,25 +388,24 @@
         <div class="fade-in space-y-6">
             <div class="bg-gradient-to-r from-yellow-900/20 to-transparent border-l-4 border-yellow-500 p-4 rounded-r-xl flex gap-4">
                 <i class="fa-solid fa-triangle-exclamation text-yellow-500 text-xl mt-1"></i>
-                <div class="text-xs text-gray-400 leading-relaxed">
-                    <strong class="text-yellow-500 block mb-1 text-sm" data-t="withdraw_rules_title">Withdrawal Rules</strong>
-                    <span data-t="withdraw_rules_desc">Please set your Gamepass price to cover the 30% tax. (Amount / 0.7).</span>
+                <div class="text-xs text-gray-400 leading-relaxed font-mono">
+                    <strong class="text-yellow-500 block mb-1 text-sm" data-t="withdraw_rules_title">Important Rule</strong>
+                    <span data-t="withdraw_rules_desc">Price your Gamepass to cover the 30% Roblox tax (Amount / 0.7).</span>
                 </div>
             </div>
             <form id="withdraw-form" class="glass p-6 md:p-8 rounded-2xl space-y-6 border border-white/5 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full pointer-events-none"></div>
                 <div>
                     <label class="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider" data-t="amount_label">Amount (Min 50 R$)</label>
                     <div class="relative mt-2">
-                        <div class="absolute left-4 top-3.5"><svg class="w-5 h-5 robux-icon"><use href="#icon-robux"></use></svg></div>
-                        <input type="number" id="w-amount" min="50" class="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white focus:border-primary outline-none transition-all placeholder-gray-700 font-mono" placeholder="50">
+                        <div class="absolute left-4 top-3.5"><svg class="w-6 h-6 robux-icon"><use href="#icon-robux"></use></svg></div>
+                        <input type="number" id="w-amount" min="50" class="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 pl-14 pr-4 text-white focus:border-primary outline-none transition-all placeholder-gray-700 font-mono text-lg" placeholder="50">
                     </div>
                 </div>
                 <div>
                     <label class="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider" data-t="link_label">Gamepass / Item Link</label>
                     <div class="relative mt-2">
                         <i class="fa-solid fa-link absolute left-4 top-4 text-gray-500 text-sm"></i>
-                        <input type="url" id="w-link" class="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 pl-10 pr-4 text-white focus:border-primary outline-none transition-all placeholder-gray-700 text-sm" placeholder="https://roblox.com/game-pass/...">
+                        <input type="url" id="w-link" class="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 pl-10 pr-4 text-white focus:border-primary outline-none transition-all placeholder-gray-700 text-sm font-mono" placeholder="https://roblox.com/game-pass/...">
                     </div>
                 </div>
                 <button type="submit" class="w-full bg-primary text-black font-bold py-4 rounded-xl click-bounce shadow-xl shadow-primary/10 hover:shadow-primary/30 transition-all flex items-center justify-center gap-2">
@@ -479,7 +414,7 @@
             </form>
             <div class="space-y-3">
                 <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1" data-t="trans_history">Transaction History</h3>
-                <div id="withdraw-history" class="space-y-2"></div>
+                <div id="withdraw-history" class="space-y-2 font-mono"></div>
             </div>
         </div>
     </template>
@@ -494,13 +429,9 @@
                 </div>
                 <table class="w-full text-left">
                     <thead class="bg-black/20 text-[10px] text-gray-500 uppercase tracking-wider font-semibold">
-                        <tr>
-                            <th class="p-4">#</th>
-                            <th class="p-4" data-t="user">User</th>
-                            <th class="p-4 text-right">R$</th>
-                        </tr>
+                        <tr><th class="p-4">#</th><th class="p-4" data-t="user">User</th><th class="p-4 text-right">R$</th></tr>
                     </thead>
-                    <tbody id="leaderboard-body" class="text-sm divide-y divide-white/5"></tbody>
+                    <tbody id="leaderboard-body" class="text-sm divide-y divide-white/5 font-mono"></tbody>
                 </table>
             </div>
         </div>
@@ -513,50 +444,100 @@
                 <div class="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none"></div>
                 <div class="relative">
                     <div class="absolute inset-0 bg-primary/30 rounded-full blur-xl animate-pulse-slow"></div>
-                    <img id="profile-img" class="w-24 h-24 rounded-full border-4 border-primary relative z-10 shadow-xl">
+                    <img id="profile-img" referrerpolicy="no-referrer" onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'" class="w-24 h-24 rounded-full border-4 border-primary relative z-10 shadow-xl">
                 </div>
                 <div class="relative z-10">
                     <h2 id="profile-name" class="font-bold text-2xl text-white">User</h2>
-                    <p id="profile-email" class="text-sm text-gray-400 font-mono">...</p>
-                    <div class="mt-3 flex flex-wrap justify-center md:justify-start gap-2">
-                        <div class="text-[10px] bg-white/10 inline-block px-3 py-1 rounded-full text-gray-300 border border-white/10">
-                            UID: <span id="profile-id" class="font-mono text-primary">...</span>
-                        </div>
-                    </div>
+                    <p id="profile-email" class="text-sm text-gray-400 font-mono mb-2">...</p>
+                    <div class="inline-block px-3 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] text-gray-300 font-mono">UID: <span id="profile-id" class="text-primary">...</span></div>
+                </div>
+            </div>
+            <!-- REFERRAL -->
+            <div class="glass p-6 rounded-2xl border border-white/5">
+                <h3 class="font-bold text-white mb-2 flex items-center gap-2"><i class="fa-solid fa-users text-primary"></i> <span data-t="ref_sys">Referral System</span></h3>
+                <p class="text-xs text-gray-400 mb-4" data-t="ref_desc">Invite friends and earn 10% of their earnings forever!</p>
+                <div class="flex gap-2">
+                    <input type="text" id="ref-link" readonly class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-gray-300" value="Loading...">
+                    <button onclick="copyRef()" class="bg-primary text-black font-bold px-4 rounded-lg text-xs hover:bg-yellow-400 click-bounce" data-t="copy_btn">COPY</button>
                 </div>
             </div>
             <div class="glass p-1 rounded-2xl border border-red-500/10 hover:border-red-500/30 transition-colors">
-                <button id="btn-logout" class="w-full bg-red-900/10 text-red-500 py-4 rounded-xl font-bold text-sm hover:bg-red-900/20 transition-all flex items-center justify-center gap-2">
+                <button id="btn-logout" class="w-full bg-red-900/10 text-red-500 py-4 rounded-xl font-bold text-sm hover:bg-red-900/20 transition-all flex items-center justify-center gap-2 click-bounce">
                     <i class="fa-solid fa-power-off"></i> <span data-t="sign_out">Sign Out</span>
                 </button>
             </div>
         </div>
     </template>
 
-    <!-- 6. ADMIN PANEL -->
+    <!-- 6. ADMIN PANEL (ENHANCED) -->
     <template id="tpl-admin">
         <div class="fade-in space-y-8 pb-12">
-            <h2 class="text-3xl font-bold text-white border-l-4 border-red-600 pl-4">Admin Console</h2>
+            <h2 class="text-3xl font-bold text-white border-l-4 border-red-600 pl-4" data-t="admin_console">Admin Console</h2>
             
+            <!-- STATS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="glass p-4 rounded-xl border border-white/10">
+                    <p class="text-gray-500 text-xs uppercase tracking-wider">Total Users</p>
+                    <h3 class="text-2xl font-bold text-white mt-1" id="adm-total-users">-</h3>
+                </div>
+                <div class="glass p-4 rounded-xl border border-white/10">
+                    <p class="text-gray-500 text-xs uppercase tracking-wider">Pending R$</p>
+                    <h3 class="text-2xl font-bold text-primary mt-1" id="adm-pending-robux">-</h3>
+                </div>
+                <div class="glass p-4 rounded-xl border border-white/10">
+                    <p class="text-gray-500 text-xs uppercase tracking-wider">Paid R$</p>
+                    <h3 class="text-2xl font-bold text-success mt-1" id="adm-paid-robux">-</h3>
+                </div>
+            </div>
+
+            <!-- USER MANAGER (GOD MODE) -->
+            <div class="glass p-6 rounded-2xl border border-purple-500/20">
+                <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-user-gear text-purple-500"></i> User Manager (God Mode)</h3>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="adm-user-search" placeholder="Enter Email or UID" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-purple-500">
+                    <button onclick="adminSearchUser()" class="bg-purple-600 text-white px-6 rounded-xl font-bold hover:bg-purple-500">Search</button>
+                </div>
+                <div id="adm-user-result" class="hidden bg-black/30 p-4 rounded-xl border border-white/5 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400 text-xs font-mono" id="adm-res-uid">UID: ...</span>
+                        <span class="text-white font-bold" id="adm-res-email">...</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label class="text-gray-400 text-xs">Balance:</label>
+                        <input type="number" id="adm-res-bal" class="bg-black/50 border border-white/10 rounded px-2 py-1 text-white w-24">
+                        <button onclick="adminUpdateBalance()" class="bg-green-600 text-xs px-3 py-1.5 rounded text-white font-bold">SAVE</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANNOUNCEMENT SYSTEM -->
+            <div class="glass p-6 rounded-2xl border border-blue-500/20">
+                <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-bullhorn text-blue-500"></i> System Broadcast</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="adm-broadcast-msg" placeholder="Message to all users" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl">
+                    <button onclick="toast('Broadcast Sent! (Simulated)', 'success')" class="bg-blue-600 text-white px-6 rounded-xl font-bold">Send</button>
+                </div>
+            </div>
+
             <!-- ADD TASK -->
             <div class="glass p-6 rounded-2xl border border-white/10">
-                <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-plus-circle text-primary"></i> Add New Task</h3>
+                <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-plus-circle text-primary"></i> <span data-t="add_task">Add New Task</span></h3>
                 <form id="add-task-form" class="space-y-4">
-                    <input type="text" id="t-title" placeholder="Task Title" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
-                    <input type="text" id="t-desc" placeholder="Task Description" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                    <input type="text" id="t-title" placeholder="Title" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                    <input type="text" id="t-desc" placeholder="Description" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
                     <div class="grid grid-cols-2 gap-4">
-                        <input type="number" id="t-reward" placeholder="Reward (R$)" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                        <input type="number" id="t-reward" placeholder="Reward" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
                         <input type="number" id="t-cooldown" placeholder="Cooldown (sec)" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
                     </div>
-                    <button class="bg-primary text-black w-full py-3 rounded-xl font-bold hover:bg-yellow-400 transition">Create Task</button>
+                    <button class="bg-primary text-black w-full py-3 rounded-xl font-bold hover:bg-yellow-400 transition" data-t="create_task_btn">Create Task</button>
                 </form>
             </div>
 
-            <!-- WITHDRAWAL REQUESTS -->
+            <!-- WITHDRAWALS -->
             <div class="glass p-6 rounded-2xl border border-white/10">
-                <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-money-bill-transfer text-primary"></i> Pending Withdrawals</h3>
+                <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-money-bill-transfer text-primary"></i> <span data-t="pending_withdraws">Pending Withdrawals</span></h3>
                 <div id="admin-withdraw-list" class="grid gap-4">
-                    <p class="text-gray-500 text-sm">Loading requests...</p>
+                    <p class="text-gray-500 text-sm" data-t="loading">Loading...</p>
                 </div>
             </div>
         </div>
@@ -568,7 +549,6 @@
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, orderBy, limit, addDoc, getDocs, onSnapshot, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-        // --- CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyCUUceDxrNY2y7OEbJ6EX0QEXVFVBp1JgM",
             authDomain: "robunexa.firebaseapp.com",
@@ -584,35 +564,71 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
         const ADMIN_EMAIL = "adanalironaldo131@gmail.com";
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const playSound = (type) => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            
+            if (type === 'click') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+                gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'success') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(1200, now); osc.frequency.setValueAtTime(1600, now + 0.1);
+                gain.gain.setValueAtTime(0.05, now); gain.gain.linearRampToValueAtTime(0, now + 0.4);
+                osc.start(now); osc.stop(now + 0.4);
+            } else if (type === 'error') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            }
+        };
 
         let state = { user: null, data: null, isAdmin: false };
-        let prevBalance = 0; // For CountUp Animation
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let prevBalance = 0;
 
+        // --- FULL LANGUAGE DICTIONARY ---
         const langData = {
-            en: {
-                code: "us", name: "English",
-                login_btn: "Login with Google", auth_desc: "Join the Elite. Earn Real Robux.", auth_footer: "Secure • Instant • No Password",
-                menu_home: "Dashboard", menu_tasks: "Earn", menu_withdraw: "Withdraw", menu_top: "Leaderboard", menu_profile: "Me",
-                welcome: "Welcome back, Earner.", total_bal: "Total Balance", start_earn: "Start Earning", completed_stat: "Completed",
-                live_drops: "Live Drops", hot_tasks: "Hot Tasks", loading: "Loading...",
-                withdraw_rules_title: "Withdrawal Rules", withdraw_rules_desc: "Cover 30% tax (Amount / 0.7).",
-                amount_label: "Amount (Min 50 R$)", link_label: "Gamepass Link", req_payout: "Request Payout", trans_history: "Transaction History",
-                top_20: "Top 20 Earners", user: "User", sign_out: "Sign Out", select_lang: "Select Language",
-                faq_title: "FAQ & Help", q1: "Is this free?", a1: "Yes! We generate revenue from ads.", q2: "Is it safe?", a2: "100% Safe. No passwords needed.",
-                promo_title: "Promo Code"
+            en: { 
+                code: "us", name: "English", 
+                login_btn: "Login with Google", auth_desc: "Join the Elite. Earn Real Robux.", 
+                menu_home: "Dashboard", menu_tasks: "Earn", menu_withdraw: "Withdraw", menu_top: "Top", menu_profile: "Me", menu_admin: "Admin Console",
+                total_bal: "Total Balance", start_earn: "Start Earning", code_btn: "Code", completed_stat: "Completed", xp_level: "XP Level", live_drops: "Realtime Activity",
+                promo_title: "Promo Code", promo_desc: "Redeem for instant R$", hot_tasks: "Hot Tasks", loading: "Loading...",
+                withdraw_rules_title: "Important Rule", withdraw_rules_desc: "Cover 30% tax (Amount / 0.7).", amount_label: "Amount (Min 50 R$)", link_label: "Gamepass Link", req_payout: "Request Payout", trans_history: "Transaction History",
+                top_20: "Top 20 Earners", user: "User", 
+                ref_sys: "Referral System", ref_desc: "Invite friends and earn 10% forever!", copy_btn: "COPY", ref_invited: "Invited:", ref_earnings: "Earnings:", sign_out: "Sign Out",
+                admin_console: "Admin Console", add_task: "Add New Task", create_task_btn: "Create Task", pending_withdraws: "Pending Withdrawals", approve: "Approve", reject: "Reject",
+                select_lang: "Select Language", redeem_btn: "REDEEM", daily_title: "Daily Bonus", daily_desc: "Claim +10 R$ every 24h",
+                faq_title: "FAQ & Help", 
+                q1: "Is this free?", a1: "RobuNexa is a completely free platform. You never have to pay us. We generate revenue through our advertising partners when you complete tasks, surveys, or download apps. A portion of this revenue is then used to purchase official Robux gift cards or group funds, which we then distribute to you as rewards.",
+                q2: "Is it safe?", a2: "Your safety is our priority. We NEVER ask for your Roblox password or any sensitive personal information. We only require your Roblox Username to send payouts via Group Funds or Gamepass purchase. This method is 100% compliant with Roblox Terms of Service.",
+                q3: "When do I get paid?", a3: "To ensure the integrity of our system and prevent fraud, all withdrawal requests are manually reviewed by our staff. This process typically takes between 24 to 72 hours. Once approved, the Robux will be sent immediately to your account.",
+                q4: "How to earn more?", a4: "There are several ways to maximize your earnings: 1. Complete high-paying surveys in the 'Earn' tab. 2. Invite your friends using your unique referral link to get 10% of their earnings forever. 3. Follow us on social media for exclusive promo codes. 4. Log in daily for the Daily Bonus reward.",
+                btn_start: "START TASK", btn_done: "COMPLETED", status_pending: "PENDING", status_approved: "APPROVED", status_rejected: "REJECTED"
             },
-            tr: {
-                code: "tr", name: "Türkçe",
-                login_btn: "Google ile Giriş Yap", auth_desc: "Elitlere Katıl. Gerçek Robux Kazan.", auth_footer: "Güvenli • Anında • Şifresiz",
-                menu_home: "Ana Sayfa", menu_tasks: "Kazan", menu_withdraw: "Çekim", menu_top: "Sıralama", menu_profile: "Profilim",
-                welcome: "Hoşgeldin Kazanıcı.", total_bal: "Toplam Bakiye", start_earn: "Kazanmaya Başla", completed_stat: "Tamamlanan",
-                live_drops: "Canlı Akış", hot_tasks: "Popüler Görevler", loading: "Yükleniyor...",
-                withdraw_rules_title: "Çekim Kuralları", withdraw_rules_desc: "%30 vergiyi karşıla (Miktar / 0.7).",
-                amount_label: "Miktar (Min 50 R$)", link_label: "Gamepass Linki", req_payout: "Ödeme İste", trans_history: "İşlem Geçmişi",
-                top_20: "En Çok Kazananlar", user: "Kullanıcı", sign_out: "Çıkış Yap", select_lang: "Dil Seç",
-                faq_title: "Sıkça Sorulan Sorular", q1: "Bu ücretsiz mi?", a1: "Evet! Reklam gelirleriyle size ödeme yapıyoruz.", q2: "Güvenli mi?", a2: "%100 Güvenli. Şifre asla istemeyiz.",
-                promo_title: "Promosyon Kodu"
+            tr: { 
+                code: "tr", name: "Türkçe", 
+                login_btn: "Google ile Giriş", auth_desc: "Elitlere Katıl. Gerçek Robux Kazan.", 
+                menu_home: "Ana Sayfa", menu_tasks: "Kazan", menu_withdraw: "Çekim", menu_top: "Sıralama", menu_profile: "Profil", menu_admin: "Yönetici Paneli",
+                total_bal: "Toplam Bakiye", start_earn: "Kazanmaya Başla", code_btn: "Kod", completed_stat: "Tamamlanan", xp_level: "XP Seviyesi", live_drops: "Canlı Aktivite",
+                promo_title: "Promosyon Kodu", promo_desc: "Anında R$ kazanmak için gir", hot_tasks: "Popüler Görevler", loading: "Yükleniyor...",
+                withdraw_rules_title: "Önemli Kural", withdraw_rules_desc: "%30 vergiyi ekle (Miktar / 0.7).", amount_label: "Miktar (Min 50 R$)", link_label: "Gamepass Linki", req_payout: "Ödeme İste", trans_history: "İşlem Geçmişi",
+                top_20: "En Çok Kazananlar", user: "Kullanıcı", 
+                ref_sys: "Davet Sistemi", ref_desc: "Arkadaşlarını davet et, ömür boyu %10 kazan!", copy_btn: "KOPYALA", ref_invited: "Davet:", ref_earnings: "Kazanç:", sign_out: "Çıkış Yap",
+                admin_console: "Yönetici Konsolu", add_task: "Yeni Görev Ekle", create_task_btn: "Görev Oluştur", pending_withdraws: "Bekleyen Çekimler", approve: "Onayla", reject: "Reddet",
+                select_lang: "Dil Seçiniz", redeem_btn: "KULLAN", daily_title: "Günlük Bonus", daily_desc: "Her 24 saatte +10 R$ Al",
+                faq_title: "SSS & Yardım", 
+                q1: "Bu ücretsiz mi?", a1: "RobuNexa tamamen ücretsiz bir platformdur. Bize asla ödeme yapmak zorunda değilsiniz. Reklam ortaklarımız aracılığıyla görevleri tamamladığınızda gelir elde ederiz. Bu gelirin bir kısmı resmi Robux hediye kartları veya grup fonları satın almak için kullanılır ve ödül olarak size dağıtılır.",
+                q2: "Güvenli mi?", a2: "Güvenliğiniz önceliğimizdir. Roblox şifrenizi veya hassas kişisel bilgilerinizi ASLA istemiyoruz. Ödemeleri Grup Fonları veya Gamepass satın alımı yoluyla göndermek için yalnızca Roblox Kullanıcı Adınıza ihtiyacımız vardır. Bu yöntem Roblox Hizmet Şartları ile %100 uyumludur.",
+                q3: "Ne zaman gelir?", a3: "Sistemimizin bütünlüğünü sağlamak ve dolandırıcılığı önlemek için tüm para çekme talepleri personelimiz tarafından manuel olarak incelenir. Bu işlem genellikle 24 ila 72 saat sürer. Onaylandıktan sonra Robux hesabınıza hemen gönderilir.",
+                q4: "Nasıl daha çok kazanırım?", a4: "Kazancınızı maksimize etmenin birkaç yolu vardır: 1. 'Kazan' sekmesindeki yüksek ödemeli anketleri tamamlayın. 2. Benzersiz referans linkinizi kullanarak arkadaşlarınızı davet edin ve kazançlarının %10'unu sonsuza kadar alın. 3. Özel promosyon kodları için bizi sosyal medyada takip edin.",
+                btn_start: "BAŞLA", btn_done: "YAPILDI", status_pending: "BEKLİYOR", status_approved: "ONAYLANDI", status_rejected: "REDDEDİLDİ"
             }
         };
 
@@ -620,9 +636,10 @@
         const t = (key) => langData[curLang]?.[key] || langData['en'][key] || key;
 
         const updateLanguage = (lang) => {
-            curLang = lang;
-            localStorage.setItem('robu_lang', lang);
-            document.querySelectorAll('[data-t]').forEach(el => el.textContent = t(el.getAttribute('data-t')));
+            curLang = lang; localStorage.setItem('robu_lang', lang);
+            document.querySelectorAll('[data-t]').forEach(el => { const k = el.getAttribute('data-t'); if(k) el.textContent = t(k); });
+            const placeholders = { 'w-amount': 'amount_label', 'w-link': 'link_label', 'promo-input': 'code_btn', 't-title': 'add_task', 't-desc': 'hot_tasks', 't-reward': 'amount_label' };
+            Object.keys(placeholders).forEach(id => { const el = document.getElementById(id); if(el) el.placeholder = t(placeholders[id]); });
             const flagClass = `fi fi-${langData[lang].code}`;
             if(document.getElementById('auth-flag-icon')) document.getElementById('auth-flag-icon').className = `${flagClass} rounded-full text-xl`;
             if(document.getElementById('sidebar-flag-icon')) document.getElementById('sidebar-flag-icon').className = `${flagClass} rounded-sm`;
@@ -630,13 +647,10 @@
             toggleLangModal(false);
         };
 
-        // UI Helpers
         window.toggleLangModal = (show = null) => {
             const m = document.getElementById('lang-modal');
-            if(show === false || (show === null && m.classList.contains('active'))) {
-                m.classList.remove('active');
-                setTimeout(()=>m.style.display='none',300);
-            } else {
+            if(show === false || (show === null && m.classList.contains('active'))) { m.classList.remove('active'); setTimeout(()=>m.style.display='none',300); }
+            else {
                 m.style.display='flex';
                 const grid = document.getElementById('lang-grid');
                 if(grid.innerHTML.trim() === '') {
@@ -652,39 +666,20 @@
             }
         };
 
-        window.togglePromoModal = (show) => {
-            const m = document.getElementById('promo-modal');
-            if(!show) { m.classList.remove('active'); setTimeout(()=>m.classList.add('hidden'),300); }
-            else { m.classList.remove('hidden'); requestAnimationFrame(()=>m.classList.add('active')); }
-        };
-
+        window.togglePromoModal = (show) => { const m = document.getElementById('promo-modal'); if(!show) { m.classList.remove('active'); setTimeout(()=>m.classList.add('hidden'),300); } else { m.classList.remove('hidden'); requestAnimationFrame(()=>m.classList.add('active')); } };
         window.toggleFaq = (el) => { el.classList.toggle('active'); playSound('click'); };
-
-        const playSound = (type) => {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
-            if (type === 'click') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
-                gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-                osc.start(now); osc.stop(now + 0.1);
-            }
-        };
 
         const toast = (msg, type = 'info') => {
             const el = document.createElement('div');
             const colors = type === 'success' ? 'bg-green-900/90 border-green-500' : type === 'error' ? 'bg-red-900/90 border-red-500' : 'bg-surface/90 border-gray-600';
-            el.className = `toast glass ${colors} border px-4 py-3 rounded-lg flex items-center gap-3 text-white shadow-lg min-w-[280px] backdrop-blur-md`;
-            el.innerHTML = `<i class="fa-solid fa-info-circle"></i> <span class="text-xs font-bold tracking-wide">${msg}</span>`;
+            el.className = `toast glass ${colors} border px-4 py-3 rounded-lg flex items-center gap-3 text-white shadow-lg min-w-[280px] backdrop-blur-md z-[10000]`;
+            el.innerHTML = `<i class="fa-solid fa-info-circle"></i> <span class="text-xs font-bold tracking-wide font-mono">${msg}</span>`;
             document.getElementById('toast-container').appendChild(el);
             requestAnimationFrame(() => el.classList.add('show'));
-            setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3000);
+            if(type === 'success') playSound('success'); else if(type === 'error') playSound('error');
+            setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 400); }, 3000);
         };
 
-        // Live Count Animation
         const animateValue = (obj, start, end, duration) => {
             if(!obj) return;
             let startTimestamp = null;
@@ -697,12 +692,43 @@
             window.requestAnimationFrame(step);
         };
 
-        // --- ROUTER ---
+        // DAILY BONUS LOGIC
+        window.claimDaily = async () => {
+            playSound('click');
+            const now = Date.now();
+            const lastBonus = state.data.lastBonusAt ? state.data.lastBonusAt.seconds * 1000 : 0;
+            const diff = now - lastBonus;
+            const hours24 = 24 * 60 * 60 * 1000;
+
+            if (diff >= hours24) {
+                await updateDoc(doc(db,"users",state.user.uid), { 
+                    balance: increment(10), 
+                    lastBonusAt: serverTimestamp() 
+                });
+                toast("Daily Bonus Claimed! +10 R$", "success");
+            } else {
+                const waitHours = Math.ceil((hours24 - diff) / (1000 * 60 * 60));
+                toast(`Wait ${waitHours} more hours.`, "error");
+            }
+        };
+
+        // ROUTER
         const router = {
             navigate: (view) => {
                 playSound('click');
                 const overlay = document.getElementById('transition-overlay');
                 overlay.classList.add('active');
+
+                // Nav Highlight Logic
+                document.querySelectorAll('.nav-item i').forEach(el => el.className = el.className.replace('text-primary','text-gray-500'));
+                document.querySelectorAll('.nav-item span').forEach(el => el.classList.remove('text-primary'));
+                const activeBtn = document.querySelector(`.nav-item[data-target="${view}"] i`);
+                if(activeBtn) { activeBtn.classList.remove('text-gray-500'); activeBtn.classList.add('text-primary'); activeBtn.nextElementSibling?.classList.add('text-primary'); }
+                
+                document.querySelectorAll('.nav-btn').forEach(el => { el.classList.remove('bg-white/10','text-white'); el.classList.add('text-gray-400'); });
+                const deskBtn = document.querySelector(`.nav-btn[data-target="${view}"]`);
+                if(deskBtn) { deskBtn.classList.remove('text-gray-400'); deskBtn.classList.add('bg-white/10','text-white'); }
+
                 setTimeout(() => {
                     const content = document.getElementById('app-content');
                     const tpl = document.getElementById(`tpl-${view}`);
@@ -710,10 +736,9 @@
                         content.innerHTML = '';
                         content.appendChild(tpl.content.cloneNode(true));
                         
-                        // Update Header Title
-                        const titles = { home:'Dashboard', earn:'Earn Tasks', withdraw:'Withdraw', leaderboard:'Leaderboard', profile:'My Profile', admin:'Admin Panel' };
+                        const titles = { home:'menu_home', earn:'menu_tasks', withdraw:'menu_withdraw', leaderboard:'menu_top', profile:'menu_profile', admin:'admin_console' };
                         const pt = document.getElementById('page-title');
-                        if(pt) pt.innerText = titles[view] || 'App';
+                        if(pt) pt.innerText = t(titles[view]) || 'App';
 
                         if(view === 'home') initHome();
                         if(view === 'earn') initEarn();
@@ -726,11 +751,11 @@
                         window.scrollTo(0,0);
                     }
                     setTimeout(() => overlay.classList.remove('active'), 300);
-                }, 800);
+                }, 600);
             }
         };
 
-        // View Functions
+        // VIEW FUNCTIONS
         const initHome = () => {
             if(!state.data) return;
             const balEl = document.getElementById('home-big-balance');
@@ -738,9 +763,20 @@
             document.getElementById('home-tasks').innerText = (state.data.completedTasks || []).length;
             document.getElementById('home-xp').innerText = state.data.xp || 0;
             const feed = document.getElementById('live-feed');
-            ['Ninja', 'Pro', 'Guest', 'Robux'].forEach(n => {
-                feed.innerHTML += `<div class="flex justify-between items-center text-xs bg-white/5 p-2 rounded-lg mb-2"><span class="text-gray-400">${n}_${Math.floor(Math.random()*99)}</span><span class="text-success font-bold">+${Math.floor(Math.random()*50)+10} R$</span></div>`;
-            });
+            
+            function addFeedItem() {
+                if(!document.getElementById('live-feed')) return;
+                const users = ['Ninja','Ghost','Pro','Guest','Player','King','Queen'];
+                const u = users[Math.floor(Math.random()*users.length)] + '_' + Math.floor(Math.random()*999);
+                const amt = [5, 10, 25, 50, 100][Math.floor(Math.random()*5)];
+                const el = document.createElement('div');
+                el.className = 'flex justify-between items-center text-xs bg-white/5 p-2 rounded-lg fade-in border border-white/5';
+                el.innerHTML = `<span class="text-gray-400 flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div> ${u}</span><span class="text-success font-bold">+${amt} R$</span>`;
+                feed.prepend(el);
+                if(feed.children.length > 5) feed.lastElementChild.remove();
+            }
+            if(!window.feedInterval) window.feedInterval = setInterval(addFeedItem, 4000);
+            for(let i=0;i<3;i++) addFeedItem();
         };
 
         const initEarn = async () => {
@@ -748,60 +784,39 @@
             const q = query(collection(db, "pages"), where("active", "==", true), orderBy("reward", "desc"));
             const snaps = await getDocs(q);
             list.innerHTML = '';
-            if(snaps.empty) list.innerHTML = `<div class="col-span-full text-center text-gray-500 text-xs py-10">${t('loading')}</div>`;
+            if(snaps.empty) list.innerHTML = `<div class="col-span-full text-center text-gray-500 text-xs py-10 font-mono">${t('loading')}</div>`;
             
             snaps.forEach(d => {
                 const tData = d.data();
                 const isDone = state.data.completedTasks?.includes(d.id);
                 const el = document.createElement('div');
-                el.className = `glass p-4 rounded-2xl border ${isDone?'border-green-500/20':'border-white/10'} transition-all`;
+                el.className = `glass p-4 rounded-2xl border ${isDone?'border-green-500/20 bg-green-900/10':'border-white/10 hover:border-primary/50'} transition-all group`;
                 el.innerHTML = `
-                    <div class="flex justify-between mb-2"><span class="text-primary font-bold flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i> ${tData.reward} R$</span></div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-primary font-bold flex items-center gap-1 font-mono text-lg group-hover:scale-110 transition-transform"><svg class="w-4 h-4 robux-icon"><use href="#icon-robux"></use></svg> +${tData.reward}</span>
+                        ${isDone ? '<i class="fa-solid fa-check-circle text-success"></i>' : ''}
+                    </div>
                     <h4 class="font-bold text-sm text-white">${tData.title}</h4>
-                    <p class="text-[10px] text-gray-500 mb-3">${tData.description}</p>
-                    <button class="btn-start w-full py-2 rounded-lg text-xs font-bold ${isDone?'bg-white/5 text-gray-500':'bg-white/10 text-white hover:bg-white/20'}" data-id="${d.id}" data-r="${tData.reward}" ${isDone?'disabled':''}>${isDone?'COMPLETED':'START TASK'}</button>
+                    <p class="text-[10px] text-gray-500 mb-3 font-mono">${tData.description}</p>
+                    <button class="btn-start w-full py-2.5 rounded-xl text-xs font-bold ${isDone?'bg-white/5 text-gray-500 cursor-not-allowed':'bg-primary text-black hover:bg-yellow-400 click-bounce shadow-lg shadow-primary/20'}" data-id="${d.id}" data-r="${tData.reward}" ${isDone?'disabled':''}>${isDone?t('btn_done'):t('btn_start')}</button>
                 `;
                 list.appendChild(el);
             });
 
             document.querySelectorAll('.btn-start').forEach(b => {
                 b.onclick = async () => {
-                    if(state.data.lastTaskAt && (Date.now()-state.data.lastTaskAt.seconds*1000)/1000 < 15) return toast('Wait 15s', 'error');
-                    window.open('https://google.com','_blank'); // Demo link
+                    if(b.disabled) return;
+                    playSound('click');
+                    if(state.data.lastTaskAt && (Date.now()-state.data.lastTaskAt.seconds*1000)/1000 < 10) return toast('Wait 10s', 'error');
+                    window.open('https://google.com', '_blank');
                     toast('Verifying...', 'info');
                     setTimeout(async()=>{
                         await updateDoc(doc(db,"users",state.user.uid), { balance: increment(Number(b.dataset.r)), xp: increment(10), completedTasks:[...state.data.completedTasks||[], b.dataset.id], lastTaskAt: serverTimestamp() });
-                        toast('Success!','success'); initEarn();
-                    },4000);
+                        toast(`+${b.dataset.r} R$ Added!`, 'success');
+                        initEarn();
+                    }, 4000);
                 }
             });
-        };
-
-        // PROMO CODE LOGIC
-        window.redeemCode = async () => {
-            const input = document.getElementById('promo-input');
-            const code = input.value.trim().toUpperCase();
-            if(!code) return toast("Enter a code", "error");
-            
-            togglePromoModal(false);
-            toast("Checking code...", "info");
-
-            // Simple Local Demo Logic (In production, query a 'codes' collection)
-            const demoCodes = { "WELCOME100": 100, "ROBUX2024": 50 };
-            
-            if(state.data.usedCodes && state.data.usedCodes.includes(code)) {
-                return toast("Code already used!", "error");
-            }
-
-            if(demoCodes[code]) {
-                await updateDoc(doc(db, "users", state.user.uid), {
-                    balance: increment(demoCodes[code]),
-                    usedCodes: [...(state.data.usedCodes || []), code]
-                });
-                toast(`Redeemed ${demoCodes[code]} R$!`, "success");
-            } else {
-                toast("Invalid Code", "error");
-            }
         };
 
         const initWithdraw = async () => {
@@ -810,21 +825,57 @@
             hist.innerHTML = '';
             snaps.forEach(s => {
                 const d = s.data();
-                hist.innerHTML += `<div class="flex justify-between p-3 bg-white/5 rounded-xl text-xs border border-white/5"><span class="text-white font-bold">${d.amount} R$</span><span class="text-gray-500 uppercase ${d.status==='approved'?'text-green-500':d.status==='rejected'?'text-red-500':'text-yellow-500'}">${d.status}</span></div>`;
+                const statusKey = `status_${d.status}`;
+                hist.innerHTML += `<div class="flex justify-between p-3 bg-white/5 rounded-xl text-xs border border-white/5"><span class="text-white font-bold">${d.amount} R$</span><span class="uppercase font-bold ${d.status==='approved'?'text-success':d.status==='rejected'?'text-error':'text-primary'}">${t(statusKey)}</span></div>`;
             });
             document.getElementById('withdraw-form').onsubmit = async (e) => {
                 e.preventDefault();
+                playSound('click');
                 const amt = Number(document.getElementById('w-amount').value);
-                if(amt<50 || state.data.balance<amt) return toast('Invalid Amount / Balance','error');
+                if(amt<50 || state.data.balance<amt) return toast('Insufficient Funds (Min 50)', 'error');
                 await updateDoc(doc(db,"users",state.user.uid),{balance:increment(-amt), lastWithdrawAt:serverTimestamp()});
                 await addDoc(collection(db,"withdrawals"),{uid:state.user.uid, amount:amt, gamepassLink:document.getElementById('w-link').value, status:'pending', createdAt:serverTimestamp(), email:state.user.email});
-                toast('Sent!','success'); initWithdraw();
+                toast('Request Sent!', 'success'); initWithdraw();
             };
         };
 
         const initAdmin = async () => {
             if(!state.isAdmin) return router.navigate('home');
             
+            // ADMIN SEARCH LOGIC
+            window.selectedAdminUser = null;
+            window.adminSearchUser = async () => {
+                const val = document.getElementById('adm-user-search').value.trim();
+                if(!val) return toast("Enter Email or UID", "error");
+                
+                let q = query(collection(db, "users"), where("email", "==", val));
+                let snaps = await getDocs(q);
+                if(snaps.empty) {
+                    q = query(collection(db, "users"), where("uid", "==", val));
+                    snaps = await getDocs(q);
+                }
+
+                if(snaps.empty) return toast("User not found", "error");
+                
+                const d = snaps.docs[0];
+                window.selectedAdminUser = { id: d.id, ...d.data() };
+                document.getElementById('adm-res-uid').innerText = "UID: " + d.id;
+                document.getElementById('adm-res-email').innerText = window.selectedAdminUser.email;
+                document.getElementById('adm-res-bal').value = window.selectedAdminUser.balance;
+                document.getElementById('adm-user-result').classList.remove('hidden');
+            };
+
+            window.adminUpdateBalance = async () => {
+                if(!window.selectedAdminUser) return;
+                const newBal = Number(document.getElementById('adm-res-bal').value);
+                await updateDoc(doc(db, "users", window.selectedAdminUser.id), { balance: newBal });
+                toast("Balance Updated!", "success");
+            };
+
+            // STATS
+            const usersSnap = await getDocs(collection(db, "users"));
+            document.getElementById('adm-total-users').innerText = usersSnap.size;
+
             // Add Task
             document.getElementById('add-task-form').onsubmit = async (e) => {
                 e.preventDefault();
@@ -833,33 +884,28 @@
                     reward: Number(document.getElementById('t-reward').value), cooldown: Number(document.getElementById('t-cooldown').value),
                     active: true, createdAt: serverTimestamp()
                 });
-                toast('Task Added','success');
-                e.target.reset();
+                toast('Task Added','success'); e.target.reset();
             };
 
-            // Withdraw List
+            // Withdrawals
             const list = document.getElementById('admin-withdraw-list');
             const pSnaps = await getDocs(query(collection(db,"withdrawals"), where("status","==","pending")));
             list.innerHTML='';
-            if(pSnaps.empty) list.innerHTML = '<p class="text-gray-500">No pending requests.</p>';
+            if(pSnaps.empty) list.innerHTML = `<p class="text-gray-500">${t('loading')}</p>`;
             
             pSnaps.forEach(s => {
                 const d = s.data();
                 const div = document.createElement('div');
                 div.className="glass p-4 rounded-xl text-xs border border-white/10";
                 div.innerHTML=`
-                    <div class="flex justify-between mb-2">
-                        <span class="text-white font-bold text-lg">${d.amount} R$</span>
-                        <span class="text-gray-400 font-mono">${d.email}</span>
-                    </div>
+                    <div class="flex justify-between mb-2"><span class="text-white font-bold text-lg">${d.amount} R$</span><span class="text-gray-400 font-mono">${d.email}</span></div>
                     <a href="${d.gamepassLink}" target="_blank" class="text-blue-400 hover:underline mb-3 block truncate"><i class="fa-solid fa-external-link"></i> ${d.gamepassLink}</a>
                     <div class="flex gap-2">
-                        <button class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg font-bold flex-1 b-a">Approve</button>
-                        <button class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-bold flex-1 b-r">Reject</button>
+                        <button class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg font-bold flex-1 b-a">${t('approve')}</button>
+                        <button class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-bold flex-1 b-r">${t('reject')}</button>
                     </div>`;
-                
                 div.querySelector('.b-a').onclick=async()=>{ await updateDoc(doc(db,"withdrawals",s.id),{status:'approved'}); div.remove(); toast('Approved','success'); };
-                div.querySelector('.b-r').onclick=async()=>{ await updateDoc(doc(db,"withdrawals",s.id),{status:'rejected'}); await updateDoc(doc(db,"users",d.uid),{balance:increment(d.amount)}); div.remove(); toast('Rejected & Refunded','info'); };
+                div.querySelector('.b-r').onclick=async()=>{ await updateDoc(doc(db,"withdrawals",s.id),{status:'rejected'}); await updateDoc(doc(db,"users",d.uid),{balance:increment(d.amount)}); div.remove(); toast('Refunded','info'); };
                 list.appendChild(div);
             });
         };
@@ -871,50 +917,63 @@
             let i=1;
             snaps.forEach(s => {
                 const d = s.data();
-                tb.innerHTML += `<tr><td class="p-4 text-primary font-bold">${i++}</td><td class="p-4 flex gap-2 items-center"><img src="${d.photoURL}" class="w-6 h-6 rounded-full"> ${d.email.slice(0,3)}...</td><td class="p-4 text-right">${d.balance.toFixed(2)}</td></tr>`;
+                tb.innerHTML += `<tr><td class="p-4 text-primary font-bold">${i++}</td><td class="p-4 flex gap-2 items-center"><img src="${d.photoURL}" class="w-6 h-6 rounded-full" onerror="this.src='https://ui-avatars.com/api/?name=U'"> ${d.email.slice(0,3)}...</td><td class="p-4 text-right font-bold text-white">${d.balance.toFixed(0)}</td></tr>`;
             });
         };
 
         const initProfile = () => {
             document.getElementById('profile-img').src = state.user.photoURL;
-            document.getElementById('profile-name').innerText = state.user.displayName;
+            document.getElementById('profile-name').innerText = state.user.displayName || "User";
             document.getElementById('profile-email').innerText = state.user.email;
             document.getElementById('profile-id').innerText = state.user.uid;
-            document.getElementById('btn-logout').onclick = () => { signOut(auth); location.reload(); };
+            
+            const refLink = `https://robunexa.com?ref=${state.user.uid}`;
+            document.getElementById('ref-link').value = refLink;
+            document.getElementById('ref-count').innerText = state.data.referralCount || 0;
+            document.getElementById('ref-earn').innerText = (state.data.referralEarnings || 0) + ' R$';
+            
+            window.copyRef = () => { navigator.clipboard.writeText(refLink); toast('Copied!', 'success'); };
+            document.getElementById('btn-logout').onclick = () => { playSound('click'); signOut(auth); location.reload(); };
         };
 
-        // --- AUTH & MAIN LOOP ---
+        window.redeemCode = async () => {
+            playSound('click');
+            const input = document.getElementById('promo-input');
+            const code = input.value.trim().toUpperCase();
+            if(!code) return toast("Empty Code", "error");
+            togglePromoModal(false);
+            const demoCodes = { "ROBUX2024": 50, "WELCOME": 25 };
+            if(state.data.usedCodes && state.data.usedCodes.includes(code)) return toast("Already Used!", "error");
+            if(demoCodes[code]) {
+                await updateDoc(doc(db, "users", state.user.uid), { balance: increment(demoCodes[code]), usedCodes: [...(state.data.usedCodes || []), code] });
+                toast(`Redeemed ${demoCodes[code]} R$!`, "success");
+            } else { toast("Invalid Code", "error"); }
+        };
+
         onAuthStateChanged(auth, async (user) => {
             const loader = document.getElementById('app-loader');
             if (user) {
                 state.user = user;
                 state.isAdmin = (user.email === ADMIN_EMAIL);
                 
-                if(state.isAdmin) {
-                    document.getElementById('menu-admin').classList.remove('hidden');
-                }
+                if(state.isAdmin) document.getElementById('nav-admin').classList.remove('hidden');
 
                 const ref = doc(db,"users",user.uid);
                 const snap = await getDoc(ref);
                 if(!snap.exists()) {
-                    await setDoc(ref,{uid:user.uid, email:user.email, balance:0, xp:0, photoURL:user.photoURL, completedTasks:[], usedCodes:[], createdAt:serverTimestamp()});
+                    await setDoc(ref,{uid:user.uid, email:user.email, balance:0, xp:0, photoURL:user.photoURL, completedTasks:[], usedCodes:[], referralCount:0, createdAt:serverTimestamp()});
                     state.data = {balance:0, completedTasks:[], usedCodes:[]};
                 } else state.data = snap.data();
                 
-                // Realtime Balance Listener with Animation
                 onSnapshot(ref, (d) => {
                     if(d.exists()) {
                         const newData = d.data();
                         const newBal = newData.balance;
-                        
-                        // Update Header
                         animateValue(document.getElementById('header-balance'), prevBalance, newBal, 1000);
                         animateValue(document.getElementById('desktop-balance'), prevBalance, newBal, 1000);
-                        
-                        // Update Home Big Display if active
                         const homeBig = document.getElementById('home-big-balance');
                         if(homeBig) animateValue(homeBig, prevBalance, newBal, 1000);
-
+                        if(newBal > prevBalance && prevBalance !== 0) playSound('success');
                         prevBalance = newBal;
                         state.data = newData;
                     }
@@ -934,7 +993,7 @@
             setTimeout(() => { loader.style.opacity='0'; setTimeout(()=>loader.remove(),500); }, 1000);
         });
 
-        document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider).catch(e => toast(e.message, 'error'));
+        document.getElementById('btn-login').onclick = () => { playSound('click'); signInWithPopup(auth, provider).catch(e => toast(e.message, 'error')); };
         window.router = router;
     </script>
 </body>
