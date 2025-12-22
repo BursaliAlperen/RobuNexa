@@ -16,135 +16,58 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: {
-                        bg: '#050505',
-                        surface: '#0F1115',
-                        primary: '#FACC15', 
-                        accent: '#EA580C', 
-                        robux: '#00b06f',
-                        success: '#10B981',
-                        error: '#EF4444'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    animation: {
-                        'float': 'float 4s ease-in-out infinite',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        }
-                    }
+                    colors: { bg: '#050505', surface: '#0F1115', primary: '#FACC15', accent: '#EA580C', robux: '#00b06f', success: '#10B981', error: '#EF4444' },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    animation: { 'float': 'float 4s ease-in-out infinite', 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite' },
+                    keyframes: { float: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-10px)' } } }
                 }
             }
         }
     </script>
-
-    <!-- Icons & Fonts & Flags -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.11.0/css/flag-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Base Reset */
-        body {
-            background-color: #050505;
-            color: #e5e5e5;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        .static-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: 
-                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08), transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(250, 204, 21, 0.05), transparent 25%);
-            background-size: cover;
-            z-index: -10;
-            pointer-events: none;
-        }
-
-        .glass {
-            background: rgba(15, 17, 21, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        }
-
+        body { background-color: #050505; color: #e5e5e5; font-family: 'Inter', sans-serif; overflow-x: hidden; -webkit-tap-highlight-color: transparent; user-select: none; }
+        .static-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08), transparent 25%), radial-gradient(circle at 85% 30%, rgba(250, 204, 21, 0.05), transparent 25%); background-size: cover; z-index: -10; pointer-events: none; }
+        .glass { background: rgba(15, 17, 21, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); }
         .robux-icon { filter: drop-shadow(0 0 5px rgba(0, 176, 111, 0.4)); }
         .click-bounce:active { transform: scale(0.96); }
-        
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
         .toast { pointer-events: all; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .toast.show { transform: translateX(0); }
-        
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #050505; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #050505; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
-
-        /* HAMBURGER MENU OVERLAY */
-        #mobile-menu {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100;
-            background: rgba(5, 5, 5, 0.6); backdrop-filter: blur(10px);
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-        }
+        /* MENU */
+        #mobile-menu { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; background: rgba(5, 5, 5, 0.6); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #mobile-menu.active { opacity: 1; pointer-events: all; }
-        
-        #mobile-menu-content {
-            position: absolute; top: 0; left: 0; bottom: 0; width: 80%; max-width: 300px;
-            background: #0F1115; border-right: 1px solid rgba(255,255,255,0.1);
-            transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex; flex-direction: column;
-        }
+        #mobile-menu-content { position: absolute; top: 0; left: 0; bottom: 0; width: 80%; max-width: 300px; background: #0F1115; border-right: 1px solid rgba(255,255,255,0.1); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
         #mobile-menu.active #mobile-menu-content { transform: translateX(0); }
 
-        /* LIVE TICKER */
-        .ticker-wrap {
-            position: fixed; top: 0; left: 0; width: 100%; overflow: hidden; height: 32px; 
-            background: rgba(250, 204, 21, 0.1); border-bottom: 1px solid rgba(250, 204, 21, 0.2);
-            z-index: 40; pointer-events: none; display: flex; align-items: center;
-            backdrop-filter: blur(4px);
-        }
+        /* TICKER */
+        .ticker-wrap { position: fixed; top: 0; left: 0; width: 100%; overflow: hidden; height: 32px; background: rgba(250, 204, 21, 0.1); border-bottom: 1px solid rgba(250, 204, 21, 0.2); z-index: 40; pointer-events: none; display: flex; align-items: center; backdrop-filter: blur(4px); }
         .ticker { display: flex; white-space: nowrap; animation: ticker 45s linear infinite; }
-        .ticker-item { 
-            display: inline-flex; align-items: center; gap: 6px; padding: 0 1.5rem; 
-            color: #FACC15; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; font-weight: bold; 
-        }
+        .ticker-item { display: inline-flex; align-items: center; gap: 6px; padding: 0 1.5rem; color: #FACC15; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; font-weight: bold; }
         .ticker-item span { color: #fff; opacity: 0.8; }
         @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
         
-        /* TRANSITIONS */
-        #transition-overlay {
-            position: fixed; inset: 0; z-index: 9999;
-            background: #050505;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-        }
+        #transition-overlay { position: fixed; inset: 0; z-index: 9999; background: #050505; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #transition-overlay.active { opacity: 1; pointer-events: all; }
-
         .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
         .faq-item.active .faq-content { max-height: 1000px; }
         .faq-item.active i { transform: rotate(180deg); color: #FACC15; }
+        
+        /* ADMIN TABS */
+        .admin-tab-btn.active { background-color: #FACC15; color: black; border-color: #FACC15; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <!-- SECURITY -->
     <script>
         document.addEventListener('contextmenu', event => event.preventDefault());
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) { e.preventDefault(); return false; }
-        });
+        document.addEventListener('keydown', function(e) { if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) { e.preventDefault(); return false; } });
     </script>
 
     <!-- ICONS -->
@@ -155,12 +78,7 @@
             <rect x="28" y="75" width="18" height="40" rx="4" fill="#4ADE80" stroke="black" stroke-width="2"/>
             <rect x="54" y="75" width="18" height="40" rx="4" fill="#4ADE80" stroke="black" stroke-width="2"/>
             <rect x="25" y="35" width="50" height="45" rx="5" fill="#3B82F6" stroke="black" stroke-width="2"/>
-            <g>
-                <rect x="30" y="5" width="40" height="35" rx="8" fill="#FACC15" stroke="black" stroke-width="2"/>
-                <circle cx="43" cy="20" r="3" fill="black"/>
-                <circle cx="57" cy="20" r="3" fill="black"/>
-                <path d="M 45 28 Q 50 32 55 28" stroke="black" stroke-width="2" fill="none" stroke-linecap="round"/>
-            </g>
+            <g><rect x="30" y="5" width="40" height="35" rx="8" fill="#FACC15" stroke="black" stroke-width="2"/><circle cx="43" cy="20" r="3" fill="black"/><circle cx="57" cy="20" r="3" fill="black"/><path d="M 45 28 Q 50 32 55 28" stroke="black" stroke-width="2" fill="none" stroke-linecap="round"/></g>
         </symbol>
         <symbol id="icon-robux" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="45" fill="#00b06f" stroke="#008050" stroke-width="2"/>
@@ -171,22 +89,15 @@
 
     <div class="static-bg"></div>
     <div id="toast-container"></div>
+    <div class="ticker-wrap hidden md:flex"><div class="ticker" id="ticker-content"></div></div>
 
-    <!-- LIVE TICKER -->
-    <div class="ticker-wrap hidden md:flex">
-        <div class="ticker" id="ticker-content"></div>
-    </div>
-
-    <!-- MOBILE HAMBURGER MENU (EVERYTHING IS HERE) -->
+    <!-- MOBILE MENU -->
     <div id="mobile-menu">
         <div id="mobile-menu-content">
-            <!-- Menu Header -->
             <div class="p-6 border-b border-white/10 flex justify-between items-center">
                 <span class="font-bold text-xl tracking-tight">Robu<span class="text-primary">Nexa</span></span>
                 <button onclick="toggleMenu(false)" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            
-            <!-- Menu Links -->
             <div class="flex-1 overflow-y-auto p-4 space-y-2">
                 <button onclick="router.navigate('home'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-house w-6 text-center"></i> <span data-t="menu_home">Dashboard</span></button>
                 <button onclick="router.navigate('earn'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-link w-6 text-center"></i> <span data-t="menu_tasks">Shortlinks</span></button>
@@ -195,20 +106,17 @@
                 <button onclick="router.navigate('leaderboard'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-trophy w-6 text-center"></i> <span data-t="menu_top">Leaderboard</span></button>
                 <button onclick="router.navigate('profile'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-user w-6 text-center"></i> <span data-t="menu_profile">Profile</span></button>
                 
-                <!-- Admin Button (Hidden by default) -->
-                <button id="mob-nav-admin" onclick="router.navigate('admin'); toggleMenu(false)" class="hidden w-full text-left px-4 py-3 rounded-xl bg-red-900/20 text-red-500 border border-red-500/20 flex items-center gap-3 mt-4"><i class="fa-solid fa-shield-halved w-6 text-center"></i> <span data-t="menu_admin">Admin Panel</span></button>
-            </div>
+                <!-- YouTube Button -->
+                <button id="mob-nav-yt" onclick="claimYouTube()" class="hidden w-full text-left px-4 py-3 rounded-xl bg-red-600/10 text-red-500 border border-red-500/20 hover:bg-red-600/20 flex items-center gap-3 mt-4"><i class="fa-brands fa-youtube w-6 text-center"></i> Subscribe (+3 R$)</button>
 
-            <!-- Language Selector Footer -->
+                <!-- Admin Button -->
+                <button id="mob-nav-admin" onclick="router.navigate('admin'); toggleMenu(false)" class="hidden w-full text-left px-4 py-3 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center gap-3 mt-2"><i class="fa-solid fa-shield-halved w-6 text-center"></i> <span data-t="menu_admin">Admin Panel</span></button>
+            </div>
             <div class="p-4 border-t border-white/10 bg-black/20">
                 <p class="text-xs text-gray-500 mb-3 font-bold uppercase tracking-wider" data-t="select_lang">Select Language</p>
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="updateLanguage('en')" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-center gap-2">
-                        <span class="fi fi-us rounded-sm"></span> <span class="text-xs font-bold">ENG</span>
-                    </button>
-                    <button onclick="updateLanguage('tr')" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-center gap-2">
-                        <span class="fi fi-tr rounded-sm"></span> <span class="text-xs font-bold">TR</span>
-                    </button>
+                    <button onclick="updateLanguage('en')" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-center gap-2"><span class="fi fi-us rounded-sm"></span> <span class="text-xs font-bold">ENG</span></button>
+                    <button onclick="updateLanguage('tr')" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-center gap-2"><span class="fi fi-tr rounded-sm"></span> <span class="text-xs font-bold">TR</span></button>
                 </div>
             </div>
         </div>
@@ -229,20 +137,8 @@
         </div>
     </div>
 
-    <!-- LOADERS -->
-    <div id="transition-overlay">
-        <svg class="w-24 h-24 animate-float"><use href="#icon-full-noob"></use></svg>
-        <div class="mt-4 flex flex-col items-center gap-2">
-            <span class="text-xs font-bold text-white tracking-widest uppercase font-mono" data-t="loading">LOADING...</span>
-            <div class="w-32 h-1 bg-white/10 rounded-full overflow-hidden">
-                <div class="h-full bg-primary w-1/2 animate-[pulse_0.5s_infinite]"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="app-loader" class="fixed inset-0 bg-[#050505] z-[140] flex flex-col items-center justify-center transition-opacity duration-500">
-        <svg class="w-32 h-32 animate-float mb-4"><use href="#icon-full-noob"></use></svg>
-    </div>
+    <div id="transition-overlay"><svg class="w-24 h-24 animate-float"><use href="#icon-full-noob"></use></svg><div class="mt-4 flex flex-col items-center gap-2"><span class="text-xs font-bold text-white tracking-widest uppercase font-mono" data-t="loading">LOADING...</span><div class="w-32 h-1 bg-white/10 rounded-full overflow-hidden"><div class="h-full bg-primary w-1/2 animate-[pulse_0.5s_infinite]"></div></div></div></div>
+    <div id="app-loader" class="fixed inset-0 bg-[#050505] z-[140] flex flex-col items-center justify-center transition-opacity duration-500"><svg class="w-32 h-32 animate-float mb-4"><use href="#icon-full-noob"></use></svg></div>
 
     <!-- AUTH SCREEN -->
     <section id="auth-view" class="hidden min-h-screen flex flex-col items-center justify-center p-6 relative z-10 py-12">
@@ -254,25 +150,49 @@
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> <span data-t="login_btn">Login with Google</span>
             </button>
         </div>
-        
-        <!-- Language Select for Auth -->
         <div class="flex gap-4 justify-center mb-8">
              <button onclick="updateLanguage('en')" class="text-gray-400 hover:text-white text-sm font-bold flex items-center gap-2"><span class="fi fi-us"></span> ENG</button>
              <button onclick="updateLanguage('tr')" class="text-gray-400 hover:text-white text-sm font-bold flex items-center gap-2"><span class="fi fi-tr"></span> TR</button>
         </div>
-
+        
+        <!-- DETAILED FAQ -->
         <div class="w-full max-w-lg space-y-3 pb-8">
             <h3 class="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-4" data-t="faq_title">FAQ & Help</h3>
+            
             <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer group" onclick="toggleFaq(this)">
                 <div class="p-4 flex justify-between items-center group-hover:bg-white/5 transition"><span class="text-sm font-bold text-white" data-t="q1">Is this free?</span> <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i></div>
-                <div class="faq-content bg-black/30"><p class="p-4 text-xs text-gray-400 font-mono leading-relaxed" data-t="a1">RobuNexa is free. Visit shortlinks, get paid.</p></div>
+                <div class="faq-content bg-black/30"><p class="p-4 text-xs text-gray-400 font-mono leading-relaxed" data-t="a1">RobuNexa is completely free. We use Shortlinks and Ads to generate revenue. No surveys required.</p></div>
+            </div>
+            
+            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer group" onclick="toggleFaq(this)">
+                <div class="p-4 flex justify-between items-center group-hover:bg-white/5 transition"><span class="text-sm font-bold text-white" data-t="q2">How to withdraw?</span> <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i></div>
+                <div class="faq-content bg-black/30"><p class="p-4 text-xs text-gray-400 font-mono leading-relaxed" data-t="a2">Go to the Withdraw tab, enter the amount you want (min 50 R$) and your Gamepass link.</p></div>
+            </div>
+
+            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer group" onclick="toggleFaq(this)">
+                <div class="p-4 flex justify-between items-center group-hover:bg-white/5 transition"><span class="text-sm font-bold text-white" data-t="q3">When do I get paid?</span> <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i></div>
+                <div class="faq-content bg-black/30"><p class="p-4 text-xs text-gray-400 font-mono leading-relaxed" data-t="a3">Withdrawals are processed manually to ensure safety. It usually takes 24-72 hours.</p></div>
+            </div>
+
+            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer group" onclick="toggleFaq(this)">
+                <div class="p-4 flex justify-between items-center group-hover:bg-white/5 transition"><span class="text-sm font-bold text-white" data-t="q4">How do Shortlinks work?</span> <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i></div>
+                <div class="faq-content bg-black/30"><p class="p-4 text-xs text-gray-400 font-mono leading-relaxed" data-t="a4">Click 'Start Task', visit the link, find the verification code on the destination site, and paste it back here to get paid.</p></div>
+            </div>
+
+            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer group" onclick="toggleFaq(this)">
+                <div class="p-4 flex justify-between items-center group-hover:bg-white/5 transition"><span class="text-sm font-bold text-white" data-t="q5">Why is it loading?</span> <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i></div>
+                <div class="faq-content bg-black/30"><p class="p-4 text-xs text-gray-400 font-mono leading-relaxed" data-t="a5">If 'Loading...' persists, check your internet connection or try refreshing the page. We use high-speed servers.</p></div>
+            </div>
+
+            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer group" onclick="toggleFaq(this)">
+                <div class="p-4 flex justify-between items-center group-hover:bg-white/5 transition"><span class="text-sm font-bold text-white" data-t="q6">Referral System?</span> <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i></div>
+                <div class="faq-content bg-black/30"><p class="p-4 text-xs text-gray-400 font-mono leading-relaxed" data-t="a6">Invite your friends using your unique link in the Profile tab. You earn 10% of everything they earn, forever!</p></div>
             </div>
         </div>
     </section>
 
     <!-- MAIN INTERFACE -->
     <div id="main-view" class="hidden min-h-screen relative z-10 flex flex-col md:flex-row pt-[32px] md:pt-[32px]">
-        <!-- Desktop Sidebar -->
         <aside class="hidden md:flex flex-col w-64 h-screen glass fixed left-0 top-0 border-r border-white/5 z-20 pt-[32px]">
             <button onclick="router.navigate('home')" class="p-6 flex items-center gap-3 justify-center border-b border-white/5 hover:bg-white/5 transition cursor-pointer w-full group">
                 <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-black font-bold text-lg group-hover:rotate-12 transition-transform">R</div>
@@ -285,43 +205,25 @@
                 <button onclick="router.navigate('withdraw')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="withdraw"><i class="fa-solid fa-money-bill-transfer w-5"></i> <span data-t="menu_withdraw" class="text-sm">Withdraw</span></button>
                 <button onclick="router.navigate('leaderboard')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="leaderboard"><i class="fa-solid fa-trophy w-5"></i> <span data-t="menu_top" class="text-sm">Leaderboard</span></button>
                 <button onclick="router.navigate('profile')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="profile"><i class="fa-solid fa-user w-5"></i> <span data-t="menu_profile" class="text-sm">Profile</span></button>
-                <button id="desk-nav-admin" onclick="router.navigate('admin')" class="hidden w-full text-left px-4 py-3 rounded-xl bg-red-900/10 text-red-500 hover:bg-red-900/30 transition flex items-center gap-3 border border-red-500/20 mt-4"><i class="fa-solid fa-shield-halved w-5"></i> <span data-t="menu_admin" class="text-sm">Admin Panel</span></button>
+                
+                <button id="desk-nav-yt" onclick="claimYouTube()" class="hidden w-full text-left px-4 py-3 rounded-xl bg-red-600/10 text-red-500 border border-red-500/20 hover:bg-red-600/20 flex items-center gap-3 mt-4"><i class="fa-brands fa-youtube w-5"></i> <span class="text-sm">Subscribe (+3 R$)</span></button>
+                <button id="desk-nav-admin" onclick="router.navigate('admin')" class="hidden w-full text-left px-4 py-3 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center gap-3 mt-2"><i class="fa-solid fa-shield-halved w-5"></i> <span data-t="menu_admin" class="text-sm">Admin Panel</span></button>
             </div>
         </aside>
 
-        <!-- Content Area -->
         <div class="flex-1 md:ml-64">
-            <!-- Mobile Header with Hamburger -->
             <header class="glass sticky top-[32px] md:top-0 z-30 px-4 py-3 flex justify-between items-center border-b border-white/5 md:hidden backdrop-blur-xl">
-                <button onclick="toggleMenu(true)" class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 click-bounce">
-                    <i class="fa-solid fa-bars text-lg text-white"></i>
-                </button>
-                
-                <div class="flex items-center gap-2" onclick="router.navigate('home')">
-                    <span class="font-bold text-lg">Robu<span class="text-primary">Nexa</span></span>
-                </div>
-                
-                <div class="bg-surface/90 px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2 shadow-inner shadow-black/50">
-                    <svg class="w-5 h-5 robux-icon"><use href="#icon-robux"></use></svg>
-                    <span id="header-balance" class="font-mono font-bold text-sm text-white">0.00</span>
-                </div>
+                <button onclick="toggleMenu(true)" class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 click-bounce"><i class="fa-solid fa-bars text-lg text-white"></i></button>
+                <div class="flex items-center gap-2" onclick="router.navigate('home')"><span class="font-bold text-lg">Robu<span class="text-primary">Nexa</span></span></div>
+                <div class="bg-surface/90 px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2 shadow-inner shadow-black/50"><svg class="w-5 h-5 robux-icon"><use href="#icon-robux"></use></svg><span id="header-balance" class="font-mono font-bold text-sm text-white">0.00</span></div>
             </header>
-
-            <!-- Desktop Header -->
             <header class="hidden md:flex justify-between items-center px-8 py-6 glass sticky top-0 z-30 border-b border-white/5 backdrop-blur-xl">
-                <div>
-                    <h2 id="page-title" class="text-2xl font-bold text-white">Dashboard</h2>
-                    <p class="text-xs text-gray-500 font-mono" data-t="welcome">Welcome back, Earner.</p>
-                </div>
+                <div><h2 id="page-title" class="text-2xl font-bold text-white">Dashboard</h2><p class="text-xs text-gray-500 font-mono" data-t="welcome">Welcome back, Earner.</p></div>
                 <div class="flex items-center gap-6">
-                    <div class="bg-surface/80 px-5 py-2 rounded-full border border-white/10 flex items-center gap-3 shadow-lg shadow-black/20 hover:border-robux/50 transition-colors cursor-pointer group hover:bg-white/5">
-                        <svg class="w-8 h-8 robux-icon group-hover:scale-110 transition-transform"><use href="#icon-robux"></use></svg>
-                        <span id="desktop-balance" class="font-mono font-bold text-xl text-white">0.00</span>
-                    </div>
+                    <div class="bg-surface/80 px-5 py-2 rounded-full border border-white/10 flex items-center gap-3 shadow-lg shadow-black/20 group hover:bg-white/5"><svg class="w-8 h-8 robux-icon group-hover:scale-110 transition-transform"><use href="#icon-robux"></use></svg><span id="desktop-balance" class="font-mono font-bold text-xl text-white">0.00</span></div>
                     <img id="user-avatar" src="" referrerpolicy="no-referrer" onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'" class="w-10 h-10 rounded-full border-2 border-white/10 hover:border-primary transition-colors cursor-pointer" onclick="router.navigate('profile')">
                 </div>
             </header>
-
             <main id="app-content" class="p-4 md:p-8 max-w-6xl mx-auto"></main>
         </div>
     </div>
@@ -334,32 +236,17 @@
                 <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div class="text-center md:text-left">
                         <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 block" data-t="total_bal">Total Balance</span>
-                        <div class="flex items-center justify-center md:justify-start gap-3 mb-6">
-                            <svg class="w-12 h-12 md:w-16 md:h-16 robux-icon animate-pulse-slow"><use href="#icon-robux"></use></svg>
-                            <span class="text-5xl md:text-6xl font-black text-white tracking-tighter" id="home-big-balance">0.00</span>
-                        </div>
+                        <div class="flex items-center justify-center md:justify-start gap-3 mb-6"><svg class="w-12 h-12 md:w-16 md:h-16 robux-icon animate-pulse-slow"><use href="#icon-robux"></use></svg><span class="text-5xl md:text-6xl font-black text-white tracking-tighter" id="home-big-balance">0.00</span></div>
                         <div class="flex gap-3 justify-center md:justify-start">
-                            <button onclick="router.navigate('earn')" class="bg-gradient-to-r from-primary to-accent text-black font-bold py-3.5 px-8 rounded-xl click-bounce shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
-                                <span data-t="start_earn">Start Earning</span>
-                            </button>
-                            <button onclick="togglePromoModal(true)" class="glass border border-white/20 text-white font-bold py-3 px-5 rounded-xl click-bounce hover:bg-white/10 flex items-center gap-2">
-                                <i class="fa-solid fa-ticket text-primary"></i> <span class="hidden md:inline" data-t="code_btn">Code</span>
-                            </button>
+                            <button onclick="router.navigate('earn')" class="bg-gradient-to-r from-primary to-accent text-black font-bold py-3.5 px-8 rounded-xl click-bounce shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow"><span data-t="start_earn">Start Earning</span></button>
+                            <button onclick="togglePromoModal(true)" class="glass border border-white/20 text-white font-bold py-3 px-5 rounded-xl click-bounce hover:bg-white/10 flex items-center gap-2"><i class="fa-solid fa-ticket text-primary"></i> <span class="hidden md:inline" data-t="code_btn">Code</span></button>
                         </div>
                     </div>
-                    <div class="hidden md:block relative">
-                        <svg class="w-40 h-40 animate-float relative z-10"><use href="#icon-full-noob"></use></svg>
-                    </div>
+                    <div class="hidden md:block relative"><svg class="w-40 h-40 animate-float relative z-10"><use href="#icon-full-noob"></use></svg></div>
                 </div>
             </div>
             <div class="glass p-4 rounded-2xl border border-yellow-500/20 bg-yellow-900/10 flex justify-between items-center cursor-pointer hover:bg-yellow-900/20 transition" id="daily-bonus-card" onclick="claimDaily()">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-500 animate-pulse"><i class="fa-solid fa-calendar-check"></i></div>
-                    <div>
-                        <h4 class="font-bold text-white text-sm" data-t="daily_title">Daily Bonus</h4>
-                        <p class="text-[10px] text-gray-400 font-mono" id="daily-timer" data-t="daily_desc">Claim +10 R$ every 24h</p>
-                    </div>
-                </div>
+                <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-500 animate-pulse"><i class="fa-solid fa-calendar-check"></i></div><div><h4 class="font-bold text-white text-sm" data-t="daily_title">Daily Bonus</h4><p class="text-[10px] text-gray-400 font-mono" id="daily-timer" data-t="daily_desc">Claim +5 R$ every 24h</p></div></div>
                 <button class="bg-yellow-500 text-black font-bold px-3 py-1 rounded text-xs click-bounce">CLAIM</button>
             </div>
         </div>
@@ -369,143 +256,86 @@
         <div class="fade-in pb-10">
             <h3 class="text-xl font-bold mb-4 flex items-center gap-2" data-t="hot_tasks">Shortlinks & Walls</h3>
             <div id="task-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="col-span-full text-center py-12 glass rounded-xl">
-                    <i class="fa-solid fa-circle-notch fa-spin text-primary text-3xl"></i>
-                    <p class="text-gray-500 text-xs mt-3 uppercase tracking-widest font-mono" data-t="loading">Fetching Shortlinks...</p>
-                </div>
+                <div class="col-span-full text-center py-12 glass rounded-xl"><i class="fa-solid fa-circle-notch fa-spin text-primary text-3xl"></i><p class="text-gray-500 text-xs mt-3 uppercase tracking-widest font-mono" data-t="loading">Fetching Shortlinks...</p></div>
             </div>
         </div>
     </template>
 
     <template id="tpl-chat">
         <div class="fade-in h-[calc(100vh-140px)] flex flex-col glass rounded-2xl border border-white/5 overflow-hidden">
-            <div class="p-4 bg-white/5 border-b border-white/5 flex justify-between items-center">
-                <h3 class="font-bold text-white flex items-center gap-2"><i class="fa-solid fa-earth-americas text-blue-400"></i> Global Chat</h3>
-                <span class="text-xs text-green-400 font-mono flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online</span>
-            </div>
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 scroll-smooth">
-                <div class="text-center text-gray-500 text-xs py-10" id="chat-loader">Loading chat history...</div>
-            </div>
-            <div class="p-3 bg-black/40 border-t border-white/5 flex gap-2">
-                <input type="text" id="chat-input" placeholder="Type a message..." class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-primary outline-none" maxlength="100">
-                <button onclick="sendMessage()" class="bg-primary text-black w-12 h-12 rounded-xl flex items-center justify-center click-bounce hover:bg-yellow-400 transition"><i class="fa-solid fa-paper-plane"></i></button>
-            </div>
+            <div class="p-4 bg-white/5 border-b border-white/5 flex justify-between items-center"><h3 class="font-bold text-white flex items-center gap-2"><i class="fa-solid fa-earth-americas text-blue-400"></i> Global Chat</h3><span class="text-xs text-green-400 font-mono flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online</span></div>
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 scroll-smooth"><div class="text-center text-gray-500 text-xs py-10" id="chat-loader">Loading...</div></div>
+            <div class="p-3 bg-black/40 border-t border-white/5 flex gap-2"><input type="text" id="chat-input" placeholder="Type a message..." class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-primary outline-none" maxlength="100"><button onclick="sendMessage()" class="bg-primary text-black w-12 h-12 rounded-xl flex items-center justify-center click-bounce hover:bg-yellow-400 transition"><i class="fa-solid fa-paper-plane"></i></button></div>
         </div>
     </template>
 
     <template id="tpl-withdraw">
         <div class="fade-in space-y-6">
-            <div class="bg-gradient-to-r from-yellow-900/20 to-transparent border-l-4 border-yellow-500 p-4 rounded-r-xl flex gap-4">
-                <i class="fa-solid fa-triangle-exclamation text-yellow-500 text-xl mt-1"></i>
-                <div class="text-xs text-gray-400 leading-relaxed font-mono">
-                    <strong class="text-yellow-500 block mb-1 text-sm" data-t="withdraw_rules_title">Important Rule</strong>
-                    <span data-t="withdraw_rules_desc">Price your Gamepass to cover the 30% Roblox tax (Amount / 0.7).</span>
-                </div>
-            </div>
+            <div class="bg-gradient-to-r from-yellow-900/20 to-transparent border-l-4 border-yellow-500 p-4 rounded-r-xl flex gap-4"><i class="fa-solid fa-triangle-exclamation text-yellow-500 text-xl mt-1"></i><div class="text-xs text-gray-400 leading-relaxed font-mono"><strong class="text-yellow-500 block mb-1 text-sm" data-t="withdraw_rules_title">Important Rule</strong><span data-t="withdraw_rules_desc">Price your Gamepass to cover the 30% Roblox tax (Amount / 0.7).</span></div></div>
             <form id="withdraw-form" class="glass p-6 md:p-8 rounded-2xl space-y-6 border border-white/5 relative overflow-hidden">
-                <div>
-                    <label class="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider" data-t="amount_label">Amount (Min 50 R$)</label>
-                    <div class="relative mt-2">
-                        <div class="absolute left-4 top-3.5"><svg class="w-6 h-6 robux-icon"><use href="#icon-robux"></use></svg></div>
-                        <input type="number" id="w-amount" min="50" class="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 pl-14 pr-4 text-white focus:border-primary outline-none transition-all placeholder-gray-700 font-mono text-lg" placeholder="50">
-                    </div>
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider" data-t="link_label">Gamepass / Item Link</label>
-                    <div class="relative mt-2">
-                        <i class="fa-solid fa-link absolute left-4 top-4 text-gray-500 text-sm"></i>
-                        <input type="url" id="w-link" class="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 pl-10 pr-4 text-white focus:border-primary outline-none transition-all placeholder-gray-700 text-sm font-mono" placeholder="https://roblox.com/game-pass/...">
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-primary text-black font-bold py-4 rounded-xl click-bounce shadow-xl shadow-primary/10 hover:shadow-primary/30 transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i> <span data-t="req_payout">Request Payout</span>
-                </button>
+                <div><label class="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider" data-t="amount_label">Amount (Min 50 R$)</label><div class="relative mt-2"><div class="absolute left-4 top-3.5"><svg class="w-6 h-6 robux-icon"><use href="#icon-robux"></use></svg></div><input type="number" id="w-amount" min="50" class="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 pl-14 pr-4 text-white focus:border-primary outline-none transition-all placeholder-gray-700 font-mono text-lg" placeholder="50"></div></div>
+                <div><label class="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider" data-t="link_label">Gamepass / Item Link</label><div class="relative mt-2"><i class="fa-solid fa-link absolute left-4 top-4 text-gray-500 text-sm"></i><input type="url" id="w-link" class="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 pl-10 pr-4 text-white focus:border-primary outline-none transition-all placeholder-gray-700 text-sm font-mono" placeholder="https://roblox.com/game-pass/..."></div></div>
+                <button type="submit" class="w-full bg-primary text-black font-bold py-4 rounded-xl click-bounce shadow-xl shadow-primary/10 hover:shadow-primary/30 transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-paper-plane"></i> <span data-t="req_payout">Request Payout</span></button>
             </form>
-            <div class="space-y-3">
-                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1" data-t="trans_history">Transaction History</h3>
-                <div id="withdraw-history" class="space-y-2 font-mono"></div>
-            </div>
+            <div class="space-y-3"><h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1" data-t="trans_history">Transaction History</h3><div id="withdraw-history" class="space-y-2 font-mono"></div></div>
         </div>
     </template>
 
     <template id="tpl-leaderboard">
-        <div class="fade-in">
-            <div class="glass rounded-2xl overflow-hidden border border-white/5 shadow-2xl shadow-black/50">
-                <div class="p-4 bg-white/5 border-b border-white/5 flex justify-between items-center">
-                    <h3 class="font-bold text-white" data-t="top_20">Top 20 Earners</h3>
-                    <i class="fa-solid fa-crown text-primary text-xl"></i>
-                </div>
-                <table class="w-full text-left">
-                    <thead class="bg-black/20 text-[10px] text-gray-500 uppercase tracking-wider font-semibold">
-                        <tr><th class="p-4">#</th><th class="p-4" data-t="user">User</th><th class="p-4 text-right">R$</th></tr>
-                    </thead>
-                    <tbody id="leaderboard-body" class="text-sm divide-y divide-white/5 font-mono"></tbody>
-                </table>
-            </div>
-        </div>
+        <div class="fade-in"><div class="glass rounded-2xl overflow-hidden border border-white/5 shadow-2xl shadow-black/50"><div class="p-4 bg-white/5 border-b border-white/5 flex justify-between items-center"><h3 class="font-bold text-white" data-t="top_20">Top 20 Earners</h3><i class="fa-solid fa-crown text-primary text-xl"></i></div><table class="w-full text-left"><thead class="bg-black/20 text-[10px] text-gray-500 uppercase tracking-wider font-semibold"><tr><th class="p-4">#</th><th class="p-4" data-t="user">User</th><th class="p-4 text-right">R$</th></tr></thead><tbody id="leaderboard-body" class="text-sm divide-y divide-white/5 font-mono"></tbody></table></div></div>
     </template>
 
     <template id="tpl-profile">
         <div class="fade-in space-y-6">
-            <div class="glass p-6 md:p-8 rounded-3xl flex flex-col md:flex-row items-center gap-6 border border-white/5 relative overflow-hidden text-center md:text-left">
-                <div class="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none"></div>
-                <div class="relative">
-                    <div class="absolute inset-0 bg-primary/30 rounded-full blur-xl animate-pulse-slow"></div>
-                    <img id="profile-img" referrerpolicy="no-referrer" onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'" class="w-24 h-24 rounded-full border-4 border-primary relative z-10 shadow-xl">
-                </div>
-                <div class="relative z-10">
-                    <h2 id="profile-name" class="font-bold text-2xl text-white">User</h2>
-                    <p id="profile-email" class="text-sm text-gray-400 font-mono mb-2">...</p>
-                    <div class="inline-block px-3 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] text-gray-300 font-mono">UID: <span id="profile-id" class="text-primary">...</span></div>
-                </div>
-            </div>
-            <div class="glass p-6 rounded-2xl border border-white/5">
-                <h3 class="font-bold text-white mb-2 flex items-center gap-2"><i class="fa-solid fa-users text-primary"></i> <span data-t="ref_sys">Referral System</span></h3>
-                <p class="text-xs text-gray-400 mb-4" data-t="ref_desc">Invite friends and earn 10% of their earnings forever!</p>
-                <div class="flex gap-2">
-                    <input type="text" id="ref-link" readonly class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-gray-300" value="Loading...">
-                    <button onclick="copyRef()" class="bg-primary text-black font-bold px-4 rounded-lg text-xs hover:bg-yellow-400 click-bounce" data-t="copy_btn">COPY</button>
-                </div>
-            </div>
-            <div class="glass p-1 rounded-2xl border border-red-500/10 hover:border-red-500/30 transition-colors">
-                <button id="btn-logout" class="w-full bg-red-900/10 text-red-500 py-4 rounded-xl font-bold text-sm hover:bg-red-900/20 transition-all flex items-center justify-center gap-2 click-bounce">
-                    <i class="fa-solid fa-power-off"></i> <span data-t="sign_out">Sign Out</span>
-                </button>
-            </div>
+            <div class="glass p-6 md:p-8 rounded-3xl flex flex-col md:flex-row items-center gap-6 border border-white/5 relative overflow-hidden text-center md:text-left"><div class="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none"></div><div class="relative"><div class="absolute inset-0 bg-primary/30 rounded-full blur-xl animate-pulse-slow"></div><img id="profile-img" referrerpolicy="no-referrer" onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'" class="w-24 h-24 rounded-full border-4 border-primary relative z-10 shadow-xl"></div><div class="relative z-10"><h2 id="profile-name" class="font-bold text-2xl text-white">User</h2><p id="profile-email" class="text-sm text-gray-400 font-mono mb-2">...</p><div class="inline-block px-3 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] text-gray-300 font-mono">UID: <span id="profile-id" class="text-primary">...</span></div></div></div>
+            <div class="glass p-6 rounded-2xl border border-white/5"><h3 class="font-bold text-white mb-2 flex items-center gap-2"><i class="fa-solid fa-users text-primary"></i> <span data-t="ref_sys">Referral System</span></h3><p class="text-xs text-gray-400 mb-4" data-t="ref_desc">Invite friends and earn 10% of their earnings forever!</p><div class="flex gap-2"><input type="text" id="ref-link" readonly class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-gray-300" value="Loading..."><button onclick="copyRef()" class="bg-primary text-black font-bold px-4 rounded-lg text-xs hover:bg-yellow-400 click-bounce" data-t="copy_btn">COPY</button></div></div>
+            <div class="glass p-1 rounded-2xl border border-red-500/10 hover:border-red-500/30 transition-colors"><button id="btn-logout" class="w-full bg-red-900/10 text-red-500 py-4 rounded-xl font-bold text-sm hover:bg-red-900/20 transition-all flex items-center justify-center gap-2 click-bounce"><i class="fa-solid fa-power-off"></i> <span data-t="sign_out">Sign Out</span></button></div>
         </div>
     </template>
 
     <template id="tpl-admin">
-        <div class="fade-in space-y-8 pb-12">
+        <div class="fade-in space-y-6 pb-12">
             <h2 class="text-3xl font-bold text-white border-l-4 border-red-600 pl-4" data-t="admin_console">Admin Console</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="glass p-4 rounded-xl border border-white/10">
-                    <p class="text-gray-500 text-xs uppercase tracking-wider">Total Users</p>
-                    <h3 class="text-2xl font-bold text-white mt-1" id="adm-total-users">-</h3>
-                </div>
-                <div class="glass p-4 rounded-xl border border-white/10">
-                    <p class="text-gray-500 text-xs uppercase tracking-wider">Pending R$</p>
-                    <h3 class="text-2xl font-bold text-primary mt-1" id="adm-pending-robux">-</h3>
+            <div class="flex gap-2 p-1 bg-white/5 rounded-xl border border-white/5">
+                <button onclick="switchAdminTab('stats')" class="admin-tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-colors active" id="tab-btn-stats">Stats</button>
+                <button onclick="switchAdminTab('withdraw')" class="admin-tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-colors" id="tab-btn-withdraw">Withdrawals</button>
+                <button onclick="switchAdminTab('tasks')" class="admin-tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-colors" id="tab-btn-tasks">Tasks/Pages</button>
+            </div>
+            <div id="admin-tab-stats" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass p-4 rounded-xl border border-white/10"><p class="text-gray-500 text-xs uppercase tracking-wider">Total Users</p><h3 class="text-2xl font-bold text-white mt-1" id="adm-total-users">-</h3></div>
+                    <div class="glass p-4 rounded-xl border border-white/10"><p class="text-gray-500 text-xs uppercase tracking-wider">Pending R$</p><h3 class="text-2xl font-bold text-primary mt-1" id="adm-pending-robux">-</h3></div>
                 </div>
             </div>
-            <div class="glass p-6 rounded-2xl border border-white/10">
-                <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-money-bill-transfer text-primary"></i> <span data-t="pending_withdraws">Pending Withdrawals</span></h3>
-                <div id="admin-withdraw-list" class="grid gap-4">
-                    <p class="text-gray-500 text-sm" data-t="loading">Loading...</p>
+            <div id="admin-tab-withdraw" class="hidden space-y-4">
+                <div class="glass p-6 rounded-2xl border border-white/10">
+                    <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-money-bill-transfer text-primary"></i> <span data-t="pending_withdraws">Pending Withdrawals</span></h3>
+                    <div id="admin-withdraw-list" class="grid gap-4"><p class="text-gray-500 text-sm" data-t="loading">Loading...</p></div>
                 </div>
             </div>
-            <!-- Task Adder -->
-            <div class="glass p-6 rounded-2xl border border-white/10">
-                <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-link text-primary"></i> <span data-t="add_task">Add Shortlink Task</span></h3>
-                <form id="add-task-form" class="space-y-4">
-                    <input type="text" id="t-title" placeholder="Name" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
-                    <input type="text" id="t-desc" placeholder="Desc" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="number" id="t-reward" placeholder="Reward" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
-                        <input type="number" id="t-cooldown" placeholder="Cooldown" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+            <div id="admin-tab-tasks" class="hidden space-y-4">
+                <div class="bg-blue-900/20 border border-blue-500/30 p-4 rounded-xl">
+                    <h4 class="text-blue-400 font-bold text-sm mb-2"><i class="fa-solid fa-wand-magic-sparkles"></i> Step 1: Generate Verification Code</h4>
+                    <p class="text-xs text-gray-400 mb-3">Copy this code and paste it into the destination website of your shortlink.</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="gen-code-display" readonly class="bg-black/40 border border-white/10 text-white font-mono text-center w-full rounded p-2" value="..."/>
+                        <button onclick="generateRandomPageCode()" class="bg-blue-500 text-white text-xs font-bold px-3 rounded">GENERATE</button>
+                        <button onclick="copyGenCode()" class="bg-white/10 text-white text-xs font-bold px-3 rounded">COPY</button>
                     </div>
-                    <button class="bg-primary text-black w-full py-3 rounded-xl font-bold hover:bg-yellow-400 transition" data-t="create_task_btn">Create Task</button>
-                </form>
+                </div>
+                <div class="glass p-6 rounded-2xl border border-white/10">
+                    <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-link text-primary"></i> Step 2: Create Shortlink Task</h3>
+                    <form id="add-task-form" class="space-y-4">
+                        <input type="text" id="t-title" placeholder="Task Name (e.g. Visit Blog)" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                        <input type="text" id="t-desc" placeholder="Instruction (e.g. Find code at bottom)" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                        <input type="text" id="t-code" placeholder="Verification Code (Paste from Step 1)" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary font-mono text-yellow-500">
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="number" id="t-reward" placeholder="Reward (R$)" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                            <input type="number" id="t-cooldown" placeholder="Cooldown (sec)" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                        </div>
+                        <button class="bg-primary text-black w-full py-3 rounded-xl font-bold hover:bg-yellow-400 transition" data-t="create_task_btn">Create Task</button>
+                    </form>
+                </div>
             </div>
         </div>
     </template>
@@ -515,171 +345,118 @@
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, orderBy, limit, addDoc, getDocs, onSnapshot, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-        // CONFIG
-        const firebaseConfig = {
-            apiKey: "AIzaSyCUUceDxrNY2y7OEbJ6EX0QEXVFVBp1JgM",
-            authDomain: "robunexa.firebaseapp.com",
-            projectId: "robunexa",
-            storageBucket: "robunexa.firebasestorage.app",
-            messagingSenderId: "212565926554",
-            appId: "1:212565926554:web:8b82d702f0ef9dc04cf523",
-            measurementId: "G-6FR21407E6"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyCUUceDxrNY2y7OEbJ6EX0QEXVFVBp1JgM", authDomain: "robunexa.firebaseapp.com", projectId: "robunexa", storageBucket: "robunexa.firebasestorage.app", messagingSenderId: "212565926554", appId: "1:212565926554:web:8b82d702f0ef9dc04cf523", measurementId: "G-6FR21407E6" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
         
-        // !!! ADMIN EMAILS !!!
+        // ADMIN EMAILS
         const ADMIN_EMAILS = ["adanalironaldo131@gmail.com"];
         
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const playSound = (type) => {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
-            
-            if (type === 'click') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
-                gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-                osc.start(now); osc.stop(now + 0.1);
-            } else if (type === 'success') {
-                osc.type = 'square'; osc.frequency.setValueAtTime(1200, now); osc.frequency.setValueAtTime(1600, now + 0.1);
-                gain.gain.setValueAtTime(0.05, now); gain.gain.linearRampToValueAtTime(0, now + 0.4);
-                osc.start(now); osc.stop(now + 0.4);
-            } else if (type === 'error') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now);
-                gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                osc.start(now); osc.stop(now + 0.3);
-            }
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); const now = audioCtx.currentTime;
+            if (type === 'click') { osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(300, now + 0.1); gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1); osc.start(now); osc.stop(now + 0.1); } 
+            else if (type === 'success') { osc.type = 'square'; osc.frequency.setValueAtTime(1200, now); osc.frequency.setValueAtTime(1600, now + 0.1); gain.gain.setValueAtTime(0.05, now); gain.gain.linearRampToValueAtTime(0, now + 0.4); osc.start(now); osc.stop(now + 0.4); } 
+            else if (type === 'error') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3); osc.start(now); osc.stop(now + 0.3); }
         };
 
         let state = { user: null, data: null, isAdmin: false };
         let prevBalance = 0;
         let chatUnsub = null;
 
-        // FAKE USER GENERATOR
         const generateRandomUser = () => {
-            const prefixes = ["xX", "Pro", "The", "iAm", "Super", "Real", "Big", "Lil", "Dr", "Mr", "Dark", "Iron", "Gold", "TR_", "Ghost"];
-            const names = ["Wolf", "Gamer", "Slayer", "Player", "Ahmet", "Mehmet", "Ali", "Ayse", "Fatma", "Can", "Cem", "King", "Queen", "Noob", "Ninja", "Turk", "Baba", "Reis", "Yigit", "Efe"];
-            const suffixes = ["_TR", "123", "1907", "1905", "1903", "53", "06", "34", "_HD", "_YT", "Xx", "99", "00", "55", "_Pro", "Bey", "Han"];
-            
-            const p = prefixes[Math.floor(Math.random() * prefixes.length)];
-            const n = names[Math.floor(Math.random() * names.length)];
-            const s = suffixes[Math.floor(Math.random() * suffixes.length)];
+            const p = ["xX", "Pro", "The", "iAm", "Super", "Real", "Big", "Lil", "Dr", "Mr", "Dark", "TR_", "Ghost"];
+            const n = ["Wolf", "Gamer", "Slayer", "Player", "Ahmet", "Mehmet", "Ali", "Ayse", "Fatma", "Can", "Cem", "King", "Queen", "Noob", "Ninja", "Turk", "Baba", "Reis", "Yigit", "Efe"];
+            const s = ["_TR", "123", "1907", "1905", "1903", "53", "06", "34", "_HD", "_YT", "Xx", "99", "00", "55", "_Pro"];
             const rand = Math.random();
-            if(rand < 0.33) return `${p}_${n}`;
-            if(rand < 0.66) return `${n}${s}`;
-            return `${p}${n}${s}`;
+            return (rand < 0.33) ? `${p[Math.floor(Math.random()*p.length)]}_${n[Math.floor(Math.random()*n.length)]}` : (rand < 0.66) ? `${n[Math.floor(Math.random()*n.length)]}${s[Math.floor(Math.random()*s.length)]}` : `${p[Math.floor(Math.random()*p.length)]}${n[Math.floor(Math.random()*n.length)]}${s[Math.floor(Math.random()*s.length)]}`;
         };
 
         const generateFakeActivity = () => {
-            const actions = [
-                { i: 'fa-circle-check', t: 'withdrew', c: 'text-success', min: 50, max: 500 },
-                { i: 'fa-bolt', t: 'earned', c: 'text-primary', min: 2, max: 25 },
-                { i: 'fa-fire', t: 'completed a task', c: 'text-orange-500', val: '' },
-                { i: 'fa-user-plus', t: 'joined RobuNexa', c: 'text-blue-400', val: '' }
-            ];
+            const actions = [{ i: 'fa-circle-check', t: 'withdrew', c: 'text-success', min: 50, max: 500 }, { i: 'fa-bolt', t: 'earned', c: 'text-primary', min: 2, max: 25 }, { i: 'fa-fire', t: 'completed a task', c: 'text-orange-500', val: '' }, { i: 'fa-user-plus', t: 'joined RobuNexa', c: 'text-blue-400', val: '' }];
             const act = actions[Math.floor(Math.random() * actions.length)];
             const user = generateRandomUser();
-            let val = '';
-            if(act.min) val = Math.floor(Math.random() * (act.max - act.min) + act.min) + ' R$';
-            
+            let val = act.min ? (Math.floor(Math.random() * (act.max - act.min) + act.min) + ' R$') : '';
             return `<i class="fa-solid ${act.i} ${act.c}"></i> <span>${user}</span> ${act.t} <span class="text-white font-bold">${val}</span>`;
         };
 
         const populateTicker = (realEvent = null) => {
             const container = document.getElementById('ticker-content');
             if(!container) return;
-            let html = '';
-            if(realEvent) html += `<div class="ticker-item bg-primary/20 rounded-full border border-primary/50">${realEvent}</div>`;
+            let html = realEvent ? `<div class="ticker-item bg-primary/20 rounded-full border border-primary/50">${realEvent}</div>` : '';
             for(let i=0; i<30; i++) html += `<div class="ticker-item">${generateFakeActivity()}</div>`;
             container.innerHTML = html;
         };
-
         setInterval(() => { if(document.visibilityState === 'visible') populateTicker(); }, 45000);
 
-        // LANG DATA
-        const langData = {
+        // *** UPDATED LANGUAGE DICTIONARY ***
+        const langData = { 
             en: { 
                 code: "us", name: "English", 
                 login_btn: "Login with Google", auth_desc: "Join the Elite. Earn Real Robux.", 
-                menu_home: "Dashboard", menu_tasks: "Shortlinks", menu_chat: "Chat", menu_withdraw: "Withdraw", menu_top: "Top", menu_profile: "Me", menu_admin: "Admin Panel",
-                total_bal: "Total Balance", start_earn: "Start Earning", code_btn: "Code", completed_stat: "Completed", xp_level: "XP Level",
-                promo_title: "Promo Code", promo_desc: "Redeem for instant R$", hot_tasks: "Shortlinks & Walls", loading: "Loading...",
-                withdraw_rules_title: "Important Rule", withdraw_rules_desc: "Cover 30% tax (Amount / 0.7).", amount_label: "Amount (Min 50 R$)", link_label: "Gamepass Link", req_payout: "Request Payout", trans_history: "Transaction History",
-                top_20: "Top 20 Earners", user: "User", 
-                ref_sys: "Referral System", ref_desc: "Invite friends and earn 10% forever!", copy_btn: "COPY", sign_out: "Sign Out",
-                admin_console: "Admin Console", add_task: "Add Shortlink Task", create_task_btn: "Create Task", pending_withdraws: "Pending Withdrawals", approve: "Approve", reject: "Reject",
-                select_lang: "Select Language", redeem_btn: "REDEEM", daily_title: "Daily Bonus", daily_desc: "Claim +10 R$ every 24h",
+                menu_home: "Dashboard", menu_tasks: "Shortlinks", menu_chat: "Chat", menu_withdraw: "Withdraw", menu_top: "Top", menu_profile: "Me", menu_admin: "Admin Panel", 
+                total_bal: "Total Balance", start_earn: "Start Earning", code_btn: "Code", completed_stat: "Completed", xp_level: "XP Level", 
+                promo_title: "Promo Code", promo_desc: "Redeem for instant R$", hot_tasks: "Shortlinks & Walls", loading: "Loading...", 
+                withdraw_rules_title: "Important Rule", withdraw_rules_desc: "Cover 30% tax (Amount / 0.7).", amount_label: "Amount (Min 50 R$)", link_label: "Gamepass Link", req_payout: "Request Payout", trans_history: "Transaction History", 
+                top_20: "Top 20 Earners", user: "User", ref_sys: "Referral System", ref_desc: "Invite friends and earn 10% forever!", copy_btn: "COPY", sign_out: "Sign Out", 
+                admin_console: "Admin Console", add_task: "Add Shortlink Task", create_task_btn: "Create Task", pending_withdraws: "Pending Withdrawals", approve: "Approve", reject: "Reject", 
+                select_lang: "Select Language", redeem_btn: "REDEEM", daily_title: "Daily Bonus", daily_desc: "Claim +5 R$ every 24h", 
                 faq_title: "FAQ & Help", 
-                q1: "Is this free?", a1: "RobuNexa is completely free. We use Shortlinks and Ads to generate revenue. No surveys required.",
-                btn_start: "VISIT LINK", btn_done: "COMPLETED", status_pending: "PENDING", status_approved: "APPROVED", status_rejected: "REJECTED"
-            },
+                q1: "Is this free?", a1: "RobuNexa is completely free. We use Shortlinks and Ads to generate revenue. No surveys required.", 
+                q2: "How to withdraw?", a2: "Go to the Withdraw tab, enter the amount you want (min 50 R$) and your Gamepass link.",
+                q3: "When do I get paid?", a3: "Withdrawals are processed manually to ensure safety. It usually takes 24-72 hours.",
+                q4: "How do Shortlinks work?", a4: "Click 'Start Task', visit the link, find the verification code on the destination site, and paste it back here to get paid.",
+                q5: "Why is it loading?", a5: "If 'Loading...' persists, check your internet connection or try refreshing the page.",
+                q6: "Referral System?", a6: "Invite your friends using your unique link in the Profile tab. You earn 10% of everything they earn, forever!",
+                btn_start: "START", btn_done: "COMPLETED", status_pending: "PENDING", status_approved: "APPROVED", status_rejected: "REJECTED" 
+            }, 
             tr: { 
                 code: "tr", name: "Türkçe", 
                 login_btn: "Google ile Giriş", auth_desc: "Elitlere Katıl. Gerçek Robux Kazan.", 
-                menu_home: "Ana Sayfa", menu_tasks: "Shortlink", menu_chat: "Sohbet", menu_withdraw: "Çekim", menu_top: "Sıralama", menu_profile: "Profil", menu_admin: "Yönetici Paneli",
-                total_bal: "Toplam Bakiye", start_earn: "Kazanmaya Başla", code_btn: "Kod", completed_stat: "Tamamlanan", xp_level: "XP Seviyesi",
-                promo_title: "Promosyon Kodu", promo_desc: "Anında R$ kazanmak için gir", hot_tasks: "Shortlink & Görevler", loading: "Yükleniyor...",
-                withdraw_rules_title: "Önemli Kural", withdraw_rules_desc: "%30 vergiyi ekle (Miktar / 0.7).", amount_label: "Miktar (Min 50 R$)", link_label: "Gamepass Linki", req_payout: "Ödeme İste", trans_history: "İşlem Geçmişi",
-                top_20: "En Çok Kazananlar", user: "Kullanıcı", 
-                ref_sys: "Davet Sistemi", ref_desc: "Arkadaşlarını davet et, ömür boyu %10 kazan!", copy_btn: "KOPYALA", sign_out: "Çıkış Yap",
-                admin_console: "Yönetici Konsolu", add_task: "Shortlink Görevi Ekle", create_task_btn: "Görev Oluştur", pending_withdraws: "Bekleyen Çekimler", approve: "Onayla", reject: "Reddet",
-                select_lang: "Dil Seçiniz", redeem_btn: "KULLAN", daily_title: "Günlük Bonus", daily_desc: "Her 24 saatte +10 R$ Al",
+                menu_home: "Ana Sayfa", menu_tasks: "Shortlink", menu_chat: "Sohbet", menu_withdraw: "Çekim", menu_top: "Sıralama", menu_profile: "Profil", menu_admin: "Yönetici Paneli", 
+                total_bal: "Toplam Bakiye", start_earn: "Kazanmaya Başla", code_btn: "Kod", completed_stat: "Tamamlanan", xp_level: "XP Seviyesi", 
+                promo_title: "Promosyon Kodu", promo_desc: "Anında R$ kazanmak için gir", hot_tasks: "Shortlink & Görevler", loading: "Yükleniyor...", 
+                withdraw_rules_title: "Önemli Kural", withdraw_rules_desc: "%30 vergiyi ekle (Miktar / 0.7).", amount_label: "Miktar (Min 50 R$)", link_label: "Gamepass Linki", req_payout: "Ödeme İste", trans_history: "İşlem Geçmişi", 
+                top_20: "En Çok Kazananlar", user: "Kullanıcı", ref_sys: "Davet Sistemi", ref_desc: "Arkadaşlarını davet et, ömür boyu %10 kazan!", copy_btn: "KOPYALA", sign_out: "Çıkış Yap", 
+                admin_console: "Yönetici Konsolu", add_task: "Shortlink Görevi Ekle", create_task_btn: "Görev Oluştur", pending_withdraws: "Bekleyen Çekimler", approve: "Onayla", reject: "Reddet", 
+                select_lang: "Dil Seçiniz", redeem_btn: "KULLAN", daily_title: "Günlük Bonus", daily_desc: "Her 24 saatte +5 R$ Al", 
                 faq_title: "SSS & Yardım", 
-                q1: "Bu ücretsiz mi?", a1: "RobuNexa tamamen ücretsizdir. Shortlink ile kazanıyoruz.",
-                btn_start: "LİNKE GİT", btn_done: "YAPILDI", status_pending: "BEKLİYOR", status_approved: "ONAYLANDI", status_rejected: "REDDEDİLDİ"
-            }
+                q1: "Bu ücretsiz mi?", a1: "RobuNexa tamamen ücretsizdir. Gelir elde etmek için Shortlink kullanıyoruz. Anket yok!", 
+                q2: "Nasıl para çekerim?", a2: "Çekim sekmesine gidin, istediğiniz miktarı (min 50 R$) ve Gamepass linkinizi girin.",
+                q3: "Ne zaman gelir?", a3: "Ödemeler güvenlik nedeniyle manuel işlenir. Genellikle 24-72 saat sürer.",
+                q4: "Shortlinkler nasıl çalışır?", a4: "'Görevi Başlat'a tıklayın, linke gidin, hedef sitedeki doğrulama kodunu bulun ve buraya yapıştırıp ödülü alın.",
+                q5: "Neden yükleniyor?", a5: "'Yükleniyor...' yazısı gitmezse internetinizi kontrol edin veya sayfayı yenileyin.",
+                q6: "Davet Sistemi?", a6: "Profil sekmesindeki özel linkinizle arkadaşlarınızı davet edin. Onların kazandığı her şeyin %10'u sonsuza kadar sizin olsun!",
+                btn_start: "BAŞLA", btn_done: "YAPILDI", status_pending: "BEKLİYOR", status_approved: "ONAYLANDI", status_rejected: "REDDEDİLDİ" 
+            } 
         };
 
         let curLang = localStorage.getItem('robu_lang') || 'tr';
         const t = (key) => langData[curLang]?.[key] || langData['en'][key] || key;
 
-        window.updateLanguage = (lang) => {
-            curLang = lang; localStorage.setItem('robu_lang', lang);
-            document.querySelectorAll('[data-t]').forEach(el => { const k = el.getAttribute('data-t'); if(k) el.textContent = t(k); });
+        window.updateLanguage = (lang) => { 
+            curLang = lang; 
+            localStorage.setItem('robu_lang', lang); 
+            document.querySelectorAll('[data-t]').forEach(el => { 
+                const k = el.getAttribute('data-t'); 
+                if(k && t(k)) el.textContent = t(k); 
+            }); 
+            
             const placeholders = { 'w-amount': 'amount_label', 'w-link': 'link_label', 'promo-input': 'code_btn', 't-title': 'add_task', 't-desc': 'hot_tasks', 't-reward': 'amount_label', 'chat-input': 'menu_chat' };
             Object.keys(placeholders).forEach(id => { const el = document.getElementById(id); if(el) el.placeholder = t(placeholders[id]) + "..."; });
             if(document.getElementById('current-lang-name')) document.getElementById('current-lang-name').innerText = langData[lang].name;
-            toggleMenu(false); // Close menu on select
+            toggleMenu(false); 
         };
-
-        window.toggleMenu = (show) => {
-            const m = document.getElementById('mobile-menu');
-            if(show) m.classList.add('active');
-            else m.classList.remove('active');
-        };
-
+        
+        window.toggleMenu = (show) => { document.getElementById('mobile-menu').classList.toggle('active', show); };
         window.togglePromoModal = (show) => { const m = document.getElementById('promo-modal'); if(!show) { m.classList.remove('active'); setTimeout(()=>m.classList.add('hidden'),300); } else { m.classList.remove('hidden'); requestAnimationFrame(()=>m.classList.add('active')); } };
         window.toggleFaq = (el) => { el.classList.toggle('active'); playSound('click'); };
 
-        const toast = (msg, type = 'info') => {
-            const el = document.createElement('div');
-            const colors = type === 'success' ? 'bg-green-900/90 border-green-500' : type === 'error' ? 'bg-red-900/90 border-red-500' : 'bg-surface/90 border-gray-600';
-            el.className = `toast glass ${colors} border px-4 py-3 rounded-lg flex items-center gap-3 text-white shadow-lg min-w-[280px] backdrop-blur-md z-[10000]`;
-            el.innerHTML = `<i class="fa-solid fa-info-circle"></i> <span class="text-xs font-bold tracking-wide font-mono">${msg}</span>`;
-            document.getElementById('toast-container').appendChild(el);
-            requestAnimationFrame(() => el.classList.add('show'));
-            if(type === 'success') playSound('success'); else if(type === 'error') playSound('error');
-            setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 400); }, 3000);
-        };
-
-        const animateValue = (obj, start, end, duration) => {
-            if(!obj) return;
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                obj.innerHTML = (start + progress * (end - start)).toFixed(2);
-                if (progress < 1) window.requestAnimationFrame(step);
-            };
-            window.requestAnimationFrame(step);
-        };
+        const toast = (msg, type='info') => { const el = document.createElement('div'); el.className = `toast glass ${type==='success'?'bg-green-900/90 border-green-500':type==='error'?'bg-red-900/90 border-red-500':'bg-surface/90 border-gray-600'} border px-4 py-3 rounded-lg flex items-center gap-3 text-white shadow-lg min-w-[280px] backdrop-blur-md z-[10000]`; el.innerHTML=`<i class="fa-solid fa-info-circle"></i> <span class="text-xs font-bold tracking-wide font-mono">${msg}</span>`; document.getElementById('toast-container').appendChild(el); requestAnimationFrame(()=>el.classList.add('show')); if(type==='success') playSound('success'); else if(type==='error') playSound('error'); setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),400); },3000); };
+        const animateValue = (obj,start,end,dur) => { if(!obj)return; let s=null; const step=(t)=>{if(!s)s=t;const p=Math.min((t-s)/dur,1);obj.innerHTML=(start+p*(end-start)).toFixed(2);if(p<1)window.requestAnimationFrame(step);};window.requestAnimationFrame(step); };
 
         window.claimDaily = async () => {
             playSound('click');
@@ -688,24 +465,35 @@
             const diff = now - lastBonus;
             const hours24 = 24 * 60 * 60 * 1000;
             if (diff >= hours24) {
-                await updateDoc(doc(db,"users",state.user.uid), { balance: increment(10), lastBonusAt: serverTimestamp() });
-                toast("Daily Bonus Claimed! +10 R$", "success");
+                await updateDoc(doc(db,"users",state.user.uid), { balance: increment(5), lastBonusAt: serverTimestamp() });
+                toast("Daily Bonus Claimed! +5 R$", "success");
             } else {
-                const waitHours = Math.ceil((hours24 - diff) / (1000 * 60 * 60));
-                toast(`Wait ${waitHours} hours.`, "error");
+                toast(`Wait ${Math.ceil((hours24 - diff) / (1000 * 60 * 60))} hours.`, "error");
             }
         };
 
-        // ROUTER
+        window.claimYouTube = async () => {
+            if(state.data.youtubeClaimed) { toast("Already Claimed!", "error"); return; }
+            playSound('click');
+            window.open('https://youtube.com/@YourChannel', '_blank');
+            setTimeout(async () => {
+                const confirmed = confirm("Did you subscribe?");
+                if(confirmed) {
+                    await updateDoc(doc(db,"users",state.user.uid), { balance: increment(3), youtubeClaimed: true });
+                    toast("+3 R$ Reward Claimed!", "success");
+                    document.getElementById('mob-nav-yt').classList.add('hidden');
+                    document.getElementById('desk-nav-yt').classList.add('hidden');
+                    playSound('success');
+                }
+            }, 5000);
+        };
+
         const router = {
             navigate: (view) => {
                 playSound('click');
                 const overlay = document.getElementById('transition-overlay');
                 overlay.classList.add('active'); 
-
                 if(chatUnsub) { chatUnsub(); chatUnsub = null; }
-
-                // Desktop sidebar active state
                 document.querySelectorAll('.nav-btn').forEach(el => { el.classList.remove('bg-white/10','text-white'); el.classList.add('text-gray-400'); });
                 const deskBtn = document.querySelector(`.nav-btn[data-target="${view}"]`);
                 if(deskBtn) { deskBtn.classList.remove('text-gray-400'); deskBtn.classList.add('bg-white/10','text-white'); }
@@ -716,11 +504,9 @@
                     if (tpl) {
                         content.innerHTML = '';
                         content.appendChild(tpl.content.cloneNode(true));
-                        
                         const titles = { home:'menu_home', earn:'menu_tasks', chat:'menu_chat', withdraw:'menu_withdraw', leaderboard:'menu_top', profile:'menu_profile', admin:'admin_console' };
                         const pt = document.getElementById('page-title');
                         if(pt) pt.innerText = t(titles[view]) || 'App';
-
                         if(view === 'home') initHome();
                         if(view === 'earn') initEarn();
                         if(view === 'chat') initChat();
@@ -728,7 +514,6 @@
                         if(view === 'leaderboard') initLeaderboard();
                         if(view === 'profile') initProfile();
                         if(view === 'admin') initAdmin();
-
                         updateLanguage(curLang);
                         window.scrollTo(0,0);
                     }
@@ -737,18 +522,14 @@
             }
         };
 
-        const initHome = () => {
-            if(!state.data) return;
-            const balEl = document.getElementById('home-big-balance');
-            if(balEl) balEl.innerText = state.data.balance.toFixed(2);
-        };
+        const initHome = () => { if(state.data) animateValue(document.getElementById('home-big-balance'), 0, state.data.balance, 1000); };
 
         const initEarn = async () => {
             const list = document.getElementById('task-list');
-            const q = query(collection(db, "pages"), where("active", "==", true), orderBy("reward", "desc"));
+            const q = query(collection(db, "pages"), where("active", "==", true), orderBy("createdAt", "desc"));
             const snaps = await getDocs(q);
             list.innerHTML = '';
-            if(snaps.empty) list.innerHTML = `<div class="col-span-full text-center text-gray-500 text-xs py-10 font-mono">${t('loading')}</div>`;
+            if(snaps.empty) list.innerHTML = `<div class="col-span-full text-center text-gray-500 text-xs py-10 font-mono">No tasks available yet.</div>`;
             
             snaps.forEach(d => {
                 const tData = d.data();
@@ -756,100 +537,77 @@
                 const el = document.createElement('div');
                 el.className = `glass p-4 rounded-2xl border ${isDone?'border-green-500/20 bg-green-900/10':'border-white/10 hover:border-primary/50'} transition-all group`;
                 el.innerHTML = `
-                    <div class="flex justify-between mb-2">
-                        <span class="text-primary font-bold flex items-center gap-1 font-mono text-lg group-hover:scale-110 transition-transform"><svg class="w-4 h-4 robux-icon"><use href="#icon-robux"></use></svg> +${tData.reward}</span>
-                        ${isDone ? '<i class="fa-solid fa-check-circle text-success"></i>' : ''}
-                    </div>
+                    <div class="flex justify-between mb-2"><span class="text-primary font-bold flex items-center gap-1 font-mono text-lg group-hover:scale-110 transition-transform"><svg class="w-4 h-4 robux-icon"><use href="#icon-robux"></use></svg> +${tData.reward}</span>${isDone ? '<i class="fa-solid fa-check-circle text-success"></i>' : ''}</div>
                     <h4 class="font-bold text-sm text-white">${tData.title}</h4>
                     <p class="text-[10px] text-gray-500 mb-3 font-mono">${tData.description}</p>
-                    <button class="btn-start w-full py-2.5 rounded-xl text-xs font-bold ${isDone?'bg-white/5 text-gray-500 cursor-not-allowed':'bg-primary text-black hover:bg-yellow-400 click-bounce shadow-lg shadow-primary/20'}" data-id="${d.id}" data-r="${tData.reward}" ${isDone?'disabled':''}>${isDone?t('btn_done'):t('btn_start')}</button>
+                    
+                    ${!isDone ? `
+                    <div id="action-area-${d.id}" class="space-y-2">
+                        <button class="w-full bg-primary text-black font-bold py-2 rounded-xl text-xs hover:bg-yellow-400 click-bounce" onclick="startTask('${d.id}')">START TASK</button>
+                    </div>
+                    <div id="verify-area-${d.id}" class="hidden space-y-2">
+                        <input type="text" id="input-${d.id}" placeholder="Enter Verification Code" class="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-xs text-white text-center font-mono placeholder-gray-600 focus:border-primary outline-none">
+                        <button class="w-full bg-green-600 text-white font-bold py-2 rounded-xl text-xs hover:bg-green-500 click-bounce" onclick="verifyTask('${d.id}', '${tData.code}', ${tData.reward})">SUBMIT CODE</button>
+                    </div>` 
+                    : `<button class="w-full bg-white/5 text-gray-500 font-bold py-2 rounded-xl text-xs cursor-not-allowed">COMPLETED</button>`}
                 `;
                 list.appendChild(el);
             });
 
-            document.querySelectorAll('.btn-start').forEach(b => {
-                b.onclick = async () => {
-                    if(b.disabled) return;
-                    playSound('click');
-                    if(state.data.lastTaskAt && (Date.now()-state.data.lastTaskAt.seconds*1000)/1000 < 10) return toast('Wait 10s', 'error');
-                    window.open('https://google.com', '_blank'); 
-                    toast('Checking...', 'info');
-                    setTimeout(async()=>{
-                        await updateDoc(doc(db,"users",state.user.uid), { balance: increment(Number(b.dataset.r)), xp: increment(10), completedTasks:[...state.data.completedTasks||[], b.dataset.id], lastTaskAt: serverTimestamp() });
-                        toast(`+${b.dataset.r} R$ Added!`, 'success');
-                        initEarn();
-                    }, 4000);
+            window.startTask = (id) => {
+                playSound('click');
+                window.open('https://google.com', '_blank');
+                document.getElementById(`action-area-${id}`).classList.add('hidden');
+                document.getElementById(`verify-area-${id}`).classList.remove('hidden');
+                toast('Link opened! Find the code.', 'info');
+            };
+
+            window.verifyTask = async (id, correctCode, reward) => {
+                const inp = document.getElementById(`input-${id}`);
+                const val = inp.value.trim();
+                if(val === correctCode) {
+                    playSound('success');
+                    await updateDoc(doc(db,"users",state.user.uid), { balance: increment(reward), xp: increment(10), completedTasks:[...state.data.completedTasks||[], id], lastTaskAt: serverTimestamp() });
+                    toast(`Correct! +${reward} R$`, 'success');
+                    initEarn();
+                } else {
+                    playSound('error');
+                    toast('Incorrect Code!', 'error');
+                    inp.classList.add('border-red-500');
+                    setTimeout(() => inp.classList.remove('border-red-500'), 1000);
                 }
-            });
+            };
         };
 
         const initChat = () => {
             const chatDiv = document.getElementById('chat-messages');
             const q = query(collection(db, "messages"), orderBy("createdAt", "desc"), limit(30));
-            
             chatUnsub = onSnapshot(q, (snapshot) => {
-                chatDiv.innerHTML = ''; // CLEAR LOADING TEXT IMMEDIATELY
-                if(snapshot.empty) {
-                    chatDiv.innerHTML = `<div class="text-center text-gray-500 text-xs py-10">No messages yet.</div>`;
-                    return;
-                }
-                const msgs = [];
-                snapshot.forEach(doc => msgs.push(doc.data()));
+                chatDiv.innerHTML = '';
+                if(snapshot.empty) { chatDiv.innerHTML = `<div class="text-center text-gray-500 text-xs py-10">No messages yet.</div>`; return; }
+                const msgs = []; snapshot.forEach(doc => msgs.push(doc.data()));
                 msgs.reverse().forEach(m => {
                     const isMe = m.uid === state.user.uid;
-                    const el = document.createElement('div');
-                    el.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
-                    el.innerHTML = `
-                        <div class="max-w-[80%] ${isMe ? 'bg-primary text-black' : 'bg-white/10 text-white'} rounded-xl px-3 py-2 text-xs">
-                            <span class="block font-bold opacity-50 text-[10px] mb-1">${m.name}</span>
-                            ${m.text}
-                        </div>
-                    `;
+                    const el = document.createElement('div'); el.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
+                    el.innerHTML = `<div class="max-w-[80%] ${isMe ? 'bg-primary text-black' : 'bg-white/10 text-white'} rounded-xl px-3 py-2 text-xs"><span class="block font-bold opacity-50 text-[10px] mb-1">${m.name}</span>${m.text}</div>`;
                     chatDiv.appendChild(el);
                 });
                 chatDiv.scrollTop = chatDiv.scrollHeight;
             });
-
-            window.sendMessage = async () => {
-                const inp = document.getElementById('chat-input');
-                const txt = inp.value.trim();
-                if(!txt) return;
-                inp.value = '';
-                await addDoc(collection(db, "messages"), {
-                    uid: state.user.uid,
-                    name: state.user.displayName || "User",
-                    text: txt,
-                    createdAt: serverTimestamp()
-                });
-            };
-            
-            document.getElementById('chat-input').addEventListener('keypress', (e) => {
-                if(e.key === 'Enter') window.sendMessage();
-            });
+            window.sendMessage = async () => { const i = document.getElementById('chat-input'); if(i.value.trim()){ await addDoc(collection(db,"messages"),{uid:state.user.uid,name:state.user.displayName||"User",text:i.value.trim(),createdAt:serverTimestamp()}); i.value=''; }};
         };
 
         const initWithdraw = async () => {
             const hist = document.getElementById('withdraw-history');
             const snaps = await getDocs(query(collection(db,"withdrawals"), where("uid","==",state.user.uid), orderBy("createdAt","desc"), limit(5)));
             hist.innerHTML = '';
-            snaps.forEach(s => {
-                const d = s.data();
-                const statusKey = `status_${d.status}`;
-                hist.innerHTML += `<div class="flex justify-between p-3 bg-white/5 rounded-xl text-xs border border-white/5"><span class="text-white font-bold">${d.amount} R$</span><span class="uppercase font-bold ${d.status==='approved'?'text-success':d.status==='rejected'?'text-error':'text-primary'}">${t(statusKey)}</span></div>`;
-            });
+            snaps.forEach(s => { const d = s.data(); const st=`status_${d.status}`; hist.innerHTML += `<div class="flex justify-between p-3 bg-white/5 rounded-xl text-xs border border-white/5"><span class="text-white font-bold">${d.amount} R$</span><span class="uppercase font-bold ${d.status==='approved'?'text-success':d.status==='rejected'?'text-error':'text-primary'}">${t(st)}</span></div>`; });
             document.getElementById('withdraw-form').onsubmit = async (e) => {
-                e.preventDefault();
-                playSound('click');
-                const amt = Number(document.getElementById('w-amount').value);
+                e.preventDefault(); playSound('click'); const amt = Number(document.getElementById('w-amount').value);
                 if(amt<50 || state.data.balance<amt) return toast('Insufficient Funds (Min 50)', 'error');
-                
                 await updateDoc(doc(db,"users",state.user.uid),{balance:increment(-amt), lastWithdrawAt:serverTimestamp()});
                 await addDoc(collection(db,"withdrawals"),{uid:state.user.uid, amount:amt, gamepassLink:document.getElementById('w-link').value, status:'pending', createdAt:serverTimestamp(), email:state.user.email});
-                
-                const userName = state.user.displayName || "You";
-                const eventHtml = `<i class="fa-solid fa-circle-check text-success"></i> <span>${userName}</span> just withdrew <span class="text-white font-bold">${amt} R$</span>`;
-                populateTicker(eventHtml);
-                
+                populateTicker(`<i class="fa-solid fa-circle-check text-success"></i> <span>${state.user.displayName||"You"}</span> just withdrew <span class="text-white font-bold">${amt} R$</span>`);
                 toast('Request Sent!', 'success'); initWithdraw();
             };
         };
@@ -857,78 +615,68 @@
         const initAdmin = async () => {
             if(!state.isAdmin) return router.navigate('home');
             
-            // Withdrawals
+            window.switchAdminTab = (tab) => {
+                ['stats','withdraw','tasks'].forEach(t => {
+                    document.getElementById(`admin-tab-${t}`).classList.add('hidden');
+                    document.getElementById(`tab-btn-${t}`).classList.remove('active');
+                });
+                document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
+                document.getElementById(`tab-btn-${tab}`).classList.add('active');
+            };
+
+            const usersSnap = await getDocs(collection(db, "users"));
+            document.getElementById('adm-total-users').innerText = usersSnap.size;
+
             const list = document.getElementById('admin-withdraw-list');
             const pSnaps = await getDocs(query(collection(db,"withdrawals"), where("status","==","pending")));
             list.innerHTML='';
-            if(pSnaps.empty) list.innerHTML = `<p class="text-gray-500">${t('loading')}</p>`;
-            
+            if(pSnaps.empty) list.innerHTML = `<p class="text-gray-500 text-xs text-center py-4">No pending withdrawals.</p>`;
             pSnaps.forEach(s => {
                 const d = s.data();
-                const div = document.createElement('div');
-                div.className="glass p-4 rounded-xl text-xs border border-white/10";
-                div.innerHTML=`
-                    <div class="flex justify-between mb-2"><span class="text-white font-bold text-lg">${d.amount} R$</span><span class="text-gray-400 font-mono">${d.email}</span></div>
-                    <a href="${d.gamepassLink}" target="_blank" class="text-blue-400 hover:underline mb-3 block truncate"><i class="fa-solid fa-external-link"></i> ${d.gamepassLink}</a>
-                    <div class="flex gap-2">
-                        <button class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg font-bold flex-1 b-a">${t('approve')}</button>
-                        <button class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-bold flex-1 b-r">${t('reject')}</button>
-                    </div>`;
+                const div = document.createElement('div'); div.className="glass p-4 rounded-xl text-xs border border-white/10";
+                div.innerHTML=`<div class="flex justify-between mb-2"><span class="text-white font-bold text-lg">${d.amount} R$</span><span class="text-gray-400 font-mono">${d.email}</span></div><a href="${d.gamepassLink}" target="_blank" class="text-blue-400 hover:underline mb-3 block truncate"><i class="fa-solid fa-external-link"></i> Link</a><div class="flex gap-2"><button class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg font-bold flex-1 b-a">Approve</button><button class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-bold flex-1 b-r">Reject</button></div>`;
                 div.querySelector('.b-a').onclick=async()=>{ await updateDoc(doc(db,"withdrawals",s.id),{status:'approved'}); div.remove(); toast('Approved','success'); };
                 div.querySelector('.b-r').onclick=async()=>{ await updateDoc(doc(db,"withdrawals",s.id),{status:'rejected'}); await updateDoc(doc(db,"users",d.uid),{balance:increment(d.amount)}); div.remove(); toast('Refunded','info'); };
                 list.appendChild(div);
             });
-            
-            const usersSnap = await getDocs(collection(db, "users"));
-            document.getElementById('adm-total-users').innerText = usersSnap.size;
-            
+
+            window.generateRandomPageCode = () => {
+                const code = Math.floor(1000 + Math.random() * 9000).toString();
+                document.getElementById('gen-code-display').value = code;
+                document.getElementById('t-code').value = code;
+            };
+            window.copyGenCode = () => { navigator.clipboard.writeText(document.getElementById('gen-code-display').value); toast('Code Copied!', 'success'); };
+            generateRandomPageCode();
+
             document.getElementById('add-task-form').onsubmit = async (e) => {
                 e.preventDefault();
                 await addDoc(collection(db,"pages"),{
-                    title: document.getElementById('t-title').value, description: document.getElementById('t-desc').value,
-                    reward: Number(document.getElementById('t-reward').value), cooldown: Number(document.getElementById('t-cooldown').value),
+                    title: document.getElementById('t-title').value,
+                    description: document.getElementById('t-desc').value,
+                    code: document.getElementById('t-code').value,
+                    reward: Number(document.getElementById('t-reward').value),
+                    cooldown: Number(document.getElementById('t-cooldown').value),
                     active: true, createdAt: serverTimestamp()
                 });
-                toast('Task Added','success'); e.target.reset();
+                toast('Task Created & Published!','success'); e.target.reset(); generateRandomPageCode();
             };
         };
 
         const initLeaderboard = async () => {
-            const tb = document.getElementById('leaderboard-body');
-            const snaps = await getDocs(query(collection(db,"users"), orderBy("balance","desc"), limit(20)));
-            tb.innerHTML = '';
-            let i=1;
-            snaps.forEach(s => {
-                const d = s.data();
-                tb.innerHTML += `<tr><td class="p-4 text-primary font-bold">${i++}</td><td class="p-4 flex gap-2 items-center"><img src="${d.photoURL}" class="w-6 h-6 rounded-full" onerror="this.src='https://ui-avatars.com/api/?name=U'"> ${d.email.slice(0,3)}...</td><td class="p-4 text-right font-bold text-white">${d.balance.toFixed(0)}</td></tr>`;
-            });
+            const tb = document.getElementById('leaderboard-body'); const snaps = await getDocs(query(collection(db,"users"), orderBy("balance","desc"), limit(20))); tb.innerHTML = ''; let i=1;
+            snaps.forEach(s => { const d = s.data(); tb.innerHTML += `<tr><td class="p-4 text-primary font-bold">${i++}</td><td class="p-4 flex gap-2 items-center"><img src="${d.photoURL}" class="w-6 h-6 rounded-full" onerror="this.src='https://ui-avatars.com/api/?name=U'"> ${d.email.slice(0,3)}...</td><td class="p-4 text-right font-bold text-white">${d.balance.toFixed(0)}</td></tr>`; });
         };
 
         const initProfile = () => {
-            document.getElementById('profile-img').src = state.user.photoURL;
-            document.getElementById('profile-name').innerText = state.user.displayName || "User";
-            document.getElementById('profile-email').innerText = state.user.email;
-            document.getElementById('profile-id').innerText = state.user.uid;
-            
-            const refLink = `https://robunexa.com?ref=${state.user.uid}`;
-            document.getElementById('ref-link').value = refLink;
-            
-            window.copyRef = () => { navigator.clipboard.writeText(refLink); toast('Copied!', 'success'); };
-            document.getElementById('btn-logout').onclick = () => { playSound('click'); signOut(auth); location.reload(); };
+            document.getElementById('profile-img').src = state.user.photoURL; document.getElementById('profile-name').innerText = state.user.displayName || "User"; document.getElementById('profile-email').innerText = state.user.email; document.getElementById('profile-id').innerText = state.user.uid;
+            document.getElementById('ref-link').value = `https://robunexa.com?ref=${state.user.uid}`; window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('ref-link').value); toast('Copied!', 'success'); }; document.getElementById('btn-logout').onclick = () => { playSound('click'); signOut(auth); location.reload(); };
         };
 
         window.redeemCode = async () => {
-            playSound('click');
-            const input = document.getElementById('promo-input');
-            const code = input.value.trim().toUpperCase();
-            if(!code) return toast("Empty Code", "error");
-            togglePromoModal(false);
-            const demoCodes = { "ROBUX2024": 50, "WELCOME": 25 };
-            if(state.data.usedCodes && state.data.usedCodes.includes(code)) return toast("Already Used!", "error");
-            if(demoCodes[code]) {
-                await updateDoc(doc(db, "users", state.user.uid), { balance: increment(demoCodes[code]), usedCodes: [...(state.data.usedCodes || []), code] });
-                toast(`Redeemed ${demoCodes[code]} R$!`, "success");
-            } else { toast("Invalid Code", "error"); }
+            playSound('click'); const c = document.getElementById('promo-input').value.trim().toUpperCase(); if(!c) return toast("Empty Code", "error"); togglePromoModal(false);
+            const codes = { "ROBUX2024": 50, "WELCOME": 25 };
+            if(state.data.usedCodes?.includes(c)) return toast("Already Used!", "error");
+            if(codes[c]) { await updateDoc(doc(db, "users", state.user.uid), { balance: increment(codes[c]), usedCodes: [...(state.data.usedCodes || []), c] }); toast(`Redeemed ${codes[c]} R$!`, "success"); } else toast("Invalid Code", "error");
         };
 
         onAuthStateChanged(auth, async (user) => {
@@ -940,38 +688,16 @@
                     document.getElementById('desk-nav-admin').classList.remove('hidden');
                     document.getElementById('mob-nav-admin').classList.remove('hidden');
                 }
+                const ref = doc(db,"users",user.uid); const snap = await getDoc(ref);
+                if(!snap.exists()) { await setDoc(ref,{uid:user.uid, email:user.email, balance:0, xp:0, photoURL:user.photoURL, completedTasks:[], usedCodes:[], referralCount:0, createdAt:serverTimestamp(), youtubeClaimed: false}); state.data = {balance:0}; } else state.data = snap.data();
+                
+                if(state.data.youtubeClaimed) { document.getElementById('mob-nav-yt').classList.add('hidden'); document.getElementById('desk-nav-yt').classList.add('hidden'); }
 
-                const ref = doc(db,"users",user.uid);
-                const snap = await getDoc(ref);
-                if(!snap.exists()) {
-                    await setDoc(ref,{uid:user.uid, email:user.email, balance:0, xp:0, photoURL:user.photoURL, completedTasks:[], usedCodes:[], referralCount:0, createdAt:serverTimestamp()});
-                    state.data = {balance:0, completedTasks:[], usedCodes:[]};
-                } else state.data = snap.data();
+                onSnapshot(ref, (d) => { if(d.exists()) { const nd = d.data(); const nb = nd.balance; animateValue(document.getElementById('header-balance'), prevBalance, nb, 1000); animateValue(document.getElementById('desktop-balance'), prevBalance, nb, 1000); if(document.getElementById('home-big-balance')) animateValue(document.getElementById('home-big-balance'), prevBalance, nb, 1000); if(nb>prevBalance && prevBalance!==0) playSound('success'); prevBalance = nb; state.data = nd; }});
                 
-                onSnapshot(ref, (d) => {
-                    if(d.exists()) {
-                        const newData = d.data();
-                        const newBal = newData.balance;
-                        animateValue(document.getElementById('header-balance'), prevBalance, newBal, 1000);
-                        animateValue(document.getElementById('desktop-balance'), prevBalance, newBal, 1000);
-                        const homeBig = document.getElementById('home-big-balance');
-                        if(homeBig) animateValue(homeBig, prevBalance, newBal, 1000);
-                        if(newBal > prevBalance && prevBalance !== 0) playSound('success');
-                        prevBalance = newBal;
-                        state.data = newData;
-                    }
-                });
-                
-                document.getElementById('auth-view').classList.add('hidden');
-                document.getElementById('main-view').classList.remove('hidden');
-                populateTicker(); 
-                updateLanguage(curLang);
-                router.navigate('home');
+                document.getElementById('auth-view').classList.add('hidden'); document.getElementById('main-view').classList.remove('hidden'); populateTicker(); updateLanguage(curLang); router.navigate('home');
             } else {
-                state = {user:null, data:null};
-                document.getElementById('main-view').classList.add('hidden');
-                document.getElementById('auth-view').classList.remove('hidden');
-                updateLanguage(curLang);
+                state = {user:null, data:null}; document.getElementById('main-view').classList.add('hidden'); document.getElementById('auth-view').classList.remove('hidden'); updateLanguage(curLang);
             }
             setTimeout(() => { loader.style.opacity='0'; setTimeout(()=>loader.remove(),500); }, 1000);
         });
