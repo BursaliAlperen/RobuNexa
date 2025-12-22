@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemap dosyanın yolu
+Sitemap: https://robunexa.com/sitemap.xml
