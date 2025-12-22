@@ -1,34 +1,36 @@
 <!DOCTYPE html>
-<html lang="tr" class="dark">
+<html lang="tr" class="notranslate" translate="no">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Robunexa | Earn Robux</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="google" content="notranslate">
+    <title>RobuNexa | Ultimate Noob Edition v3.0</title>
     
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='0' y='0' width='100' height='100' rx='20' fill='%23FACC15'/%3E%3Ccircle cx='30' cy='40' r='10' fill='black'/%3E%3Ccircle cx='70' cy='40' r='10' fill='black'/%3E%3Cpath d='M25 70 Q50 90 75 70' stroke='black' stroke-width='8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
-
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     
     <script>
-        document.documentElement.classList.add('dark');
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
-                    colors: {
-                        dark: { bg: '#09090b', card: '#18181b', text: '#f4f4f5' },
-                        theme: { yellow: '#FACC15', gold: '#EAB308', orange: '#F97316' },
-                        rbx: { green: '#00b06f', legGreen: '#A4BD47', torsoBlue: '#0d69ac' }
+                    colors: { 
+                        dark: '#020202',
+                        card: '#080808',
+                        noob: '#FACC15',
+                        noobBlue: '#00A2FF',
+                        noobGreen: '#2ECC71'
                     },
-                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
-                    animation: { 'float': 'float 6s ease-in-out infinite', 'scroll': 'scroll 30s linear infinite', 'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite' },
-                    keyframes: { 
+                    animation: {
+                        'spin-slow': 'spin 8s linear infinite',
+                        'float': 'float 4s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+                    },
+                    keyframes: {
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
-                        scroll: { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(-100%)' } }
+                        glow: { 'from': { boxShadow: '0 0 10px #FACC1533' }, 'to': { boxShadow: '0 0 30px #FACC1566' } },
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
                     }
                 }
             }
@@ -36,413 +38,703 @@
     </script>
 
     <style>
-        body { background-color: #09090b; color: #f4f4f5; overflow-x: hidden; }
-        .glass { background: rgba(24, 24, 27, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(250, 204, 21, 0.1); }
-        .bg-grid { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-image: linear-gradient(rgba(250, 204, 21, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(250, 204, 21, 0.03) 1px, transparent 1px); background-size: 40px 40px; }
-        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #09090b; } ::-webkit-scrollbar-thumb { background: #FACC15; border-radius: 3px; }
-        #loading-screen { transition: opacity 0.5s ease, visibility 0.5s; } .fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
-        .nav-active { @apply bg-theme-yellow/10 text-theme-yellow border-r-4 border-theme-yellow; }
-        .tab-btn { @apply px-6 py-2 rounded-full font-bold text-gray-400 transition border border-transparent; }
-        .tab-btn.active { @apply bg-theme-yellow text-black shadow-lg border-theme-yellow; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         
-        details > summary { list-style: none; cursor: pointer; }
-        details > summary::-webkit-details-marker { display: none; }
-        details[open] summary ~ * { animation: sweep .3s ease-in-out; }
-        @keyframes sweep { 0% {opacity: 0; transform: translateY(-10px)} 100% {opacity: 1; transform: translateY(0)} }
-        details[open] .fa-chevron-down { transform: rotate(180deg); }
-        .fa-chevron-down { transition: transform 0.3s ease; }
+        /* Root & Anti-Copy System */
+        :root { --noob: #FACC15; }
+        * { 
+            -webkit-user-select: none; user-select: none; 
+            -webkit-user-drag: none; box-sizing: border-box;
+            outline: none; scrollbar-width: none;
+        }
+        *::-webkit-scrollbar { display: none; }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: #020202; color: white; 
+            overflow: hidden; height: 100vh;
+        }
+
+        /* Particles Canvas Background */
+        #particle-canvas {
+            position: fixed; inset: 0; z-index: -1;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #020202 100%);
+        }
+
+        /* Custom Noob Branding Components */
+        .noob-head {
+            width: 100px; height: 100px; background: var(--noob);
+            border-radius: 20px; position: relative;
+            box-shadow: 0 15px 50px rgba(250, 204, 21, 0.25);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .noob-eyes { position: absolute; top: 35px; width: 60%; display: flex; justify-content: space-between; }
+        .noob-eye { width: 12px; height: 12px; background: #000; border-radius: 50%; }
+        .noob-mouth { 
+            width: 30px; height: 12px; border-bottom: 4px solid #000; 
+            border-radius: 50%; margin-top: 25px;
+        }
+
+        /* Hexagonal System */
+        .hexagon {
+            width: 30px; height: 35px; background: var(--noob);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex; align-items: center; justify-content: center;
+            color: black; font-weight: 800; font-size: 14px;
+        }
+
+        /* Glassmorphism System */
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-hover:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--noob); }
+
+        /* Views */
+        .view { display: none; height: calc(100vh - 80px); overflow-y: auto; padding: 2rem; }
+        .view.active { display: block; animation: slide-up 0.6s ease; }
+
+        /* Custom Input Styling */
+        input { background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.08) !important; transition: 0.3s; }
+        input:focus { border-color: var(--noob) !important; box-shadow: 0 0 15px rgba(250, 204, 21, 0.1); }
+
+        /* Notifications */
+        #notif-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-col; gap: 10px; }
+        .notif { padding: 15px 25px; border-radius: 12px; font-weight: 700; font-size: 13px; transform: translateX(120%); transition: 0.4s; }
+
+        /* Preloader */
+        #preloader { position: fixed; inset: 0; background: #020202; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
-<body class="antialiased min-h-screen font-sans">
+<body oncontextmenu="return false;">
 
-    <div class="bg-grid"></div>
-
-    <div id="loading-screen" class="fixed inset-0 z-[999] bg-[#09090b] flex flex-col items-center justify-center">
-        <div class="w-32 h-32 animate-bounce"><svg class="w-full h-full drop-shadow-2xl"><use href="#icon-noob"></use></svg></div>
-        <div class="mt-8 text-xl font-black text-white tracking-[0.3em]">ROBUNEXA</div>
+<div id="preloader">
+    <div class="noob-head animate-float mb-6">
+        <div class="noob-eyes"><div class="noob-eye"></div><div class="noob-eye"></div></div>
+        <div class="noob-mouth"></div>
     </div>
-
-    <div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col gap-3"></div>
-
-    <svg style="display: none;">
-        <symbol id="icon-noob" viewBox="0 0 100 100">
-            <rect x="35" y="2" width="30" height="30" rx="6" fill="#FACC15" stroke="#000" stroke-width="2"/>
-            <circle cx="43" cy="12" r="3" fill="black"/> <circle cx="57" cy="12" r="3" fill="black"/> <path d="M42 22 Q50 26 58 22" stroke="black" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <rect x="25" y="34" width="50" height="30" rx="2" fill="#0d69ac" stroke="#000" stroke-width="2"/>
-            <text x="50" y="55" font-family="Arial" font-weight="900" font-size="16" text-anchor="middle" fill="white" style="filter: drop-shadow(1px 1px 0px rgba(0,0,0,0.5));">R$</text>
-            <rect x="5" y="34" width="18" height="30" rx="5" fill="#FACC15" stroke="#000" stroke-width="2"/>
-            <rect x="77" y="34" width="18" height="30" rx="5" fill="#FACC15" stroke="#000" stroke-width="2"/>
-            <rect x="25" y="66" width="23" height="28" rx="2" fill="#A4BD47" stroke="#000" stroke-width="2"/>
-            <rect x="52" y="66" width="23" height="28" rx="2" fill="#A4BD47" stroke="#000" stroke-width="2"/>
-        </symbol>
-    </svg>
-
-    <!-- 1. LOGIN SCREEN -->
-    <div id="login-screen" class="min-h-screen flex flex-col relative z-10 overflow-x-hidden">
-        <nav class="w-full py-6 px-8 flex justify-between items-center">
-            <div class="flex items-center gap-3 text-2xl font-black text-white"><svg class="w-10 h-10"><use href="#icon-noob"></use></svg> ROBUNEXA</div>
-            <div class="relative z-50">
-                <button onclick="toggleLangMenu('lang-menu-login')" class="border border-zinc-700 px-4 py-2 rounded-full flex items-center gap-2 text-sm font-bold text-white hover:bg-zinc-800 transition bg-zinc-900">
-                    <img id="current-flag-login" src="https://flagcdn.com/w40/tr.png" class="w-5 rounded shadow-sm"><span id="current-text-login">TR</span> <i class="fas fa-chevron-down text-xs"></i>
-                </button>
-                <div id="lang-menu-login" class="hidden absolute top-12 right-0 bg-zinc-900 border border-zinc-700 p-2 rounded-xl flex-col gap-1 w-40 shadow-xl z-50"></div>
-            </div>
-        </nav>
-        
-        <!-- HERO -->
-        <section class="flex flex-col items-center justify-center px-6 mt-10">
-            <div class="glass w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl relative text-center" data-aos="zoom-in">
-                <div class="absolute -top-14 left-1/2 transform -translate-x-1/2 animate-float"><svg class="w-40 h-40"><use href="#icon-noob"></use></svg></div>
-                <h1 class="text-4xl font-black text-white mt-20 mb-2" data-i18n="hero_title">Bedava Robux</h1>
-                <p class="text-gray-400 mb-8" data-i18n="hero_sub">Google hesabınla anında başla.</p>
-                <button id="btn-google-login" class="w-full bg-white text-black font-bold py-4 rounded-2xl shadow-lg hover:scale-[1.02] transition flex items-center justify-center gap-3">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6"> <span data-i18n="btn_login_google">Google ile Giriş Yap</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- INFO SECTION (HOW IT WORKS & FAQ) -->
-        <section class="py-20 mt-10 border-t border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
-            <div class="container mx-auto px-6 max-w-4xl">
-                <!-- How It Works -->
-                <div class="text-center mb-16" data-aos="fade-up">
-                    <h2 class="text-3xl font-black text-white mb-10" data-i18n="how_title">Nasıl Çalışır?</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div class="bg-zinc-800 p-6 rounded-2xl border border-zinc-700">
-                            <div class="w-12 h-12 bg-theme-yellow/10 rounded-full flex items-center justify-center text-theme-yellow font-black text-xl mx-auto mb-4">1</div>
-                            <h3 class="font-bold text-white mb-2" data-i18n="how_step1_title">Giriş Yap</h3>
-                            <p class="text-sm text-gray-400" data-i18n="how_step1_desc">Google ile anında kayıt ol.</p>
-                        </div>
-                        <div class="bg-zinc-800 p-6 rounded-2xl border border-zinc-700">
-                            <div class="w-12 h-12 bg-theme-yellow/10 rounded-full flex items-center justify-center text-theme-yellow font-black text-xl mx-auto mb-4">2</div>
-                            <h3 class="font-bold text-white mb-2" data-i18n="how_step2_title">Görev Yap</h3>
-                            <p class="text-sm text-gray-400" data-i18n="how_step2_desc">Linkleri geç ve puan topla.</p>
-                        </div>
-                        <div class="bg-zinc-800 p-6 rounded-2xl border border-zinc-700">
-                            <div class="w-12 h-12 bg-theme-yellow/10 rounded-full flex items-center justify-center text-theme-yellow font-black text-xl mx-auto mb-4">3</div>
-                            <h3 class="font-bold text-white mb-2" data-i18n="how_step3_title">Çekim Yap</h3>
-                            <p class="text-sm text-gray-400" data-i18n="how_step3_desc">Bakiyeni hesabına aktar.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- FAQ -->
-                <h2 class="text-3xl font-black text-center text-white mb-10" data-aos="fade-up" data-i18n="faq_title">Sıkça Sorulan Sorular</h2>
-                <div class="space-y-4" data-aos="fade-up">
-                    <details class="group glass p-6 rounded-2xl">
-                        <summary class="flex justify-between items-center font-bold text-white text-lg"><span data-i18n="faq_q1">Sistem Güvenli mi?</span><i class="fas fa-chevron-down text-theme-yellow"></i></summary>
-                        <p class="mt-4 text-gray-300 leading-relaxed border-t border-zinc-700 pt-4" data-i18n="faq_a1">Evet! Asla şifrenizi istemiyoruz.</p>
-                    </details>
-                    <details class="group glass p-6 rounded-2xl">
-                        <summary class="flex justify-between items-center font-bold text-white text-lg"><span data-i18n="faq_q2">Robux ne zaman gelir?</span><i class="fas fa-chevron-down text-theme-yellow"></i></summary>
-                        <p class="mt-4 text-gray-300 leading-relaxed border-t border-zinc-700 pt-4" data-i18n="faq_a2">Gamepass yöntemiyle 3-7 gün içinde gelir.</p>
-                    </details>
-                    <details class="group glass p-6 rounded-2xl">
-                        <summary class="flex justify-between items-center font-bold text-white text-lg"><span data-i18n="faq_q3">Neden puanım gelmedi?</span><i class="fas fa-chevron-down text-theme-yellow"></i></summary>
-                        <p class="mt-4 text-gray-300 leading-relaxed border-t border-zinc-700 pt-4" data-i18n="faq_a3">Reklam engelleyici (AdBlock) kullanıyorsanız kapatın.</p>
-                    </details>
-                </div>
-            </div>
-        </section>
+    <div class="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+        <div id="load-bar" class="w-0 h-full bg-noob transition-all duration-500"></div>
     </div>
+    <p class="mt-4 text-[10px] font-bold text-noob tracking-[0.5em] uppercase">RobuNexa Loading</p>
+</div>
 
-    <!-- 2. APP SCREEN -->
-    <div id="app-screen" class="hidden flex h-screen overflow-hidden relative z-10">
-        <aside class="w-72 bg-zinc-900 border-r border-zinc-800 hidden md:flex flex-col z-20">
-            <div class="h-24 flex items-center px-8 border-b border-zinc-800"><svg class="w-12 h-12 mr-3"><use href="#icon-noob"></use></svg><span class="text-xl font-extrabold text-white">ROBUNEXA</span></div>
-            <nav class="flex-1 p-6 space-y-2 overflow-y-auto">
-                <button onclick="switchView('dashboard')" class="nav-btn nav-active w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-400 hover:bg-zinc-800 font-bold"><i class="fas fa-home w-5"></i> <span data-i18n="nav_dashboard">Ana Sayfa</span></button>
-                <button onclick="switchView('tasks')" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-400 hover:bg-zinc-800 font-bold"><i class="fas fa-gamepad w-5"></i> <span data-i18n="nav_tasks">Görevler</span></button>
-                <button onclick="switchView('promo')" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-400 hover:bg-zinc-800 font-bold"><i class="fas fa-ticket-alt w-5"></i> <span data-i18n="nav_promo">Kodlar</span></button>
-                <button onclick="switchView('referral')" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-400 hover:bg-zinc-800 font-bold"><i class="fas fa-users w-5"></i> <span data-i18n="nav_ref">Referans</span></button>
-                <button id="btn-admin-nav" onclick="switchView('admin')" class="hidden nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-xl text-red-500 bg-red-500/10 hover:bg-red-500/20 font-bold"><i class="fas fa-shield-alt w-5"></i> Admin</button>
-            </nav>
-            <div class="p-6"><button onclick="handleLogout()" class="w-full text-red-500 font-bold py-3 hover:bg-zinc-800 rounded-xl" data-i18n="btn_logout">Çıkış Yap</button></div>
-        </aside>
+<canvas id="particle-canvas"></canvas>
 
-        <main class="flex-1 flex flex-col relative overflow-hidden bg-zinc-950">
-            <div class="bg-theme-yellow/10 h-8 flex items-center overflow-hidden border-b border-theme-yellow/10">
-                <div id="live-ticker" class="animate-scroll whitespace-nowrap px-4 text-xs font-bold text-theme-yellow flex gap-8"></div>
-            </div>
+<div id="notif-container"></div>
 
-            <header class="h-20 bg-zinc-900/80 backdrop-blur border-b border-zinc-800 flex items-center justify-between px-6 sticky top-0 z-30">
-                <div class="md:hidden"><button onclick="toggleDrawer()"><i class="fas fa-bars text-white text-xl"></i></button></div>
-                <div class="hidden md:block text-white font-bold text-lg" id="page-title">Panel</div>
-                <div class="flex items-center gap-4">
-                    <div class="bg-zinc-800 border border-zinc-700 rounded-full pl-2 pr-5 py-1.5 flex items-center gap-3">
-                        <img id="header-pfp" src="" class="w-9 h-9 rounded-full border-2 border-theme-yellow object-cover">
-                        <div class="flex flex-col leading-none">
-                            <span class="text-[10px] text-gray-400 uppercase font-bold" data-i18n="card_balance">Bakiye</span>
-                            <span class="text-white font-black"><span id="header-balance">0.00</span> R$</span>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <div class="flex-1 overflow-y-auto p-4 md:p-8 relative">
-                <!-- DASHBOARD -->
-                <div id="view-dashboard" class="space-y-6 animate-fade-in pb-20">
-                    <div class="bg-gradient-to-r from-theme-yellow to-orange-500 rounded-3xl p-8 text-black relative overflow-hidden">
-                        <h2 class="text-3xl font-black mb-2" data-i18n="dash_welcome">Hoş Geldin!</h2>
-                        <p class="font-bold opacity-80" data-i18n="dash_subtitle">Görevleri yap, Robux kazan.</p>
-                        <div class="absolute right-0 bottom-[-20px] opacity-30"><svg class="w-48 h-48"><use href="#icon-noob"></use></svg></div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="glass p-6 rounded-3xl">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="bg-theme-yellow/20 p-3 rounded-xl text-theme-yellow"><i class="fas fa-wallet text-xl"></i></div>
-                                <button onclick="toggleModal('withdraw-modal')" class="bg-zinc-700 px-3 py-1 rounded text-xs font-bold text-white hover:bg-zinc-600" data-i18n="btn_withdraw">Çekim</button>
-                            </div>
-                            <span class="text-gray-400 text-sm font-bold uppercase" data-i18n="card_balance">Bakiye</span>
-                            <div class="text-3xl font-black text-white" id="dash-balance">0.00</div>
-                        </div>
-                        <div class="glass p-6 rounded-3xl relative overflow-hidden">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="bg-orange-500/20 p-3 rounded-xl text-orange-500"><i class="fas fa-gift text-xl"></i></div>
-                                <span class="bg-theme-yellow/20 text-theme-yellow px-2 py-1 rounded text-xs font-bold">+1 R$</span>
-                            </div>
-                            <span class="text-gray-400 text-sm font-bold uppercase" data-i18n="card_daily">Günlük Görev</span>
-                            <div class="mt-4"><button id="btn-daily" class="w-full bg-zinc-800 text-gray-400 font-bold py-3 rounded-xl cursor-not-allowed transition" disabled>0/10 <span data-i18n="daily_tasks">Görev</span></button></div>
-                        </div>
-                        <div class="glass p-6 rounded-3xl">
-                             <div class="mb-4 bg-blue-500/20 p-3 rounded-xl w-fit text-blue-500"><i class="fas fa-check text-xl"></i></div>
-                             <span class="text-gray-400 text-sm font-bold uppercase" data-i18n="task_title">Tamamlanan</span>
-                             <div class="text-3xl font-black text-white" id="dash-tasks-total">0</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TASKS (SPLIT VIEW) -->
-                <div id="view-tasks" class="hidden space-y-6 animate-fade-in pb-20">
-                    <div class="flex items-center gap-4 mb-4">
-                        <button onclick="filterTasks('social')" id="tab-social" class="tab-btn active"><i class="fab fa-instagram mr-2"></i> <span data-i18n="tab_social">Sosyal</span></button>
-                        <button onclick="filterTasks('shortlink')" id="tab-shortlink" class="tab-btn flex items-center gap-2"><i class="fas fa-link"></i> Shortlink <span class="bg-green-500 text-black text-[10px] px-2 py-0.5 rounded font-black animate-pulse-fast uppercase" data-i18n="badge_easy">AŞIRI KOLAY</span></button>
-                    </div>
-                    <div id="task-container-social" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                    <div id="task-container-shortlink" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                </div>
-
-                <!-- PROMO -->
-                <div id="view-promo" class="hidden animate-fade-in pb-20 flex justify-center pt-10">
-                    <div class="glass p-10 rounded-3xl w-full max-w-lg text-center">
-                        <i class="fas fa-ticket-alt text-4xl text-theme-yellow mb-4"></i>
-                        <h2 class="text-2xl font-black text-white mb-6" data-i18n="promo_title">Promosyon Kodu</h2>
-                        <input id="promo-code-input" class="w-full bg-black/40 border border-zinc-700 p-4 rounded-xl text-center text-white font-bold uppercase mb-4 focus:border-theme-yellow outline-none" placeholder="CODE">
-                        <button id="btn-use-promo" class="w-full bg-theme-yellow hover:bg-orange-500 text-black font-bold py-4 rounded-xl transition" data-i18n="btn_redeem">KULLAN</button>
-                    </div>
-                </div>
-
-                <!-- REFERRAL -->
-                <div id="view-referral" class="hidden animate-fade-in pb-20 text-center pt-10">
-                    <div class="glass p-10 rounded-3xl max-w-2xl mx-auto">
-                         <h2 class="text-2xl font-black text-white mb-2" data-i18n="ref_title">Davet Et</h2>
-                         <p class="text-gray-400 mb-6" data-i18n="ref_desc">%10 Komisyon.</p>
-                         <div class="bg-black/40 p-4 rounded-xl flex items-center justify-between border border-zinc-700">
-                             <code id="ref-link" class="text-theme-yellow">...</code>
-                             <button onclick="copyRef()" class="text-white hover:text-theme-yellow"><i class="far fa-copy"></i></button>
-                         </div>
-                    </div>
-                </div>
-
-                <!-- ADMIN (Advanced) -->
-                <div id="view-admin" class="hidden space-y-8 animate-fade-in pb-20">
-                    <h1 class="text-3xl font-black text-red-500">Yönetici Paneli</h1>
-                    <!-- Link Generator -->
-                    <div class="glass p-6 rounded-3xl border-l-4 border-blue-500">
-                        <h3 class="text-xl font-bold text-white mb-2">1. Adım: İç Link Oluştur</h3>
-                        <div class="flex gap-2">
-                            <input id="admin-gen-slug" placeholder="Görev ID" class="bg-black/40 border border-zinc-700 p-2 rounded text-white flex-1">
-                            <button onclick="generateInternalLink()" class="bg-blue-600 text-white px-4 rounded font-bold">Oluştur</button>
-                        </div>
-                        <div id="admin-gen-result" class="mt-2 text-theme-yellow font-mono text-sm break-all"></div>
-                    </div>
-                    <!-- Add Task -->
-                    <div class="glass p-6 rounded-3xl border-l-4 border-green-500">
-                        <h3 class="text-xl font-bold text-white mb-4">2. Adım: Görevi Ekle</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
-                            <input id="admin-task-name" placeholder="Görev Adı" class="bg-black/40 border border-zinc-700 p-2 rounded text-white">
-                            <input id="admin-task-reward" type="number" placeholder="Ödül (R$)" class="bg-black/40 border border-zinc-700 p-2 rounded text-white">
-                        </div>
-                        <input id="admin-task-url" placeholder="Kısaltılmış Link" class="bg-black/40 border border-zinc-700 p-2 rounded text-white w-full mb-2">
-                        <select id="admin-task-type" class="bg-black/40 border border-zinc-700 p-2 rounded text-white w-full">
-                            <option value="shortlink">Shortlink (Aşırı Kolay Rozetli)</option>
-                            <option value="social">Sosyal Medya (YouTube/Insta)</option>
-                        </select>
-                        <button onclick="adminAddTask()" class="mt-4 bg-green-600 text-white px-4 py-2 rounded font-bold w-full">Sisteme Kaydet</button>
-                    </div>
-                    <div class="glass p-6 rounded-3xl">
-                        <h3 class="text-xl font-bold text-white mb-4">Bekleyen Çekimler</h3>
-                        <div class="overflow-x-auto"><tbody id="admin-withdraw-list"></tbody></div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- WITHDRAW MODAL -->
-    <div id="withdraw-modal" class="hidden fixed inset-0 z-[110] bg-black/80 flex items-center justify-center p-4">
-        <div class="glass w-full max-w-md p-8 rounded-3xl relative">
-            <button onclick="toggleModal('withdraw-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
-            <h2 class="text-2xl font-bold text-white text-center mb-6" data-i18n="modal_withdraw_title">Robux Çek</h2>
-            <input id="w-gamepass" placeholder="Gamepass ID / Link" class="w-full bg-black/40 border border-zinc-700 p-3 rounded-xl text-white mb-3">
-            <input id="w-amount" type="number" placeholder="Min 5" class="w-full bg-black/40 border border-zinc-700 p-3 rounded-xl text-white mb-3">
-            <div class="bg-theme-yellow/10 p-3 rounded-xl flex justify-between mb-4"><span class="text-theme-yellow" data-i18n="modal_receive">Alacağın:</span><span class="font-bold text-white"><span id="calc-net">0</span> R$</span></div>
-            <button id="btn-submit-withdraw" class="w-full bg-theme-yellow hover:bg-orange-500 text-black font-bold py-3 rounded-xl" data-i18n="btn_submit_req">ONAYLA</button>
+<nav class="fixed top-0 w-full z-50 glass h-20 px-8 flex items-center justify-between">
+    <div class="flex items-center gap-4 group cursor-pointer" onclick="showView('landing')">
+        <div class="noob-head scale-[0.35] group-hover:rotate-[360deg] transition-all duration-1000 shadow-none">
+            <div class="noob-eyes"><div class="noob-eye"></div><div class="noob-eye"></div></div>
+            <div class="noob-mouth"></div>
+        </div>
+        <div class="flex flex-col leading-none">
+            <span class="font-extrabold text-2xl tracking-tighter italic" translate="no">ROBU<span class="text-noob">NEXA</span></span>
+            <span class="text-[8px] font-bold text-gray-500 tracking-[0.3em] uppercase">Absolute Premium</span>
         </div>
     </div>
 
-    <script type="module">
-        try { AOS.init(); } catch(e){}
+    <div id="nav-user-area" class="hidden flex items-center gap-6">
+        <div class="flex items-center gap-3 bg-white/5 border border-white/10 pl-2 pr-5 py-1.5 rounded-full">
+            <div class="hexagon">R</div>
+            <div class="flex flex-col">
+                <span id="balance-val" class="text-noob font-black text-sm">0.00</span>
+                <span class="text-[7px] font-bold text-gray-500 uppercase">Current Robux</span>
+            </div>
+        </div>
+        <button onclick="logout()" class="w-10 h-10 rounded-full glass border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+            <i class="fa-solid fa-power-off"></i>
+        </button>
+    </div>
+</nav>
 
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs, addDoc, deleteDoc, serverTimestamp, query, where, orderBy, onSnapshot, limit } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-
-        const firebaseConfig = { apiKey: "AIzaSyCUUceDxrNY2y7OEbJ6EX0QEXVFVBp1JgM", authDomain: "robunexa.firebaseapp.com", projectId: "robunexa", storageBucket: "robunexa.firebasestorage.app", messagingSenderId: "212565926554", appId: "1:212565926554:web:8b82d702f0ef9dc04cf523" };
-        let app, auth, db; try { app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app); } catch(e) {}
-        const ADMIN_EMAIL = "adanalironaldo131@gmail.com";
-        const ui = { loading: document.getElementById('loading-screen'), login: document.getElementById('login-screen'), app: document.getElementById('app-screen') };
-        let currentUser = null, userData = null;
-
-        // --- LANGUAGE SYSTEM (TR, EN, ES, PT) ---
-        const languages = [ 
-            {c:'tr',n:'Türkçe',f:'tr'}, 
-            {c:'en',n:'English',f:'us'}, 
-            {c:'es',n:'Español',f:'es'},
-            {c:'pt',n:'Português',f:'br'} 
-        ];
+<aside id="sidebar" class="hidden fixed left-0 top-20 h-full w-20 md:w-72 glass border-r border-white/5 z-40">
+    <div class="flex flex-col p-4 gap-4">
+        <div class="px-4 py-2 text-[10px] font-black text-gray-600 uppercase tracking-widest hidden md:block">Main Menu</div>
         
-        const translations = { 
-            tr: { 
-                hero_title:"Bedava Robux", hero_sub:"Google ile başla.", btn_login_google:"Google ile Giriş Yap", nav_dashboard:"Ana Sayfa", nav_tasks:"Görevler", nav_promo:"Kodlar", nav_ref:"Referans", btn_logout:"Çıkış", dash_welcome:"Hoş Geldin!", dash_subtitle:"Görev Yap & Kazan", btn_withdraw:"Çekim", card_balance:"Bakiye", card_daily:"Günlük Görev", daily_tasks:"Görev", task_title:"Tamamlanan", promo_title:"Promosyon Kodu", btn_redeem:"KULLAN", ref_title:"Davet Et", ref_desc:"%10 Komisyon", badge_easy:"AŞIRI KOLAY", tab_social:"Sosyal", 
-                how_title: "Nasıl Çalışır?", how_step1_title: "Giriş Yap", how_step1_desc: "Google ile anında kayıt ol.", how_step2_title: "Görev Yap", how_step2_desc: "Linkleri geç ve puan topla.", how_step3_title: "Çekim Yap", how_step3_desc: "Bakiyeni hesabına aktar.", 
-                faq_title: "Sıkça Sorulan Sorular", faq_q1: "Sistem Güvenli mi?", faq_a1: "Evet! Asla şifrenizi istemiyoruz.", faq_q2: "Robux ne zaman gelir?", faq_a2: "Gamepass yöntemiyle 3-7 gün içinde gelir.", faq_q3: "Neden puanım gelmedi?", faq_a3: "Reklam engelleyici (AdBlock) kullanıyorsanız kapatın.",
-                modal_withdraw_title: "Robux Çek", modal_receive: "Alacağın:", btn_submit_req: "ONAYLA"
-            },
-            en: { 
-                hero_title:"Free Robux", hero_sub:"Start with Google.", btn_login_google:"Login with Google", nav_dashboard:"Home", nav_tasks:"Tasks", nav_promo:"Codes", nav_ref:"Referral", btn_logout:"Logout", dash_welcome:"Welcome!", dash_subtitle:"Do Tasks & Earn", btn_withdraw:"Withdraw", card_balance:"Balance", card_daily:"Daily Quest", daily_tasks:"Tasks", task_title:"Completed", promo_title:"Promo Code", btn_redeem:"REDEEM", ref_title:"Invite", ref_desc:"10% Comm.", badge_easy:"VERY EASY", tab_social:"Social",
-                how_title: "How it Works", how_step1_title: "Login", how_step1_desc: "Instant sign up with Google.", how_step2_title: "Do Tasks", how_step2_desc: "Complete links and earn points.", how_step3_title: "Withdraw", how_step3_desc: "Transfer balance to account.",
-                faq_title: "FAQ", faq_q1: "Is it Safe?", faq_a1: "Yes! We never ask for passwords.", faq_q2: "When do I get Robux?", faq_a2: "Via Gamepass in 3-7 days.", faq_q3: "Why no points?", faq_a3: "Disable AdBlocker.",
-                modal_withdraw_title: "Withdraw Robux", modal_receive: "Receive:", btn_submit_req: "CONFIRM"
-            },
-            es: { 
-                hero_title:"Robux Gratis", hero_sub:"Empieza con Google.", btn_login_google:"Acceso con Google", nav_dashboard:"Inicio", nav_tasks:"Tareas", nav_promo:"Códigos", nav_ref:"Referido", btn_logout:"Salir", dash_welcome:"¡Bienvenido!", dash_subtitle:"Haz tareas y gana", btn_withdraw:"Retirar", card_balance:"Saldo", card_daily:"Misión Diaria", daily_tasks:"Tareas", task_title:"Completado", promo_title:"Código Promo", btn_redeem:"CANJEAR", ref_title:"Invitar", ref_desc:"10% Comisión", badge_easy:"MUY FÁCIL", tab_social:"Social",
-                how_title: "Cómo Funciona", how_step1_title: "Acceso", how_step1_desc: "Registro instantáneo con Google.", how_step2_title: "Tareas", how_step2_desc: "Completa enlaces y gana puntos.", how_step3_title: "Retirar", how_step3_desc: "Transfiere saldo a tu cuenta.",
-                faq_title: "Preguntas Frecuentes", faq_q1: "¿Es seguro?", faq_a1: "¡Sí! Nunca pedimos contraseñas.", faq_q2: "¿Cuándo llegan los Robux?", faq_a2: "Vía Gamepass en 3-7 días.", faq_q3: "¿Por qué no llegan puntos?", faq_a3: "Desactiva el AdBlock.",
-                modal_withdraw_title: "Retirar Robux", modal_receive: "Recibes:", btn_submit_req: "CONFIRMAR"
-            },
-            pt: { 
-                hero_title:"Robux Grátis", hero_sub:"Comece com Google.", btn_login_google:"Entrar com Google", nav_dashboard:"Início", nav_tasks:"Tarefas", nav_promo:"Códigos", nav_ref:"Indicar", btn_logout:"Sair", dash_welcome:"Bem-vindo!", dash_subtitle:"Faça tarefas e ganhe", btn_withdraw:"Sacar", card_balance:"Saldo", card_daily:"Missão Diária", daily_tasks:"Tarefas", task_title:"Concluído", promo_title:"Código Promo", btn_redeem:"RESGATAR", ref_title:"Convidar", ref_desc:"10% Comissão", badge_easy:"MUITO FÁCIL", tab_social:"Social",
-                how_title: "Como Funciona", how_step1_title: "Entrar", how_step1_desc: "Cadastro instantâneo com Google.", how_step2_title: "Tarefas", how_step2_desc: "Complete links e ganhe pontos.", how_step3_title: "Sacar", how_step3_desc: "Transfira o saldo para sua conta.",
-                faq_title: "Perguntas Frequentes", faq_q1: "É seguro?", faq_a1: "Sim! Nunca pedimos senhas.", faq_q2: "Quando recebo os Robux?", faq_a2: "Via Gamepass em 3-7 dias.", faq_q3: "Por que não recebi pontos?", faq_a3: "Desative o AdBlock.",
-                modal_withdraw_title: "Sacar Robux", modal_receive: "Receber:", btn_submit_req: "CONFIRMAR"
-            }
-        };
-        let curLang = localStorage.getItem('rx_lang') || 'tr';
+        <button onclick="showView('tasks')" class="nav-btn flex items-center justify-center md:justify-start gap-5 p-4 rounded-2xl text-gray-500 hover:text-noob hover:bg-noob/5 transition-all" data-view="tasks">
+            <i class="fa-solid fa-rocket text-xl"></i>
+            <span class="hidden md:block font-bold text-sm uppercase tracking-tight" data-key="nav_tasks">Görevler</span>
+        </button>
 
-        window.toggleLangMenu = (id) => document.getElementById(id).classList.toggle('hidden');
-        window.setLang = (c) => { 
-            curLang = c; localStorage.setItem('rx_lang', c); updateText(); 
-            const l = languages.find(x => x.c === c);
-            document.getElementById('current-flag-login').src = `https://flagcdn.com/w40/${l.f}.png`;
-            document.getElementById('current-text-login').innerText = l.c.toUpperCase();
-            document.getElementById('lang-menu-login').classList.add('hidden');
-        };
-        function updateText() { const d = translations[curLang] || translations['en']; document.querySelectorAll('[data-i18n]').forEach(e => { const k = e.dataset.i18n; if(d[k]) e.innerText = d[k]; }); }
-        document.getElementById('lang-menu-login').innerHTML = languages.map(l => `<button onclick="setLang('${l.c}')" class="flex items-center gap-2 p-2 w-full hover:bg-zinc-800 rounded text-white text-sm"><img src="https://flagcdn.com/w40/${l.f}.png" class="w-5 rounded">${l.n}</button>`).join('');
-        const defaultLang = languages.find(x => x.c === curLang);
-        document.getElementById('current-flag-login').src = `https://flagcdn.com/w40/${defaultLang.f}.png`;
-        document.getElementById('current-text-login').innerText = defaultLang.c.toUpperCase();
-        updateText();
+        <button onclick="showView('withdraw')" class="nav-btn flex items-center justify-center md:justify-start gap-5 p-4 rounded-2xl text-gray-500 hover:text-noob hover:bg-noob/5 transition-all" data-view="withdraw">
+            <i class="fa-solid fa-wallet text-xl"></i>
+            <span class="hidden md:block font-bold text-sm uppercase tracking-tight" data-key="nav_withdraw">Çekim İşlemleri</span>
+        </button>
 
-        const provider = new GoogleAuthProvider();
-        document.getElementById('btn-google-login').addEventListener('click', () => signInWithPopup(auth, provider).catch(e=>console.log(e)));
-        window.handleLogout = () => signOut(auth).then(() => window.location.reload());
+        <button onclick="showView('profile')" class="nav-btn flex items-center justify-center md:justify-start gap-5 p-4 rounded-2xl text-gray-500 hover:text-noob hover:bg-noob/5 transition-all" data-view="profile">
+            <i class="fa-solid fa-user-astronaut text-xl"></i>
+            <span class="hidden md:block font-bold text-sm uppercase tracking-tight" data-key="nav_profile">Profil</span>
+        </button>
+
+        <div class="h-[1px] bg-white/5 my-2"></div>
+
+        <button onclick="showView('settings')" class="nav-btn flex items-center justify-center md:justify-start gap-5 p-4 rounded-2xl text-gray-500 hover:text-noob hover:bg-noob/5 transition-all" data-view="settings">
+            <i class="fa-solid fa-gear text-xl"></i>
+            <span class="hidden md:block font-bold text-sm uppercase tracking-tight" data-key="nav_settings">Ayarlar</span>
+        </button>
+
+        <div id="admin-nav-item" class="hidden flex flex-col gap-2 mt-4">
+            <div class="px-4 py-2 text-[10px] font-black text-red-600 uppercase tracking-widest hidden md:block">Authority</div>
+            <button onclick="showView('admin')" class="flex items-center justify-center md:justify-start gap-5 p-4 rounded-2xl bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                <i class="fa-solid fa-shield-halved text-xl"></i>
+                <span class="hidden md:block font-black text-sm uppercase tracking-tight">Admin Panel</span>
+            </button>
+        </div>
+    </div>
+</aside>
+
+<main id="main-content" class="pt-20 transition-all duration-500">
+    
+    <div id="view-landing" class="view active flex flex-col items-center justify-center min-h-[80vh]">
+        <div class="relative mb-12 animate-float">
+            <div class="noob-head scale-125">
+                <div class="noob-eyes"><div class="noob-eye"></div><div class="noob-eye"></div></div>
+                <div class="noob-mouth"></div>
+            </div>
+            <div class="absolute -inset-8 bg-noob/20 blur-[60px] rounded-full -z-10 animate-pulse"></div>
+        </div>
+
+        <h1 class="text-6xl md:text-8xl font-black text-center leading-none tracking-tighter uppercase mb-6">
+            Sınırsız <br> <span class="text-noob italic">Robux</span> Havuzu
+        </h1>
         
-        onAuthStateChanged(auth, async (u) => {
-            if(u) {
-                currentUser = u;
-                document.getElementById('header-pfp').src = u.photoURL;
-                const userRef = doc(db, "users", u.uid);
-                const snap = await getDoc(userRef);
-                if(!snap.exists()) { userData = { email: u.email, balance: 0, tasksCompleted: 0, dailyProgress: 0, referralCode: Math.random().toString(36).substr(2,8), lastDaily: null }; await setDoc(userRef, userData); } 
-                else userData = snap.data();
-                if(u.email === ADMIN_EMAIL) document.getElementById('btn-admin-nav').classList.remove('hidden');
-                updateUI(); ui.login.classList.add('hidden'); ui.app.classList.remove('hidden'); ui.loading.classList.add('fade-out');
-                loadTasks();
-            } else { ui.app.classList.add('hidden'); ui.login.classList.remove('hidden'); ui.loading.classList.add('fade-out'); }
+        <p class="text-gray-400 text-center max-w-xl mb-12 font-medium leading-relaxed" data-key="hero_sub">
+            RobuNexa ile artık Robux almak çok kolay. Günlük görevleri tamamla, 
+            bakiyeni biriktir ve anında hesabına aktar. Tamamen güvenli ve ücretsiz.
+        </p>
+
+        <button onclick="login()" class="group relative bg-noob text-black px-16 py-6 rounded-3xl font-black flex items-center gap-4 hover:scale-105 transition-all shadow-2xl shadow-noob/20">
+            <i class="fa-brands fa-google text-2xl"></i>
+            <span class="text-lg uppercase" data-key="login_btn">Google ile Başla</span>
+            <div class="absolute inset-0 bg-white/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </button>
+
+        <div class="w-full max-w-4xl mt-24 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="glass p-8 rounded-[2.5rem]">
+                <h2 class="text-xl font-black mb-8 flex items-center gap-3 italic">
+                    <i class="fa-solid fa-circle-question text-noob"></i> <span data-key="faq_title">Sıkça Sorulanlar</span>
+                </h2>
+                <div class="space-y-4">
+                    <details class="group glass rounded-2xl border-white/5 transition-all overflow-hidden">
+                        <summary class="p-5 font-bold cursor-pointer list-none flex justify-between items-center hover:bg-white/5">
+                            <span data-key="faq_q1">Sistem nasıl çalışır?</span>
+                            <i class="fa-solid fa-plus text-noob group-open:rotate-45 transition-transform"></i>
+                        </summary>
+                        <div class="p-5 pt-0 text-sm text-gray-500 leading-relaxed" data-key="faq_a1">
+                            Görevleri yaparsın, biz reklam gelirlerimizi Robux olarak seninle paylaşırız. 
+                            Bakiye biriktirince kendi oluşturduğun Gamepass üzerinden ödeme alırsın.
+                        </div>
+                    </details>
+                    <details class="group glass rounded-2xl border-white/5 transition-all overflow-hidden">
+                        <summary class="p-5 font-bold cursor-pointer list-none flex justify-between items-center hover:bg-white/5">
+                            <span data-key="faq_q2">Ödemeler ne zaman gelir?</span>
+                            <i class="fa-solid fa-plus text-noob group-open:rotate-45 transition-transform"></i>
+                        </summary>
+                        <div class="p-5 pt-0 text-sm text-gray-500 leading-relaxed" data-key="faq_a2">
+                            Talep onaylandıktan sonra Roblox'un standart 'Pending' süresi olan 5-7 gün içinde Robux'un hesabına geçer.
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <div class="glass p-8 rounded-[2.5rem] flex flex-col justify-center items-center text-center">
+                <div class="w-20 h-20 bg-noob/10 rounded-full flex items-center justify-center mb-6">
+                    <i class="fa-solid fa-shield-heart text-4xl text-noob"></i>
+                </div>
+                <h3 class="text-xl font-black mb-4 uppercase italic">Güvenlik Politikası</h3>
+                <p class="text-sm text-gray-500 font-medium">
+                    Asla Roblox şifrenizi istemiyoruz. Sadece Google girişinizi kullanarak profilinizi oluşturuyoruz. 
+                    %100 Safe & Legat.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-tasks" class="view">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                <div>
+                    <h2 class="text-5xl font-black italic uppercase tracking-tighter" data-key="nav_tasks">Görevler</h2>
+                    <p class="text-gray-500 mt-2 font-medium">Günlük limitlerini doldurarak kazancını maksimize et.</p>
+                </div>
+                <div class="glass px-6 py-3 rounded-2xl border-noob/20 flex items-center gap-4">
+                    <span class="text-[10px] font-black uppercase text-gray-500 tracking-widest">Sıralama:</span>
+                    <select class="bg-transparent font-bold text-xs outline-none cursor-pointer">
+                        <option>En Çok Kazandıran</option>
+                        <option>En Yeni</option>
+                    </select>
+                </div>
+            </div>
+            <div id="task-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </div>
+        </div>
+    </div>
+
+    <div id="view-withdraw" class="view">
+        <div class="max-w-4xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="space-y-8">
+                    <h2 class="text-5xl font-black italic uppercase tracking-tighter" data-key="nav_withdraw">Çekim</h2>
+                    <div class="glass p-8 rounded-[3rem] relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-noob/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-all"></div>
+                        
+                        <div class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">Miktar Girişi</label>
+                                <div class="relative">
+                                    <input type="number" id="withdraw-amount" placeholder="0" class="w-full p-6 rounded-3xl text-4xl font-black">
+                                    <div class="absolute right-6 top-1/2 -translate-y-1/2 hexagon scale-150 shadow-xl">R</div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">Gamepass Adresi</label>
+                                <input type="text" id="withdraw-link" placeholder="https://www.roblox.com/game-pass/..." class="w-full p-5 rounded-2xl text-xs font-medium italic">
+                            </div>
+
+                            <button onclick="processWithdraw()" class="w-full bg-noob text-black py-6 rounded-3xl font-black uppercase tracking-widest text-sm shadow-xl shadow-noob/20 hover:scale-[1.02] transition-all">
+                                Talebi Gönder
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <h3 class="text-xl font-black italic uppercase tracking-widest">Geçmiş Talepler</h3>
+                    <div id="withdraw-history" class="space-y-4">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-profile" class="view">
+        <div class="max-w-3xl mx-auto">
+            <div class="glass p-10 rounded-[3rem] text-center relative overflow-hidden">
+                <div class="noob-head scale-150 mx-auto mb-10 mt-6 shadow-2xl">
+                    <div class="noob-eyes"><div class="noob-eye"></div><div class="noob-eye"></div></div>
+                    <div class="noob-mouth"></div>
+                </div>
+                <h2 id="user-display-name" class="text-3xl font-black mb-2 uppercase italic tracking-tighter">Noob User</h2>
+                <p id="user-display-email" class="text-gray-500 text-sm font-medium mb-8">user@example.com</p>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Toplam Kazanç</p>
+                        <p class="text-2xl font-black text-noob"><span id="total-earned">0</span> R$</p>
+                    </div>
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Tamamlanan</p>
+                        <p class="text-2xl font-black text-white"><span id="total-tasks">0</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-settings" class="view">
+        <div class="max-w-2xl mx-auto">
+            <h2 class="text-5xl font-black italic uppercase tracking-tighter mb-12" data-key="nav_settings">Ayarlar</h2>
+            
+            <div class="glass p-10 rounded-[3rem] space-y-10">
+                <div class="space-y-6">
+                    <label class="text-[11px] font-black text-noob uppercase tracking-[0.3em]">Yerelleştirme / Language</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button onclick="setLang('tr')" id="btn-tr" class="flex items-center justify-between p-6 rounded-2xl glass border-2 border-transparent transition-all">
+                            <span class="font-bold">Türkçe</span>
+                            <img src="https://flagcdn.com/w40/tr.png" class="w-8 rounded shadow-lg">
+                        </button>
+                        <button onclick="setLang('en')" id="btn-en" class="flex items-center justify-between p-6 rounded-2xl glass border-2 border-transparent transition-all">
+                            <span class="font-bold">English</span>
+                            <img src="https://flagcdn.com/w40/us.png" class="w-8 rounded shadow-lg">
+                        </button>
+                    </div>
+                </div>
+
+                <div class="h-[1px] bg-white/5"></div>
+
+                <div class="space-y-4">
+                    <label class="text-[11px] font-black text-noob uppercase tracking-[0.3em]">Hakkımızda</label>
+                    <p class="text-xs text-gray-500 font-medium leading-relaxed italic">
+                        RobuNexa v3.0, topluluk odaklı bir ödül sistemidir. Tüm hakları saklıdır. 
+                        Kullanılan tüm Noob varlıkları Roblox Corp. markasından bağımsız hayran yapımı tasarımlardır.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-admin" class="view">
+        <div class="max-w-7xl mx-auto space-y-12">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="glass p-8 rounded-3xl border-red-500/20 col-span-1">
+                    <h3 class="text-sm font-black text-red-500 uppercase tracking-widest mb-6 italic">Görev Yayınla</h3>
+                    <div class="space-y-4">
+                        <input id="adm-task-title" type="text" placeholder="Görev Başlığı" class="w-full p-4 rounded-xl text-xs font-bold">
+                        <textarea id="adm-task-desc" placeholder="Görev Detayı" class="w-full p-4 rounded-xl text-xs font-medium h-24 bg-transparent border border-white/10"></textarea>
+                        <input id="adm-task-reward" type="number" placeholder="Ödül (R$)" class="w-full p-4 rounded-xl text-xs font-bold">
+                        <button onclick="addTask()" class="w-full bg-red-500 text-white py-4 rounded-xl font-black text-xs uppercase shadow-lg shadow-red-500/20">Sisteme Enjekte Et</button>
+                    </div>
+                </div>
+
+                <div class="glass p-8 rounded-3xl border-white/10 col-span-2 overflow-hidden">
+                    <h3 class="text-sm font-black text-gray-500 uppercase tracking-widest mb-6 italic">Ödeme Bekleyenler</h3>
+                    <div id="admin-withdrawals" class="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, arrayUnion, increment, query, where, orderBy } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+    // Firebase Config
+    const firebaseConfig = { apiKey: "AIzaSyCUUceDxrNY2y7OEbJ6EX0QEXVFVBp1JgM", authDomain: "robunexa.firebaseapp.com", projectId: "robunexa", storageBucket: "robunexa.firebasestorage.app", messagingSenderId: "212565926554", appId: "1:212565926554:web:8b82d702f0ef9dc04cf523", measurementId: "G-6FR21407E6" };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+    const ADMIN_EMAIL = "adanalironaldo131@gmail.com";
+
+    // Global State
+    let currentUser = null;
+    let currentLang = 'tr';
+
+    const translations = {
+        tr: {
+            nav_tasks: "Görevler", nav_withdraw: "Çekim", nav_settings: "Ayarlar", nav_profile: "Profil",
+            hero_sub: "RobuNexa ile artık Robux almak çok kolay. Günlük görevleri tamamla, bakiyeni biriktir ve anında hesabına aktar.",
+            login_btn: "Google ile Başla", faq_title: "Sıkça Sorulanlar",
+            faq_q1: "Sistem nasıl çalışır?", faq_a1: "Görevleri yaparsın, reklam gelirlerimizi Robux olarak seninle paylaşırız.",
+            faq_q2: "Ödemeler ne zaman gelir?", faq_a2: "Talep onaylandıktan sonra 5-7 gün içinde Robux'un hesabına geçer.",
+            withdraw_head: "Çekim", withdraw_btn: "Talebi Gönder", task_btn: "Görevi Yap"
+        },
+        en: {
+            nav_tasks: "Tasks", nav_withdraw: "Withdraw", nav_settings: "Settings", nav_profile: "Profile",
+            hero_sub: "Earning Robux is easier than ever with RobuNexa. Complete tasks, save balance and withdraw instantly.",
+            login_btn: "Start with Google", faq_title: "FAQ",
+            faq_q1: "How it works?", faq_a1: "You do tasks, we share our revenue with you as Robux.",
+            faq_q2: "When will I get paid?", faq_a2: "Robux arrives in 5-7 days after approval, following Roblox standard.",
+            withdraw_head: "Withdraw", withdraw_btn: "Submit Request", task_btn: "Do Task"
+        }
+    };
+
+    // UI Helper Functions
+    window.notify = (msg, type = 'success') => {
+        const container = document.getElementById('notif-container');
+        const n = document.createElement('div');
+        n.className = `notif glass border-${type === 'success' ? 'noob' : 'red-500'}/30 text-${type === 'success' ? 'noob' : 'red-500'}`;
+        n.innerText = msg;
+        container.appendChild(n);
+        setTimeout(() => n.style.transform = 'translateX(0)', 10);
+        setTimeout(() => {
+            n.style.transform = 'translateX(120%)';
+            setTimeout(() => n.remove(), 400);
+        }, 3000);
+    };
+
+    window.showView = (name) => {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        const target = document.getElementById(`view-${name}`);
+        target.classList.add('active');
+        
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            const isActive = btn.dataset.view === name;
+            btn.classList.toggle('text-noob', isActive);
+            btn.classList.toggle('bg-noob/5', isActive);
         });
 
-        function updateUI() {
-            if(!userData) return;
-            document.getElementById('header-balance').innerText = userData.balance.toFixed(2);
-            document.getElementById('dash-balance').innerText = userData.balance.toFixed(2);
-            document.getElementById('dash-tasks-total').innerText = userData.tasksCompleted || 0;
-            document.getElementById('ref-link').innerText = window.location.host + "/?ref=" + userData.referralCode;
-            const dailyBtn = document.getElementById('btn-daily');
-            const done = userData.dailyProgress || 0;
-            if(done >= 10) { dailyBtn.disabled = false; dailyBtn.innerText = "+1 R$"; dailyBtn.classList.add('bg-theme-yellow','text-black'); }
-            else { dailyBtn.disabled = true; dailyBtn.innerText = `${done}/10`; dailyBtn.classList.remove('bg-theme-yellow','text-black'); }
-        }
+        // Specific view logic
+        if(name === 'tasks') syncTasks();
+    };
 
-        let allTasks = [];
-        async function loadTasks() {
-            const snap = await getDocs(collection(db, "pages"));
-            allTasks = [];
-            snap.forEach(d => allTasks.push({...d.data(), id: d.id}));
-            renderTasks('social'); 
-        }
+    window.setLang = (lang) => {
+        currentLang = lang;
+        document.getElementById('btn-tr').style.borderColor = lang === 'tr' ? '#FACC15' : 'transparent';
+        document.getElementById('btn-en').style.borderColor = lang === 'en' ? '#FACC15' : 'transparent';
+        
+        document.querySelectorAll('[data-key]').forEach(el => {
+            el.innerHTML = translations[lang][el.dataset.key];
+        });
+        if(currentUser) syncTasks();
+    };
 
-        window.filterTasks = (type) => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-'+type).classList.add('active');
-            document.getElementById('task-container-social').classList.add('hidden');
-            document.getElementById('task-container-shortlink').classList.add('hidden');
-            document.getElementById('task-container-'+type).classList.remove('hidden');
-            renderTasks(type);
-        }
+    // Firebase Core Functions
+    window.login = async () => {
+        try {
+            const result = await signInWithPopup(auth, provider);
+            await initializeUserData(result.user);
+            notify("Giriş Başarılı!");
+        } catch (e) { notify("Giriş Hatası!", "error"); }
+    };
 
-        function renderTasks(type) {
-            const container = document.getElementById('task-container-'+type);
-            container.innerHTML = "";
-            const filtered = allTasks.filter(t => (t.type === type) || (!t.type && type === 'social'));
-            filtered.forEach(t => {
-                const icon = type === 'shortlink' ? 'fa-link' : 'fa-youtube';
-                const color = type === 'shortlink' ? 'text-blue-500 bg-blue-500/10' : 'text-red-500 bg-red-500/10';
-                container.innerHTML += `<div class="glass p-5 rounded-2xl flex items-center justify-between hover:border-theme-yellow/50 transition"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl flex items-center justify-center ${color} text-xl"><i class="fas ${icon}"></i></div><div><h4 class="font-bold text-white text-lg">${t.name}</h4><span class="text-xs text-rbx-green font-bold">+${t.reward} R$</span></div></div><a href="${t.shortlinkUrl}" target="_blank" onclick="completeTask('${t.id}', ${t.reward})" class="bg-white/10 hover:bg-theme-yellow hover:text-black px-6 py-2 rounded-xl font-bold text-white transition">Git</a></div>`;
+    window.logout = () => signOut(auth).then(() => location.reload());
+
+    async function initializeUserData(user) {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (!userSnap.exists()) {
+            await setDoc(userRef, {
+                uid: user.uid,
+                email: user.email,
+                name: user.displayName,
+                balance: 0,
+                totalEarned: 0,
+                completedCount: 0,
+                completedTasks: [],
+                createdAt: serverTimestamp()
             });
-            if(filtered.length === 0) container.innerHTML = `<div class="col-span-2 text-center text-gray-500 py-10">...</div>`;
         }
+    }
 
-        window.completeTask = async (id, reward) => { setTimeout(async () => { try { await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(reward), tasksCompleted: increment(1), dailyProgress: increment(1) }); userData.balance += reward; userData.dailyProgress = (userData.dailyProgress||0)+1; userData.tasksCompleted++; updateUI(); showToast(`+${reward} R$`); } catch(e){} }, 5000); }
-
-        window.switchView = (v) => {
-            if(v==='admin' && currentUser.email !== ADMIN_EMAIL) return;
-            ['dashboard','tasks','promo','referral','admin'].forEach(x => document.getElementById('view-'+x).classList.add('hidden'));
-            document.getElementById('view-'+v).classList.remove('hidden');
-        }
-
-        window.generateInternalLink = () => { const slug = document.getElementById('admin-gen-slug').value; if(!slug) return; const url = window.location.origin + "/?verify=" + slug; document.getElementById('admin-gen-result').innerText = url; navigator.clipboard.writeText(url); showToast("Kopyalandı!"); }
-        window.adminAddTask = async () => { const name = document.getElementById('admin-task-name').value; const reward = parseFloat(document.getElementById('admin-task-reward').value); const url = document.getElementById('admin-task-url').value; const type = document.getElementById('admin-task-type').value; await addDoc(collection(db, "pages"), { name, reward, shortlinkUrl: url, type }); showToast("Görev eklendi!"); loadTasks(); }
-        document.getElementById('btn-daily').addEventListener('click', async () => { if(userData.dailyProgress < 10) return; await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(1), dailyProgress: 0 }); userData.balance++; userData.dailyProgress = 0; updateUI(); });
+    onAuthStateChanged(auth, (user) => {
+        const preloader = document.getElementById('preloader');
+        const loadBar = document.getElementById('load-bar');
         
-        onSnapshot(query(collection(db, "withdrawals"), orderBy("createdAt", "desc"), limit(10)), (snap) => {
-            const t = document.getElementById('live-ticker'); t.innerHTML = "";
-            snap.forEach(d => { const w = d.data(); const n = w.email.split('@')[0].substring(0,5)+"***"; t.innerHTML += `<span class="flex items-center gap-2"><i class="fas fa-money-bill text-green-500"></i> ${n} - ${w.amount} R$</span>`; });
+        loadBar.style.width = "100%";
+        
+        setTimeout(() => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('nav-user-area').classList.remove('hidden');
+                document.getElementById('sidebar').classList.remove('hidden');
+                document.getElementById('main-content').classList.add('md:ml-72');
+                document.getElementById('user-display-name').innerText = user.displayName;
+                document.getElementById('user-display-email').innerText = user.email;
+                
+                if(user.email === ADMIN_EMAIL) document.getElementById('admin-nav-item').classList.remove('hidden');
+                
+                showView('tasks');
+                syncRealtimeData();
+            } else {
+                showView('landing');
+            }
+            preloader.style.opacity = '0';
+            setTimeout(() => preloader.style.display = 'none', 600);
+        }, 1000);
+    });
+
+    function syncRealtimeData() {
+        // Balance Sync
+        onSnapshot(doc(db, "users", currentUser.uid), (d) => {
+            const data = d.data();
+            document.getElementById('balance-val').innerText = parseFloat(data.balance).toFixed(2);
+            document.getElementById('total-earned').innerText = data.totalEarned || 0;
+            document.getElementById('total-tasks').innerText = data.completedCount || 0;
         });
 
-        const wAmount = document.getElementById('w-amount');
-        wAmount.addEventListener('input', () => document.getElementById('calc-net').innerText = (wAmount.value * 0.7).toFixed(2));
-        document.getElementById('btn-submit-withdraw').addEventListener('click', async () => {
-             const amt = parseFloat(wAmount.value); const gp = document.getElementById('w-gamepass').value;
-             if(amt > userData.balance) return showToast("Yetersiz Bakiye", "error");
-             await addDoc(collection(db, "withdrawals"), { userId: currentUser.uid, email: currentUser.email, gamepassId: gp, amount: amt, status: 'Bekleniyor', createdAt: serverTimestamp() });
-             await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amt) });
-             userData.balance -= amt; updateUI(); toggleModal('withdraw-modal'); showToast("Talep alındı");
+        // Withdraw History Sync
+        const wQuery = query(collection(db, "withdrawals"), where("uid", "==", currentUser.uid), orderBy("createdAt", "desc"));
+        onSnapshot(wQuery, (s) => {
+            const hist = document.getElementById('withdraw-history');
+            hist.innerHTML = s.empty ? '<p class="text-[10px] text-gray-600 font-bold uppercase italic p-4">Henüz talep yok...</p>' : '';
+            s.forEach(d => {
+                const w = d.data();
+                const div = document.createElement('div');
+                div.className = "glass p-5 rounded-2xl flex justify-between items-center";
+                div.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="hexagon scale-75">${w.amount}</div>
+                        <div>
+                            <p class="text-xs font-black uppercase italic tracking-tighter">Robux Talebi</p>
+                            <p class="text-[9px] text-gray-500 font-bold">${w.status.toUpperCase()}</p>
+                        </div>
+                    </div>
+                    <div class="w-2 h-2 rounded-full bg-${w.status === 'pending' ? 'noob' : (w.status === 'approved' ? 'noobGreen' : 'red-500')} animate-pulse"></div>
+                `;
+                hist.appendChild(div);
+            });
         });
-        window.toggleModal = (id) => document.getElementById(id).classList.toggle('hidden');
-        window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('ref-link').innerText); showToast("Kopyalandı"); }
-        function showToast(m, t='success') { const c = document.getElementById('toast-container'); const d = document.createElement('div'); d.className = `glass p-4 rounded-xl shadow-xl text-white ${t==='error'?'border-red-500':'border-theme-yellow'} border-l-4`; d.innerText = m; c.appendChild(d); setTimeout(()=>d.remove(),3000); }
-    </script>
+
+        // Admin Withdraw Sync
+        if(currentUser.email === ADMIN_EMAIL) {
+            onSnapshot(query(collection(db, "withdrawals"), where("status", "==", "pending")), (s) => {
+                const alist = document.getElementById('admin-withdrawals');
+                alist.innerHTML = '';
+                s.forEach(d => {
+                    const w = d.data();
+                    const div = document.createElement('div');
+                    div.className = "glass p-4 rounded-xl flex justify-between items-center border-l-4 border-noob";
+                    div.innerHTML = `
+                        <div class="flex flex-col">
+                            <span class="text-xs font-black">${w.amount} R$</span>
+                            <a href="${w.gamepassLink}" target="_blank" class="text-[9px] text-blue-400 font-bold hover:underline">Link Aç</a>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="approveWithdraw('${d.id}')" class="p-2 bg-noobGreen/20 text-noobGreen rounded-lg text-xs"><i class="fa-solid fa-check"></i></button>
+                            <button onclick="rejectWithdraw('${d.id}', '${w.uid}', ${w.amount})" class="p-2 bg-red-500/20 text-red-500 rounded-lg text-xs"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    `;
+                    alist.appendChild(div);
+                });
+            });
+        }
+    }
+
+    function syncTasks() {
+        onSnapshot(collection(db, "tasks"), (s) => {
+            const list = document.getElementById('task-list');
+            list.innerHTML = '';
+            s.forEach(d => {
+                const t = d.data();
+                const card = document.createElement('div');
+                card.className = "glass p-8 rounded-[2.5rem] flex flex-col justify-between hover:scale-[1.02] transition-all group border-white/5 hover:border-noob/20";
+                card.innerHTML = `
+                    <div class="mb-6">
+                        <div class="flex justify-between items-start mb-4">
+                             <div class="w-12 h-12 glass rounded-2xl flex items-center justify-center text-noob group-hover:bg-noob group-hover:text-black transition-all">
+                                <i class="fa-solid fa-bolt-lightning text-xl"></i>
+                             </div>
+                             <div class="flex flex-col items-end">
+                                <span class="text-2xl font-black text-noob">${t.reward}</span>
+                                <span class="text-[8px] font-black text-gray-600 uppercase">Robux Reward</span>
+                             </div>
+                        </div>
+                        <h3 class="text-lg font-black uppercase italic tracking-tighter" translate="no">${t.title}</h3>
+                        <p class="text-[10px] text-gray-500 font-medium leading-relaxed mt-2 line-clamp-2">${t.description}</p>
+                    </div>
+                    <button onclick="doTask('${d.id}', ${t.reward})" class="w-full bg-white text-black py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-noob transition-all">
+                        ${translations[currentLang].task_btn}
+                    </button>
+                `;
+                list.appendChild(card);
+            });
+        });
+    }
+
+    // Task Actions
+    window.doTask = async (taskId, reward) => {
+        window.open('https://roblox.com', '_blank');
+        notify("Görev başlatıldı, doğrulanıyor...");
+        
+        setTimeout(async () => {
+            const userRef = doc(db, "users", currentUser.uid);
+            await updateDoc(userRef, {
+                balance: increment(reward),
+                totalEarned: increment(reward),
+                completedCount: increment(1),
+                completedTasks: arrayUnion(taskId)
+            });
+            notify(`${reward} R$ bakiyene eklendi!`);
+        }, 3000);
+    };
+
+    window.processWithdraw = async () => {
+        const amt = parseInt(document.getElementById('withdraw-amount').value);
+        const link = document.getElementById('withdraw-link').value;
+        const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        const balance = userSnap.data().balance;
+
+        if (amt < 10) return notify("Minimum çekim 10 R$", "error");
+        if (balance < amt) return notify("Yetersiz Bakiye!", "error");
+        if (!link.includes("roblox.com")) return notify("Geçersiz Link!", "error");
+
+        await addDoc(collection(db, "withdrawals"), {
+            uid: currentUser.uid,
+            amount: amt,
+            gamepassLink: link,
+            status: "pending",
+            createdAt: serverTimestamp()
+        });
+
+        await updateDoc(userRef, { balance: increment(-amt) });
+        notify("Çekim talebi oluşturuldu!");
+        document.getElementById('withdraw-amount').value = '';
+        document.getElementById('withdraw-link').value = '';
+    };
+
+    // Admin Actions
+    window.addTask = async () => {
+        const title = document.getElementById('adm-task-title').value;
+        const desc = document.getElementById('adm-task-desc').value;
+        const reward = parseInt(document.getElementById('adm-task-reward').value);
+
+        if (!title || !reward) return notify("Eksik bilgi!", "error");
+
+        await addDoc(collection(db, "tasks"), { title, description: desc, reward, createdAt: serverTimestamp() });
+        notify("Görev başarıyla eklendi.");
+        document.getElementById('adm-task-title').value = '';
+        document.getElementById('adm-task-desc').value = '';
+        document.getElementById('adm-task-reward').value = '';
+    };
+
+    window.approveWithdraw = async (id) => {
+        await updateDoc(doc(db, "withdrawals", id), { status: 'approved' });
+        notify("Talep onaylandı.");
+    };
+
+    window.rejectWithdraw = async (id, uid, amt) => {
+        await updateDoc(doc(db, "withdrawals", id), { status: 'rejected' });
+        await updateDoc(doc(db, "users", uid), { balance: increment(amt) });
+        notify("Talep reddedildi, bakiye iade edildi.");
+    };
+
+    // --- Particle System Engine ---
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.onresize = resize;
+    resize();
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2;
+            this.speedX = (Math.random() - 0.5) * 0.5;
+            this.speedY = (Math.random() - 0.5) * 0.5;
+            this.opacity = Math.random();
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.x > canvas.width) this.x = 0;
+            if (this.x < 0) this.x = canvas.width;
+            if (this.y > canvas.height) this.y = 0;
+            if (this.y < 0) this.y = canvas.height;
+        }
+        draw() {
+            ctx.fillStyle = `rgba(250, 204, 21, ${this.opacity * 0.2})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function initParticles() {
+        for (let i = 0; i < 150; i++) particles.push(new Particle());
+    }
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+    }
+    initParticles();
+    animate();
+
+    // GSAP Intro
+    gsap.from("nav", { y: -100, duration: 1, ease: "power4.out" });
+    gsap.from("aside", { x: -100, duration: 1, delay: 0.5, ease: "power4.out" });
+
+    // Anti-Devtools (Basic)
+    window.addEventListener('keydown', (e) => {
+        if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key === "I")) e.preventDefault();
+        if (e.ctrlKey && (e.key === "c" || e.key === "v" || e.key === "u")) e.preventDefault();
+    });
+
+    // Default Lang
+    setLang('tr');
+
+</script>
 </body>
 </html>
