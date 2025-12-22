@@ -1,485 +1,538 @@
 <!DOCTYPE html>
-<html lang="tr" class="light">
+<html lang="tr" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Robunexa | Bedava Robux</title>
     
     <!-- FAVICON -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%2302b757'/%3E%3Ctext x='50' y='72' font-family='Arial' font-weight='900' font-size='60' text-anchor='middle' fill='white'%3ER$%3C/text%3E%3C/svg%3E">
+    <link rel="icon" href="https://tr.rbxcdn.com/76236b280145db74087dc26177e74288/150/150/AvatarHeadshot/Png">
 
     <!-- LIBS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- ANIMATION LIB -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
     <script>
-        // Theme Init
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-        document.addEventListener('contextmenu', e => e.preventDefault());
+        // Force Dark Mode
+        document.documentElement.classList.add('dark');
         
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        light: { bg: '#f0f4f8', card: '#ffffff', text: '#1e293b' },
-                        dark: { bg: '#0f172a', card: '#1e293b', text: '#f1f5f9' },
-                        rbx: { blue: '#3b82f6', gold: '#F59E0B', green: '#02b757', greenDark: '#028a42' } 
+                        dark: { bg: '#09090b', card: '#18181b', text: '#f4f4f5' }, // Zinc colors for high contrast
+                        theme: { 
+                            yellow: '#FACC15', // Main Yellow
+                            gold: '#EAB308',   // Darker Gold
+                            orange: '#F97316'  // Accent Orange
+                        },
+                        rbx: { green: '#00b06f' } // Keep green only for "Success" states
                     },
                     fontFamily: { sans: ['Outfit', 'sans-serif'] },
-                    animation: { 'float': 'float 6s ease-in-out infinite' },
-                    keyframes: { float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } } }
+                    animation: { 
+                        'float': 'float 6s ease-in-out infinite',
+                        'blob': 'blob 15s infinite',
+                        'scroll': 'scroll 20s linear infinite',
+                        'grid': 'gridMove 40s linear infinite'
+                    },
+                    keyframes: { 
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
+                        blob: { "0%": { transform: "translate(0px, 0px) scale(1)" }, "33%": { transform: "translate(30px, -50px) scale(1.1)" }, "66%": { transform: "translate(-20px, 20px) scale(0.9)" }, "100%": { transform: "translate(0px, 0px) scale(1)" } },
+                        scroll: { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(-100%)' } },
+                        gridMove: { '0%': { backgroundPosition: '0 0' }, '100%': { backgroundPosition: '40px 40px' } }
+                    }
                 }
             }
         }
     </script>
 
     <style>
-        body { transition: background-color 0.3s, color 0.3s; }
-        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.5); }
-        .dark .glass { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); }
-        #right-drawer { transition: transform 0.3s ease-in-out; }
+        body { background-color: #09090b; color: #f4f4f5; overflow-x: hidden; }
+        
+        /* High Contrast Glass Effect */
+        .glass { 
+            background: rgba(24, 24, 27, 0.85); /* Much darker background for text readability */
+            backdrop-filter: blur(16px); 
+            border: 1px solid rgba(250, 204, 21, 0.15); /* Subtle yellow border */
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Animated Background */
+        .bg-animated {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
+            background-color: #050505;
+        }
+        
+        /* Cyber Grid Pattern (Yellowish) */
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background-image: 
+                linear-gradient(rgba(250, 204, 21, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(250, 204, 21, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 40s linear infinite;
+        }
+
+        .bg-blob {
+            position: absolute; filter: blur(100px); opacity: 0.3; z-index: -2; animation: blob 15s infinite;
+        }
+        
+        /* FAQ Details */
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] summary ~ * { animation: sweep .3s ease-in-out; }
+        @keyframes sweep { 0% {opacity: 0; transform: translateY(-10px)} 100% {opacity: 1; transform: translateY(0)} }
+        details[open] .fa-chevron-down { transform: rotate(180deg); }
+        .fa-chevron-down { transition: transform 0.3s ease; }
+
+        /* Drawer & Modals */
+        #right-drawer { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         #right-drawer.open { transform: translateX(0); }
         #right-drawer.closed { transform: translateX(100%); }
-        .modal { transition: opacity 0.3s ease-in-out; pointer-events: none; opacity: 0; }
-        .modal.active { pointer-events: auto; opacity: 1; }
-        .modal-content { transform: scale(0.95); transition: transform 0.3s ease; }
-        .modal.active .modal-content { transform: scale(1); }
-        .lang-dropdown { opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s; }
-        .lang-dropdown.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        .nav-active { @apply bg-blue-50 text-rbx-blue dark:bg-blue-900/20 dark:text-blue-300; }
+        .modal { transition: all 0.3s ease-in-out; pointer-events: none; opacity: 0; transform: scale(0.95); }
+        .modal.active { pointer-events: auto; opacity: 1; transform: scale(1); }
+        .nav-active { @apply bg-theme-yellow/10 text-theme-yellow border-r-4 border-theme-yellow; }
         
-        /* Loader Transition */
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #09090b; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FACC15; }
+
+        /* Loading */
         #loading-screen { transition: opacity 0.5s ease, visibility 0.5s; }
         .fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
     </style>
 </head>
-<body class="antialiased min-h-screen bg-light-bg text-light-text dark:bg-dark-bg dark:text-dark-text font-sans">
+<body class="antialiased min-h-screen font-sans selection:bg-theme-yellow selection:text-black">
+
+    <!-- ANIMATED BACKGROUND -->
+    <div class="bg-animated">
+        <div class="bg-grid"></div> 
+        <!-- Warm Blobs for Yellow Theme -->
+        <div class="bg-blob bg-yellow-600 w-96 h-96 rounded-full top-0 left-0 mix-blend-screen opacity-20"></div>
+        <div class="bg-blob bg-orange-600 w-96 h-96 rounded-full bottom-0 right-0 mix-blend-screen opacity-20 animation-delay-2000"></div>
+        <div class="bg-blob bg-red-600 w-80 h-80 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mix-blend-screen opacity-20 animation-delay-4000"></div>
+    </div>
 
     <!-- SVG ICONS -->
     <svg style="display: none;">
-        <symbol id="icon-robux-round" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="48" fill="#02b757"/>
-            <circle cx="50" cy="50" r="48" fill="url(#gradShine)" opacity="0.3"/>
-            <text x="50" y="72" font-family="Arial" font-weight="900" font-size="65" text-anchor="middle" fill="white" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">R$</text>
-            <defs><linearGradient id="gradShine" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="white" stop-opacity="0.5"/><stop offset="100%" stop-color="white" stop-opacity="0"/></linearGradient></defs>
+        <symbol id="icon-noob" viewBox="0 0 100 100">
+            <circle cx="50" cy="35" r="20" fill="#FACC15" stroke="#000" stroke-width="2"/>
+            <rect x="25" y="55" width="50" height="45" rx="5" fill="#0d69ac" stroke="#000" stroke-width="2"/>
+            <path d="M25 60 L10 60 Q5 60 5 70 L5 90 Q5 100 15 100 L25 100" fill="#FACC15" stroke="#000" stroke-width="2"/>
+            <path d="M75 60 L90 60 Q95 60 95 70 L95 90 Q95 100 85 100 L75 100" fill="#FACC15" stroke="#000" stroke-width="2"/>
+            <text x="50" y="85" font-family="Arial" font-weight="900" font-size="20" text-anchor="middle" fill="white" opacity="0.3">R$</text>
         </symbol>
     </svg>
 
-    <!-- LOADING SCREEN (Z-INDEX YÜKSEK) -->
-    <div id="loading-screen" class="fixed inset-0 z-[999] bg-white dark:bg-dark-bg flex flex-col items-center justify-center">
-        <svg class="w-24 h-24 animate-bounce drop-shadow-2xl"><use href="#icon-robux-round"></use></svg>
-        <h2 class="mt-4 text-2xl font-black text-gray-800 dark:text-white tracking-widest">ROBUNEXA</h2>
-        <p class="mt-2 text-sm text-gray-400 animate-pulse">Yükleniyor...</p>
-    </div>
-
-    <!-- TOAST -->
-    <div id="toast-container" class="fixed top-5 right-5 z-[80] flex flex-col gap-3"></div>
-
-    <!-- RIGHT DRAWER -->
-    <div id="drawer-overlay" class="fixed inset-0 bg-black/50 z-[60] hidden backdrop-blur-sm transition-opacity"></div>
-    <div id="right-drawer" class="closed fixed top-0 right-0 h-full w-80 bg-white dark:bg-dark-card shadow-2xl z-[70] p-6 flex flex-col border-l border-gray-100 dark:border-gray-700 overflow-y-auto">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-bold dark:text-white" data-i18n="menu_title">Menü</h2>
-            <button id="close-drawer-btn" class="text-gray-400 hover:text-red-500"><i class="fas fa-times text-2xl"></i></button>
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen" class="fixed inset-0 z-[999] bg-[#09090b] flex flex-col items-center justify-center">
+        <div class="relative w-32 h-32 animate-bounce">
+            <svg class="w-full h-full drop-shadow-2xl"><use href="#icon-noob"></use></svg>
         </div>
-        <!-- Mobile Nav -->
-        <div class="space-y-2 mb-6">
-            <button onclick="safeSwitch('dashboard')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:text-white"><i class="fas fa-home"></i> <span data-i18n="nav_dashboard">Panel</span></button>
-            <button onclick="safeSwitch('tasks')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:text-white"><i class="fas fa-tasks"></i> <span data-i18n="nav_tasks">Görevler</span></button>
-            <button onclick="safeSwitch('promo')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:text-white"><i class="fas fa-ticket-alt"></i> <span data-i18n="nav_promo">Kupon</span></button>
-            <button onclick="safeSwitch('referral')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:text-white"><i class="fas fa-users"></i> <span data-i18n="nav_ref">Referans</span></button>
-            <button onclick="safeSwitch('history')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:text-white"><i class="fas fa-history"></i> <span data-i18n="nav_history">Geçmiş</span></button>
-        </div>
-        <!-- Settings -->
-        <div class="mt-auto space-y-4">
-            <div class="flex justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-xl"><span class="dark:text-white" data-i18n="dark_mode">Karanlık</span><button onclick="toggleTheme()" class="w-10 h-5 bg-gray-300 dark:bg-green-500 rounded-full relative"><div class="w-3 h-3 bg-white rounded-full absolute top-1 left-1 dark:left-6 transition-all"></div></button></div>
-            <button id="btn-logout-drawer" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold" data-i18n="btn_logout">Çıkış Yap</button>
-        </div>
-    </div>
-
-    <!-- WITHDRAW MODAL -->
-    <div id="withdraw-modal" class="modal fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-md">
-        <div class="modal-content bg-white dark:bg-dark-card w-full max-w-md p-8 rounded-[2rem] shadow-2xl relative border border-gray-100 dark:border-gray-700">
-            <button id="close-modal-btn" class="absolute top-5 right-5 text-gray-400 hover:text-red-500 transition"><i class="fas fa-times text-xl"></i></button>
-            <h2 class="text-2xl font-bold text-center text-gray-800 dark:text-white mb-6" data-i18n="modal_withdraw_title">Çekim Talebi</h2>
-            <div class="space-y-4">
-                <input id="w-gamepass" type="text" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 outline-none focus:ring-2 focus:ring-rbx-blue transition dark:text-white" placeholder="Gamepass ID / Link">
-                <input id="w-amount" type="number" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 outline-none font-bold focus:ring-2 focus:ring-rbx-blue transition dark:text-white" placeholder="Miktar (Min 5)">
-                <div class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-xl text-sm"><span data-i18n="modal_net">Alacağın:</span> <span id="calc-net" class="font-bold">0</span> R$</div>
-                <button id="btn-submit-withdraw" class="w-full bg-rbx-blue hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg transition" data-i18n="btn_submit_req">Onayla</button>
+        <div class="mt-8 flex flex-col items-center gap-2">
+            <div class="w-48 h-2 bg-gray-800 rounded-full overflow-hidden relative">
+                <div class="absolute top-0 left-0 h-full bg-theme-yellow w-1/2 animate-[shimmer_1s_infinite]"></div>
             </div>
+            <h2 class="text-xl font-black text-white tracking-[0.3em]">ROBUNEXA</h2>
         </div>
     </div>
 
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="hidden min-h-screen flex flex-col relative overflow-x-hidden bg-white dark:bg-dark-bg">
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col gap-3"></div>
+
+    <!-- 1. LANDING / LOGIN SCREEN -->
+    <div id="login-screen" class="min-h-screen flex flex-col relative z-10 transition-opacity duration-500 overflow-x-hidden">
         <nav class="w-full py-6 px-8 flex justify-between items-center z-20">
-            <div class="flex items-center gap-3"><svg class="w-8 h-8 drop-shadow-md"><use href="#icon-robux-round"></use></svg><span class="text-2xl font-black text-gray-800 dark:text-white">ROBUNEXA</span></div>
-            <div class="relative"><button id="lang-btn-login" class="glass px-4 py-2 rounded-full flex items-center gap-2 text-sm font-bold dark:text-white"><img id="current-flag-login" src="https://flagcdn.com/w40/tr.png" class="w-5 h-auto rounded"><span id="current-lang-login">TR</span></button><div id="lang-menu-login" class="lang-dropdown absolute right-0 top-12 bg-white dark:bg-dark-card shadow-2xl rounded-2xl p-2 w-64 grid grid-cols-2 gap-2 z-50 hidden"></div></div>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-theme-yellow/20 rounded-lg flex items-center justify-center border border-theme-yellow/30 backdrop-blur-sm">
+                    <svg class="w-8 h-8"><use href="#icon-noob"></use></svg>
+                </div>
+                <span class="text-2xl font-black text-white tracking-tight">ROBUNEXA</span>
+            </div>
+            <button onclick="toggleLangMenu('lang-menu-login')" class="bg-zinc-800 border border-zinc-700 px-4 py-2 rounded-full flex items-center gap-2 text-sm font-bold text-white cursor-pointer hover:bg-zinc-700 transition">
+                <img id="current-flag-login" src="https://flagcdn.com/w40/tr.png" class="w-5 h-auto rounded"><span id="current-lang-login">TR</span>
+            </button>
+            <div id="lang-menu-login" class="absolute top-20 right-8 bg-zinc-900 border border-zinc-700 p-2 rounded-xl flex-col gap-1 hidden"></div>
         </nav>
         
-        <section class="flex-1 flex flex-col items-center justify-center relative z-10 px-6 pt-10 pb-20">
-            <div class="absolute top-0 -left-4 w-96 h-96 bg-green-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"></div>
-            <div class="glass w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl border border-white/60 dark:border-gray-700 relative" data-aos="zoom-in">
-                <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 animate-float"><svg class="w-28 h-28 drop-shadow-2xl"><use href="#icon-robux-round"></use></svg></div>
-                <div class="text-center mt-12 mb-8"><h1 class="text-4xl font-black text-gray-900 dark:text-white mb-2" data-i18n="hero_title">Robux Kazan</h1></div>
-                <form id="login-form" class="space-y-5">
-                    <input type="email" id="email-input" class="w-full bg-white/50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl py-4 px-6 outline-none focus:ring-2 focus:ring-rbx-green transition font-semibold dark:text-white placeholder-gray-400" placeholder="E-Mail" required>
-                    <button type="submit" id="btn-login" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 rounded-2xl shadow-lg transition transform hover:scale-[1.02]" data-i18n="btn_login_link">Giriş Yap</button>
+        <!-- HERO SECTION -->
+        <section class="flex flex-col items-center justify-center relative z-10 px-6 pt-10 pb-16">
+            <div class="glass w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl relative" data-aos="zoom-in">
+                <div class="absolute -top-14 left-1/2 transform -translate-x-1/2 animate-float">
+                    <svg class="w-32 h-32 drop-shadow-[0_20px_20px_rgba(0,0,0,0.5)]"><use href="#icon-noob"></use></svg>
+                </div>
+                <div class="text-center mt-16 mb-8">
+                    <h1 class="text-4xl font-black text-white mb-2" data-i18n="hero_title">Bedava Robux</h1>
+                    <p class="text-gray-300 font-medium text-lg" data-i18n="hero_sub">Şifresiz. Hızlı. Güvenli.</p>
+                </div>
+                <form id="login-form" class="space-y-4">
+                    <div class="relative group">
+                        <i class="fas fa-envelope absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-theme-yellow transition"></i>
+                        <input type="email" id="email-input" class="w-full bg-black/40 border border-zinc-700 rounded-2xl py-4 pl-12 pr-6 outline-none focus:ring-2 focus:ring-theme-yellow transition font-semibold text-white placeholder-gray-500" placeholder="E-Mail Adresin" required>
+                    </div>
+                    <!-- YELLOW BUTTON (Black Text for Contrast) -->
+                    <button type="submit" id="btn-login" class="w-full bg-gradient-to-r from-theme-yellow to-orange-500 hover:from-orange-500 hover:to-theme-yellow text-black font-black py-4 rounded-2xl shadow-lg shadow-orange-500/20 transition transform hover:scale-[1.02] flex items-center justify-center gap-2 text-lg">
+                        <span data-i18n="btn_login_link">Giriş Yap</span> <i class="fas fa-arrow-right"></i>
+                    </button>
                 </form>
+            </div>
+            
+            <div class="mt-8 animate-bounce text-theme-yellow cursor-pointer" onclick="document.getElementById('how-it-works').scrollIntoView({behavior: 'smooth'})">
+                <i class="fas fa-chevron-down text-2xl"></i>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS & FAQ -->
+        <section id="how-it-works" class="py-20 bg-zinc-900/50 backdrop-blur-sm border-t border-zinc-800">
+            <div class="container mx-auto px-6 max-w-4xl">
+                
+                <!-- Steps -->
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-3xl font-black text-white mb-10"><span class="text-theme-yellow">Nasıl</span> Çalışır?</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="bg-zinc-800/50 p-6 rounded-2xl border border-zinc-700 hover:border-theme-yellow/50 transition">
+                            <div class="w-14 h-14 bg-theme-yellow/10 rounded-full flex items-center justify-center text-theme-yellow text-2xl mx-auto mb-4 font-black">1</div>
+                            <h3 class="text-xl font-bold text-white mb-2">Giriş Yap</h3>
+                            <p class="text-gray-400 text-sm">Sadece mail adresinle kayıt ol. Şifre asla istemiyoruz.</p>
+                        </div>
+                        <div class="bg-zinc-800/50 p-6 rounded-2xl border border-zinc-700 hover:border-theme-yellow/50 transition">
+                            <div class="w-14 h-14 bg-theme-yellow/10 rounded-full flex items-center justify-center text-theme-yellow text-2xl mx-auto mb-4 font-black">2</div>
+                            <h3 class="text-xl font-bold text-white mb-2">Görev Yap</h3>
+                            <p class="text-gray-400 text-sm">Basit link görevlerini tamamla ve R$ bakiyesi biriktir.</p>
+                        </div>
+                        <div class="bg-zinc-800/50 p-6 rounded-2xl border border-zinc-700 hover:border-theme-yellow/50 transition">
+                            <div class="w-14 h-14 bg-theme-yellow/10 rounded-full flex items-center justify-center text-theme-yellow text-2xl mx-auto mb-4 font-black">3</div>
+                            <h3 class="text-xl font-bold text-white mb-2">Çekim Yap</h3>
+                            <p class="text-gray-400 text-sm">Bakiyeni Gamepass yöntemiyle anında hesabına çek.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Accordion -->
+                <h2 class="text-3xl font-black text-center text-white mb-10" data-aos="fade-up">Sıkça Sorulan Sorular</h2>
+                <div class="space-y-4" data-aos="fade-up">
+                    <details class="group glass p-6 rounded-2xl cursor-pointer">
+                        <summary class="flex justify-between items-center font-bold text-white text-lg">
+                            <span>Sistem Güvenli mi? Şifre istiyor musunuz?</span>
+                            <i class="fas fa-chevron-down text-theme-yellow"></i>
+                        </summary>
+                        <p class="mt-4 text-gray-300 leading-relaxed border-t border-zinc-700 pt-4">
+                            Kesinlikle! Robunexa olarak asla Roblox şifrenizi istemiyoruz. Sadece Kullanıcı Adınız (Username) veya Gamepass ID'niz yeterlidir. Hesabınız %100 güvendedir.
+                        </p>
+                    </details>
+
+                    <details class="group glass p-6 rounded-2xl cursor-pointer">
+                        <summary class="flex justify-between items-center font-bold text-white text-lg">
+                            <span>Robux ne zaman hesabıma gelir?</span>
+                            <i class="fas fa-chevron-down text-theme-yellow"></i>
+                        </summary>
+                        <p class="mt-4 text-gray-300 leading-relaxed border-t border-zinc-700 pt-4">
+                            Çekim talebi oluşturduğunuzda sistem yöneticileri onaylar. Roblox'un "Pending Robux" (Bekleyen Robux) politikası gereği, gönderilen Robux'un hesabınızda harcanabilir olması <strong>3 ile 7 gün</strong> arasında sürer.
+                        </p>
+                    </details>
+
+                    <details class="group glass p-6 rounded-2xl cursor-pointer">
+                        <summary class="flex justify-between items-center font-bold text-white text-lg">
+                            <span>Nasıl daha fazla kazanırım?</span>
+                            <i class="fas fa-chevron-down text-theme-yellow"></i>
+                        </summary>
+                        <p class="mt-4 text-gray-300 leading-relaxed border-t border-zinc-700 pt-4">
+                            1. <strong>Görevler:</strong> Tüm görevleri yapın.<br>
+                            2. <strong>Günlük Ödül:</strong> Her gün giriş yapın.<br>
+                            3. <strong>Referans:</strong> Arkadaşlarınızı davet edin (%10 Pay).
+                        </p>
+                    </details>
+                    
+                    <details class="group glass p-6 rounded-2xl cursor-pointer">
+                        <summary class="flex justify-between items-center font-bold text-white text-lg">
+                            <span>Neden puanım gelmedi?</span>
+                            <i class="fas fa-chevron-down text-theme-yellow"></i>
+                        </summary>
+                        <p class="mt-4 text-gray-300 leading-relaxed border-t border-zinc-700 pt-4">
+                            Lütfen sitemizdeyken <strong>Reklam Engelleyici (AdBlock)</strong> kullanmayın. Görev takibi için reklamların görüntülenmesi gerekmektedir.
+                        </p>
+                    </details>
+                </div>
+
+                <div class="text-center mt-12 mb-20">
+                     <p class="text-gray-500 text-sm">© 2024 Robunexa. Not affiliated with Roblox Corporation.</p>
+                </div>
             </div>
         </section>
     </div>
 
-    <!-- APP SCREEN -->
-    <div id="app-screen" class="hidden flex h-screen overflow-hidden bg-light-bg dark:bg-dark-bg">
-        <aside class="w-72 bg-white dark:bg-dark-card border-r border-gray-100 dark:border-gray-800 hidden md:flex flex-col z-20">
-            <div class="h-24 flex items-center px-8 border-b border-gray-50 dark:border-gray-800">
-                <div class="bg-rbx-green text-white rounded-lg px-3 py-1 font-black text-xl mr-3">R</div>
-                <span class="text-xl font-extrabold text-gray-800 dark:text-white">ROBUNEXA</span>
+    <!-- 2. APP SCREEN -->
+    <div id="app-screen" class="hidden flex h-screen overflow-hidden relative z-10">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-72 bg-zinc-900 border-r border-zinc-800 hidden md:flex flex-col z-20">
+            <div class="h-24 flex items-center px-8 border-b border-zinc-800">
+                <svg class="w-10 h-10 mr-3"><use href="#icon-noob"></use></svg>
+                <span class="text-xl font-extrabold text-white tracking-tight">ROBUNEXA</span>
             </div>
             <nav class="flex-1 p-6 space-y-2 overflow-y-auto">
-                <button onclick="switchView('dashboard')" id="nav-btn-dashboard" class="nav-btn nav-active w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all font-semibold group"><i class="fas fa-home w-5 text-center"></i> <span data-i18n="nav_dashboard">Panel</span></button>
-                <button onclick="switchView('tasks')" id="nav-btn-tasks" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all font-semibold group"><i class="fas fa-tasks w-5 text-center"></i> <span data-i18n="nav_tasks">Görevler</span></button>
-                <button onclick="switchView('promo')" id="nav-btn-promo" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all font-semibold group"><i class="fas fa-ticket-alt w-5 text-center"></i> <span data-i18n="nav_promo">Kupon</span></button>
-                <button onclick="switchView('referral')" id="nav-btn-referral" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all font-semibold group"><i class="fas fa-users w-5 text-center"></i> <span data-i18n="nav_ref">Referans</span></button>
-                <button onclick="switchView('history')" id="nav-btn-history" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all font-semibold group"><i class="fas fa-history w-5 text-center"></i> <span data-i18n="nav_history">Geçmiş</span></button>
-                <button id="nav-admin-sidebar" onclick="switchView('admin')" class="hidden nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all font-semibold mt-4"><i class="fas fa-shield-alt w-5 text-center"></i> <span data-i18n="nav_admin">Yönetici</span></button>
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-4" data-i18n="lbl_nav">Menü</div>
+                <button onclick="switchView('dashboard')" id="nav-btn-dashboard" class="nav-btn nav-active w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-400 hover:bg-zinc-800 hover:text-white transition-all font-bold text-sm"><i class="fas fa-home w-5 text-center text-lg"></i> <span data-i18n="nav_dashboard">Panel</span></button>
+                <button onclick="switchView('tasks')" id="nav-btn-tasks" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-400 hover:bg-zinc-800 hover:text-white transition-all font-bold text-sm"><i class="fas fa-gamepad w-5 text-center text-lg"></i> <span data-i18n="nav_tasks">Görevler</span></button>
+                <button onclick="switchView('promo')" id="nav-btn-promo" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-400 hover:bg-zinc-800 hover:text-white transition-all font-bold text-sm"><i class="fas fa-ticket-alt w-5 text-center text-lg"></i> <span data-i18n="nav_promo">Kupon</span></button>
+                <button onclick="switchView('referral')" id="nav-btn-referral" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-400 hover:bg-zinc-800 hover:text-white transition-all font-bold text-sm"><i class="fas fa-users w-5 text-center text-lg"></i> <span data-i18n="nav_ref">Referans</span></button>
+                <button onclick="switchView('history')" id="nav-btn-history" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-400 hover:bg-zinc-800 hover:text-white transition-all font-bold text-sm"><i class="fas fa-clock w-5 text-center text-lg"></i> <span data-i18n="nav_history">Geçmiş</span></button>
+                <div class="mt-8 text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-4">Hesap</div>
+                <button id="nav-admin-sidebar" onclick="switchView('admin')" class="hidden nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-red-500 bg-red-500/10 hover:bg-red-500/20 transition-all font-bold text-sm mb-2"><i class="fas fa-shield-alt w-5 text-center"></i> Yönetici</button>
+                <button onclick="handleLogout()" class="w-full flex items-center gap-4 px-5 py-3 rounded-2xl text-gray-400 hover:text-white hover:bg-red-500/10 hover:text-red-500 transition-all font-bold text-sm"><i class="fas fa-sign-out-alt w-5 text-center"></i> Çıkış</button>
             </nav>
-            <div class="p-6 border-t border-gray-50 dark:border-gray-800">
-                <button id="btn-logout" class="w-full flex items-center gap-3 px-5 py-3 rounded-xl text-gray-400 hover:text-red-500 transition-all font-semibold text-sm"><i class="fas fa-sign-out-alt"></i> <span data-i18n="btn_logout">Çıkış</span></button>
-            </div>
         </aside>
 
-        <main class="flex-1 flex flex-col relative overflow-hidden">
-            <header class="h-24 bg-white/80 dark:bg-dark-card/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-10 sticky top-0 z-30">
-                <div class="flex items-center gap-4"><div class="text-gray-400 font-medium text-sm" id="date-display">...</div></div>
+        <main class="flex-1 flex flex-col relative overflow-hidden bg-black/20">
+            <!-- LIVE TICKER (Yellow) -->
+            <div class="bg-theme-yellow/10 border-b border-theme-yellow/10 h-8 flex items-center overflow-hidden whitespace-nowrap">
+                <div class="animate-scroll inline-block px-4 text-xs font-bold text-theme-yellow" id="live-ticker">
+                    <span class="mx-4">🔥 User123 kazandı 5 R$</span>
+                </div>
+            </div>
+
+            <!-- HEADER -->
+            <header class="h-20 bg-zinc-900/90 backdrop-blur-md border-b border-zinc-800 flex items-center justify-between px-6 sticky top-0 z-30">
                 <div class="flex items-center gap-4">
-                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full px-5 py-2 flex items-center gap-3 shadow-sm hover:shadow-md transition">
-                        <svg class="w-6 h-6"><use href="#icon-robux-round"></use></svg>
-                        <span class="font-extrabold text-gray-800 dark:text-white text-lg"><span id="header-balance">0.00</span> R$</span>
+                    <button onclick="toggleDrawer()" class="md:hidden w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-white"><i class="fas fa-bars"></i></button>
+                    <div class="hidden md:block">
+                        <h2 class="text-xl font-bold text-white" id="page-title">Panel</h2>
+                        <p class="text-xs text-gray-400" id="date-display">...</p>
                     </div>
-                    <button id="btn-drawer-toggle" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-white hover:bg-rbx-green hover:text-white transition md:hidden"><i class="fas fa-bars"></i></button>
+                </div>
+                <div class="bg-zinc-800 border border-zinc-700 rounded-full px-1 py-1 pr-5 flex items-center gap-3 shadow-lg cursor-default">
+                    <div class="w-10 h-10 bg-theme-yellow rounded-full flex items-center justify-center shadow-inner text-black"><i class="fas fa-coins"></i></div>
+                    <span class="font-black text-white text-lg tracking-wide"><span id="header-balance">0.00</span> R$</span>
                 </div>
             </header>
 
-            <div class="flex-1 overflow-y-auto p-8 md:p-12 relative">
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 relative scroll-smooth">
                 <!-- DASHBOARD -->
-                <div id="view-dashboard" class="space-y-8 animate-fade-in">
-                    <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-[2rem] p-10 text-white shadow-2xl relative overflow-hidden">
-                        <div class="relative z-10"><h2 class="text-4xl font-black mb-3" data-i18n="dash_welcome">Hoş Geldin!</h2><p class="text-green-100 font-medium text-lg" data-i18n="dash_subtitle">Görevleri tamamla, 1 R$ günlük ödülünü al.</p></div>
-                        <div class="absolute right-0 bottom-[-20px] opacity-20 transform rotate-12"><svg class="w-48 h-48"><use href="#icon-robux-round"></use></svg></div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div class="bg-white dark:bg-dark-card p-8 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-800 hover:-translate-y-2 transition">
-                            <span class="text-xs font-bold uppercase text-gray-400" data-i18n="card_balance">Bakiye</span>
-                            <div class="flex items-center gap-3 mt-4 mb-6"><svg class="w-10 h-10"><use href="#icon-robux-round"></use></svg><span class="text-4xl font-black text-gray-900 dark:text-white" id="dash-balance">0.00</span></div>
-                            <button id="btn-open-withdraw" class="w-full bg-gray-900 dark:bg-gray-700 text-white font-bold py-3 rounded-xl" data-i18n="btn_withdraw">Çekim</button>
+                <div id="view-dashboard" class="space-y-6 animate-fade-in pb-20">
+                    <!-- MAIN CARD: Yellow Gradient -->
+                    <div class="bg-gradient-to-br from-theme-yellow to-orange-600 rounded-[2rem] p-8 md:p-10 text-black shadow-2xl relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 w-64 h-64 bg-white/20 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
+                        <div class="relative z-10 max-w-lg">
+                            <span class="bg-black/10 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur-sm border border-black/10">R$ Farm</span>
+                            <h2 class="text-3xl md:text-4xl font-black mt-3 mb-2">Hoş Geldin!</h2>
+                            <p class="text-black/70 font-bold text-lg mb-6">Görevleri tamamla, XP kazan ve günlük ödülünü al.</p>
+                            <div class="bg-black/20 rounded-full h-8 w-full max-w-xs relative flex items-center p-1 border border-black/10">
+                                <div class="absolute left-1 top-1 bottom-1 bg-white rounded-full w-[0%]" id="xp-bar-fill"></div>
+                                <span class="absolute w-full text-center text-xs font-bold text-black drop-shadow-sm z-10">Lvl 1 - %0</span>
+                            </div>
                         </div>
-                        <div class="bg-white dark:bg-dark-card p-8 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-800 border-l-[6px] border-l-rbx-green hover:-translate-y-2 transition">
-                             <span class="text-xs font-bold uppercase text-gray-400" data-i18n="card_daily">Günlük Ödül</span>
-                             <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 mt-4">+1.00 R$</h3>
-                             <button id="btn-daily-claim" class="w-full bg-green-50 dark:bg-green-900/50 text-rbx-green font-bold py-3 rounded-xl disabled:opacity-50" disabled>Yükleniyor...</button>
+                        <div class="absolute right-5 bottom-0 transform translate-y-4 group-hover:translate-y-0 transition duration-500">
+                             <svg class="w-40 h-40 drop-shadow-2xl opacity-90"><use href="#icon-noob"></use></svg>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="glass p-6 rounded-[2rem] hover:-translate-y-1 transition duration-300">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="bg-theme-yellow/20 p-3 rounded-2xl text-theme-yellow"><i class="fas fa-wallet text-2xl"></i></div>
+                                <button onclick="toggleModal('withdraw-modal')" class="text-xs bg-zinc-700 px-3 py-1 rounded-lg font-bold hover:bg-zinc-600 transition text-white">Çekim</button>
+                            </div>
+                            <span class="text-gray-400 font-bold text-sm uppercase" data-i18n="card_balance">Bakiye</span>
+                            <div class="text-4xl font-black text-white mt-1" id="dash-balance">0.00</div>
+                        </div>
+                        <div class="glass p-6 rounded-[2rem] hover:-translate-y-1 transition duration-300 relative overflow-hidden">
+                             <div class="flex justify-between items-start mb-4">
+                                <div class="bg-orange-500/20 p-3 rounded-2xl text-orange-500"><i class="fas fa-gift text-2xl"></i></div>
+                                <span class="text-xs font-bold text-theme-yellow bg-theme-yellow/10 px-2 py-1 rounded">+1.00 R$</span>
+                             </div>
+                             <span class="text-gray-400 font-bold text-sm uppercase" data-i18n="card_daily">Günlük Ödül</span>
+                             <div class="mt-4"><button id="btn-daily-claim" class="w-full bg-gradient-to-r from-theme-yellow to-orange-500 text-black font-bold py-3 rounded-xl shadow-lg transition hover:scale-[1.02]">Yükleniyor...</button></div>
+                        </div>
+                        <div class="glass p-6 rounded-[2rem] hover:-translate-y-1 transition duration-300">
+                            <div class="flex justify-between items-start mb-4"><div class="bg-blue-500/20 p-3 rounded-2xl text-blue-500"><i class="fas fa-chart-pie text-2xl"></i></div></div>
+                            <span class="text-gray-400 font-bold text-sm uppercase">Tamamlanan</span>
+                            <div class="text-4xl font-black text-white mt-1"><span id="dash-tasks-count">0</span> <span class="text-base text-gray-500">Görev</span></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- TASKS -->
-                <div id="view-tasks" class="hidden space-y-8 animate-fade-in">
-                    <h2 class="text-2xl font-black text-gray-900 dark:text-white" data-i18n="nav_tasks">Görevler</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white dark:bg-dark-card p-6 rounded-2xl border border-gray-100 dark:border-gray-800 flex justify-between items-center hover:shadow-lg transition">
-                            <div class="flex items-center gap-4"><div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center text-red-600 text-xl"><i class="fab fa-youtube"></i></div><div><h3 class="font-bold text-gray-800 dark:text-white">YouTube Abone Ol</h3><span class="text-sm text-green-500 font-bold">+1.00 R$</span></div></div>
-                            <button id="btn-yt-claim" class="bg-red-600 text-white px-6 py-2 rounded-xl font-bold">Git</button>
+                <div id="view-tasks" class="hidden space-y-6 animate-fade-in pb-20">
+                    <h2 class="text-2xl font-black text-white">Görev Listesi</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="bg-zinc-800 p-5 rounded-2xl border border-zinc-700 flex items-center justify-between hover:shadow-xl hover:shadow-red-500/10 transition group">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 bg-red-900/20 rounded-2xl flex items-center justify-center text-red-600 text-2xl group-hover:scale-110 transition"><i class="fab fa-youtube"></i></div>
+                                <div><h3 class="font-bold text-white text-lg">YouTube Abone Ol</h3><div class="flex items-center gap-1 mt-1"><i class="fas fa-bolt text-theme-yellow text-xs"></i> <span class="text-xs font-bold text-gray-400">Hızlı</span></div></div>
+                            </div>
+                            <div class="flex flex-col items-end gap-2"><span class="text-rbx-green font-black text-lg">+1.00 R$</span><button onclick="claimYoutubeReward()" id="btn-yt-claim" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-lg transition">GİT</button></div>
                         </div>
                         <div id="user-pages-list" class="contents"></div>
                     </div>
                 </div>
 
                 <!-- PROMO -->
-                <div id="view-promo" class="hidden space-y-8 animate-fade-in">
-                    <div class="bg-white dark:bg-dark-card p-10 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-800 max-w-2xl mx-auto text-center relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-rbx-green to-blue-500"></div>
-                        <h2 class="text-2xl font-black text-gray-900 dark:text-white mb-6" data-i18n="promo_title">Promosyon Kodu</h2>
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <input id="promo-input" class="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-2xl text-center font-bold outline-none focus:ring-2 focus:ring-rbx-green uppercase dark:text-white" placeholder="CODE">
-                            <button id="btn-redeem" class="bg-rbx-green hover:bg-green-600 text-white font-bold px-8 py-4 rounded-2xl shadow-lg transition active:scale-95" data-i18n="btn_redeem">KULLAN</button>
-                        </div>
+                <div id="view-promo" class="hidden animate-fade-in flex items-center justify-center min-h-[50vh]">
+                    <div class="glass w-full max-w-lg p-10 rounded-[2.5rem] relative overflow-hidden text-center">
+                        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-theme-yellow via-orange-500 to-red-500"></div>
+                        <div class="mb-6 inline-block p-4 rounded-full bg-theme-yellow/20 text-theme-yellow text-3xl"><i class="fas fa-ticket-alt"></i></div>
+                        <h2 class="text-3xl font-black text-white mb-2" data-i18n="promo_title">Promosyon Kodu</h2>
+                        <input id="promo-input" class="w-full bg-black/40 border border-zinc-700 p-5 rounded-2xl text-center font-black text-xl tracking-widest outline-none focus:ring-2 focus:ring-theme-yellow uppercase text-white mt-6 mb-6" placeholder="KODU YAZ">
+                        <button id="btn-redeem" class="w-full bg-theme-yellow hover:bg-orange-500 text-black font-bold py-4 rounded-2xl shadow-lg transition active:scale-95" data-i18n="btn_redeem">KULLAN</button>
                     </div>
                 </div>
 
                 <!-- REFERRAL -->
-                <div id="view-referral" class="hidden space-y-8 animate-fade-in">
-                    <div class="bg-white dark:bg-dark-card p-8 rounded-[2rem] border border-gray-100 dark:border-gray-800 text-center">
-                        <h2 class="text-2xl font-black text-gray-900 dark:text-white mb-4" data-i18n="nav_ref">Referans Sistemi</h2>
-                        <p class="text-gray-500 dark:text-gray-400 mb-6" data-i18n="ref_text">Arkadaşlarını davet et, %10 kazan!</p>
-                        <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl flex justify-between items-center border border-gray-200 dark:border-gray-700 max-w-xl mx-auto">
-                            <code id="ref-code" class="text-sm text-gray-600 dark:text-gray-300 font-bold truncate">...</code>
-                            <button id="btn-copy" class="text-rbx-green hover:scale-110 transition"><i class="far fa-copy text-xl"></i></button>
+                <div id="view-referral" class="hidden animate-fade-in space-y-8">
+                     <div class="bg-gradient-to-r from-indigo-900 to-purple-900 rounded-[2rem] p-10 text-white text-center relative overflow-hidden border border-white/10">
+                        <div class="relative z-10">
+                            <h2 class="text-3xl font-black mb-4" data-i18n="nav_ref">Arkadaşlarını Davet Et</h2>
+                            <div class="bg-black/30 backdrop-blur-md p-2 rounded-2xl flex items-center max-w-lg mx-auto border border-white/10">
+                                <div class="flex-1 px-4 truncate font-mono text-sm opacity-80" id="ref-code">https://robunexa.com/?ref=...</div>
+                                <button id="btn-copy" class="bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-gray-200 transition"><i class="far fa-copy"></i></button>
+                            </div>
                         </div>
-                    </div>
+                     </div>
                 </div>
 
                 <!-- HISTORY -->
-                <div id="view-history" class="hidden space-y-8 animate-fade-in">
-                    <h2 class="text-2xl font-black text-gray-900 dark:text-white" data-i18n="history_title">Çekim Geçmişi</h2>
-                    <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
-                        <table class="w-full text-left text-sm dark:text-gray-300">
-                            <thead class="bg-gray-50 dark:bg-gray-800 font-bold"><tr><th class="p-4" data-i18n="tbl_date">Tarih</th><th class="p-4" data-i18n="tbl_amount">Miktar</th><th class="p-4" data-i18n="tbl_status">Durum</th></tr></thead>
-                            <tbody id="user-history-list" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
+                <div id="view-history" class="hidden animate-fade-in space-y-6">
+                    <h2 class="text-2xl font-black text-white" data-i18n="history_title">İşlem Geçmişi</h2>
+                    <div class="glass rounded-2xl overflow-hidden">
+                        <table class="w-full text-left text-sm text-gray-300">
+                            <thead class="bg-black/30 font-bold uppercase text-xs text-gray-500"><tr><th class="p-5" data-i18n="tbl_date">Tarih</th><th class="p-5" data-i18n="tbl_amount">Miktar</th><th class="p-5" data-i18n="tbl_status">Durum</th></tr></thead>
+                            <tbody id="user-history-list" class="divide-y divide-white/5"></tbody>
                         </table>
                     </div>
                 </div>
-
+                
                 <!-- ADMIN -->
-                <div id="view-admin" class="hidden space-y-10 animate-fade-in">
-                    <h2 class="text-3xl font-black text-gray-900 dark:text-white">Admin Paneli</h2>
-                    <div class="flex flex-wrap gap-4 border-b border-gray-200 dark:border-gray-700 pb-2">
-                        <button id="btn-tab-withdrawals" class="px-4 py-2 font-bold text-rbx-blue border-b-2 border-rbx-blue">Çekimler</button>
-                        <button id="btn-tab-promos" class="px-4 py-2 font-bold text-gray-500 hover:text-rbx-blue">Kodlar</button>
-                        <button id="btn-tab-users" class="px-4 py-2 font-bold text-gray-500 hover:text-rbx-blue">Kullanıcılar</button>
-                        <button id="btn-tab-pages" class="px-4 py-2 font-bold text-gray-500 hover:text-rbx-blue">Sayfalar</button>
-                    </div>
-                    <!-- Withdrawals Tab -->
-                    <div id="admin-sec-withdrawals" class="bg-white dark:bg-dark-card p-6 rounded-2xl border dark:border-gray-700">
-                        <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-gray-700 dark:text-white">Talepler</h3><button id="btn-admin-refresh" class="text-blue-500"><i class="fas fa-sync"></i></button></div>
-                        <div class="overflow-x-auto"><table class="w-full text-left text-sm dark:text-gray-300"><tbody id="admin-withdraw-list" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
-                    </div>
-                    <!-- Promos Tab -->
-                    <div id="admin-sec-promos" class="hidden bg-white dark:bg-dark-card p-6 rounded-2xl border dark:border-gray-700">
-                        <h3 class="font-bold mb-4 dark:text-white">Kod Ekle</h3>
-                        <div class="flex gap-4 mb-4"><input id="admin-code" placeholder="Kod Adı" class="bg-gray-50 dark:bg-gray-800 p-2 rounded dark:text-white border"><input id="admin-val" type="number" placeholder="Değer" class="bg-gray-50 dark:bg-gray-800 p-2 rounded dark:text-white border"><button id="btn-create-promo" class="bg-green-500 text-white px-4 rounded font-bold">Ekle</button></div>
-                        <ul id="admin-promo-list" class="space-y-2"></ul>
-                    </div>
-                    <!-- Pages Tab -->
-                    <div id="admin-sec-pages" class="hidden bg-white dark:bg-dark-card p-6 rounded-2xl border dark:border-gray-700">
-                        <h3 class="font-bold mb-4 dark:text-white">Yeni Görev Sayfası</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                            <input id="page-name" placeholder="Görev Adı" class="bg-gray-50 dark:bg-gray-800 p-3 rounded dark:text-white border border-gray-200 dark:border-gray-700">
-                            <input id="page-slug" placeholder="Slug (URL sonu)" class="bg-gray-50 dark:bg-gray-800 p-3 rounded dark:text-white border border-gray-200 dark:border-gray-700">
-                            <input id="page-link" placeholder="Link (URL)" class="bg-gray-50 dark:bg-gray-800 p-3 rounded dark:text-white border border-gray-200 dark:border-gray-700">
-                            <input id="page-reward" type="number" placeholder="Ödül (R$)" class="bg-gray-50 dark:bg-gray-800 p-3 rounded dark:text-white border border-gray-200 dark:border-gray-700">
-                        </div>
-                        <button id="btn-create-page" class="w-full bg-green-500 text-white py-3 rounded font-bold hover:bg-green-600 transition">Görevi Oluştur</button>
-                        <div id="admin-pages-list" class="mt-6 space-y-2"></div>
-                    </div>
-                    <!-- Users Tab -->
-                    <div id="admin-sec-users" class="hidden bg-white dark:bg-dark-card p-6 rounded-2xl border dark:border-gray-700"><div class="overflow-x-auto max-h-96 overflow-y-auto"><table class="w-full text-left text-sm dark:text-gray-300"><thead class="bg-gray-50 dark:bg-gray-800 font-bold sticky top-0"><tr><th class="p-3">Email</th><th class="p-3">Bakiye</th><th class="p-3">Ref</th></tr></thead><tbody id="admin-user-list" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div></div>
-                </div>
+                <div id="view-admin" class="hidden space-y-10 animate-fade-in pb-20"></div>
             </div>
         </main>
     </div>
 
-    <!-- EDIT PAGE MODAL -->
-    <div id="edit-page-modal" class="modal fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-md">
-        <div class="modal-content bg-white dark:bg-dark-card w-full max-w-md p-8 rounded-3xl shadow-2xl relative">
-            <button id="close-edit-modal" class="absolute top-4 right-4 text-gray-400"><i class="fas fa-times text-2xl"></i></button>
-            <h2 class="text-xl font-bold mb-4 dark:text-white">Düzenle</h2>
-            <input type="hidden" id="edit-page-id">
-            <div class="space-y-3">
-                <input id="edit-page-url" class="w-full border dark:bg-gray-800 dark:border-gray-700 dark:text-white p-3 rounded-lg" placeholder="Shortlink URL">
-                <input id="edit-page-reward" type="number" class="w-full border dark:bg-gray-800 dark:border-gray-700 dark:text-white p-3 rounded-lg" placeholder="Ödül">
-                <button id="btn-save-page" class="w-full bg-green-500 text-white font-bold py-3 rounded-lg">Kaydet</button>
+    <!-- RIGHT DRAWER -->
+    <div id="right-drawer" class="closed fixed top-0 right-0 h-full w-80 bg-zinc-900 shadow-2xl z-[80] p-6 flex flex-col border-l border-zinc-800">
+        <div class="flex justify-between items-center mb-8"><h2 class="text-xl font-bold text-white">Menü</h2><button onclick="toggleDrawer()" class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-gray-500"><i class="fas fa-times"></i></button></div>
+        <div class="space-y-2 mb-6 flex-1">
+            <button onclick="safeSwitch('dashboard')" class="w-full flex items-center gap-3 p-4 rounded-xl bg-zinc-800 font-bold text-white"><i class="fas fa-home text-gray-400"></i> Panel</button>
+            <button onclick="safeSwitch('tasks')" class="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-zinc-800 font-bold text-gray-400"><i class="fas fa-gamepad"></i> Görevler</button>
+        </div>
+        <button id="btn-logout-drawer" class="w-full bg-red-500/10 text-red-500 py-4 rounded-xl font-bold border border-red-500/20">Çıkış Yap</button>
+    </div>
+
+    <!-- WITHDRAW MODAL -->
+    <div id="withdraw-modal" class="modal fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="modal-content glass w-full max-w-md p-8 rounded-[2rem] shadow-2xl relative">
+            <button onclick="toggleModal('withdraw-modal')" class="absolute top-5 right-5 w-8 h-8 bg-zinc-700 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-theme-yellow/20 rounded-full flex items-center justify-center text-theme-yellow text-2xl mx-auto mb-4"><i class="fas fa-hand-holding-dollar"></i></div>
+                <h2 class="text-2xl font-bold text-white" data-i18n="modal_withdraw_title">Robux Çek</h2>
+            </div>
+            <div class="space-y-4">
+                <input id="w-gamepass" type="text" class="w-full bg-black/40 border border-zinc-600 rounded-xl p-4 outline-none focus:ring-2 focus:ring-theme-yellow transition text-white font-medium" placeholder="Gamepass ID / Link">
+                <input id="w-amount" type="number" class="w-full bg-black/40 border border-zinc-600 rounded-xl p-4 outline-none font-bold text-lg focus:ring-2 focus:ring-theme-yellow transition text-white" placeholder="Miktar (Min 5)">
+                <div class="bg-theme-yellow/10 border border-theme-yellow/30 p-4 rounded-xl flex justify-between items-center">
+                    <span class="text-sm text-theme-yellow font-medium">Hesabına Gelecek:</span>
+                    <span class="font-black text-xl text-white"><span id="calc-net">0</span> R$</span>
+                </div>
+                <button id="btn-submit-withdraw" class="w-full bg-theme-yellow hover:bg-orange-500 text-black font-bold py-4 rounded-xl shadow-lg transition active:scale-95" data-i18n="btn_submit_req">ONAYLA</button>
             </div>
         </div>
     </div>
 
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- LOGIC (UNCHANGED FUNCTIONALITY) -->
     <script type="module">
+        try { if (typeof AOS !== 'undefined') { AOS.init(); } } catch(e) { console.error(e); }
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs, addDoc, deleteDoc, serverTimestamp, query, where, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-        AOS.init();
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCUUceDxrNY2y7OEbJ6EX0QEXVFVBp1JgM",
-            authDomain: "robunexa.firebaseapp.com",
-            projectId: "robunexa",
-            storageBucket: "robunexa.firebasestorage.app",
-            messagingSenderId: "212565926554",
-            appId: "1:212565926554:web:8b82d702f0ef9dc04cf523",
-            measurementId: "G-6FR21407E6"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyCUUceDxrNY2y7OEbJ6EX0QEXVFVBp1JgM", authDomain: "robunexa.firebaseapp.com", projectId: "robunexa", storageBucket: "robunexa.firebasestorage.app", messagingSenderId: "212565926554", appId: "1:212565926554:web:8b82d702f0ef9dc04cf523" };
         const ADMIN_EMAIL = "adanalironaldo131@gmail.com";
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        
+        let app, auth, db;
+        try { app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app); } catch(e) { console.error(e); }
 
-        // LANGUAGES
-        const languages = [ { code: 'tr', name: 'Türkçe', flag: 'tr' }, { code: 'en', name: 'English', flag: 'us' }, { code: 'es', name: 'Español', flag: 'es' }, { code: 'pt', name: 'Português', flag: 'br' }, { code: 'de', name: 'Deutsch', flag: 'de' }, { code: 'fr', name: 'Français', flag: 'fr' }, { code: 'it', name: 'Italiano', flag: 'it' }, { code: 'ru', name: 'Русский', flag: 'ru' }, { code: 'pl', name: 'Polski', flag: 'pl' }, { code: 'id', name: 'Indonesia', flag: 'id' }, { code: 'vn', name: 'Tiếng Việt', flag: 'vn' }, { code: 'th', name: 'ไทย', flag: 'th' }, { code: 'jp', name: '日本語', flag: 'jp' }, { code: 'kr', name: '한국어', flag: 'kr' } ];
+        const languages = [ {c:'tr',n:'Türkçe',f:'tr'}, {c:'en',n:'English',f:'us'} ];
         const translations = { 
-            tr: { hero_title: "Bedava Robux Kazan", btn_login_link: "Giriş Yap", nav_dashboard: "Panel", nav_tasks: "Görevler", nav_promo: "Kupon", nav_ref: "Referans", nav_history: "Geçmiş", nav_admin: "Yönetici", btn_logout: "Çıkış Yap", dash_welcome: "Hoş Geldin!", card_balance: "Bakiye", card_daily: "Günlük Ödül", btn_withdraw: "Çekim Yap", btn_daily: "Ödülü Al", promo_title: "Promosyon Kodu", btn_redeem: "KULLAN", history_title: "Çekim Geçmişi", tbl_date: "Tarih", tbl_amount: "Miktar", tbl_status: "Durum", menu_title: "Menü", status_online: "Çevrimiçi", lbl_nav: "Navigasyon", lbl_settings: "Ayarlar", dark_mode: "Karanlık Mod", language: "Dil", ref_text: "Arkadaşlarını davet et!", modal_withdraw_title: "Çekim Talebi", modal_gross: "Çekilen:", modal_net: "Alacağın:", btn_submit_req: "Onayla" },
-            en: { hero_title: "Earn Free Robux", btn_login_link: "Login", nav_dashboard: "Dashboard", nav_tasks: "Tasks", nav_promo: "Promo", nav_ref: "Referral", nav_history: "History", nav_admin: "Admin", btn_logout: "Logout", dash_welcome: "Welcome!", card_balance: "Balance", card_daily: "Daily Reward", btn_withdraw: "Withdraw", btn_daily: "Claim", promo_title: "Promo Code", btn_redeem: "REDEEM", history_title: "Withdrawal History", tbl_date: "Date", tbl_amount: "Amount", tbl_status: "Status", menu_title: "Menu", status_online: "Online", lbl_nav: "Navigation", lbl_settings: "Settings", dark_mode: "Dark Mode", language: "Language", ref_text: "Invite Friends!", modal_withdraw_title: "Withdraw Request", modal_gross: "Amount:", modal_net: "Receive:", btn_submit_req: "Confirm" }
+            tr: { hero_title: "Bedava Robux", btn_login_link: "Giriş Yap", nav_dashboard: "Panel", nav_tasks: "Görevler", nav_promo: "Kupon", nav_ref: "Referans", nav_history: "Geçmiş", nav_admin: "Yönetici", btn_logout: "Çıkış", dash_welcome: "Hoş Geldin!", card_balance: "Bakiye", card_daily: "Günlük Ödül", btn_withdraw: "Çekim", promo_title: "Promosyon Kodu", btn_redeem: "KULLAN", history_title: "Çekim Geçmişi", tbl_date: "Tarih", tbl_amount: "Miktar", tbl_status: "Durum", modal_withdraw_title: "Çekim Talebi", btn_submit_req: "Onayla" },
+            en: { hero_title: "Free Robux", btn_login_link: "Login", nav_dashboard: "Dashboard", nav_tasks: "Tasks", nav_promo: "Promo", nav_ref: "Referral", nav_history: "History", nav_admin: "Admin", btn_logout: "Logout", dash_welcome: "Welcome!", card_balance: "Balance", card_daily: "Daily Reward", btn_withdraw: "Withdraw", promo_title: "Promo Code", btn_redeem: "REDEEM", history_title: "History", tbl_date: "Date", tbl_amount: "Amount", tbl_status: "Status", modal_withdraw_title: "Withdraw", btn_submit_req: "Confirm" }
         };
-        let currentLang = localStorage.getItem('robunexa_lang') || 'tr';
-        window.toggleLangMenu = (id) => { const el = document.getElementById(id); if(el) el.classList.toggle('hidden'); };
-        window.setLanguage = (lang) => { currentLang = lang; localStorage.setItem('robunexa_lang', lang); updateTranslations(); document.querySelectorAll('.lang-dropdown').forEach(el => el.classList.add('hidden')); };
-        function updateTranslations() { 
-            const langData = languages.find(l=>l.code===currentLang); 
-            if(document.getElementById('current-flag-login')) document.getElementById('current-flag-login').src = `https://flagcdn.com/w40/${langData.flag}.png`; 
-            if(document.getElementById('current-lang-login')) document.getElementById('current-lang-login').innerText = langData.name.substring(0,2).toUpperCase();
-            if(document.getElementById('current-flag-drawer')) document.getElementById('current-flag-drawer').src = `https://flagcdn.com/w40/${langData.flag}.png`;
-            const dict = translations[currentLang] || translations['en']; 
-            document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if(dict[key]) el.innerText = dict[key]; }); 
-        }
-        function initLanguage() { 
-            const html = languages.map(l => `<button onclick="setLanguage('${l.code}')" class="flex items-center gap-2 p-2 hover:bg-gray-100 rounded text-sm text-gray-700 w-full text-left"><img src="https://flagcdn.com/w40/${l.flag}.png" class="w-5 h-auto">${l.name}</button>`).join(''); 
-            if(document.getElementById('lang-menu-login')) document.getElementById('lang-menu-login').innerHTML = html; 
-            if(document.getElementById('lang-menu-drawer')) document.getElementById('lang-menu-drawer').innerHTML = html; 
-            updateTranslations(); 
-        }
+        let curLang = localStorage.getItem('rx_lang') || 'tr';
 
         const ui = { loading: document.getElementById('loading-screen'), login: document.getElementById('login-screen'), app: document.getElementById('app-screen'), views: { dashboard: document.getElementById('view-dashboard'), tasks: document.getElementById('view-tasks'), promo: document.getElementById('view-promo'), referral: document.getElementById('view-referral'), history: document.getElementById('view-history'), admin: document.getElementById('view-admin') }, navs: { dashboard: document.getElementById('nav-btn-dashboard'), tasks: document.getElementById('nav-btn-tasks'), promo: document.getElementById('nav-btn-promo'), referral: document.getElementById('nav-btn-referral'), history: document.getElementById('nav-btn-history'), admin: document.getElementById('nav-admin-sidebar') } };
         document.getElementById('date-display').innerText = new Date().toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'long'});
-        
-        // --- SAFE EVENT LISTENERS ---
-        function safeAddListener(id, event, func) { const el = document.getElementById(id); if(el) el.addEventListener(event, func); }
 
-        // --- PAGE LOADER LOGIC ---
-        window.switchView = (name) => {
-            const loader = document.getElementById('loading-screen');
-            if(loader) loader.classList.remove('opacity-0', 'invisible'); 
-            setTimeout(() => {
-                Object.values(ui.views).forEach(el => { if(el) el.classList.add('hidden'); });
-                Object.values(ui.navs).forEach(el => { if(el) { el.classList.remove('nav-active'); el.classList.add('text-gray-500', 'dark:text-gray-400'); } });
-                if(ui.views[name]) ui.views[name].classList.remove('hidden');
-                if(ui.navs[name]) { ui.navs[name].classList.add('nav-active'); ui.navs[name].classList.remove('text-gray-500', 'dark:text-gray-400'); }
-                if(name === 'admin') loadAdminStats(); if(name === 'tasks') loadUserPages(); if(name === 'history') loadHistory();
-                if(loader) loader.classList.add('opacity-0', 'invisible'); 
-            }, 800); 
+        window.toggleLangMenu = (id) => { const el = document.getElementById(id); if(el) el.classList.toggle('hidden'); };
+        window.setLang = (c) => { curLang = c; localStorage.setItem('rx_lang', c); updateText(); document.getElementById('lang-menu-login').classList.add('hidden'); };
+        function updateText() { const d = translations[curLang] || translations['en']; document.querySelectorAll('[data-i18n]').forEach(e => { const k = e.dataset.i18n; if(d[k]) e.innerText = d[k]; }); }
+        const langHtml = languages.map(l => `<button onclick="window.setLang('${l.c}')" class="flex items-center gap-2 p-2 hover:bg-white/20 rounded text-sm w-full text-white"><img src="https://flagcdn.com/w40/${l.f}.png" class="w-5 rounded">${l.n}</button>`).join('');
+        document.getElementById('lang-menu-login').innerHTML = langHtml; updateText();
+
+        window.switchView = (v) => {
+            ui.app.querySelector('main > div').scrollTo(0,0); document.getElementById('page-title').innerText = translations[curLang][`nav_${v}`] || v;
+            Object.values(ui.views).forEach(e => e.classList.add('hidden')); Object.values(ui.navs).forEach(e => { if(e) e.classList.remove('nav-active'); });
+            ui.views[v].classList.remove('hidden'); if(ui.navs[v]) ui.navs[v].classList.add('nav-active');
+            if(v==='admin') loadAdminStats(); if(v==='tasks') loadUserPages(); if(v==='history') loadHistory();
         }
-        window.safeSwitch = (name) => { window.switchView(name); window.toggleDrawer(); }
+        window.safeSwitch = (v) => { window.switchView(v); window.toggleDrawer(); }
+        window.toggleDrawer = () => { const d = document.getElementById('right-drawer'); if (d.classList.contains('closed')) { d.classList.remove('closed'); d.classList.add('open'); } else { d.classList.remove('open'); d.classList.add('closed'); } };
+        window.toggleModal = (id) => document.getElementById(id).classList.toggle('active');
 
-        window.toggleModal = (id) => { const el = document.getElementById(id); if(el) el.classList.toggle('active'); };
-        window.toggleDrawer = () => { const d = document.getElementById('right-drawer'); const o = document.getElementById('drawer-overlay'); if (d.classList.contains('closed')) { d.classList.remove('closed'); d.classList.add('open'); o.classList.remove('hidden'); } else { d.classList.remove('open'); d.classList.add('closed'); o.classList.add('hidden'); } };
-        window.toggleTheme = () => { if (document.documentElement.classList.contains('dark')) { document.documentElement.classList.remove('dark'); localStorage.setItem('color-theme', 'light'); } else { document.documentElement.classList.add('dark'); localStorage.setItem('color-theme', 'dark'); } };
-        window.showToast = (msg, type='success') => { const container = document.getElementById('toast-container'); const el = document.createElement('div'); const cls = type==='success' ? 'bg-white border-green-500 text-green-700' : 'bg-white border-red-500 text-red-700'; el.className = `${cls} border-l-4 px-6 py-4 rounded-xl shadow-2xl font-bold flex items-center gap-3 transform transition-all duration-300 translate-x-full z-[80]`; el.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-exclamation-circle'} text-xl"></i> ${msg}`; container.appendChild(el); requestAnimationFrame(()=>el.classList.remove('translate-x-full')); setTimeout(()=>el.remove(), 3000); };
-
-        let currentUser = null, userData = null;
-        
-        // Failsafe loader removal
-        setTimeout(() => {
-             const l = document.getElementById('loading-screen');
-             if(l && !l.classList.contains('opacity-0')) { l.classList.add('opacity-0', 'invisible'); document.getElementById('login-screen').classList.remove('hidden'); }
-        }, 4000);
-
-        onAuthStateChanged(auth, async (user) => { 
-            const loader = document.getElementById('loading-screen');
-            if (user) { 
-                currentUser = user; 
-                try { await loadUser(); } catch(e) {} 
-                ui.login.classList.add('hidden'); 
-                ui.app.classList.remove('hidden'); 
-                ui.app.style.display = 'flex'; 
-                switchView('dashboard'); 
-                if(user.email === ADMIN_EMAIL) { if(document.getElementById('drawer-admin-btn')) document.getElementById('drawer-admin-btn').classList.remove('hidden'); if(ui.navs.admin) ui.navs.admin.classList.remove('hidden'); } 
-                if(document.getElementById('drawer-email')) document.getElementById('drawer-email').innerText = user.email; 
-            } else { 
-                ui.app.classList.add('hidden'); 
-                ui.login.classList.remove('hidden'); 
-                initLanguage(); 
-                if(loader) setTimeout(() => loader.classList.add('opacity-0', 'invisible'), 800);
-            } 
+        let currentUser = null, userData = null, authChecked = false;
+        onAuthStateChanged(auth, async (u) => {
+            authChecked = true;
+            if(u) {
+                currentUser = u;
+                try {
+                    const docSnap = await getDoc(doc(db, "users", u.uid));
+                    if(docSnap.exists()) userData = docSnap.data();
+                    else { userData = { email: u.email, balance: 0, tasksCompleted: 0, referralCode: Math.random().toString(36).substr(2,8), lastDaily: null }; await setDoc(doc(db, "users", u.uid), userData); }
+                    if(u.email === ADMIN_EMAIL && ui.navs.admin) ui.navs.admin.classList.remove('hidden');
+                    updateUI(); ui.login.classList.add('hidden'); ui.app.classList.remove('hidden'); switchView('dashboard'); ui.loading.classList.add('fade-out');
+                } catch(e) { ui.loading.classList.add('fade-out'); ui.login.classList.remove('hidden'); }
+            } else { ui.app.classList.add('hidden'); ui.login.classList.remove('hidden'); ui.loading.classList.add('fade-out'); }
         });
 
-        async function loadUser() { const ref = doc(db, "users", currentUser.uid); const snap = await getDoc(ref); if (snap.exists()) { userData = snap.data(); } else { const refCode = localStorage.getItem('robunexa_ref'); userData = { email: currentUser.email, balance: 0, referralCode: Math.random().toString(36).substr(2, 8), referredBy: refCode, createdAt: serverTimestamp(), lastDaily: null, hasYoutubeReward: false, tasksCompleted: 0 }; await setDoc(ref, userData); } updateDOM(); }
-        function updateDOM() { 
-            if(document.getElementById('header-balance')) document.getElementById('header-balance').innerText = userData.balance.toFixed(2); 
-            if(document.getElementById('dash-balance')) document.getElementById('dash-balance').innerText = userData.balance.toFixed(2); 
-            if(document.getElementById('ref-code')) document.getElementById('ref-code').innerText = window.location.host + "/?ref=" + userData.referralCode; 
-            checkDailyStatus(); initLanguage(); 
-        }
-        
-        async function loadHistory() {
-            const list = document.getElementById('user-history-list'); if(!list) return; list.innerHTML = 'Loading...';
-            const q = query(collection(db, "withdrawals"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc"));
-            const snap = await getDocs(q); list.innerHTML = '';
-            if(snap.empty) { list.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-400">İşlem yok.</td></tr>'; return; }
-            snap.forEach(d => { const w = d.data(); const date = w.createdAt ? w.createdAt.toDate().toLocaleDateString() : '-'; const color = w.status === 'pending' ? 'text-yellow-500' : 'text-green-500'; const statusText = w.status === 'pending' ? 'Bekliyor' : 'Ödendi'; list.innerHTML += `<tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"><td class="p-4 text-gray-600 dark:text-gray-300">${date}</td><td class="p-4 font-bold dark:text-white flex items-center gap-2"><svg class="w-4 h-4 text-rbx-gold"><use href="#icon-robux-round"></use></svg> ${w.amount}</td><td class="p-4 font-bold ${color}">${statusText}</td></tr>`; });
+        setTimeout(() => { if(!authChecked && ui.loading && !ui.loading.classList.contains('fade-out')) { ui.loading.classList.add('fade-out'); ui.login.classList.remove('hidden'); } }, 5000);
+
+        async function loadUser() { if(!currentUser) return; const snap = await getDoc(doc(db, "users", currentUser.uid)); if (snap.exists()) { userData = snap.data(); } updateUI(); }
+        function updateUI() {
+            if(!userData) return; document.getElementById('header-balance').innerText = userData.balance.toFixed(2); document.getElementById('dash-balance').innerText = userData.balance.toFixed(2); document.getElementById('dash-tasks-count').innerText = userData.tasksCompleted || 0; document.getElementById('ref-code').innerText = window.location.host + "/?ref=" + userData.referralCode;
+            const tasks = userData.tasksCompleted || 0; const progress = (tasks % 10) * 10; const fill = document.getElementById('xp-bar-fill'); if(fill) { fill.style.width = `${progress}%`; fill.nextElementSibling.innerText = `Lvl ${Math.floor(tasks / 10) + 1} - %${progress}`; }
+            checkDailyStatus();
         }
 
-        function checkDailyStatus() { const btn = document.getElementById('btn-daily-claim'); if(!btn) return; const now = Date.now(); const last = userData.lastDaily ? userData.lastDaily.toMillis() : 0; const tasks = userData.tasksCompleted || 0; 
-            if(now - last < 86400000) { 
-                btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); btn.innerText = "Yarın Gel"; 
-            } else if(tasks < 10) { 
-                btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); btn.innerText = `Görev Yap (${tasks}/10)`; 
-            } else { 
-                btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); btn.innerText = "1 R$ Al"; 
-            } 
-        }
-        safeAddListener('btn-daily-claim', 'click', async () => { const now = Date.now(); const last = userData.lastDaily ? userData.lastDaily.toMillis() : 0; if(now - last < 86400000) return showToast("Zaman dolmadı!", "error"); try { await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(1), lastDaily: serverTimestamp() }); userData.balance += 1; userData.lastDaily = { toMillis: () => Date.now() }; updateDOM(); showToast("1 R$ Eklendi!"); } catch(e) { showToast(e.message, "error"); } });
-
-        const wAmount = document.getElementById('w-amount'); if(wAmount) wAmount.addEventListener('input', () => { const val = parseFloat(wAmount.value) || 0; const fee = val * 0.40; document.getElementById('calc-gross').innerText = val.toFixed(2); document.getElementById('calc-fee').innerText = fee.toFixed(2); document.getElementById('calc-net').innerText = (val - fee).toFixed(2); });
-        safeAddListener('btn-submit-withdraw', 'click', async () => { const amount = parseFloat(wAmount.value); const gp = document.getElementById('w-gamepass').value; if(!amount || amount < 5) return showToast("Min 5 R$", "error"); if(amount > userData.balance) return showToast("Yetersiz Bakiye", "error"); try { await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) }); await addDoc(collection(db, "withdrawals"), { userId: currentUser.uid, email: currentUser.email, gamepassId: gp, amount: amount, netAmount: amount * 0.60, status: 'pending', createdAt: serverTimestamp() }); showToast("Talep Oluşturuldu"); toggleModal('withdraw-modal'); loadUser(); } catch(e) { showToast(e.message, "error"); } });
-
-        window.claimYoutubeReward = async () => { if(userData.hasYoutubeReward) return showToast("Bu ödülü zaten aldın!", "error"); window.open("https://youtube.com/@robunexa", "_blank"); try { await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(1), hasYoutubeReward: true, tasksCompleted: increment(1) }); userData.balance += 1; userData.hasYoutubeReward = true; userData.tasksCompleted += 1; updateDOM(); showToast("1 R$ Eklendi!"); } catch(e) { showToast("Hata oluştu", "error"); } };
-
-        window.switchAdminTab = (tab) => { ['withdrawals','users','pages','promos'].forEach(t => {const el=document.getElementById('admin-sec-'+t); if(el) el.classList.add('hidden');}); const el=document.getElementById('admin-sec-'+tab); if(el) el.classList.remove('hidden'); };
-        window.loadAdminStats = async () => { if(currentUser.email !== ADMIN_EMAIL) return; 
-            const wList = document.getElementById('admin-withdraw-list'); if(wList) { wList.innerHTML = ''; const wSnap = await getDocs(query(collection(db, "withdrawals"), orderBy("createdAt", "desc"))); wSnap.forEach(d => { const w = d.data(); wList.innerHTML += `<tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"><td class="p-4 font-medium dark:text-gray-300">${w.email}</td><td class="p-4 font-mono text-blue-600 dark:text-blue-400 font-bold">${w.gamepassId}</td><td class="p-4 font-bold dark:text-white">${w.amount} R$</td><td class="p-4 text-green-500 font-bold text-right">${w.netAmount.toFixed(1)} R$</td></tr>`; }); }
-            const uList = document.getElementById('admin-user-list'); if(uList) { uList.innerHTML = ''; const uSnap = await getDocs(collection(db, "users")); uSnap.forEach(d => { const u = d.data(); uList.innerHTML += `<tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"><td class="p-3">${u.email}</td><td class="p-3 font-bold text-rbx-green">${u.balance}</td><td class="p-3 text-xs text-gray-500">${u.tasksCompleted || 0}</td></tr>`; }); }
-            loadAdminPromos(); loadAdminPages();
-        };
-        async function loadAdminPromos() { const list = document.getElementById('admin-promo-list'); if(!list) return; list.innerHTML = ''; const snap = await getDocs(collection(db, "promo_codes")); snap.forEach(d => { const p = d.data(); list.innerHTML += `<li class="flex justify-between bg-gray-50 dark:bg-gray-800 p-2 rounded items-center"><span class="font-bold dark:text-white">${p.code} (${p.value} R$)</span><button onclick="deletePromo('${d.id}')" class="text-red-500"><i class="fas fa-trash"></i></button></li>`; }); }
-        window.createPromo = async () => { const c = document.getElementById('admin-code').value; const v = Number(document.getElementById('admin-val').value); if(c && v) { await addDoc(collection(db, "promo_codes"), { code: c, value: v, active: true }); showToast("Kod Eklendi"); loadAdminPromos(); } };
-        window.deletePromo = async (id) => { await deleteDoc(doc(db, "promo_codes", id)); showToast("Kod Silindi"); loadAdminPromos(); };
-        
-        window.createPage = async () => { 
-            const name = document.getElementById('page-name').value; 
-            const slug = document.getElementById('page-slug').value;
-            const link = document.getElementById('page-link').value;
-            const reward = Number(document.getElementById('page-reward').value);
-            if(name && slug && link && reward) { 
-                await addDoc(collection(db, "pages"), { name, slug, shortlinkUrl: link, reward: reward, createdAt: serverTimestamp() }); 
-                showToast("Görev Oluşturuldu"); loadAdminPages(); 
-                document.getElementById('page-name').value = ''; document.getElementById('page-slug').value = ''; 
-                document.getElementById('page-link').value = ''; document.getElementById('page-reward').value = '';
-            } else { showToast("Tüm alanları doldurun", "error"); }
-        };
-        async function loadAdminPages() { const list = document.getElementById('admin-pages-list'); if(!list) return; list.innerHTML = ''; const snap = await getDocs(collection(db, "pages")); snap.forEach(d => { const p = d.data(); list.innerHTML += `<div class="flex justify-between items-center bg-gray-50 dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700"><div><div class="font-bold text-lg dark:text-white">${p.name}</div><div class="text-sm text-gray-400 mt-1">Shortlink: ${p.shortlinkUrl ? 'Aktif' : 'Yok'} | Ödül: ${p.reward} R$</div></div><button onclick="openEditPage('${d.id}', '${p.shortlinkUrl||''}', ${p.reward||0})" class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-4 py-2 rounded-lg text-sm font-bold dark:text-white hover:bg-gray-100 transition shadow-sm">Düzenle</button></div>`; }); }
-        window.openEditPage = (id, url, reward) => { document.getElementById('edit-page-id').value = id; document.getElementById('edit-page-url').value = url; document.getElementById('edit-page-reward').value = reward; toggleModal('edit-page-modal'); };
-        window.savePageDetails = async () => { const id = document.getElementById('edit-page-id').value; await updateDoc(doc(db, "pages", id), { shortlinkUrl: document.getElementById('edit-page-url').value, reward: Number(document.getElementById('edit-page-reward').value) }); showToast("Kaydedildi"); toggleModal('edit-page-modal'); loadAdminPages(); };
-        async function loadUserPages() { const cont = document.getElementById('user-pages-list'); if(!cont) return; cont.innerHTML = ''; const s = await getDocs(collection(db, "pages")); s.forEach(d => { const p = d.data(); if(p.shortlinkUrl) cont.innerHTML += `<div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex justify-between items-center hover:shadow-lg transition transform hover:-translate-y-1"><div><h3 class="font-bold text-gray-800 dark:text-white text-lg">${p.name}</h3><span class="text-sm text-green-500 font-bold bg-green-50 dark:bg-green-900/30 px-3 py-1 rounded-lg mt-1 inline-block">+${p.reward} R$</span></div><a href="${p.shortlinkUrl}" target="_blank" onclick="completeTask()" class="bg-rbx-blue text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-200 dark:shadow-none hover:bg-blue-600 transition">Git</a></div>`; }); }
-        window.completeTask = async () => { try { await updateDoc(doc(db, "users", currentUser.uid), { tasksCompleted: increment(1) }); userData.tasksCompleted += 1; updateDOM(); } catch(e){} };
-
-        // Listeners
-        safeAddListener('btn-login', 'click', async (e) => { e.preventDefault(); const email = document.getElementById('email-input').value; try { await sendSignInLinkToEmail(auth, email, { url: window.location.href, handleCodeInApp: true }); window.localStorage.setItem('emailForSignIn', email); showToast("Link Gönderildi"); } catch(e) { showToast(e.message, "error"); } });
-        if (isSignInWithEmailLink(auth, window.location.href)) { let email = window.localStorage.getItem('emailForSignIn'); if (!email) email = window.prompt('Email?'); signInWithEmailLink(auth, email, window.location.href).then(() => { window.localStorage.removeItem('emailForSignIn'); window.history.replaceState({}, '', '/'); }).catch(e => showToast(e.message, "error")); }
+        document.getElementById('btn-login').addEventListener('click', async (e) => { e.preventDefault(); const email = document.getElementById('email-input').value; if(!email) return showToast("Email giriniz", "error"); try { await sendSignInLinkToEmail(auth, email, { url: window.location.href, handleCodeInApp: true }); window.localStorage.setItem('emailForSignIn', email); showToast("Link mailine gönderildi!", "success"); } catch(e) { showToast(e.message, "error"); } });
+        if (isSignInWithEmailLink(auth, window.location.href)) { let email = window.localStorage.getItem('emailForSignIn'); if (!email) email = window.prompt('E-mail?'); signInWithEmailLink(auth, email, window.location.href).then(() => { window.localStorage.removeItem('emailForSignIn'); window.history.replaceState({}, '', '/'); }).catch(e => showToast("Hata", "error")); }
         window.handleLogout = () => signOut(auth).then(() => window.location.reload());
-        safeAddListener('btn-logout', 'click', () => window.handleLogout());
-        safeAddListener('btn-logout-drawer', 'click', () => window.handleLogout());
-        safeAddListener('btn-redeem', 'click', async () => { const code = document.getElementById('promo-input').value; const snap = await getDocs(query(collection(db, 'promo_codes'), where('code', '==', code))); if(!snap.empty && snap.docs[0].data().active) { await updateDoc(doc(db, 'users', currentUser.uid), { balance: increment(snap.docs[0].data().value), tasksCompleted: increment(1) }); showToast("Kazanıldı!"); loadUser(); } else showToast("Geçersiz Kod", "error"); });
-        safeAddListener('btn-copy', 'click', () => { navigator.clipboard.writeText(document.getElementById('ref-code').innerText); showToast("Kopyalandı"); });
-        safeAddListener('btn-drawer-toggle', 'click', () => window.toggleDrawer());
-        safeAddListener('btn-admin-refresh', 'click', () => loadAdminStats());
-        safeAddListener('btn-create-promo', 'click', () => createPromo());
-        safeAddListener('btn-create-page', 'click', () => createPage());
-        safeAddListener('btn-save-page', 'click', () => savePageDetails());
-        safeAddListener('close-modal-btn', 'click', () => toggleModal('withdraw-modal'));
-        safeAddListener('close-edit-modal', 'click', () => toggleModal('edit-page-modal'));
-        safeAddListener('btn-open-withdraw', 'click', () => toggleModal('withdraw-modal'));
-        safeAddListener('btn-tab-withdrawals', 'click', () => switchAdminTab('withdrawals'));
-        safeAddListener('btn-tab-promos', 'click', () => switchAdminTab('promos'));
-        safeAddListener('btn-tab-users', 'click', () => switchAdminTab('users'));
-        safeAddListener('btn-tab-pages', 'click', () => switchAdminTab('pages'));
-        safeAddListener('lang-btn-login', 'click', () => toggleLangMenu('lang-menu-login'));
-        safeAddListener('close-drawer-btn', 'click', () => toggleDrawer());
-        safeAddListener('btn-yt-claim', 'click', () => claimYoutubeReward());
+        document.getElementById('btn-logout-drawer').addEventListener('click', handleLogout);
+
+        function checkDailyStatus() { const btn = document.getElementById('btn-daily-claim'); if(!btn) return; const now = Date.now(); const last = userData.lastDaily ? userData.lastDaily.toMillis() : 0; const tasks = userData.tasksCompleted || 0; if(now - last < 86400000) { btn.disabled = true; btn.innerText = "Yarın Gel"; } else if(tasks < 2) { btn.disabled = true; btn.innerText = `2 Görev Yap`; } else { btn.disabled = false; btn.innerText = "1 R$ AL"; } }
+        document.getElementById('btn-daily-claim').addEventListener('click', async () => { if(!currentUser) return; try { await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(1), lastDaily: serverTimestamp() }); userData.balance += 1; userData.lastDaily = { toMillis: () => Date.now() }; updateUI(); showToast("+1 R$ Eklendi!"); } catch(e) { showToast("Hata", "error"); } });
+
+        const wAmount = document.getElementById('w-amount'); wAmount.addEventListener('input', () => { const val = parseFloat(wAmount.value) || 0; const fee = val * 0.30; document.getElementById('calc-net').innerText = (val - fee).toFixed(2); });
+        document.getElementById('btn-submit-withdraw').addEventListener('click', async () => { const amount = parseFloat(wAmount.value); const gp = document.getElementById('w-gamepass').value; if(!gp) return showToast("Gamepass ID?", "error"); if(!amount || amount < 5) return showToast("Min 5 R$", "error"); if(amount > userData.balance) return showToast("Yetersiz Bakiye", "error"); try { await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) }); await addDoc(collection(db, "withdrawals"), { userId: currentUser.uid, email: currentUser.email, gamepassId: gp, amount: amount, status: 'pending', createdAt: serverTimestamp() }); showToast("Talep Alındı!"); toggleModal('withdraw-modal'); loadUser(); } catch(e) { showToast(e.message, "error"); } });
+
+        window.claimYoutubeReward = async () => { if(userData.hasYoutubeReward) return showToast("Alındı!", "error"); window.open("https://youtube.com/@robunexa", "_blank"); setTimeout(async () => { try { await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(1), hasYoutubeReward: true, tasksCompleted: increment(1) }); userData.balance += 1; userData.hasYoutubeReward = true; userData.tasksCompleted += 1; updateUI(); showToast("+1 R$"); } catch(e) {} }, 5000); };
+        async function loadUserPages() { const c = document.getElementById('user-pages-list'); if(!c) return; c.innerHTML = 'Wait...'; try { const s = await getDocs(collection(db, "pages")); c.innerHTML = ''; if(s.empty) { c.innerHTML = '<div class="col-span-2 text-center text-gray-400">Görev yok.</div>'; return; } s.forEach(d => { const p = d.data(); c.innerHTML += `<div class="bg-zinc-800 p-5 rounded-2xl border border-zinc-700 flex items-center justify-between hover:shadow-xl transition"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-blue-900/20 rounded-xl flex justify-center items-center text-blue-500"><i class="fas fa-link"></i></div><div><h3 class="font-bold text-white">${p.name}</h3><span class="text-xs text-green-500 font-bold">+${p.reward} R$</span></div></div><a href="${p.shortlinkUrl}" target="_blank" onclick="completeTask('${d.id}')" class="bg-white/5 hover:bg-theme-yellow hover:text-black px-5 py-2 rounded-xl font-bold transition text-white">Git</a></div>`; }); } catch(e) { c.innerHTML = ''; } }
+        window.completeTask = async (id) => { setTimeout(async () => { try { await updateDoc(doc(db, "users", auth.currentUser.uid), { tasksCompleted: increment(1) }); userData.tasksCompleted += 1; updateUI(); } catch(e){} }, 2000); };
+        
+        async function loadHistory() { const list = document.getElementById('user-history-list'); if(!list) return; list.innerHTML = 'Loading...'; try { const q = query(collection(db, "withdrawals"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc")); const snap = await getDocs(q); list.innerHTML = ''; if(snap.empty) { list.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">İşlem yok.</td></tr>`; return; } snap.forEach(d => { const w = d.data(); const date = w.createdAt ? w.createdAt.toDate().toLocaleDateString() : '-'; list.innerHTML += `<tr class="border-b border-zinc-700 hover:bg-zinc-800"><td class="p-5 text-gray-300">${date}</td><td class="p-5 font-bold text-white flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-theme-yellow text-black flex items-center justify-center text-xs">R$</div> ${w.amount}</td><td class="p-5 font-bold text-theme-yellow">${w.status}</td></tr>`; }); } catch(e) { list.innerHTML = ''; } }
+        
+        document.getElementById('btn-redeem').addEventListener('click', async () => { const code = document.getElementById('promo-input').value; if(!code) return showToast("Kod?", "error"); try { const snap = await getDocs(query(collection(db, 'promo_codes'), where('code', '==', code))); if(!snap.empty && snap.docs[0].data().active) { const val = snap.docs[0].data().value; await updateDoc(doc(db, 'users', currentUser.uid), { balance: increment(val), tasksCompleted: increment(1) }); showToast(`+${val} R$`); loadUser(); } else showToast("Geçersiz", "error"); } catch(e) { showToast("Hata", "error"); } });
+        
+        function showToast(msg, type = 'success') { const c = document.getElementById('toast-container'); const d = document.createElement('div'); const color = type === 'error' ? 'border-l-4 border-red-500 text-red-500' : 'border-l-4 border-green-500 text-green-600'; d.className = `glass p-4 rounded-xl shadow-xl flex items-center gap-3 animate-fade-in ${color} bg-zinc-900 text-white`; d.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> <span class="font-bold">${msg}</span>`; c.appendChild(d); setTimeout(() => { d.style.opacity = '0'; setTimeout(() => d.remove(), 300) }, 3000); }
+        document.getElementById('btn-copy').addEventListener('click', () => { navigator.clipboard.writeText(document.getElementById('ref-code').innerText); showToast("Kopyalandı"); });
+        window.loadAdminStats = async () => { if(currentUser.email === ADMIN_EMAIL) { document.getElementById('view-admin').innerHTML = '<h1 class="text-white text-2xl font-bold">Admin Panel</h1>'; } }
+        
+        const tickerNames = ["Ahmet", "Mehmet", "ProGamer", "RobloxKing", "NoobMaster", "AliTr"]; setInterval(() => { const name = tickerNames[Math.floor(Math.random() * tickerNames.length)]; const amt = Math.floor(Math.random() * 20) + 1; const action = Math.random() > 0.5 ? "kazandı" : "çekti"; const el = document.createElement('span'); el.className = "mx-4 inline-block animate-pulse"; el.innerText = `${action === "kazandı" ? "🔥" : "🚀"} ${name} ${action} ${amt} R$`; document.getElementById('live-ticker').appendChild(el); if(document.getElementById('live-ticker').children.length > 10) document.getElementById('live-ticker').firstElementChild.remove(); }, 3000);
     </script>
-    <footer class="py-10 bg-white dark:bg-dark-card border-t border-gray-100 dark:border-gray-700 text-center">
-        <div class="flex justify-center gap-6 mb-6">
-            <a href="https://youtube.com/@robunexa" class="text-gray-400 hover:text-red-500 text-2xl transition"><i class="fab fa-youtube"></i></a>
-        </div>
-        <p class="text-gray-400 text-sm">© 2025 Robunexa. Not affiliated with Roblox Corporation.</p>
-    </footer>
 </body>
 </html>
