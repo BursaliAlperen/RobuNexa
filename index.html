@@ -211,7 +211,6 @@
             <div class="flex-1 px-3 py-4 space-y-1">
                 <button onclick="router.navigate('home')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="home"><i class="fa-solid fa-house w-5"></i> <span data-t="menu_home" class="text-sm">Dashboard</span></button>
                 <button onclick="router.navigate('earn')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="earn"><i class="fa-solid fa-link w-5"></i> <span data-t="menu_tasks" class="text-sm">Shortlinks</span></button>
-                <!-- CHAT REMOVED -->
                 <button onclick="router.navigate('withdraw')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="withdraw"><i class="fa-solid fa-money-bill-transfer w-5"></i> <span data-t="menu_withdraw" class="text-sm">Withdraw</span></button>
                 <button onclick="router.navigate('leaderboard')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="leaderboard"><i class="fa-solid fa-trophy w-5"></i> <span data-t="menu_top" class="text-sm">Leaderboard</span></button>
                 <button onclick="router.navigate('profile')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="profile"><i class="fa-solid fa-user w-5"></i> <span data-t="menu_profile" class="text-sm">Profile</span></button>
@@ -548,7 +547,7 @@
 
         const initEarn = async () => {
             const list = document.getElementById('task-list');
-            // REMOVED orderBy to prevent index errors and infinite loading
+            // REMOVED orderBy to prevent index errors
             onSnapshot(collection(db, "pages"), (snap) => {
                 list.innerHTML = '';
                 if(snap.empty) { 
@@ -588,6 +587,7 @@
                     // Clear used code
                     localStorage.removeItem('verify_code');
                     toast(`Correct! +${reward} R$`, 'success');
+                    initEarn();
                 } else {
                     playSound('error');
                     toast('Incorrect Code! Please complete the link.', 'error');
@@ -711,6 +711,7 @@
             };
         };
 
+        // ... [Leaderboard, Profile, Redeem Code functions remain same] ...
         const initLeaderboard = async () => { const tb = document.getElementById('leaderboard-body'); const snaps = await getDocs(query(collection(db,"users"), orderBy("balance","desc"), limit(20))); tb.innerHTML = ''; let i=1; snaps.forEach(s => { const d = s.data(); tb.innerHTML += `<tr><td class="p-4 text-primary font-bold">${i++}</td><td class="p-4 flex gap-2 items-center"><img src="${d.photoURL}" class="w-6 h-6 rounded-full" onerror="this.src='https://ui-avatars.com/api/?name=U'"> ${d.email.slice(0,3)}...</td><td class="p-4 text-right font-bold text-white">${d.balance.toFixed(0)}</td></tr>`; }); };
         const initProfile = () => { document.getElementById('profile-img').src = state.user.photoURL; document.getElementById('profile-name').innerText = state.user.displayName || "User"; document.getElementById('profile-email').innerText = state.user.email; document.getElementById('profile-id').innerText = state.user.uid; document.getElementById('ref-link').value = `https://robunexa.onrender.com?ref=${state.user.uid}`; window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('ref-link').value); toast('Copied!', 'success'); }; document.getElementById('btn-logout').onclick = () => { playSound('click'); signOut(auth); location.reload(); }; };
         window.redeemCode = async () => { playSound('click'); const c = document.getElementById('promo-input').value.trim().toUpperCase(); if(!c) return toast("Empty Code", "error"); togglePromoModal(false); const q = query(collection(db, "codes"), where("name", "==", c)); const snap = await getDocs(q); if(snap.empty) { const h = { "ROBUX2024": 50 }; if(h[c]) { if(state.data.usedCodes?.includes(c)) return toast("Already Used!", "error"); await updateDoc(doc(db,"users",state.user.uid), { balance: increment(h[c]), usedCodes: [...(state.data.usedCodes||[]), c] }); return toast(`Redeemed ${h[c]} R$!`, "success"); } return toast("Invalid Code", "error"); } const d = snap.docs[0].data(); if(state.data.usedCodes?.includes(c)) return toast("Already Used!", "error"); const ut = state.data.completedTasks?.length || 0; if(ut < d.reqTasks) return toast(`Complete ${d.reqTasks - ut} more tasks!`, "error"); await updateDoc(doc(db,"users",state.user.uid), { balance: increment(d.reward), usedCodes: [...(state.data.usedCodes||[]), c] }); toast(`Redeemed ${d.reward} R$!`, "success"); };
