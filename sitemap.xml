@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+   <!-- ANA SAYFA -->
+   <url>
+      <loc>https://robunexa.com/</loc>
+      <lastmod>2024-05-20</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1.0</priority>
+   </url>
+
+   <!-- KAZAN / SHORTLINKS SAYFASI -->
+   <url>
+      <loc>https://robunexa.com/#earn</loc>
+      <lastmod>2024-05-20</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>0.8</priority>
+   </url>
+
+   <!-- ÇEKİM SAYFASI -->
+   <url>
+      <loc>https://robunexa.com/#withdraw</loc>
+      <lastmod>2024-05-20</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.8</priority>
+   </url>
+
+   <!-- LİDERLİK TABLOSU -->
+   <url>
+      <loc>https://robunexa.com/#leaderboard</loc>
+      <lastmod>2024-05-20</lastmod>
+      <changefreq>hourly</changefreq>
+      <priority>0.6</priority>
+   </url>
+
+   <!-- GLOBAL SOHBET -->
+   <url>
+      <loc>https://robunexa.com/#chat</loc>
+      <lastmod>2024-05-20</lastmod>
+      <changefreq>always</changefreq>
+      <priority>0.5</priority>
+   </url>
+
+   <!-- PROFİL (Genel) -->
+   <url>
+      <loc>https://robunexa.com/#profile</loc>
+      <lastmod>2024-05-20</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.4</priority>
+   </url>
+</urlset>
