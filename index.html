@@ -1,740 +1,866 @@
 <!DOCTYPE html>
-<html lang="tr" class="notranslate" translate="no">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="google" content="notranslate">
-    <title>RobuNexa | Ultimate Noob Edition v3.0</title>
+    <title>RobuNexa | Ultimate Rewards</title>
+    <meta name="theme-color" content="#050505">
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
-                    colors: { 
-                        dark: '#020202',
-                        card: '#080808',
-                        noob: '#FACC15',
-                        noobBlue: '#00A2FF',
-                        noobGreen: '#2ECC71'
+                    colors: {
+                        bg: '#050505',
+                        surface: '#09090b',
+                        primary: '#FACC15', 
+                        accent: '#EA580C', 
+                        torso: '#3B82F6',   
+                        leg: '#4ADE80',     
+                        success: '#10B981',
+                        error: '#EF4444'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
                     },
                     animation: {
-                        'spin-slow': 'spin 8s linear infinite',
                         'float': 'float 4s ease-in-out infinite',
-                        'glow': 'glow 2s ease-in-out infinite alternate',
-                        'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
-                        glow: { 'from': { boxShadow: '0 0 10px #FACC1533' }, 'to': { boxShadow: '0 0 30px #FACC1566' } },
-                        slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-10px) rotate(2deg)' },
+                        }
                     }
                 }
             }
         }
     </script>
 
+    <!-- Icons & Fonts & Flags -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.11.0/css/flag-icons.min.css"> <!-- Real Flag Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        /* Base Reset */
+        body {
+            background-color: #050505;
+            color: #e5e5e5;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none; /* Metin seçimi engellendi */
+            -webkit-user-select: none;
+        }
+
+        /* Moving Math Grid Background */
+        .math-grid {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(rgba(250, 204, 21, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(250, 204, 21, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transform: perspective(500px) rotateX(60deg);
+            animation: gridMove 20s linear infinite;
+            z-index: -10;
+            pointer-events: none;
+        }
+
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(40px); }
+        }
+
+        /* Vignette & Glass */
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 50%, #050505 100%); z-index: -9; pointer-events: none; }
+        .glass {
+            background: rgba(20, 20, 22, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Full Noob SVG Style */
+        .noob-full { filter: drop-shadow(0 0 15px rgba(250, 204, 21, 0.2)); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #09090b; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+        /* Animation & Toast */
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.99); } to { opacity: 1; transform: scale(1); } }
+        .click-bounce:active { transform: scale(0.95); }
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { transform: translateX(100%); transition: transform 0.3s ease; }
+        .toast.show { transform: translateX(0); }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+
+        /* Overlays */
+        #transition-overlay, #lang-modal { transition: opacity 0.3s ease; pointer-events: none; opacity: 0; }
+        #transition-overlay.active, #lang-modal.active { opacity: 1; pointer-events: all; }
         
-        /* Root & Anti-Copy System */
-        :root { --noob: #FACC15; }
-        * { 
-            -webkit-user-select: none; user-select: none; 
-            -webkit-user-drag: none; box-sizing: border-box;
-            outline: none; scrollbar-width: none;
-        }
-        *::-webkit-scrollbar { display: none; }
-
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: #020202; color: white; 
-            overflow: hidden; height: 100vh;
-        }
-
-        /* Particles Canvas Background */
-        #particle-canvas {
-            position: fixed; inset: 0; z-index: -1;
-            background: radial-gradient(circle at center, #0a0a0a 0%, #020202 100%);
-        }
-
-        /* Custom Noob Branding Components */
-        .noob-head {
-            width: 100px; height: 100px; background: var(--noob);
-            border-radius: 20px; position: relative;
-            box-shadow: 0 15px 50px rgba(250, 204, 21, 0.25);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .noob-eyes { position: absolute; top: 35px; width: 60%; display: flex; justify-content: space-between; }
-        .noob-eye { width: 12px; height: 12px; background: #000; border-radius: 50%; }
-        .noob-mouth { 
-            width: 30px; height: 12px; border-bottom: 4px solid #000; 
-            border-radius: 50%; margin-top: 25px;
-        }
-
-        /* Hexagonal System */
-        .hexagon {
-            width: 30px; height: 35px; background: var(--noob);
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            display: flex; align-items: center; justify-content: center;
-            color: black; font-weight: 800; font-size: 14px;
-        }
-
-        /* Glassmorphism System */
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .glass-hover:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--noob); }
-
-        /* Views */
-        .view { display: none; height: calc(100vh - 80px); overflow-y: auto; padding: 2rem; }
-        .view.active { display: block; animation: slide-up 0.6s ease; }
-
-        /* Custom Input Styling */
-        input { background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.08) !important; transition: 0.3s; }
-        input:focus { border-color: var(--noob) !important; box-shadow: 0 0 15px rgba(250, 204, 21, 0.1); }
-
-        /* Notifications */
-        #notif-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-col; gap: 10px; }
-        .notif { padding: 15px 25px; border-radius: 12px; font-weight: 700; font-size: 13px; transform: translateX(120%); transition: 0.4s; }
-
-        /* Preloader */
-        #preloader { position: fixed; inset: 0; background: #020202; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        /* FAQ Accordion */
+        .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .faq-item.active .faq-content { max-height: 200px; }
+        .faq-item.active i { transform: rotate(180deg); }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body oncontextmenu="return false;"> <!-- Basic HTML Attribute Block -->
 
-<div id="preloader">
-    <div class="noob-head animate-float mb-6">
-        <div class="noob-eyes"><div class="noob-eye"></div><div class="noob-eye"></div></div>
-        <div class="noob-mouth"></div>
-    </div>
-    <div class="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
-        <div id="load-bar" class="w-0 h-full bg-noob transition-all duration-500"></div>
-    </div>
-    <p class="mt-4 text-[10px] font-bold text-noob tracking-[0.5em] uppercase">RobuNexa Loading</p>
-</div>
-
-<canvas id="particle-canvas"></canvas>
-
-<div id="notif-container"></div>
-
-<nav class="fixed top-0 w-full z-50 glass h-20 px-8 flex items-center justify-between">
-    <div class="flex items-center gap-4 group cursor-pointer" onclick="showView('landing')">
-        <div class="noob-head scale-[0.35] group-hover:rotate-[360deg] transition-all duration-1000 shadow-none">
-            <div class="noob-eyes"><div class="noob-eye"></div><div class="noob-eye"></div></div>
-            <div class="noob-mouth"></div>
-        </div>
-        <div class="flex flex-col leading-none">
-            <span class="font-extrabold text-2xl tracking-tighter italic" translate="no">ROBU<span class="text-noob">NEXA</span></span>
-            <span class="text-[8px] font-bold text-gray-500 tracking-[0.3em] uppercase">Absolute Premium</span>
-        </div>
-    </div>
-
-    <div id="nav-user-area" class="hidden flex items-center gap-6">
-        <div class="flex items-center gap-3 bg-white/5 border border-white/10 pl-2 pr-5 py-1.5 rounded-full">
-            <div class="hexagon">R</div>
-            <div class="flex flex-col">
-                <span id="balance-val" class="text-noob font-black text-sm">0.00</span>
-                <span class="text-[7px] font-bold text-gray-500 uppercase">Current Robux</span>
-            </div>
-        </div>
-        <button onclick="logout()" class="w-10 h-10 rounded-full glass border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all">
-            <i class="fa-solid fa-power-off"></i>
-        </button>
-    </div>
-</nav>
-
-<aside id="sidebar" class="hidden fixed left-0 top-20 h-full w-20 md:w-72 glass border-r border-white/5 z-40">
-    <div class="flex flex-col p-4 gap-4">
-        <div class="px-4 py-2 text-[10px] font-black text-gray-600 uppercase tracking-widest hidden md:block">Main Menu</div>
-        
-        <button onclick="showView('tasks')" class="nav-btn flex items-center justify-center md:justify-start gap-5 p-4 rounded-2xl text-gray-500 hover:text-noob hover:bg-noob/5 transition-all" data-view="tasks">
-            <i class="fa-solid fa-rocket text-xl"></i>
-            <span class="hidden md:block font-bold text-sm uppercase tracking-tight" data-key="nav_tasks">Görevler</span>
-        </button>
-
-        <button onclick="showView('withdraw')" class="nav-btn flex items-center justify-center md:justify-start gap-5 p-4 rounded-2xl text-gray-500 hover:text-noob hover:bg-noob/5 transition-all" data-view="withdraw">
-            <i class="fa-solid fa-wallet text-xl"></i>
-            <span class="hidden md:block font-bold text-sm uppercase tracking-tight" data-key="nav_withdraw">Çekim İşlemleri</span>
-        </button>
-
-        <button onclick="showView('profile')" class="nav-btn flex items-center justify-center md:justify-start gap-5 p-4 rounded-2xl text-gray-500 hover:text-noob hover:bg-noob/5 transition-all" data-view="profile">
-            <i class="fa-solid fa-user-astronaut text-xl"></i>
-            <span class="hidden md:block font-bold text-sm uppercase tracking-tight" data-key="nav_profile">Profil</span>
-        </button>
-
-        <div class="h-[1px] bg-white/5 my-2"></div>
-
-        <button onclick="showView('settings')" class="nav-btn flex items-center justify-center md:justify-start gap-5 p-4 rounded-2xl text-gray-500 hover:text-noob hover:bg-noob/5 transition-all" data-view="settings">
-            <i class="fa-solid fa-gear text-xl"></i>
-            <span class="hidden md:block font-bold text-sm uppercase tracking-tight" data-key="nav_settings">Ayarlar</span>
-        </button>
-
-        <div id="admin-nav-item" class="hidden flex flex-col gap-2 mt-4">
-            <div class="px-4 py-2 text-[10px] font-black text-red-600 uppercase tracking-widest hidden md:block">Authority</div>
-            <button onclick="showView('admin')" class="flex items-center justify-center md:justify-start gap-5 p-4 rounded-2xl bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all">
-                <i class="fa-solid fa-shield-halved text-xl"></i>
-                <span class="hidden md:block font-black text-sm uppercase tracking-tight">Admin Panel</span>
-            </button>
-        </div>
-    </div>
-</aside>
-
-<main id="main-content" class="pt-20 transition-all duration-500">
-    
-    <div id="view-landing" class="view active flex flex-col items-center justify-center min-h-[80vh]">
-        <div class="relative mb-12 animate-float">
-            <div class="noob-head scale-125">
-                <div class="noob-eyes"><div class="noob-eye"></div><div class="noob-eye"></div></div>
-                <div class="noob-mouth"></div>
-            </div>
-            <div class="absolute -inset-8 bg-noob/20 blur-[60px] rounded-full -z-10 animate-pulse"></div>
-        </div>
-
-        <h1 class="text-6xl md:text-8xl font-black text-center leading-none tracking-tighter uppercase mb-6">
-            Sınırsız <br> <span class="text-noob italic">Robux</span> Havuzu
-        </h1>
-        
-        <p class="text-gray-400 text-center max-w-xl mb-12 font-medium leading-relaxed" data-key="hero_sub">
-            RobuNexa ile artık Robux almak çok kolay. Günlük görevleri tamamla, 
-            bakiyeni biriktir ve anında hesabına aktar. Tamamen güvenli ve ücretsiz.
-        </p>
-
-        <button onclick="login()" class="group relative bg-noob text-black px-16 py-6 rounded-3xl font-black flex items-center gap-4 hover:scale-105 transition-all shadow-2xl shadow-noob/20">
-            <i class="fa-brands fa-google text-2xl"></i>
-            <span class="text-lg uppercase" data-key="login_btn">Google ile Başla</span>
-            <div class="absolute inset-0 bg-white/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        </button>
-
-        <div class="w-full max-w-4xl mt-24 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="glass p-8 rounded-[2.5rem]">
-                <h2 class="text-xl font-black mb-8 flex items-center gap-3 italic">
-                    <i class="fa-solid fa-circle-question text-noob"></i> <span data-key="faq_title">Sıkça Sorulanlar</span>
-                </h2>
-                <div class="space-y-4">
-                    <details class="group glass rounded-2xl border-white/5 transition-all overflow-hidden">
-                        <summary class="p-5 font-bold cursor-pointer list-none flex justify-between items-center hover:bg-white/5">
-                            <span data-key="faq_q1">Sistem nasıl çalışır?</span>
-                            <i class="fa-solid fa-plus text-noob group-open:rotate-45 transition-transform"></i>
-                        </summary>
-                        <div class="p-5 pt-0 text-sm text-gray-500 leading-relaxed" data-key="faq_a1">
-                            Görevleri yaparsın, biz reklam gelirlerimizi Robux olarak seninle paylaşırız. 
-                            Bakiye biriktirince kendi oluşturduğun Gamepass üzerinden ödeme alırsın.
-                        </div>
-                    </details>
-                    <details class="group glass rounded-2xl border-white/5 transition-all overflow-hidden">
-                        <summary class="p-5 font-bold cursor-pointer list-none flex justify-between items-center hover:bg-white/5">
-                            <span data-key="faq_q2">Ödemeler ne zaman gelir?</span>
-                            <i class="fa-solid fa-plus text-noob group-open:rotate-45 transition-transform"></i>
-                        </summary>
-                        <div class="p-5 pt-0 text-sm text-gray-500 leading-relaxed" data-key="faq_a2">
-                            Talep onaylandıktan sonra Roblox'un standart 'Pending' süresi olan 5-7 gün içinde Robux'un hesabına geçer.
-                        </div>
-                    </details>
-                </div>
-            </div>
-
-            <div class="glass p-8 rounded-[2.5rem] flex flex-col justify-center items-center text-center">
-                <div class="w-20 h-20 bg-noob/10 rounded-full flex items-center justify-center mb-6">
-                    <i class="fa-solid fa-shield-heart text-4xl text-noob"></i>
-                </div>
-                <h3 class="text-xl font-black mb-4 uppercase italic">Güvenlik Politikası</h3>
-                <p class="text-sm text-gray-500 font-medium">
-                    Asla Roblox şifrenizi istemiyoruz. Sadece Google girişinizi kullanarak profilinizi oluşturuyoruz. 
-                    %100 Safe & Legat.
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <div id="view-tasks" class="view">
-        <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-                <div>
-                    <h2 class="text-5xl font-black italic uppercase tracking-tighter" data-key="nav_tasks">Görevler</h2>
-                    <p class="text-gray-500 mt-2 font-medium">Günlük limitlerini doldurarak kazancını maksimize et.</p>
-                </div>
-                <div class="glass px-6 py-3 rounded-2xl border-noob/20 flex items-center gap-4">
-                    <span class="text-[10px] font-black uppercase text-gray-500 tracking-widest">Sıralama:</span>
-                    <select class="bg-transparent font-bold text-xs outline-none cursor-pointer">
-                        <option>En Çok Kazandıran</option>
-                        <option>En Yeni</option>
-                    </select>
-                </div>
-            </div>
-            <div id="task-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                </div>
-        </div>
-    </div>
-
-    <div id="view-withdraw" class="view">
-        <div class="max-w-4xl mx-auto">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <div class="space-y-8">
-                    <h2 class="text-5xl font-black italic uppercase tracking-tighter" data-key="nav_withdraw">Çekim</h2>
-                    <div class="glass p-8 rounded-[3rem] relative overflow-hidden group">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-noob/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-all"></div>
-                        
-                        <div class="space-y-6">
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">Miktar Girişi</label>
-                                <div class="relative">
-                                    <input type="number" id="withdraw-amount" placeholder="0" class="w-full p-6 rounded-3xl text-4xl font-black">
-                                    <div class="absolute right-6 top-1/2 -translate-y-1/2 hexagon scale-150 shadow-xl">R</div>
-                                </div>
-                            </div>
-
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">Gamepass Adresi</label>
-                                <input type="text" id="withdraw-link" placeholder="https://www.roblox.com/game-pass/..." class="w-full p-5 rounded-2xl text-xs font-medium italic">
-                            </div>
-
-                            <button onclick="processWithdraw()" class="w-full bg-noob text-black py-6 rounded-3xl font-black uppercase tracking-widest text-sm shadow-xl shadow-noob/20 hover:scale-[1.02] transition-all">
-                                Talebi Gönder
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="space-y-6">
-                    <h3 class="text-xl font-black italic uppercase tracking-widest">Geçmiş Talepler</h3>
-                    <div id="withdraw-history" class="space-y-4">
-                        </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="view-profile" class="view">
-        <div class="max-w-3xl mx-auto">
-            <div class="glass p-10 rounded-[3rem] text-center relative overflow-hidden">
-                <div class="noob-head scale-150 mx-auto mb-10 mt-6 shadow-2xl">
-                    <div class="noob-eyes"><div class="noob-eye"></div><div class="noob-eye"></div></div>
-                    <div class="noob-mouth"></div>
-                </div>
-                <h2 id="user-display-name" class="text-3xl font-black mb-2 uppercase italic tracking-tighter">Noob User</h2>
-                <p id="user-display-email" class="text-gray-500 text-sm font-medium mb-8">user@example.com</p>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="glass p-6 rounded-3xl">
-                        <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Toplam Kazanç</p>
-                        <p class="text-2xl font-black text-noob"><span id="total-earned">0</span> R$</p>
-                    </div>
-                    <div class="glass p-6 rounded-3xl">
-                        <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Tamamlanan</p>
-                        <p class="text-2xl font-black text-white"><span id="total-tasks">0</span></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="view-settings" class="view">
-        <div class="max-w-2xl mx-auto">
-            <h2 class="text-5xl font-black italic uppercase tracking-tighter mb-12" data-key="nav_settings">Ayarlar</h2>
-            
-            <div class="glass p-10 rounded-[3rem] space-y-10">
-                <div class="space-y-6">
-                    <label class="text-[11px] font-black text-noob uppercase tracking-[0.3em]">Yerelleştirme / Language</label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <button onclick="setLang('tr')" id="btn-tr" class="flex items-center justify-between p-6 rounded-2xl glass border-2 border-transparent transition-all">
-                            <span class="font-bold">Türkçe</span>
-                            <img src="https://flagcdn.com/w40/tr.png" class="w-8 rounded shadow-lg">
-                        </button>
-                        <button onclick="setLang('en')" id="btn-en" class="flex items-center justify-between p-6 rounded-2xl glass border-2 border-transparent transition-all">
-                            <span class="font-bold">English</span>
-                            <img src="https://flagcdn.com/w40/us.png" class="w-8 rounded shadow-lg">
-                        </button>
-                    </div>
-                </div>
-
-                <div class="h-[1px] bg-white/5"></div>
-
-                <div class="space-y-4">
-                    <label class="text-[11px] font-black text-noob uppercase tracking-[0.3em]">Hakkımızda</label>
-                    <p class="text-xs text-gray-500 font-medium leading-relaxed italic">
-                        RobuNexa v3.0, topluluk odaklı bir ödül sistemidir. Tüm hakları saklıdır. 
-                        Kullanılan tüm Noob varlıkları Roblox Corp. markasından bağımsız hayran yapımı tasarımlardır.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="view-admin" class="view">
-        <div class="max-w-7xl mx-auto space-y-12">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="glass p-8 rounded-3xl border-red-500/20 col-span-1">
-                    <h3 class="text-sm font-black text-red-500 uppercase tracking-widest mb-6 italic">Görev Yayınla</h3>
-                    <div class="space-y-4">
-                        <input id="adm-task-title" type="text" placeholder="Görev Başlığı" class="w-full p-4 rounded-xl text-xs font-bold">
-                        <textarea id="adm-task-desc" placeholder="Görev Detayı" class="w-full p-4 rounded-xl text-xs font-medium h-24 bg-transparent border border-white/10"></textarea>
-                        <input id="adm-task-reward" type="number" placeholder="Ödül (R$)" class="w-full p-4 rounded-xl text-xs font-bold">
-                        <button onclick="addTask()" class="w-full bg-red-500 text-white py-4 rounded-xl font-black text-xs uppercase shadow-lg shadow-red-500/20">Sisteme Enjekte Et</button>
-                    </div>
-                </div>
-
-                <div class="glass p-8 rounded-3xl border-white/10 col-span-2 overflow-hidden">
-                    <h3 class="text-sm font-black text-gray-500 uppercase tracking-widest mb-6 italic">Ödeme Bekleyenler</h3>
-                    <div id="admin-withdrawals" class="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-                        </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, arrayUnion, increment, query, where, orderBy } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-
-    // Firebase Config
-    const firebaseConfig = { apiKey: "AIzaSyCUUceDxrNY2y7OEbJ6EX0QEXVFVBp1JgM", authDomain: "robunexa.firebaseapp.com", projectId: "robunexa", storageBucket: "robunexa.firebasestorage.app", messagingSenderId: "212565926554", appId: "1:212565926554:web:8b82d702f0ef9dc04cf523", measurementId: "G-6FR21407E6" };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
-    const ADMIN_EMAIL = "adanalironaldo131@gmail.com";
-
-    // Global State
-    let currentUser = null;
-    let currentLang = 'tr';
-
-    const translations = {
-        tr: {
-            nav_tasks: "Görevler", nav_withdraw: "Çekim", nav_settings: "Ayarlar", nav_profile: "Profil",
-            hero_sub: "RobuNexa ile artık Robux almak çok kolay. Günlük görevleri tamamla, bakiyeni biriktir ve anında hesabına aktar.",
-            login_btn: "Google ile Başla", faq_title: "Sıkça Sorulanlar",
-            faq_q1: "Sistem nasıl çalışır?", faq_a1: "Görevleri yaparsın, reklam gelirlerimizi Robux olarak seninle paylaşırız.",
-            faq_q2: "Ödemeler ne zaman gelir?", faq_a2: "Talep onaylandıktan sonra 5-7 gün içinde Robux'un hesabına geçer.",
-            withdraw_head: "Çekim", withdraw_btn: "Talebi Gönder", task_btn: "Görevi Yap"
-        },
-        en: {
-            nav_tasks: "Tasks", nav_withdraw: "Withdraw", nav_settings: "Settings", nav_profile: "Profile",
-            hero_sub: "Earning Robux is easier than ever with RobuNexa. Complete tasks, save balance and withdraw instantly.",
-            login_btn: "Start with Google", faq_title: "FAQ",
-            faq_q1: "How it works?", faq_a1: "You do tasks, we share our revenue with you as Robux.",
-            faq_q2: "When will I get paid?", faq_a2: "Robux arrives in 5-7 days after approval, following Roblox standard.",
-            withdraw_head: "Withdraw", withdraw_btn: "Submit Request", task_btn: "Do Task"
-        }
-    };
-
-    // UI Helper Functions
-    window.notify = (msg, type = 'success') => {
-        const container = document.getElementById('notif-container');
-        const n = document.createElement('div');
-        n.className = `notif glass border-${type === 'success' ? 'noob' : 'red-500'}/30 text-${type === 'success' ? 'noob' : 'red-500'}`;
-        n.innerText = msg;
-        container.appendChild(n);
-        setTimeout(() => n.style.transform = 'translateX(0)', 10);
-        setTimeout(() => {
-            n.style.transform = 'translateX(120%)';
-            setTimeout(() => n.remove(), 400);
-        }, 3000);
-    };
-
-    window.showView = (name) => {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        const target = document.getElementById(`view-${name}`);
-        target.classList.add('active');
-        
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            const isActive = btn.dataset.view === name;
-            btn.classList.toggle('text-noob', isActive);
-            btn.classList.toggle('bg-noob/5', isActive);
-        });
-
-        // Specific view logic
-        if(name === 'tasks') syncTasks();
-    };
-
-    window.setLang = (lang) => {
-        currentLang = lang;
-        document.getElementById('btn-tr').style.borderColor = lang === 'tr' ? '#FACC15' : 'transparent';
-        document.getElementById('btn-en').style.borderColor = lang === 'en' ? '#FACC15' : 'transparent';
-        
-        document.querySelectorAll('[data-key]').forEach(el => {
-            el.innerHTML = translations[lang][el.dataset.key];
-        });
-        if(currentUser) syncTasks();
-    };
-
-    // Firebase Core Functions
-    window.login = async () => {
-        try {
-            const result = await signInWithPopup(auth, provider);
-            await initializeUserData(result.user);
-            notify("Giriş Başarılı!");
-        } catch (e) { notify("Giriş Hatası!", "error"); }
-    };
-
-    window.logout = () => signOut(auth).then(() => location.reload());
-
-    async function initializeUserData(user) {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        
-        if (!userSnap.exists()) {
-            await setDoc(userRef, {
-                uid: user.uid,
-                email: user.email,
-                name: user.displayName,
-                balance: 0,
-                totalEarned: 0,
-                completedCount: 0,
-                completedTasks: [],
-                createdAt: serverTimestamp()
-            });
-        }
-    }
-
-    onAuthStateChanged(auth, (user) => {
-        const preloader = document.getElementById('preloader');
-        const loadBar = document.getElementById('load-bar');
-        
-        loadBar.style.width = "100%";
-        
-        setTimeout(() => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('nav-user-area').classList.remove('hidden');
-                document.getElementById('sidebar').classList.remove('hidden');
-                document.getElementById('main-content').classList.add('md:ml-72');
-                document.getElementById('user-display-name').innerText = user.displayName;
-                document.getElementById('user-display-email').innerText = user.email;
-                
-                if(user.email === ADMIN_EMAIL) document.getElementById('admin-nav-item').classList.remove('hidden');
-                
-                showView('tasks');
-                syncRealtimeData();
-            } else {
-                showView('landing');
+    <!-- SECURITY SCRIPT (Anti-Inspect & Anti-Bypass) -->
+    <script>
+        // 1. Disable Right Click & Key Combos
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', function(e) {
+            // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+                (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+                alert("Security Alert: Developer tools are disabled.");
+                return false;
             }
-            preloader.style.opacity = '0';
-            setTimeout(() => preloader.style.display = 'none', 600);
+        });
+
+        // 2. Debugger Trap (Dondurucu)
+        // Eğer DevTools açılırsa bu loop çalışır ve sayfayı kilitler.
+        // Normal kullanıcı etkilenmez, sadece inspect yapan etkilenir.
+        setInterval(function(){
+            const startTime = performance.now();
+            debugger; // Burası DevTools açıksa duraksar
+            if (performance.now() - startTime > 100) {
+                // DevTools tespit edildi
+                document.body.innerHTML = '<div style="background:black;color:red;height:100vh;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:24px;">SECURITY VIOLATION DETECTED<br>PLEASE CLOSE DEVTOOLS</div>';
+            }
         }, 1000);
-    });
 
-    function syncRealtimeData() {
-        // Balance Sync
-        onSnapshot(doc(db, "users", currentUser.uid), (d) => {
-            const data = d.data();
-            document.getElementById('balance-val').innerText = parseFloat(data.balance).toFixed(2);
-            document.getElementById('total-earned').innerText = data.totalEarned || 0;
-            document.getElementById('total-tasks').innerText = data.completedCount || 0;
-        });
+        // 3. Clear Console
+        setInterval(() => { console.clear(); }, 2000);
+    </script>
 
-        // Withdraw History Sync
-        const wQuery = query(collection(db, "withdrawals"), where("uid", "==", currentUser.uid), orderBy("createdAt", "desc"));
-        onSnapshot(wQuery, (s) => {
-            const hist = document.getElementById('withdraw-history');
-            hist.innerHTML = s.empty ? '<p class="text-[10px] text-gray-600 font-bold uppercase italic p-4">Henüz talep yok...</p>' : '';
-            s.forEach(d => {
-                const w = d.data();
-                const div = document.createElement('div');
-                div.className = "glass p-5 rounded-2xl flex justify-between items-center";
-                div.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <div class="hexagon scale-75">${w.amount}</div>
-                        <div>
-                            <p class="text-xs font-black uppercase italic tracking-tighter">Robux Talebi</p>
-                            <p class="text-[9px] text-gray-500 font-bold">${w.status.toUpperCase()}</p>
-                        </div>
-                    </div>
-                    <div class="w-2 h-2 rounded-full bg-${w.status === 'pending' ? 'noob' : (w.status === 'approved' ? 'noobGreen' : 'red-500')} animate-pulse"></div>
-                `;
-                hist.appendChild(div);
-            });
-        });
+    <!-- SVG Sprites (FULL BODY NOOB) -->
+    <svg style="display: none;">
+        <symbol id="icon-full-noob" viewBox="0 0 100 120">
+            <rect x="5" y="35" width="20" height="40" rx="5" fill="#FACC15" stroke="black" stroke-width="2"/>
+            <rect x="75" y="35" width="20" height="40" rx="5" fill="#FACC15" stroke="black" stroke-width="2"/>
+            <rect x="28" y="75" width="18" height="40" rx="4" fill="#4ADE80" stroke="black" stroke-width="2"/>
+            <rect x="54" y="75" width="18" height="40" rx="4" fill="#4ADE80" stroke="black" stroke-width="2"/>
+            <rect x="25" y="35" width="50" height="45" rx="5" fill="#3B82F6" stroke="black" stroke-width="2"/>
+            <g>
+                <rect x="30" y="5" width="40" height="35" rx="8" fill="#FACC15" stroke="black" stroke-width="2"/>
+                <circle cx="43" cy="20" r="3" fill="black"/>
+                <circle cx="57" cy="20" r="3" fill="black"/>
+                <path d="M 45 28 Q 50 32 55 28" stroke="black" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </g>
+        </symbol>
+    </svg>
 
-        // Admin Withdraw Sync
-        if(currentUser.email === ADMIN_EMAIL) {
-            onSnapshot(query(collection(db, "withdrawals"), where("status", "==", "pending")), (s) => {
-                const alist = document.getElementById('admin-withdrawals');
-                alist.innerHTML = '';
-                s.forEach(d => {
-                    const w = d.data();
-                    const div = document.createElement('div');
-                    div.className = "glass p-4 rounded-xl flex justify-between items-center border-l-4 border-noob";
-                    div.innerHTML = `
-                        <div class="flex flex-col">
-                            <span class="text-xs font-black">${w.amount} R$</span>
-                            <a href="${w.gamepassLink}" target="_blank" class="text-[9px] text-blue-400 font-bold hover:underline">Link Aç</a>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="approveWithdraw('${d.id}')" class="p-2 bg-noobGreen/20 text-noobGreen rounded-lg text-xs"><i class="fa-solid fa-check"></i></button>
-                            <button onclick="rejectWithdraw('${d.id}', '${w.uid}', ${w.amount})" class="p-2 bg-red-500/20 text-red-500 rounded-lg text-xs"><i class="fa-solid fa-xmark"></i></button>
-                        </div>
-                    `;
-                    alist.appendChild(div);
-                });
-            });
-        }
-    }
+    <!-- Background Elements -->
+    <div class="math-grid"></div>
+    <div class="vignette"></div>
+    <div id="toast-container"></div>
 
-    function syncTasks() {
-        onSnapshot(collection(db, "tasks"), (s) => {
-            const list = document.getElementById('task-list');
-            list.innerHTML = '';
-            s.forEach(d => {
-                const t = d.data();
-                const card = document.createElement('div');
-                card.className = "glass p-8 rounded-[2.5rem] flex flex-col justify-between hover:scale-[1.02] transition-all group border-white/5 hover:border-noob/20";
-                card.innerHTML = `
-                    <div class="mb-6">
-                        <div class="flex justify-between items-start mb-4">
-                             <div class="w-12 h-12 glass rounded-2xl flex items-center justify-center text-noob group-hover:bg-noob group-hover:text-black transition-all">
-                                <i class="fa-solid fa-bolt-lightning text-xl"></i>
-                             </div>
-                             <div class="flex flex-col items-end">
-                                <span class="text-2xl font-black text-noob">${t.reward}</span>
-                                <span class="text-[8px] font-black text-gray-600 uppercase">Robux Reward</span>
-                             </div>
-                        </div>
-                        <h3 class="text-lg font-black uppercase italic tracking-tighter" translate="no">${t.title}</h3>
-                        <p class="text-[10px] text-gray-500 font-medium leading-relaxed mt-2 line-clamp-2">${t.description}</p>
-                    </div>
-                    <button onclick="doTask('${d.id}', ${t.reward})" class="w-full bg-white text-black py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-noob transition-all">
-                        ${translations[currentLang].task_btn}
-                    </button>
-                `;
-                list.appendChild(card);
-            });
-        });
-    }
+    <!-- LANGUAGE MODAL -->
+    <div id="lang-modal" class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="glass w-full max-w-md rounded-2xl p-6 border border-white/10">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-white font-bold text-lg" data-t="select_lang">Select Language</h3>
+                <button onclick="toggleLangModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto" id="lang-grid">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
 
-    // Task Actions
-    window.doTask = async (taskId, reward) => {
-        window.open('https://roblox.com', '_blank');
-        notify("Görev başlatıldı, doğrulanıyor...");
+    <!-- PAGE TRANSITION LOADER -->
+    <div id="transition-overlay" class="fixed inset-0 bg-[#050505] z-[150] flex flex-col items-center justify-center">
+        <svg class="w-32 h-32 animate-float noob-full"><use href="#icon-full-noob"></use></svg>
+        <div class="mt-6 flex items-center gap-2">
+            <i class="fa-solid fa-circle-notch fa-spin text-primary text-sm"></i>
+            <span class="text-xs font-mono text-gray-500 tracking-widest uppercase" data-t="loading">Loading...</span>
+        </div>
+    </div>
+
+    <!-- APP INITIAL LOADER -->
+    <div id="app-loader" class="fixed inset-0 bg-[#050505] z-[140] flex flex-col items-center justify-center transition-opacity duration-500">
+        <svg class="w-40 h-40 animate-float noob-full mb-6"><use href="#icon-full-noob"></use></svg>
+        <div class="w-24 h-1 bg-gray-800 rounded-full overflow-hidden">
+            <div class="h-full bg-primary animate-pulse-slow w-full"></div>
+        </div>
+    </div>
+
+    <!-- AUTH SCREEN -->
+    <section id="auth-view" class="hidden min-h-screen flex flex-col items-center justify-center p-6 relative z-10 py-12">
         
-        setTimeout(async () => {
-            const userRef = doc(db, "users", currentUser.uid);
-            await updateDoc(userRef, {
-                balance: increment(reward),
-                totalEarned: increment(reward),
-                completedCount: increment(1),
-                completedTasks: arrayUnion(taskId)
+        <!-- Top Right Language -->
+        <button onclick="toggleLangModal()" class="absolute top-6 right-6 w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-white/10 transition z-20 overflow-hidden">
+            <span id="auth-flag-icon" class="fi fi-us rounded-full text-xl"></span>
+        </button>
+
+        <div class="glass p-8 rounded-3xl w-full max-w-sm text-center border-t border-primary/20 shadow-2xl shadow-primary/5 mb-8">
+            <div class="mb-8 relative inline-block">
+                <div class="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse-slow"></div>
+                <svg class="w-32 h-32 animate-float relative z-10 noob-full"><use href="#icon-full-noob"></use></svg>
+            </div>
+            
+            <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight">Robu<span class="text-primary">Nexa</span></h1>
+            <p class="text-gray-400 text-sm mb-8 leading-relaxed" data-t="auth_desc">Join the Elite.<br>Earn Real Robux Instantly.</p>
+            
+            <button id="btn-login" class="w-full bg-white text-black font-bold py-3.5 px-6 rounded-xl flex items-center justify-center gap-3 hover:bg-gray-100 transition-all click-bounce shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
+                <span data-t="login_btn">Login with Google</span>
+            </button>
+            
+            <p class="mt-6 text-[10px] text-gray-600" data-t="auth_footer">Secure • Instant • No Password Required</p>
+        </div>
+
+        <!-- FAQ SECTION -->
+        <div class="w-full max-w-sm space-y-3">
+            <h3 class="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-4" data-t="faq_title">FAQ & Help</h3>
+            
+            <!-- Q1 -->
+            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer" onclick="toggleFaq(this)">
+                <div class="p-4 flex justify-between items-center hover:bg-white/5 transition">
+                    <span class="text-sm font-bold text-white" data-t="q1">Is this free?</span>
+                    <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i>
+                </div>
+                <div class="faq-content bg-black/20">
+                    <p class="p-4 text-xs text-gray-400 pt-0" data-t="a1">Yes! We generate revenue from ads and use it to buy Robux for you.</p>
+                </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer" onclick="toggleFaq(this)">
+                <div class="p-4 flex justify-between items-center hover:bg-white/5 transition">
+                    <span class="text-sm font-bold text-white" data-t="q2">Is it safe?</span>
+                    <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i>
+                </div>
+                <div class="faq-content bg-black/20">
+                    <p class="p-4 text-xs text-gray-400 pt-0" data-t="a2">100% Safe. We NEVER ask for your password. We only need your username to send gifts.</p>
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="faq-item glass rounded-xl overflow-hidden cursor-pointer" onclick="toggleFaq(this)">
+                <div class="p-4 flex justify-between items-center hover:bg-white/5 transition">
+                    <span class="text-sm font-bold text-white" data-t="q3">When do I get paid?</span>
+                    <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i>
+                </div>
+                <div class="faq-content bg-black/20">
+                    <p class="p-4 text-xs text-gray-400 pt-0" data-t="a3">Withdrawals are manually reviewed and sent within 24-48 hours to prevent fraud.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN APP INTERFACE -->
+    <div id="main-view" class="hidden min-h-screen relative z-10 flex flex-col md:flex-row">
+        
+        <!-- Sidebar (Desktop) -->
+        <aside class="hidden md:flex flex-col w-72 h-screen glass fixed left-0 top-0 border-r border-white/5 z-20">
+            <div class="p-8 flex items-center gap-3 justify-center border-b border-white/5">
+                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-black font-bold text-xl">R</div>
+                <span class="font-bold text-xl tracking-tight">Robu<span class="text-primary">Nexa</span></span>
+            </div>
+            
+            <div class="flex-1 px-4 py-6 space-y-2">
+                <button onclick="router.navigate('home')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3">
+                    <i class="fa-solid fa-house w-6"></i> <span data-t="menu_home">Dashboard</span>
+                </button>
+                <button onclick="router.navigate('earn')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3">
+                    <i class="fa-solid fa-list-check w-6"></i> <span data-t="menu_tasks">Tasks</span>
+                </button>
+                <button onclick="router.navigate('withdraw')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3">
+                    <i class="fa-solid fa-money-bill-transfer w-6"></i> <span data-t="menu_withdraw">Withdraw</span>
+                </button>
+                <button onclick="router.navigate('leaderboard')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3">
+                    <i class="fa-solid fa-trophy w-6"></i> <span data-t="menu_top">Leaderboard</span>
+                </button>
+                <button onclick="router.navigate('profile')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3">
+                    <i class="fa-solid fa-user w-6"></i> <span data-t="menu_profile">Profile</span>
+                </button>
+            </div>
+
+            <div class="p-6 border-t border-white/5">
+                 <button onclick="toggleLangModal()" class="w-full glass py-2 rounded-lg text-xs text-gray-400 hover:text-white flex items-center justify-center gap-2">
+                    <span id="sidebar-flag-icon" class="fi fi-us rounded-sm"></span> <span id="current-lang-name">English</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Content Wrapper -->
+        <div class="flex-1 md:ml-72 pb-24 md:pb-0">
+            
+            <!-- Mobile Header -->
+            <header class="glass sticky top-0 z-30 px-4 py-3 flex justify-between items-center border-b border-white/5 md:hidden">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/50">
+                        <i class="fa-solid fa-cube text-primary text-sm"></i>
+                    </div>
+                    <span class="font-bold text-lg">Robu<span class="text-primary">Nexa</span></span>
+                </div>
+                <div class="bg-surface/90 px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2 shadow-inner shadow-black/50">
+                    <i class="fa-solid fa-coins text-primary text-xs"></i>
+                    <span id="header-balance" class="font-mono font-bold text-sm">0.00</span>
+                </div>
+            </header>
+
+            <!-- Desktop Header -->
+            <header class="hidden md:flex justify-between items-center px-8 py-6 glass sticky top-0 z-30 border-b border-white/5 backdrop-blur-xl">
+                <div>
+                    <h2 id="page-title" class="text-2xl font-bold text-white" data-t="menu_home">Dashboard</h2>
+                    <p class="text-xs text-gray-500" data-t="welcome">Welcome back, Earner.</p>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="bg-surface/80 px-5 py-2 rounded-full border border-white/10 flex items-center gap-3 shadow-lg shadow-black/20 hover:border-primary/50 transition-colors cursor-pointer">
+                        <i class="fa-solid fa-coins text-primary text-lg"></i>
+                        <span id="desktop-balance" class="font-mono font-bold text-xl">0.00</span>
+                    </div>
+                    <img id="user-avatar" src="" class="w-10 h-10 rounded-full border-2 border-white/10 hover:border-primary transition-colors">
+                </div>
+            </header>
+
+            <!-- Dynamic View Container -->
+            <main id="app-content" class="p-4 md:p-8 max-w-6xl mx-auto"></main>
+        </div>
+
+        <!-- Bottom Navigation (Mobile) -->
+        <nav class="fixed bottom-0 left-0 w-full glass border-t border-white/5 z-40 md:hidden pb-safe">
+            <div class="grid grid-cols-5 h-16 items-center justify-items-center relative">
+                <button onclick="router.navigate('home')" class="nav-item group flex flex-col items-center gap-1 text-gray-500 w-full">
+                    <i class="fa-solid fa-house text-lg group-hover:text-primary transition-colors"></i>
+                    <span class="text-[9px]" data-t="menu_home">Home</span>
+                </button>
+                <button onclick="router.navigate('earn')" class="nav-item group flex flex-col items-center gap-1 text-gray-500 w-full">
+                    <i class="fa-solid fa-list-check text-lg group-hover:text-primary transition-colors"></i>
+                    <span class="text-[9px]" data-t="menu_tasks">Earn</span>
+                </button>
+                <button onclick="router.navigate('withdraw')" class="relative -top-6">
+                    <div class="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(250,204,21,0.4)] border-4 border-[#050505] click-bounce z-50">
+                        <i class="fa-solid fa-wallet text-black text-xl"></i>
+                    </div>
+                </button>
+                <button onclick="router.navigate('leaderboard')" class="nav-item group flex flex-col items-center gap-1 text-gray-500 w-full">
+                    <i class="fa-solid fa-trophy text-lg group-hover:text-primary transition-colors"></i>
+                    <span class="text-[9px]" data-t="menu_top">Top</span>
+                </button>
+                <button onclick="router.navigate('profile')" class="nav-item group flex flex-col items-center gap-1 text-gray-500 w-full">
+                    <i class="fa-solid fa-user text-lg group-hover:text-primary transition-colors"></i>
+                    <span class="text-[9px]" data-t="menu_profile">Me</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- TEMPLATES -->
+    
+    <!-- 1. HOME -->
+    <template id="tpl-home">
+        <div class="fade-in space-y-6">
+            <div class="glass relative overflow-hidden rounded-3xl p-6 md:p-10 border border-primary/20 group">
+                <div class="absolute -right-16 -top-16 w-56 h-56 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors duration-500"></div>
+                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="text-center md:text-left">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 block" data-t="total_bal">Total Balance</span>
+                        <div class="flex items-baseline justify-center md:justify-start gap-1 mb-4">
+                            <span class="text-5xl md:text-6xl font-black text-white tracking-tighter" id="home-big-balance">0.00</span>
+                            <span class="text-primary font-bold text-2xl">R$</span>
+                        </div>
+                        <button onclick="router.navigate('earn')" class="bg-gradient-to-r from-primary to-accent text-black font-bold py-3 px-8 rounded-xl click-bounce shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
+                            <span data-t="start_earn">Start Earning Now</span> <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                    <div class="hidden md:block">
+                        <svg class="w-40 h-40 animate-float noob-full"><use href="#icon-full-noob"></use></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 md:gap-6">
+                <div class="glass p-5 rounded-2xl border border-white/5">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3 text-blue-400">
+                        <i class="fa-solid fa-list-check text-xl"></i>
+                    </div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wider" data-t="completed_stat">Completed</p>
+                    <p class="text-2xl font-bold text-white mt-1" id="home-tasks">0</p>
+                </div>
+                <div class="glass p-5 rounded-2xl border border-white/5">
+                    <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mb-3 text-purple-400">
+                        <i class="fa-solid fa-bolt text-xl"></i>
+                    </div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wider">XP Level</p>
+                    <p class="text-2xl font-bold text-white mt-1" id="home-xp">0</p>
+                </div>
+            </div>
+            <div class="glass rounded-2xl p-4 border border-white/5">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-tower-broadcast text-red-500 animate-pulse"></i> <span data-t="live_drops">Live Drops</span>
+                    </h3>
+                </div>
+                <div id="live-feed" class="space-y-2 max-h-40 overflow-hidden relative">
+                    <div class="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-surface to-transparent z-10"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- 2. EARN -->
+    <template id="tpl-earn">
+        <div class="fade-in pb-10">
+            <h3 class="text-xl font-bold mb-4 flex items-center gap-2" data-t="hot_tasks">Hot Tasks</h3>
+            <div id="task-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="col-span-full text-center py-12 glass rounded-xl">
+                    <i class="fa-solid fa-circle-notch fa-spin text-primary text-3xl"></i>
+                    <p class="text-gray-500 text-xs mt-3 uppercase tracking-widest" data-t="loading">Fetching Tasks...</p>
+                </div>
+            </div>
+            <!-- Admin Hidden -->
+            <div id="admin-task-ui" class="hidden mt-12 border-t border-white/10 pt-8">
+                 <form id="add-task-form" class="glass p-6 rounded-xl border border-red-500/30 space-y-4">
+                    <h3 class="text-red-500 font-bold text-sm uppercase">Admin Panel</h3>
+                    <input type="text" id="t-title" placeholder="Title" class="w-full bg-black/50 p-2 text-white border border-white/10 rounded">
+                    <input type="text" id="t-desc" placeholder="Desc" class="w-full bg-black/50 p-2 text-white border border-white/10 rounded">
+                    <input type="number" id="t-reward" placeholder="Reward" class="w-full bg-black/50 p-2 text-white border border-white/10 rounded">
+                    <input type="number" id="t-cooldown" placeholder="Cooldown" class="w-full bg-black/50 p-2 text-white border border-white/10 rounded">
+                    <button class="bg-red-600 text-white w-full py-2 rounded">Add Task</button>
+                 </form>
+            </div>
+        </div>
+    </template>
+
+    <!-- 3. WITHDRAW -->
+    <template id="tpl-withdraw">
+        <div class="fade-in space-y-6">
+            <div class="bg-gradient-to-r from-yellow-900/20 to-transparent border-l-4 border-yellow-500 p-4 rounded-r-xl flex gap-4">
+                <i class="fa-solid fa-triangle-exclamation text-yellow-500 text-xl mt-1"></i>
+                <div class="text-xs text-gray-400 leading-relaxed">
+                    <strong class="text-yellow-500 block mb-1 text-sm" data-t="withdraw_rules_title">Withdrawal Rules</strong>
+                    <span data-t="withdraw_rules_desc">Please set your Gamepass price to cover the 30% tax. (Amount / 0.7).</span>
+                </div>
+            </div>
+            <form id="withdraw-form" class="glass p-6 md:p-8 rounded-2xl space-y-6 border border-white/5 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full pointer-events-none"></div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider" data-t="amount_label">Amount (Min 50 R$)</label>
+                    <div class="relative mt-2">
+                        <i class="fa-solid fa-coins absolute left-4 top-4 text-gray-500 text-sm"></i>
+                        <input type="number" id="w-amount" min="50" class="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 pl-10 pr-4 text-white focus:border-primary outline-none transition-all placeholder-gray-700 font-mono" placeholder="50">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider" data-t="link_label">Gamepass / Item Link</label>
+                    <div class="relative mt-2">
+                        <i class="fa-solid fa-link absolute left-4 top-4 text-gray-500 text-sm"></i>
+                        <input type="url" id="w-link" class="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 pl-10 pr-4 text-white focus:border-primary outline-none transition-all placeholder-gray-700 text-sm" placeholder="https://roblox.com/game-pass/...">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-primary text-black font-bold py-4 rounded-xl click-bounce shadow-xl shadow-primary/10 hover:shadow-primary/30 transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> <span data-t="req_payout">Request Payout</span>
+                </button>
+            </form>
+            <div class="space-y-3">
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1" data-t="trans_history">Transaction History</h3>
+                <div id="withdraw-history" class="space-y-2"></div>
+            </div>
+            <!-- Admin -->
+            <div id="admin-withdraw-ui" class="hidden mt-8 pt-6 border-t border-white/10">
+                <div id="admin-withdraw-list" class="grid gap-3"></div>
+            </div>
+        </div>
+    </template>
+
+    <!-- 4. LEADERBOARD -->
+    <template id="tpl-leaderboard">
+        <div class="fade-in">
+            <div class="glass rounded-2xl overflow-hidden border border-white/5 shadow-2xl shadow-black/50">
+                <div class="p-4 bg-white/5 border-b border-white/5 flex justify-between items-center">
+                    <h3 class="font-bold text-white" data-t="top_20">Top 20 Earners</h3>
+                    <i class="fa-solid fa-crown text-primary text-xl"></i>
+                </div>
+                <table class="w-full text-left">
+                    <thead class="bg-black/20 text-[10px] text-gray-500 uppercase tracking-wider font-semibold">
+                        <tr>
+                            <th class="p-4">#</th>
+                            <th class="p-4" data-t="user">User</th>
+                            <th class="p-4 text-right">R$</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body" class="text-sm divide-y divide-white/5"></tbody>
+                </table>
+            </div>
+        </div>
+    </template>
+
+    <!-- 5. PROFILE -->
+    <template id="tpl-profile">
+        <div class="fade-in space-y-6">
+            <div class="glass p-6 md:p-8 rounded-3xl flex flex-col md:flex-row items-center gap-6 border border-white/5 relative overflow-hidden text-center md:text-left">
+                <div class="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none"></div>
+                <div class="relative">
+                    <div class="absolute inset-0 bg-primary/30 rounded-full blur-xl animate-pulse-slow"></div>
+                    <img id="profile-img" class="w-24 h-24 rounded-full border-4 border-primary relative z-10 shadow-xl">
+                </div>
+                <div class="relative z-10">
+                    <h2 id="profile-name" class="font-bold text-2xl text-white">User</h2>
+                    <p id="profile-email" class="text-sm text-gray-400 font-mono">...</p>
+                    <div class="mt-3 flex flex-wrap justify-center md:justify-start gap-2">
+                        <div class="text-[10px] bg-white/10 inline-block px-3 py-1 rounded-full text-gray-300 border border-white/10">
+                            UID: <span id="profile-id" class="font-mono text-primary">...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="glass p-1 rounded-2xl border border-red-500/10 hover:border-red-500/30 transition-colors">
+                <button id="btn-logout" class="w-full bg-red-900/10 text-red-500 py-4 rounded-xl font-bold text-sm hover:bg-red-900/20 transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-power-off"></i> <span data-t="sign_out">Sign Out</span>
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <!-- LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, orderBy, limit, addDoc, getDocs, onSnapshot, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        // --- CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCUUceDxrNY2y7OEbJ6EX0QEXVFVBp1JgM",
+            authDomain: "robunexa.firebaseapp.com",
+            projectId: "robunexa",
+            storageBucket: "robunexa.firebasestorage.app",
+            messagingSenderId: "212565926554",
+            appId: "1:212565926554:web:8b82d702f0ef9dc04cf523",
+            measurementId: "G-6FR21407E6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+        const ADMIN_EMAIL = "adanalironaldo131@gmail.com";
+
+        // --- GLOBAL STATE ---
+        let state = { user: null, data: null, isAdmin: false };
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // --- LANGUAGE SYSTEM (ISO CODES FOR FLAGS) ---
+        const langData = {
+            en: {
+                code: "us", name: "English",
+                login_btn: "Login with Google", auth_desc: "Join the Elite. Earn Real Robux.", auth_footer: "Secure • Instant • No Password",
+                menu_home: "Dashboard", menu_tasks: "Earn", menu_withdraw: "Withdraw", menu_top: "Leaderboard", menu_profile: "Me",
+                welcome: "Welcome back, Earner.", total_bal: "Total Balance", start_earn: "Start Earning Now", completed_stat: "Completed",
+                live_drops: "Live Drops", hot_tasks: "Hot Tasks", loading: "Loading...",
+                withdraw_rules_title: "Withdrawal Rules", withdraw_rules_desc: "Cover 30% tax (Amount / 0.7).",
+                amount_label: "Amount (Min 50 R$)", link_label: "Gamepass Link", req_payout: "Request Payout", trans_history: "Transaction History",
+                top_20: "Top 20 Earners", user: "User", sign_out: "Sign Out", select_lang: "Select Language",
+                faq_title: "FAQ & Help", q1: "Is this free?", a1: "Yes! We generate revenue from ads.", q2: "Is it safe?", a2: "100% Safe. No passwords needed.", q3: "When do I get paid?", a3: "Within 24-48 hours."
+            },
+            tr: {
+                code: "tr", name: "Türkçe",
+                login_btn: "Google ile Giriş Yap", auth_desc: "Elitlere Katıl. Gerçek Robux Kazan.", auth_footer: "Güvenli • Anında • Şifresiz",
+                menu_home: "Ana Sayfa", menu_tasks: "Kazan", menu_withdraw: "Çekim", menu_top: "Sıralama", menu_profile: "Profilim",
+                welcome: "Hoşgeldin Kazanıcı.", total_bal: "Toplam Bakiye", start_earn: "Kazanmaya Başla", completed_stat: "Tamamlanan",
+                live_drops: "Canlı Akış", hot_tasks: "Popüler Görevler", loading: "Yükleniyor...",
+                withdraw_rules_title: "Çekim Kuralları", withdraw_rules_desc: "%30 vergiyi karşıla (Miktar / 0.7).",
+                amount_label: "Miktar (Min 50 R$)", link_label: "Gamepass Linki", req_payout: "Ödeme İste", trans_history: "İşlem Geçmişi",
+                top_20: "En Çok Kazananlar", user: "Kullanıcı", sign_out: "Çıkış Yap", select_lang: "Dil Seç",
+                faq_title: "Sıkça Sorulan Sorular", q1: "Bu ücretsiz mi?", a1: "Evet! Reklam gelirleriyle size ödeme yapıyoruz.", q2: "Güvenli mi?", a2: "%100 Güvenli. Şifre asla istemeyiz.", q3: "Ne zaman gelir?", a3: "24-48 saat içinde gönderilir."
+            },
+            de: { code: "de", name: "Deutsch", login_btn: "Mit Google anmelden", auth_desc: "Verdiene echtes Robux.", menu_tasks: "Aufgaben", menu_withdraw: "Auszahlen", q1: "Ist das kostenlos?", a1: "Ja, wir nutzen Werbeeinnahmen." },
+            fr: { code: "fr", name: "Français", login_btn: "Se connecter", auth_desc: "Gagnez des Robux réels.", menu_tasks: "Gagner", menu_withdraw: "Retrait", q1: "Est-ce gratuit?", a1: "Oui, grâce aux publicités." },
+            es: { code: "es", name: "Español", login_btn: "Iniciar sesión", auth_desc: "Gana Robux reales.", menu_tasks: "Tareas", menu_withdraw: "Retirar", q1: "¿Es gratis?", a1: "¡Sí! Usamos ingresos publicitarios." },
+            pt: { code: "pt", name: "Português", login_btn: "Entrar com Google", auth_desc: "Ganhe Robux reais.", menu_tasks: "Tarefas", menu_withdraw: "Sacar", q1: "É grátis?", a1: "Sim, usamos receita de anúncios." },
+            it: { code: "it", name: "Italiano", login_btn: "Accedi con Google", auth_desc: "Guadagna Robux reali.", menu_tasks: "Compiti", menu_withdraw: "Preleva" },
+            ru: { code: "ru", name: "Русский", login_btn: "Войти через Google", auth_desc: "Заработай реальные Robux.", menu_tasks: "Задания", menu_withdraw: "Вывод" },
+            pl: { code: "pl", name: "Polski", login_btn: "Zaloguj przez Google", auth_desc: "Zarabiaj prawdziwe Robux.", menu_tasks: "Zadania", menu_withdraw: "Wypłata" },
+            id: { code: "id", name: "Bahasa Indo", login_btn: "Masuk dengan Google", auth_desc: "Dapatkan Robux nyata.", menu_tasks: "Tugas", menu_withdraw: "Tarik" },
+            vn: { code: "vn", name: "Tiếng Việt", login_btn: "Đăng nhập Google", auth_desc: "Kiếm Robux thật.", menu_tasks: "Nhiệm vụ", menu_withdraw: "Rút tiền" },
+            th: { code: "th", name: "ไทย", login_btn: "เข้าสู่ระบบด้วย Google", auth_desc: "รับ Robux จริง", menu_tasks: "งาน", menu_withdraw: "ถอนเงิน" },
+            jp: { code: "jp", name: "日本語", login_btn: "Googleでログイン", auth_desc: "本物のRobuxを稼ごう。", menu_tasks: "タスク", menu_withdraw: "出金" },
+            kr: { code: "kr", name: "한국어", login_btn: "Google로 로그인", auth_desc: "진짜 Robux를 얻으세요.", menu_tasks: "미션", menu_withdraw: "출금" },
+            cn: { code: "cn", name: "中国人", login_btn: "使用 Google 登录", auth_desc: "赚取真正的 Robux。", menu_tasks: "任务", menu_withdraw: "提取" },
+            ar: { code: "sa", name: "العربية", login_btn: "تسجيل الدخول", auth_desc: "اكسب Robux حقيقي.", menu_tasks: "مهام", menu_withdraw: "سحب" },
+            hi: { code: "in", name: "हिन्दी", login_btn: "Google से लॉगिन करें", auth_desc: "असली Robux कमाएं।", menu_tasks: "कार्य", menu_withdraw: "निकालना" }
+        };
+
+        let curLang = localStorage.getItem('robu_lang') || 'en';
+
+        // Helper to get text (falls back to EN if missing)
+        const t = (key) => {
+            return langData[curLang]?.[key] || langData['en'][key] || key;
+        };
+
+        const updateLanguage = (lang) => {
+            curLang = lang;
+            localStorage.setItem('robu_lang', lang);
+            
+            // Update DOM text
+            document.querySelectorAll('[data-t]').forEach(el => {
+                const key = el.getAttribute('data-t');
+                el.textContent = t(key);
             });
-            notify(`${reward} R$ bakiyene eklendi!`);
-        }, 3000);
-    };
+            
+            // Update Auth Flag & Sidebar Flag
+            const flagClass = `fi fi-${langData[lang].code}`;
+            const authFlag = document.getElementById('auth-flag-icon');
+            if(authFlag) authFlag.className = `${flagClass} rounded-full text-xl`;
 
-    window.processWithdraw = async () => {
-        const amt = parseInt(document.getElementById('withdraw-amount').value);
-        const link = document.getElementById('withdraw-link').value;
-        const userRef = doc(db, "users", currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        const balance = userSnap.data().balance;
+            const sbFlag = document.getElementById('sidebar-flag-icon');
+            if(sbFlag) sbFlag.className = `${flagClass} rounded-sm`;
+            
+            const langNameEl = document.getElementById('current-lang-name');
+            if(langNameEl && langData[lang]) langNameEl.innerText = langData[lang].name;
 
-        if (amt < 10) return notify("Minimum çekim 10 R$", "error");
-        if (balance < amt) return notify("Yetersiz Bakiye!", "error");
-        if (!link.includes("roblox.com")) return notify("Geçersiz Link!", "error");
+            toggleLangModal(false);
+        };
 
-        await addDoc(collection(db, "withdrawals"), {
-            uid: currentUser.uid,
-            amount: amt,
-            gamepassLink: link,
-            status: "pending",
-            createdAt: serverTimestamp()
+        // Make functions global for HTML onClick
+        window.toggleLangModal = (show = null) => {
+            const m = document.getElementById('lang-modal');
+            if(show === false || (show === null && m.classList.contains('active'))) {
+                m.classList.remove('active');
+                setTimeout(()=>m.style.display='none',300);
+            } else {
+                m.style.display='flex';
+                // Build Grid if empty
+                const grid = document.getElementById('lang-grid');
+                if(grid.innerHTML.trim() === '') {
+                    Object.keys(langData).forEach(k => {
+                        const btn = document.createElement('button');
+                        btn.className = `glass p-3 rounded-xl flex items-center gap-3 hover:bg-white/10 transition ${curLang===k ? 'border-primary' : 'border-white/5'}`;
+                        btn.innerHTML = `<span class="fi fi-${langData[k].code} text-xl rounded shadow-sm"></span> <span class="text-sm font-bold text-gray-200">${langData[k].name}</span>`;
+                        btn.onclick = () => updateLanguage(k);
+                        grid.appendChild(btn);
+                    });
+                }
+                requestAnimationFrame(()=>m.classList.add('active'));
+            }
+        };
+
+        window.toggleFaq = (el) => {
+            el.classList.toggle('active');
+            state.audio && playSound('click');
+        };
+
+        // --- AUDIO & UTILS ---
+        const playSound = (type) => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            if (type === 'click') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+                gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+            }
+        };
+
+        const toast = (msg, type = 'info') => {
+            const el = document.createElement('div');
+            const colors = type === 'success' ? 'bg-green-900/90 border-green-500' : type === 'error' ? 'bg-red-900/90 border-red-500' : 'bg-surface/90 border-gray-600';
+            el.className = `toast glass ${colors} border px-4 py-3 rounded-lg flex items-center gap-3 text-white shadow-lg min-w-[280px] backdrop-blur-md`;
+            el.innerHTML = `<i class="fa-solid fa-info-circle"></i> <span class="text-xs font-bold tracking-wide">${msg}</span>`;
+            document.getElementById('toast-container').appendChild(el);
+            requestAnimationFrame(() => el.classList.add('show'));
+            setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3000);
+        };
+
+        // --- ROUTER & LOGIC ---
+        const router = {
+            navigate: (view) => {
+                playSound('click');
+                const overlay = document.getElementById('transition-overlay');
+                overlay.classList.add('active');
+                setTimeout(() => {
+                    const content = document.getElementById('app-content');
+                    const tpl = document.getElementById(`tpl-${view}`);
+                    if (tpl) {
+                        content.innerHTML = '';
+                        content.appendChild(tpl.content.cloneNode(true));
+                        
+                        if(view === 'home') initHome();
+                        if(view === 'earn') initEarn();
+                        if(view === 'withdraw') initWithdraw();
+                        if(view === 'leaderboard') initLeaderboard();
+                        if(view === 'profile') initProfile();
+
+                        // Re-apply language
+                        updateLanguage(curLang);
+                        window.scrollTo(0,0);
+                    }
+                    setTimeout(() => overlay.classList.remove('active'), 300);
+                }, 800);
+            }
+        };
+
+        // Logic Functions
+        const initHome = () => {
+            if(!state.data) return;
+            document.getElementById('home-big-balance').innerText = state.data.balance.toFixed(2);
+            document.getElementById('home-tasks').innerText = (state.data.completedTasks || []).length;
+            document.getElementById('home-xp').innerText = state.data.xp || 0;
+            const feed = document.getElementById('live-feed');
+            ['Ninja', 'Pro', 'Guest', 'Robux'].forEach(n => {
+                feed.innerHTML += `<div class="flex justify-between items-center text-xs bg-white/5 p-2 rounded-lg mb-2"><span class="text-gray-400">${n}_${Math.floor(Math.random()*99)}</span><span class="text-success font-bold">+${Math.floor(Math.random()*50)+10} R$</span></div>`;
+            });
+        };
+
+        const initEarn = async () => {
+            const list = document.getElementById('task-list');
+            const q = query(collection(db, "pages"), where("active", "==", true), orderBy("reward", "desc"));
+            const snaps = await getDocs(q);
+            list.innerHTML = '';
+            if(snaps.empty) list.innerHTML = `<div class="col-span-full text-center text-gray-500 text-xs py-10">${t('loading')}</div>`;
+            
+            snaps.forEach(d => {
+                const tData = d.data();
+                const isDone = state.data.completedTasks?.includes(d.id);
+                const el = document.createElement('div');
+                el.className = `glass p-4 rounded-2xl border ${isDone?'border-green-500/20':'border-white/10'} transition-all`;
+                el.innerHTML = `
+                    <div class="flex justify-between mb-2"><span class="text-primary font-bold">+${tData.reward} R$</span></div>
+                    <h4 class="font-bold text-sm text-white">${tData.title}</h4>
+                    <p class="text-[10px] text-gray-500 mb-3">${tData.description}</p>
+                    <button class="btn-start w-full py-2 rounded text-xs font-bold ${isDone?'bg-white/5 text-gray-500':'bg-white/10 text-white hover:bg-white/20'}" data-id="${d.id}" data-r="${tData.reward}" ${isDone?'disabled':''}>${isDone?'DONE':'START'}</button>
+                `;
+                list.appendChild(el);
+            });
+            // Task Handlers
+            document.querySelectorAll('.btn-start').forEach(b => {
+                b.onclick = async () => {
+                    if(state.data.lastTaskAt && (Date.now()-state.data.lastTaskAt.seconds*1000)/1000 < 15) return toast('Wait 15s', 'error');
+                    window.open('https://google.com','_blank');
+                    toast('Verifying...', 'info');
+                    setTimeout(async()=>{
+                        await updateDoc(doc(db,"users",state.user.uid), { balance: increment(Number(b.dataset.r)), xp: increment(10), completedTasks:[...state.data.completedTasks||[], b.dataset.id], lastTaskAt: serverTimestamp() });
+                        toast('Success!','success'); initEarn();
+                    },4000);
+                }
+            });
+            // Admin
+            if(state.isAdmin) {
+                document.getElementById('admin-task-ui').classList.remove('hidden');
+                document.getElementById('add-task-form').onsubmit = async (e) => {
+                    e.preventDefault();
+                    await addDoc(collection(db,"pages"),{
+                        title: document.getElementById('t-title').value, description: document.getElementById('t-desc').value,
+                        reward: Number(document.getElementById('t-reward').value), cooldown: Number(document.getElementById('t-cooldown').value),
+                        active: true, createdAt: serverTimestamp()
+                    });
+                    toast('Task Added','success'); initEarn();
+                };
+            }
+        };
+
+        const initWithdraw = async () => {
+            const hist = document.getElementById('withdraw-history');
+            const snaps = await getDocs(query(collection(db,"withdrawals"), where("uid","==",state.user.uid), orderBy("createdAt","desc"), limit(5)));
+            hist.innerHTML = '';
+            snaps.forEach(s => {
+                const d = s.data();
+                hist.innerHTML += `<div class="flex justify-between p-3 bg-white/5 rounded-xl text-xs border border-white/5"><span class="text-white font-bold">${d.amount} R$</span><span class="text-gray-500 uppercase">${d.status}</span></div>`;
+            });
+            document.getElementById('withdraw-form').onsubmit = async (e) => {
+                e.preventDefault();
+                const amt = Number(document.getElementById('w-amount').value);
+                if(amt<50 || state.data.balance<amt) return toast('Invalid Amount','error');
+                await updateDoc(doc(db,"users",state.user.uid),{balance:increment(-amt), lastWithdrawAt:serverTimestamp()});
+                await addDoc(collection(db,"withdrawals"),{uid:state.user.uid, amount:amt, gamepassLink:document.getElementById('w-link').value, status:'pending', createdAt:serverTimestamp(), email:state.user.email});
+                toast('Sent!','success'); initWithdraw();
+            };
+            if(state.isAdmin) {
+                document.getElementById('admin-withdraw-ui').classList.remove('hidden');
+                const list = document.getElementById('admin-withdraw-list');
+                const pSnaps = await getDocs(query(collection(db,"withdrawals"), where("status","==","pending")));
+                list.innerHTML='';
+                pSnaps.forEach(s => {
+                    const d = s.data();
+                    const div = document.createElement('div');
+                    div.className="glass p-3 rounded text-xs";
+                    div.innerHTML=`${d.amount} R$ - ${d.email} <br> <a href="${d.gamepassLink}" target="_blank" class="text-blue-400">Link</a> <div class="mt-2 flex gap-2"><button class="bg-green-500 px-2 py-1 rounded text-black b-a">Approve</button><button class="bg-red-500 px-2 py-1 rounded text-white b-r">Reject</button></div>`;
+                    div.querySelector('.b-a').onclick=async()=>{ await updateDoc(doc(db,"withdrawals",s.id),{status:'approved'}); div.remove(); };
+                    div.querySelector('.b-r').onclick=async()=>{ await updateDoc(doc(db,"withdrawals",s.id),{status:'rejected'}); await updateDoc(doc(db,"users",d.uid),{balance:increment(d.amount)}); div.remove(); };
+                    list.appendChild(div);
+                });
+            }
+        };
+
+        const initLeaderboard = async () => {
+            const tb = document.getElementById('leaderboard-body');
+            const snaps = await getDocs(query(collection(db,"users"), orderBy("balance","desc"), limit(20)));
+            tb.innerHTML = '';
+            let i=1;
+            snaps.forEach(s => {
+                const d = s.data();
+                tb.innerHTML += `<tr><td class="p-4 text-primary font-bold">${i++}</td><td class="p-4 flex gap-2 items-center"><img src="${d.photoURL}" class="w-6 h-6 rounded-full"> ${d.email.slice(0,3)}...</td><td class="p-4 text-right">${d.balance.toFixed(2)}</td></tr>`;
+            });
+        };
+
+        const initProfile = () => {
+            document.getElementById('profile-img').src = state.user.photoURL;
+            document.getElementById('profile-name').innerText = state.user.displayName;
+            document.getElementById('profile-email').innerText = state.user.email;
+            document.getElementById('profile-id').innerText = state.user.uid;
+            document.getElementById('btn-logout').onclick = () => { signOut(auth); location.reload(); };
+        };
+
+        // --- AUTH ---
+        onAuthStateChanged(auth, async (user) => {
+            const loader = document.getElementById('app-loader');
+            if (user) {
+                state.user = user;
+                state.isAdmin = (user.email === ADMIN_EMAIL);
+                const ref = doc(db,"users",user.uid);
+                const snap = await getDoc(ref);
+                if(!snap.exists()) {
+                    await setDoc(ref,{uid:user.uid, email:user.email, balance:0, xp:0, photoURL:user.photoURL, completedTasks:[], createdAt:serverTimestamp()});
+                    state.data = {balance:0, completedTasks:[]};
+                } else state.data = snap.data();
+                
+                onSnapshot(ref, (d) => {
+                    if(d.exists()) {
+                        state.data = d.data();
+                        document.querySelectorAll('#header-balance, #desktop-balance').forEach(el=>el.innerText=state.data.balance.toFixed(2));
+                        if(document.getElementById('home-big-balance')) document.getElementById('home-big-balance').innerText=state.data.balance.toFixed(2);
+                    }
+                });
+                
+                document.getElementById('user-avatar').src = user.photoURL;
+                document.getElementById('auth-view').classList.add('hidden');
+                document.getElementById('main-view').classList.remove('hidden');
+                updateLanguage(curLang);
+                router.navigate('home');
+            } else {
+                state = {user:null, data:null};
+                document.getElementById('main-view').classList.add('hidden');
+                document.getElementById('auth-view').classList.remove('hidden');
+                updateLanguage(curLang); // Update auth texts
+            }
+            setTimeout(() => { loader.style.opacity='0'; setTimeout(()=>loader.remove(),500); }, 1000);
         });
 
-        await updateDoc(userRef, { balance: increment(-amt) });
-        notify("Çekim talebi oluşturuldu!");
-        document.getElementById('withdraw-amount').value = '';
-        document.getElementById('withdraw-link').value = '';
-    };
-
-    // Admin Actions
-    window.addTask = async () => {
-        const title = document.getElementById('adm-task-title').value;
-        const desc = document.getElementById('adm-task-desc').value;
-        const reward = parseInt(document.getElementById('adm-task-reward').value);
-
-        if (!title || !reward) return notify("Eksik bilgi!", "error");
-
-        await addDoc(collection(db, "tasks"), { title, description: desc, reward, createdAt: serverTimestamp() });
-        notify("Görev başarıyla eklendi.");
-        document.getElementById('adm-task-title').value = '';
-        document.getElementById('adm-task-desc').value = '';
-        document.getElementById('adm-task-reward').value = '';
-    };
-
-    window.approveWithdraw = async (id) => {
-        await updateDoc(doc(db, "withdrawals", id), { status: 'approved' });
-        notify("Talep onaylandı.");
-    };
-
-    window.rejectWithdraw = async (id, uid, amt) => {
-        await updateDoc(doc(db, "withdrawals", id), { status: 'rejected' });
-        await updateDoc(doc(db, "users", uid), { balance: increment(amt) });
-        notify("Talep reddedildi, bakiye iade edildi.");
-    };
-
-    // --- Particle System Engine ---
-    const canvas = document.getElementById('particle-canvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    window.onresize = resize;
-    resize();
-
-    class Particle {
-        constructor() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 2;
-            this.speedX = (Math.random() - 0.5) * 0.5;
-            this.speedY = (Math.random() - 0.5) * 0.5;
-            this.opacity = Math.random();
-        }
-        update() {
-            this.x += this.speedX;
-            this.y += this.speedY;
-            if (this.x > canvas.width) this.x = 0;
-            if (this.x < 0) this.x = canvas.width;
-            if (this.y > canvas.height) this.y = 0;
-            if (this.y < 0) this.y = canvas.height;
-        }
-        draw() {
-            ctx.fillStyle = `rgba(250, 204, 21, ${this.opacity * 0.2})`;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
-
-    function initParticles() {
-        for (let i = 0; i < 150; i++) particles.push(new Particle());
-    }
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => { p.update(); p.draw(); });
-        requestAnimationFrame(animate);
-    }
-    initParticles();
-    animate();
-
-    // GSAP Intro
-    gsap.from("nav", { y: -100, duration: 1, ease: "power4.out" });
-    gsap.from("aside", { x: -100, duration: 1, delay: 0.5, ease: "power4.out" });
-
-    // Anti-Devtools (Basic)
-    window.addEventListener('keydown', (e) => {
-        if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key === "I")) e.preventDefault();
-        if (e.ctrlKey && (e.key === "c" || e.key === "v" || e.key === "u")) e.preventDefault();
-    });
-
-    // Default Lang
-    setLang('tr');
-
-</script>
+        document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider).catch(e => toast(e.message, 'error'));
+        window.router = router;
+    </script>
 </body>
 </html>
