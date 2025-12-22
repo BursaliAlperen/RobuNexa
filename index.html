@@ -6,7 +6,7 @@
     <title>RobuNexa | Earn Robux</title>
     <meta name="theme-color" content="#0f172a">
     
-    <!-- FAVICON (CLASSIC NOOB) -->
+    <!-- FAVICON -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 120'%3E%3Crect x='5' y='35' width='20' height='40' rx='5' fill='%23FACC15' stroke='black' stroke-width='2'/%3E%3Crect x='75' y='35' width='20' height='40' rx='5' fill='%23FACC15' stroke='black' stroke-width='2'/%3E%3Crect x='28' y='75' width='18' height='40' rx='4' fill='%234ADE80' stroke='black' stroke-width='2'/%3E%3Crect x='54' y='75' width='18' height='40' rx='4' fill='%234ADE80' stroke='black' stroke-width='2'/%3E%3Crect x='25' y='35' width='50' height='45' rx='5' fill='%233B82F6' stroke='black' stroke-width='2'/%3E%3Cg%3E%3Crect x='30' y='5' width='40' height='35' rx='8' fill='%23FACC15' stroke='black' stroke-width='2'/%3E%3Ccircle cx='43' cy='20' r='3' fill='black'/%3E%3Ccircle cx='57' cy='20' r='3' fill='black'/%3E%3Cpath d='M 45 28 Q 50 32 55 28' stroke='black' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E">
 
     <!-- Tailwind CSS -->
@@ -30,28 +30,58 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        body { background-color: #0f172a; color: #f1f5f9; font-family: 'Inter', sans-serif; overflow-x: hidden; -webkit-tap-highlight-color: transparent; user-select: none; padding-top: 32px; }
+        /* Base Layout */
+        body { 
+            background-color: #0f172a; 
+            color: #f1f5f9; 
+            font-family: 'Inter', sans-serif; 
+            overflow-x: hidden; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none; 
+            padding-top: 32px; /* Push content down for fixed ticker */
+        }
+
         .static-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 15% 50%, rgba(52, 211, 153, 0.05), transparent 30%), radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.05), transparent 30%); background-size: cover; z-index: -10; pointer-events: none; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
         .robux-icon { filter: drop-shadow(0 0 5px rgba(16, 185, 129, 0.4)); }
         .click-bounce:active { transform: scale(0.96); }
-        #toast-container { position: fixed; top: 50px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        
+        #toast-container { position: fixed; top: 50px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
         .toast { pointer-events: all; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .toast.show { transform: translateX(0); }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #0f172a; } ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
 
+        /* FIXED TICKER (EN ÜSTTE SABİT) */
+        .ticker-wrap { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            overflow: hidden; 
+            height: 32px; 
+            background: rgba(15, 23, 42, 0.95); /* Opaque bg to hide scrolling content */
+            border-bottom: 1px solid rgba(56, 189, 248, 0.2); 
+            z-index: 50; /* Above normal content, below modals/menu */
+            display: flex; 
+            align-items: center; 
+            backdrop-filter: blur(4px); 
+        }
+        .ticker { display: flex; white-space: nowrap; animation: ticker 45s linear infinite; }
+        .ticker-item { display: inline-flex; align-items: center; gap: 6px; padding: 0 1.5rem; color: #38bdf8; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; font-weight: bold; }
+        .ticker-item span { color: #f1f5f9; opacity: 0.9; }
+        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+
+        /* MENU */
         #mobile-menu { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #mobile-menu.active { opacity: 1; pointer-events: all; }
         #mobile-menu-content { position: absolute; top: 0; left: 0; bottom: 0; width: 80%; max-width: 300px; background: #1e293b; border-right: 1px solid rgba(255,255,255,0.1); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; padding-top: 32px; }
         #mobile-menu.active #mobile-menu-content { transform: translateX(0); }
 
-        .ticker-wrap { position: fixed; top: 0; left: 0; width: 100%; overflow: hidden; height: 32px; background: rgba(56, 189, 248, 0.1); border-bottom: 1px solid rgba(56, 189, 248, 0.2); z-index: 99999; pointer-events: none; display: flex; align-items: center; backdrop-filter: blur(4px); }
-        .ticker { display: flex; white-space: nowrap; animation: ticker 45s linear infinite; }
-        .ticker-item { display: inline-flex; align-items: center; gap: 6px; padding: 0 1.5rem; color: #38bdf8; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; font-weight: bold; }
-        .ticker-item span { color: #f1f5f9; opacity: 0.9; }
-        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
-        
+        /* FIX HEADERS TO STICK BELOW TICKER */
+        header.sticky { top: 32px !important; }
+        aside.fixed { top: 32px !important; height: calc(100vh - 32px) !important; }
+
         #transition-overlay { position: fixed; inset: 0; z-index: 9999; background: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #transition-overlay.active { opacity: 1; pointer-events: all; }
         .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
@@ -85,6 +115,8 @@
 
     <div class="static-bg"></div>
     <div id="toast-container"></div>
+    
+    <!-- FIXED TICKER AT TOP -->
     <div class="ticker-wrap"><div class="ticker" id="ticker-content"></div></div>
 
     <!-- MOBILE MENU -->
@@ -347,7 +379,7 @@
                             <input type="text" id="t-code" placeholder="Paste Verification Code Here" class="w-full bg-black/50 pl-10 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary font-mono text-primary">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <input type="number" id="t-reward" placeholder="Reward (0.20)" step="0.01" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
+                            <input type="number" id="t-reward" placeholder="Reward (Default 0.20)" step="0.01" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
                             <input type="number" id="t-cooldown" placeholder="Cooldown (sec)" class="w-full bg-black/50 p-3 text-white border border-white/10 rounded-xl outline-none focus:border-primary">
                         </div>
                         <button class="bg-primary text-black w-full py-3 rounded-xl font-bold hover:bg-emerald-400 transition" data-t="create_task_btn">Create Task</button>
