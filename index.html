@@ -141,7 +141,6 @@
             <div class="flex-1 overflow-y-auto p-4 space-y-2">
                 <button onclick="router.navigate('home'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-house w-6 text-center text-primary"></i> <span data-t="menu_home">Dashboard</span></button>
                 <button onclick="router.navigate('earn'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-link w-6 text-center text-primary"></i> <span data-t="menu_tasks">Shortlinks</span></button>
-                <button onclick="router.navigate('chat'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-comments w-6 text-center text-primary"></i> <span data-t="menu_chat">Chat</span></button>
                 <button onclick="router.navigate('withdraw'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-money-bill-transfer w-6 text-center text-primary"></i> <span data-t="menu_withdraw">Withdraw</span></button>
                 <button onclick="router.navigate('leaderboard'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-trophy w-6 text-center text-primary"></i> <span data-t="menu_top">Leaderboard</span></button>
                 <button onclick="router.navigate('profile'); toggleMenu(false)" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 flex items-center gap-3"><i class="fa-solid fa-user w-6 text-center text-primary"></i> <span data-t="menu_profile">Profile</span></button>
@@ -212,7 +211,7 @@
             <div class="flex-1 px-3 py-4 space-y-1">
                 <button onclick="router.navigate('home')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="home"><i class="fa-solid fa-house w-5"></i> <span data-t="menu_home" class="text-sm">Dashboard</span></button>
                 <button onclick="router.navigate('earn')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="earn"><i class="fa-solid fa-link w-5"></i> <span data-t="menu_tasks" class="text-sm">Shortlinks</span></button>
-                <button onclick="router.navigate('chat')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="chat"><i class="fa-solid fa-comments w-5"></i> <span data-t="menu_chat" class="text-sm">Chat</span></button>
+                <!-- CHAT REMOVED -->
                 <button onclick="router.navigate('withdraw')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="withdraw"><i class="fa-solid fa-money-bill-transfer w-5"></i> <span data-t="menu_withdraw" class="text-sm">Withdraw</span></button>
                 <button onclick="router.navigate('leaderboard')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="leaderboard"><i class="fa-solid fa-trophy w-5"></i> <span data-t="menu_top" class="text-sm">Leaderboard</span></button>
                 <button onclick="router.navigate('profile')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition flex items-center gap-3" data-target="profile"><i class="fa-solid fa-user w-5"></i> <span data-t="menu_profile" class="text-sm">Profile</span></button>
@@ -268,14 +267,6 @@
             <div id="task-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="col-span-full text-center py-12 glass rounded-xl"><i class="fa-solid fa-circle-notch fa-spin text-primary text-3xl"></i><p class="text-gray-500 text-xs mt-3 uppercase tracking-widest font-mono" data-t="loading">Fetching Shortlinks...</p></div>
             </div>
-        </div>
-    </template>
-
-    <template id="tpl-chat">
-        <div class="fade-in h-[calc(100vh-140px)] flex flex-col glass rounded-2xl border border-white/5 overflow-hidden">
-            <div class="p-4 bg-white/5 border-b border-white/5 flex justify-between items-center"><h3 class="font-bold text-white flex items-center gap-2"><i class="fa-solid fa-earth-americas text-accent"></i> Global Chat</h3><span class="text-xs text-green-400 font-mono flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online</span></div>
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 scroll-smooth"><div class="text-center text-gray-500 text-xs py-10" id="chat-loader">Loading...</div></div>
-            <div class="p-3 bg-black/20 border-t border-white/5 flex gap-2"><input type="text" id="chat-input" placeholder="Type a message..." class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-primary outline-none" maxlength="100"><button onclick="sendMessage()" class="bg-primary text-black w-12 h-12 rounded-xl flex items-center justify-center click-bounce hover:bg-emerald-400 transition"><i class="fa-solid fa-paper-plane"></i></button></div>
         </div>
     </template>
 
@@ -368,9 +359,9 @@
                 <!-- STEP 1: CREATE PAGE -->
                 <div class="bg-blue-900/10 border border-blue-500/20 p-5 rounded-2xl">
                     <h4 class="text-accent font-bold text-sm mb-3 flex items-center gap-2"><i class="fa-solid fa-file-circle-plus"></i> Step 1: Create Link & Page</h4>
-                    <p class="text-xs text-gray-400 mb-4">Click to generate a unique Page ID and Verification Code for your target site.</p>
+                    <p class="text-xs text-gray-400 mb-4">Click to generate your unique verification link. Shorten this link and use it in Step 2.</p>
                     <div class="flex gap-2">
-                        <input type="text" id="gen-link-display" readonly class="bg-black/40 border border-white/10 text-white font-mono text-center w-full rounded p-2 text-xs" value="https://robunexa.com/#verify"/>
+                        <input type="text" id="gen-link-display" readonly class="bg-black/40 border border-white/10 text-white font-mono text-center w-full rounded p-2 text-xs" value="https://robunexa.onrender.com/#verify"/>
                         <button onclick="copyGenLink()" class="bg-accent text-black text-xs font-bold px-4 py-2 rounded-xl hover:bg-white transition">COPY LINK</button>
                     </div>
                 </div>
@@ -540,7 +531,7 @@
                         if(pt) pt.innerText = t(titles[view]) || 'App';
                         if(view === 'home') initHome();
                         if(view === 'earn') initEarn();
-                        if(view === 'chat') initChat();
+                        if(view === 'chat') initChat(); // Keep empty for structure but no data
                         if(view === 'withdraw') initWithdraw();
                         if(view === 'leaderboard') initLeaderboard();
                         if(view === 'profile') initProfile();
@@ -557,23 +548,24 @@
 
         const initEarn = async () => {
             const list = document.getElementById('task-list');
-            const q = query(collection(db, "pages"), where("active", "==", true), orderBy("createdAt", "desc"));
-            const snaps = await getDocs(q);
-            list.innerHTML = '';
-            
-            // Fix: Show "No Tasks" if empty
-            if(snaps.empty) { 
-                list.innerHTML = `<div class="col-span-full text-center text-gray-400 text-xs py-10 font-mono">No active tasks found.</div>`;
-                return;
-            }
-            
-            snaps.forEach(d => {
-                const tData = d.data();
-                const isDone = state.data.completedTasks?.includes(d.id);
-                const el = document.createElement('div');
-                el.className = `glass p-4 rounded-2xl border ${isDone?'border-green-500/20 bg-green-900/10':'border-white/10 hover:border-primary/50'} transition-all group`;
-                el.innerHTML = `<div class="flex justify-between mb-2"><span class="text-primary font-bold flex items-center gap-1 font-mono text-lg group-hover:scale-110 transition-transform"><svg class="w-4 h-4 robux-icon"><use href="#icon-robux"></use></svg> +${tData.reward}</span>${isDone ? '<i class="fa-solid fa-check-circle text-success"></i>' : ''}</div><h4 class="font-bold text-sm text-white">${tData.title}</h4><p class="text-[10px] text-gray-400 mb-3 font-mono">Shortlink</p>${!isDone ? `<div id="action-area-${d.id}" class="space-y-2"><button class="w-full bg-primary text-black font-bold py-2 rounded-xl text-xs hover:bg-emerald-400 click-bounce" onclick="startTask('${d.id}', '${tData.link}')">START TASK</button></div><div id="verify-area-${d.id}" class="hidden space-y-2"><input type="text" id="input-${d.id}" placeholder="Enter Code" class="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-xs text-white text-center font-mono placeholder-gray-600 focus:border-primary outline-none"><button class="w-full bg-green-600 text-white font-bold py-2 rounded-xl text-xs hover:bg-green-500 click-bounce" onclick="verifyTask('${d.id}', '${tData.reward}')">SUBMIT CODE</button></div>` : `<button class="w-full bg-white/5 text-gray-500 font-bold py-2 rounded-xl text-xs cursor-not-allowed">COMPLETED</button>`}`;
-                list.appendChild(el);
+            // REMOVED orderBy to prevent index errors and infinite loading
+            onSnapshot(collection(db, "pages"), (snap) => {
+                list.innerHTML = '';
+                if(snap.empty) { 
+                    list.innerHTML = `<div class="col-span-full text-center text-gray-400 text-xs py-10 font-mono">No active tasks found.</div>`;
+                    return;
+                }
+                
+                snap.forEach(d => {
+                    const tData = d.data();
+                    if(!tData.active) return; // Client-side filter for now
+                    
+                    const isDone = state.data.completedTasks?.includes(d.id);
+                    const el = document.createElement('div');
+                    el.className = `glass p-4 rounded-2xl border ${isDone?'border-green-500/20 bg-green-900/10':'border-white/10 hover:border-primary/50'} transition-all group`;
+                    el.innerHTML = `<div class="flex justify-between mb-2"><span class="text-primary font-bold flex items-center gap-1 font-mono text-lg group-hover:scale-110 transition-transform"><svg class="w-4 h-4 robux-icon"><use href="#icon-robux"></use></svg> +${tData.reward}</span>${isDone ? '<i class="fa-solid fa-check-circle text-success"></i>' : ''}</div><h4 class="font-bold text-sm text-white">${tData.title}</h4><p class="text-[10px] text-gray-400 mb-3 font-mono">Shortlink</p>${!isDone ? `<div id="action-area-${d.id}" class="space-y-2"><button class="w-full bg-primary text-black font-bold py-2 rounded-xl text-xs hover:bg-emerald-400 click-bounce" onclick="startTask('${d.id}', '${tData.link}')">START TASK</button></div><div id="verify-area-${d.id}" class="hidden space-y-2"><input type="text" id="input-${d.id}" placeholder="Enter Code" class="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-xs text-white text-center font-mono placeholder-gray-600 focus:border-primary outline-none"><button class="w-full bg-green-600 text-white font-bold py-2 rounded-xl text-xs hover:bg-green-500 click-bounce" onclick="verifyTask('${d.id}', '${tData.reward}')">SUBMIT CODE</button></div>` : `<button class="w-full bg-white/5 text-gray-500 font-bold py-2 rounded-xl text-xs cursor-not-allowed">COMPLETED</button>`}`;
+                    list.appendChild(el);
+                });
             });
 
             window.startTask = (id, link) => {
@@ -596,7 +588,6 @@
                     // Clear used code
                     localStorage.removeItem('verify_code');
                     toast(`Correct! +${reward} R$`, 'success');
-                    initEarn();
                 } else {
                     playSound('error');
                     toast('Incorrect Code! Please complete the link.', 'error');
@@ -607,22 +598,12 @@
         };
 
         const initChat = () => {
-            const chatDiv = document.getElementById('chat-messages');
-            const q = query(collection(db, "messages"), orderBy("createdAt", "desc"), limit(30));
-            chatUnsub = onSnapshot(q, (snapshot) => {
-                chatDiv.innerHTML = '';
-                // Fix: Show "No Messages" if empty
-                if(snapshot.empty) { chatDiv.innerHTML = `<div class="text-center text-gray-500 text-xs py-10">No messages yet.</div>`; return; }
-                const msgs = []; snapshot.forEach(doc => msgs.push(doc.data()));
-                msgs.reverse().forEach(m => { const isMe = m.uid === state.user.uid; const el = document.createElement('div'); el.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`; el.innerHTML = `<div class="max-w-[80%] ${isMe ? 'bg-primary text-black' : 'bg-white/10 text-white'} rounded-xl px-3 py-2 text-xs"><span class="block font-bold opacity-50 text-[10px] mb-1">${m.name}</span>${m.text}</div>`; chatDiv.appendChild(el); });
-                chatDiv.scrollTop = chatDiv.scrollHeight;
-            });
-            window.sendMessage = async () => { const i = document.getElementById('chat-input'); if(i.value.trim()){ await addDoc(collection(db,"messages"),{uid:state.user.uid,name:state.user.displayName||"User",text:i.value.trim(),createdAt:serverTimestamp()}); i.value=''; }};
+            // Chat removed, keeping empty function to prevent errors if called
         };
 
         const initWithdraw = async () => {
             const hist = document.getElementById('withdraw-history');
-            const snaps = await getDocs(query(collection(db,"withdrawals"), where("uid","==",state.user.uid), orderBy("createdAt","desc"), limit(5)));
+            const snaps = await getDocs(query(collection(db,"withdrawals"), where("uid","==",state.user.uid), limit(5)));
             hist.innerHTML = '';
             snaps.forEach(s => { const d = s.data(); const st=`status_${d.status}`; hist.innerHTML += `<div class="flex justify-between p-3 bg-white/5 rounded-xl text-xs border border-white/5"><span class="text-white font-bold">${d.amount} R$</span><span class="uppercase font-bold ${d.status==='approved'?'text-success':d.status==='rejected'?'text-error':'text-primary'}">${t(st)}</span></div>`; });
             document.getElementById('withdraw-form').onsubmit = async (e) => { e.preventDefault(); playSound('click'); const amt = Number(document.getElementById('w-amount').value); if(amt<50 || state.data.balance<amt) return toast('Insufficient Funds (Min 50)', 'error'); await updateDoc(doc(db,"users",state.user.uid),{balance:increment(-amt), lastWithdrawAt:serverTimestamp()}); await addDoc(collection(db,"withdrawals"),{uid:state.user.uid, amount:amt, gamepassLink:document.getElementById('w-link').value, status:'pending', createdAt:serverTimestamp(), email:state.user.email}); populateTicker(`<i class="fa-solid fa-circle-check text-success"></i> <span>${state.user.displayName||"You"}</span> just withdrew <span class="text-white font-bold">${amt} R$</span>`); toast('Request Sent!', 'success'); initWithdraw(); };
@@ -668,7 +649,8 @@
             // --- TASKS ---
             const taskList = document.getElementById('admin-tasks-list');
             const loadTasks = () => {
-                onSnapshot(query(collection(db, "pages"), orderBy("createdAt", "desc")), (snap) => {
+                // REMOVED orderBy to prevent index errors
+                onSnapshot(collection(db, "pages"), (snap) => {
                     taskList.innerHTML = '';
                     if(snap.empty) { taskList.innerHTML='<p class="text-gray-500 text-xs">No active tasks.</p>'; return; }
                     snap.forEach(d => {
@@ -683,7 +665,7 @@
             window.deleteTask = async (id) => { if(confirm('Delete this task?')) await deleteDoc(doc(db, "pages", id)); };
             loadTasks();
 
-            window.copyGenLink = () => { navigator.clipboard.writeText("https://robunexa.com/#verify"); toast('Verify Link Copied!', 'success'); };
+            window.copyGenLink = () => { navigator.clipboard.writeText("https://robunexa.onrender.com/#verify"); toast('Verify Link Copied!', 'success'); };
             
             document.getElementById('add-task-form').onsubmit = async (e) => {
                 e.preventDefault();
@@ -702,7 +684,8 @@
             // --- CODES ---
             const codeList = document.getElementById('admin-codes-list');
             const loadCodes = () => {
-                onSnapshot(query(collection(db, "codes"), orderBy("createdAt", "desc")), (snap) => {
+                // REMOVED orderBy to prevent index errors
+                onSnapshot(collection(db, "codes"), (snap) => {
                     codeList.innerHTML = '';
                     if(snap.empty) { codeList.innerHTML='<p class="text-gray-500 text-xs">No active codes.</p>'; return; }
                     snap.forEach(d => {
@@ -728,9 +711,8 @@
             };
         };
 
-        // ... [Leaderboard, Profile, Redeem Code functions remain same] ...
         const initLeaderboard = async () => { const tb = document.getElementById('leaderboard-body'); const snaps = await getDocs(query(collection(db,"users"), orderBy("balance","desc"), limit(20))); tb.innerHTML = ''; let i=1; snaps.forEach(s => { const d = s.data(); tb.innerHTML += `<tr><td class="p-4 text-primary font-bold">${i++}</td><td class="p-4 flex gap-2 items-center"><img src="${d.photoURL}" class="w-6 h-6 rounded-full" onerror="this.src='https://ui-avatars.com/api/?name=U'"> ${d.email.slice(0,3)}...</td><td class="p-4 text-right font-bold text-white">${d.balance.toFixed(0)}</td></tr>`; }); };
-        const initProfile = () => { document.getElementById('profile-img').src = state.user.photoURL; document.getElementById('profile-name').innerText = state.user.displayName || "User"; document.getElementById('profile-email').innerText = state.user.email; document.getElementById('profile-id').innerText = state.user.uid; document.getElementById('ref-link').value = `https://robunexa.com?ref=${state.user.uid}`; window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('ref-link').value); toast('Copied!', 'success'); }; document.getElementById('btn-logout').onclick = () => { playSound('click'); signOut(auth); location.reload(); }; };
+        const initProfile = () => { document.getElementById('profile-img').src = state.user.photoURL; document.getElementById('profile-name').innerText = state.user.displayName || "User"; document.getElementById('profile-email').innerText = state.user.email; document.getElementById('profile-id').innerText = state.user.uid; document.getElementById('ref-link').value = `https://robunexa.onrender.com?ref=${state.user.uid}`; window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('ref-link').value); toast('Copied!', 'success'); }; document.getElementById('btn-logout').onclick = () => { playSound('click'); signOut(auth); location.reload(); }; };
         window.redeemCode = async () => { playSound('click'); const c = document.getElementById('promo-input').value.trim().toUpperCase(); if(!c) return toast("Empty Code", "error"); togglePromoModal(false); const q = query(collection(db, "codes"), where("name", "==", c)); const snap = await getDocs(q); if(snap.empty) { const h = { "ROBUX2024": 50 }; if(h[c]) { if(state.data.usedCodes?.includes(c)) return toast("Already Used!", "error"); await updateDoc(doc(db,"users",state.user.uid), { balance: increment(h[c]), usedCodes: [...(state.data.usedCodes||[]), c] }); return toast(`Redeemed ${h[c]} R$!`, "success"); } return toast("Invalid Code", "error"); } const d = snap.docs[0].data(); if(state.data.usedCodes?.includes(c)) return toast("Already Used!", "error"); const ut = state.data.completedTasks?.length || 0; if(ut < d.reqTasks) return toast(`Complete ${d.reqTasks - ut} more tasks!`, "error"); await updateDoc(doc(db,"users",state.user.uid), { balance: increment(d.reward), usedCodes: [...(state.data.usedCodes||[]), c] }); toast(`Redeemed ${d.reward} R$!`, "success"); };
 
         // GENERATE VERIFICATION CODE
