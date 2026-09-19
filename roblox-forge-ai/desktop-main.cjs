@@ -6,7 +6,7 @@ const http=require("node:http");
 const crypto=require("node:crypto");
 const {AccountStore}=require("./account-store.cjs");
 const FORGE_URL="https://roblox-forge-ai.hatchable.site";
-let win=null,bridge=null,bridgeState="offline",accounts=null;
+let win=null,bridge=null,bridgeState="offline",accounts=null,bridgeStartedAt=0,bridgeLastOutputAt=0,bridgeHealthTimer=null;
 function logFile(){try{return path.join(app.getPath("userData"),"startup.log")}catch{return path.join(process.cwd(),"startup.log")}}
 function log(x){try{fs.appendFileSync(logFile(),new Date().toISOString()+" "+x+"\n")}catch{}}
 process.on("uncaughtException",e=>log("UNCAUGHT "+e.stack));
@@ -21,11 +21,24 @@ function startBridge(forgeKey,noxeryKey,autoDev=false){
  const bridgePath=path.join(process.resourcesPath,"bridge.cjs");
  if(!fs.existsSync(bridgePath))throw new Error("Bridge runtime bulunamadı: "+bridgePath);
  bridge=spawn(process.execPath,[bridgePath,forgeKey,noxeryKey,autoDev?"1":"0"],{env:{...process.env,ELECTRON_RUN_AS_NODE:"1",ELECTRON_NO_ASAR:"1"},stdio:["pipe","pipe","pipe"],windowsHide:false});
+ bridgeStartedAt=Date.now();bridgeLastOutputAt=Date.now();
  setState("starting","Roblox Studio MCP başlatılıyor...");
- bridge.stdout.on("data",b=>emit("log",{stream:"stdout",text:String(b)}));
- bridge.stderr.on("data",b=>emit("log",{stream:"stderr",text:String(b)}));
+ bridge.stdout.on("data",b=>{
+  const text=String(b);bridgeLastOutputAt=Date.now();emit("log",{stream:"stdout",text});
+  for(const raw of text.split(/\r?\n/)){const line=raw.trim();if(!line)continue;
+   if(line.includes("[OK] Studio baglandi."))setState("online","Roblox Studio MCP bağlantısı kuruldu.");
+   else if(line.includes("[MCP] Connection closed"))setState("offline","Roblox Studio MCP bağlantısı kapandı.");
+   else if(line.startsWith("[FATAL]")||line.startsWith("[ERROR]"))setState("error",line.slice(0,500));
+  }
+ });
+ bridge.stderr.on("data",b=>{const text=String(b);bridgeLastOutputAt=Date.now();emit("log",{stream:"stderr",text});const line=text.trim();if(line.includes("[MCP]")||line.includes("[FATAL]")||line.includes("[ERROR]"))setState("error",line.slice(0,500))});
  bridge.on("error",e=>{log("BRIDGE ERROR "+e.stack);setState("error",e.message)});
- bridge.on("close",(code,signal)=>{bridge=null;setState(code===0?"offline":"error","Bridge kapandı: code="+code+" signal="+(signal||""))});
+ bridge.on("close",(code,signal)=>{if(bridgeHealthTimer){clearInterval(bridgeHealthTimer);bridgeHealthTimer=null}bridge=null;setState(code===0?"offline":"error","Bridge kapandı: code="+code+" signal="+(signal||""))});
+ if(bridgeHealthTimer)clearInterval(bridgeHealthTimer);
+ bridgeHealthTimer=setInterval(()=>{
+  if(!bridge||bridge.killed){clearInterval(bridgeHealthTimer);bridgeHealthTimer=null;return}
+  if(bridgeState==="starting"&&Date.now()-bridgeStartedAt>15000)setState("starting","Bridge çalışıyor; Roblox Studio MCP yanıtı bekleniyor...");
+ },5000);
  accounts?.log("bridge.started",{autoDev:!!autoDev});
  return {ok:true,state:"starting"};
 }
@@ -75,7 +88,7 @@ if(!gotLock)app.quit();else{
   ipcMain.handle("bridge-start",(e,a)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return startBridge(a?.forgeKey,a?.noxeryKey,!!a?.autoDev)});
   ipcMain.handle("bridge-send",(e,p)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return sendCommand(p)});
   ipcMain.handle("bridge-stop",(e)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return stopBridge()});
-  ipcMain.handle("bridge-status",(e)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return {state:bridgeState,alive:!!bridge&&!bridge.killed}});
+  ipcMain.handle("bridge-status",(e)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return {state:bridgeState,alive:!!bridge&&!bridge.killed,pid:bridge?.pid||null,startedAt:bridgeStartedAt||null,lastOutputAt:bridgeLastOutputAt||null,ageMs:bridgeLastOutputAt?Date.now()-bridgeLastOutputAt:null}});
   ipcMain.handle("forge-create-key",async(e)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return createForgeKey()});
   ipcMain.handle("account-get",e=>{if(!trusted(e))throw new Error("Untrusted renderer.");return accounts.getAccount()});
   ipcMain.handle("account-local",e=>{if(!trusted(e))throw new Error("Untrusted renderer.");accounts.ensureLocal();accounts.log("account.local_login");return accounts.getAccount()});

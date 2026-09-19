@@ -6,7 +6,8 @@
   "main": "desktop-main.cjs",
   "scripts": {
     "start": "electron .",
-    "build:exe": "node build-exe.mjs"
+    "build:exe": "node build-exe.mjs",
+    "check": "node check.cjs"
   },
   "dependencies": {
     "@modelcontextprotocol/client": "2.0.0"
