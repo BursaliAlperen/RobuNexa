@@ -1,6 +1,6 @@
 {
   "name": "roblox-forge-ai-desktop",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "private": true,
   "description": "Roblox Forge AI desktop app with GPT-6 Astra and Roblox Studio MCP bridge",
   "main": "desktop-main.cjs",
@@ -23,6 +23,7 @@
     "files": [
       "desktop-main.cjs",
       "desktop-preload.cjs",
+      "desktop.html",
       "roblox-forge-bridge.js",
       "package.json"
     ],
@@ -36,7 +37,9 @@
       "target": [
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "artifactName": "RobloxForgeAI-Windows-x64.exe",
