@@ -1,7 +1,7 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 <External>null</External><External>nil</External>
 <Item class="Script" referent="RBXFORGEAI01"><Properties>
-<bool name="Disabled">false</bool><Content name="LinkedSource"><null></null></Content>
+<bool name="Disabled">false</bool><token name="RunContext">3</token><Content name="LinkedSource"><null></null></Content>
 <string name="Name">RobloxForgeAI</string><string name="ScriptGuid">{B7A92C27-77E1-4BB6-8A0E-FORGEAI2026}</string>
 <ProtectedString name="Source"><![CDATA[
 --!strict
