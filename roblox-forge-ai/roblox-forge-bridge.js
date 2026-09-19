@@ -5,6 +5,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import readline from "node:readline";
+import { spawn } from "node:child_process";
 
 const FORGE_URL="https://roblox-forge-ai.hatchable.site";
 const CONFIG_DIR=path.join(os.homedir(),".roblox-forge-ai");
@@ -107,7 +108,6 @@ async function postActivity(forge,level,event,detail="",job_id=null){try{await p
 function speakAction(text){
  try{
   if(process.platform!=="win32")return;
-  const {spawn}=await import("node:child_process");
   const safe=String(text||"").replace(/"/g,'\\\"');
   spawn("powershell.exe",["-NoProfile","-Command","Add-Type -AssemblyName System.Speech; $s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.Speak(\""+safe+"\")"],{windowsHide:true,stdio:"ignore"});
  }catch{}
