@@ -20,6 +20,14 @@ jobs:
           node-version: 25.5.0
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Stamp version (EXE version == release tag rfa-v2.0.N)
+        run: npm version 2.0.${{ github.run_number }} --no-git-tag-version --allow-same-version
+      - name: Static checks (syntax of every packaged file, CSP, packaged-file list)
+        run: npm run check
+      - name: Regression tests (auth flow + main-process logic)
+        run: |
+          node tests/auth.test.mjs
+          node tests/main.test.cjs
       - name: Build desktop EXE
         run: npm run build:exe
       - name: Verify EXE
@@ -29,11 +37,35 @@ jobs:
           $size=(Get-Item "dist/RobloxForgeAI-Windows-x64.exe").Length
           if ($size -lt 50000000) { throw "EXE boyutu gecersiz: $size bytes" }
           Write-Host "RobloxForgeAI desktop EXE OK - $size bytes"
+      - name: Real Electron self-test (real mouse input, overray, nav, auto-toggle, nav-lock, IPC)
+        shell: pwsh
+        run: |
+          $report = Join-Path $PWD "selftest-report.json"
+          if (Test-Path $report) { Remove-Item $report }
+          $env:RFA_SELFTEST_REPORT = $report
+          $exe = Join-Path $PWD "dist/win-unpacked/Roblox Forge AI.exe"
+           if (-not (Test-Path $exe) { throw "win-unpacked exe not found: $exe" }
+          Write-Host "ProductVersion: $((Get-Item $exe).VersionInfo.ProductVersion)"
+          $p = Start-Process -FilePath $exe -ArgumentList "--selftest" -PassThru
+          if (-not $p.WaitForExit(150000)) { $p.Kill(); throw "selftest timeout" }
+          if (-not (Test-Path $report)) { throw "selftest produced no report (exit $($p.ExitCode))" }
+          $r = Get-Content $report -Raw | ConvertFrom-Json
+          Write-Host "app=$($r.version) electron=$($r.electron) url=$($r.url)"
+          foreach ($t in $r.results) { Write-Host ("{0} {1} {2}" -f $(if ($t.pass) {"PASS"} else {"FAIL"}), $t.name, $t.detail) }
+          if ($r.failed -gt 0 -or $r.consoleErrors.Count -gt 0 -or $r.crashed) { throw "selftest failed: failed=$($r.failed) consoleErrors=$($r.consoleErrors.Count)" }
+          if ($r.version -ne "2.0.${{ github.run_number }}") { throw "version mismatch: app=$($r.version) tag=2.0.${{ github.run_number }}" }
+      - name: Upload self-test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selftest-report
+          path: roblox-forge-ai/selftest-report.json
+          if-no-files-found: warn
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: RobloxForgeAI-Windows-x64
-          path: roblox-forge-ai/dist/RobloxForgeAI-Windows-x64.exe
+          path: robox-forge-ai/dist/RobloxForgeAI-Windows-x64.exe
           retention-days: 30
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -47,6 +79,6 @@ jobs:
             roblox-forge-ai/dist/RobloxForgeAI-Windows-x64.exe
           generate_release_notes: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 # Trigger build after portable EXE configuration fix.

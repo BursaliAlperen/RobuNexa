@@ -1,19 +1,2 @@
 const {contextBridge,ipcRenderer}=require("electron");
-contextBridge.exposeInMainWorld("robloxForgeDesktop",{
- isDesktop:true,
- start:(forgeKey,noxeryKey,autoDev)=>ipcRenderer.invoke("bridge-start",{forgeKey:String(forgeKey||""),noxeryKey:String(noxeryKey||""),autoDev:!!autoDev}),
- send:(prompt)=>ipcRenderer.invoke("bridge-send",String(prompt||"")),
- stop:()=>ipcRenderer.invoke("bridge-stop"),
- status:()=>ipcRenderer.invoke("bridge-status"),
- createKey:()=>ipcRenderer.invoke("forge-create-key"),
- account:()=>ipcRenderer.invoke("account-get"),
- localAccount:()=>ipcRenderer.invoke("account-local"),
- googleLogin:()=>ipcRenderer.invoke("account-google-login"),
- logout:()=>ipcRenderer.invoke("account-logout"),
- settings:(key,value)=>ipcRenderer.invoke("account-setting",{key,value}),
- snapshot:()=>ipcRenderer.invoke("account-snapshot"),
- log:(action,detail)=>ipcRenderer.invoke("account-log",{action,detail}),
- addCredits:(amount,source)=>ipcRenderer.invoke("credits-add",{amount,source}),
- spendCredits:(amount,reason)=>ipcRenderer.invoke("credits-spend",{amount,reason}),
- onEvent:(callback)=>ipcRenderer.on("forge-bridge-event",(_e,data)=>callback(data))
-});
+contextBridge.exposeInMainWorld("robloxForgeDesktop",{isDesktop:true,start:(forgeKey,noxeryKey,autoDev)=>ipcRenderer.invoke("bridge-start",{forgeKey:String(forgeKey||""),noxeryKey:String(noxeryKey||"),query:"
