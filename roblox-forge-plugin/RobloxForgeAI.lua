@@ -90,7 +90,7 @@ local function heartbeat()
 end
 
 local function jsonFromText(s)
-  s=s:gsub("^<jsonfence>%s*",""):gsub("^<fence>%s*",""):gsub("%s*<endfence>$",""):match("^%s*(.-)%s*$")
+  s=s:match("^%s*(.-)%s*$")
   local ok,data=pcall(function() return HttpService:JSONDecode(s) end)
   if ok then return data end
   error("Noxery JSON döndürmedi.")
@@ -162,7 +162,7 @@ end
 
 local function executePrompt(id,prompt)
   say("PLAN · Prompt alındı")
-  local plan=askNoxery(prompt.."\\nÖnce analiz et, sonra küçük ve doğrulanabilir action listesi üret. Mevcut sistemi gereksiz yere silme.")
+  local plan=askNoxery(prompt.."\nÖnce analiz et, sonra küçük ve doğrulanabilir action listesi üret. Mevcut sistemi gereksiz yere silme.")
   local actions=plan.actions or {}
   say("PLAN "..tostring(#actions).." ACTION")
   local results={}
