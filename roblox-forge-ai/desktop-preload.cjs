@@ -1,0 +1,2 @@
+const {contextBridge,ipcRenderer}=require("electron");
+contextBridge.exposeInMainWorld("robloxForgeDesktop",{isDesktop:true,start:(forgeKey,noxeryKey)=>ipcRenderer.invoke("bridge-start",{forgeKey:String(forgeKey||""),noxeryKey:String(noxeryKey||"")}),send:(prompt)=>ipcRenderer.invoke("bridge-send",String(prompt||"")),stop:()=>ipcRenderer.invoke("bridge-stop"),status:()=>ipcRenderer.invoke("bridge-status"),onEvent:(callback)=>ipcRenderer.on("forge-bridge-event",(_e,data)=>callback(data))});
