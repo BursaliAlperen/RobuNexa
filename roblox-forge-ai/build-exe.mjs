@@ -1,9 +1,7 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { build } from "esbuild";
-import { execFileSync } from "node:child_process";
+import {mkdir} from "node:fs/promises";
+import {build} from "esbuild";
+import {execFileSync} from "node:child_process";
 await mkdir("dist",{recursive:true});
-await build({entryPoints:["roblox-forge-bridge.js"],bundle:true,platform:"node",format:"cjs",target:"node24",outfile:"dist/bridge.cjs",sourcemap:false});
-const config={main:"dist/bridge.cjs",mainFormat:"commonjs",output:"dist/RobloxForgeAI.exe",disableExperimentalSEAWarning:true,useSnapshot:false,useCodeCache:false};
-await writeFile("dist/sea-config.json",JSON.stringify(config,null,2));
-execFileSync(process.execPath,["--build-sea","dist/sea-config.json"],{stdio:"inherit"});
-console.log("RobloxForgeAI.exe created.");
+await build({entryPoints:["roblox-forge-bridge.js"],bundle:true,platform:"node",format:"cjs",target:"node24",outfile:"dist/bridge.cjs",sourcemap:false,minify:false});
+execFileSync("npx",["electron-builder","--win","portable"],{stdio:"inherit"});
+console.log("RobloxForgeAI-Windows-x64.exe created.");
