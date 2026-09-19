@@ -77,7 +77,7 @@ function googleLogin(){
 }
 function createWindow(){
  win=new BrowserWindow({width:1440,height:920,minWidth:1050,minHeight:700,show:false,backgroundColor:"#05070b",autoHideMenuBar:true,title:"Roblox Forge AI",webPreferences:{preload:path.join(app.getAppPath(),"desktop-preload.cjs"),contextIsolation:true,nodeIntegration:false,sandbox:true}});
- win.once("ready-to-show",()=>win.show());win.webContents.on("did-fail-load",(_e,c,d,u)=>log("LOAD FAIL "+c+" "+d+" "+u));win.webContents.on("render-process-gone",(_e,d)=>log("RENDER GONE "+JSON.stringify(d)));win.webContents.on("console-message",(_e,l,m)=>log("CONSOLE "+l+" "+m));win.loadURL(FORGE_URL+"/?desktop=1").catch(e=>log("LOADURL "+e.stack));win.on("closed",()=>{win=null;stopBridge()})
+ win.once("ready-to-show",()=>win.show());win.webContents.on("did-fail-load",(_e,c,d,u)=>log("LOAD FAIL "+c+" "+d+" "+u));win.webContents.on("render-process-gone",(_e,d)=>log("RENDER GONE "+JSON.stringify(d)));win.webContents.on("console-message",(_e,l,m)=>log("CONSOLE "+l+" "+m));win.loadFile(path.join(app.getAppPath(),"desktop.html")).catch(e=>log("LOADFILE "+e.stack));win.on("closed",()=>{win=null;stopBridge()})
 }
 const gotLock=app.requestSingleInstanceLock();
 if(!gotLock)app.quit();else{
