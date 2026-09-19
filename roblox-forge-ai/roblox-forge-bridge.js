@@ -114,6 +114,7 @@ async function jobLoop(forge,nox,session,autoDev=false){
    if(d.job){
     try{
      await heartbeat("working",{job_id:d.job.id});
+     await postActivity(forge,"info","JOB STARTED",d.job.prompt,d.job.id);
      const result=await runPrompt(nox,session,d.job.prompt,autoDev);
      await postForge("/api/jobs/complete",{id:d.job.id,status:"completed",result},forge);
      await postActivity(forge,"info","JOB COMPLETED",String(result.summary||"").slice(0,3500),d.job.id);
@@ -123,6 +124,42 @@ async function jobLoop(forge,nox,session,autoDev=false){
      await postForge("/api/jobs/complete",{id:d.job.id,status:"failed",result:null,error:msg},forge);
      await postActivity(forge,"error","JOB FAILED",msg,d.job.id);
      console.error("\n[SITE JOB FAILED] "+msg);
+    }
+   } else if(autoDev){
+    try{
+     await heartbeat("auto_working",{auto_dev:true});
+     const autoPrompt=`AUTO DEVELOPMENT MODE — AUTONOMOUS BUILD CYCLE.
+You are the senior Roblox product engineer responsible for improving the LIVE Roblox Studio project while the user is away.
+
+MISSION:
+1. Inspect the LIVE DataModel first. Never guess the project state.
+2. Audit current systems, scripts, UI, map, assets, VFX/SFX, mobile controls, performance and errors.
+3. Choose EXACTLY ONE safe, high-value improvement or bug fix for this cycle.
+4. Internally create a concrete mini-plan: goal, affected Instances/scripts, client/server responsibilities, dependencies, Creator Store assets needed, acceptance checks and rollback-safe approach.
+5. Execute that plan completely with real Roblox Studio MCP tools.
+6. Use proper LocalScripts for client UI/input/camera/client VFX, Scripts for server authority/DataStore/remotes/anti-exploit, and ModuleScripts for shared logic.
+7. For STUDDED GUI, actually create the required ScreenGui/Frames/ImageLabels/ImageButtons/TextLabels/UIStrokes/UICorners and search available Creator Store/MCP asset tools for suitable stud textures, cartoon icons and decals. Use exact returned asset IDs; never invent IDs.
+8. Wire every dependency: folders, remotes, references, animations, sounds, VFX, cleanup and integration. Do not leave placeholders or disconnected mockups.
+9. Preserve working systems. Do not delete/rewrite unrelated code.
+10. Playtest/inspect Output and fix errors. Re-test the changed feature.
+11. Write a concise completion report with what changed, files/Instances touched, verification evidence and any remaining limitation.
+12. If there is no safe improvement, perform an audit only and report why.
+
+IMPORTANT:
+- Do NOT ask the user for approval in this mode; Auto Development is an explicit user opt-in.
+- Never make destructive economy/data resets, delete major systems, publish external content, or spend Robux without an explicit user request.
+- One cycle = one coherent improvement. Stop that cycle after verification and log it.
+- Then wait for the next cycle.
+
+Begin by inspecting the live Studio project now.`;
+     await postActivity(forge,"info","AUTO DEVELOPMENT STARTED","Astra live audit + one improvement cycle başlıyor.");
+     const result=await runPrompt(nox,session,autoPrompt,true);
+     await postActivity(forge,"info","AUTO DEVELOPMENT COMPLETED",String(result.summary||"").slice(0,3500));
+     await heartbeat("online",{auto_dev:true});
+    }catch(e){
+     const msg=String(e?.message||e);
+     await postActivity(forge,"error","AUTO DEVELOPMENT ERROR",msg.slice(0,3500));
+     await heartbeat("online",{auto_dev:true,error:msg.slice(0,1000)});
     }
    }
   }catch(e){console.error("\n[JOB LOOP] "+(e?.message||e))}
