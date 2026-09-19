@@ -235,7 +235,7 @@ local function executePrompt(id,prompt,selectedStyle,styleContract)
   say("STYLE · "..tostring(selectedStyle or style.Text or "Studded"))
   say("PROMPT · "..prompt)
   mission(true,prompt,"PLANNING",0,10,"Noxery plan engine çalışıyor…\nStudio context okunuyor ve küçük doğrulanabilir actions hazırlanıyor.")
-  local contract=String(styleContract or "")
+  local contract=tostring(styleContract or "")
   local styleInstruction=contract~="" and contract or ("[VISUAL DNA] STYLE: "..tostring(selectedStyle or style.Text or "Studded").." · Keep GUI, map, assets, materials, lighting and VFX visually consistent with this style.")
   local plan=askNoxery(styleInstruction.."\n\nUSER PROMPT: "..prompt.."\nÖnce analiz et, sonra küçük ve doğrulanabilir action listesi üret. Mevcut sistemi gereksiz yere silme.")
   local actions=plan.actions or {}
