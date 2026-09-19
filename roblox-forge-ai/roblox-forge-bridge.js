@@ -131,7 +131,9 @@ async function main(){
   catch(e){console.error("[MCP] Baglanti basarisiz: "+(e?.message||e));if(attempt>=5)throw e;console.log("Studio MCP yeniden deneniyor...");await new Promise(r=>setTimeout(r,3000))}
  }
  console.log("[2/2] Astra hazir.");
+ console.log("[AUTO] Studio MCP baglantisi kuruldu. Forge AI plan/approval pipeline hazir.");
  console.log("\nKomut yaz ve Enter'a bas:");
+ console.log("  > PLAN: oyunu analiz et ve AAA plan hazirla");
  console.log("  > create a studded lobby with 3 portals");
  console.log("  > add a mobile inventory UI");
  console.log("  > /status");
