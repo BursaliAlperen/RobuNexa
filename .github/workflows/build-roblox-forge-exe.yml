@@ -46,3 +46,18 @@ jobs:
           name: RobloxForgeAI-Windows-x64-ZIP
           path: roblox-forge-ai/RobloxForgeAI-Windows-x64.zip
           retention-days: 30
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: rfa-v1.0.${{ github.run_number }}
+          name: Roblox Forge AI v1.0.${{ github.run_number }}
+          body: |
+            Automatic Windows x64 release of Roblox Forge AI Bridge.
+            Download the EXE or ZIP below.
+          files: |
+            roblox-forge-ai/dist/RobloxForgeAI.exe
+            roblox-forge-ai/RobloxForgeAI-Windows-x64.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
