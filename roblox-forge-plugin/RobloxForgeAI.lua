@@ -18,46 +18,66 @@ local widget = plugin:CreateDockWidgetPluginGuiAsync(
 widget.Title = "Roblox Forge AI"
 widget.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
+local missionWidget = plugin:CreateDockWidgetPluginGuiAsync(
+  "RobloxForgeAIMission",
+  DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, false, true, 640, 380, 520, 300)
+)
+missionWidget.Title = "Forge AI · Live Mission"
+missionWidget.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
 local function mk(class, props)
   local o = Instance.new(class)
   for k,v in pairs(props) do o[k] = v end
   return o
 end
 
-local root = mk("Frame",{Parent=widget,Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(18,22,30),BorderSizePixel=0})
+local root = mk("Frame",{Parent=widget,Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(8,12,19),BorderSizePixel=0})
 mk("UIPadding",{Parent=root,PaddingTop=12,PaddingBottom=12,PaddingLeft=12,PaddingRight=12})
-local layout = mk("UIListLayout",{Parent=root,Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder})
+mk("UIListLayout",{Parent=root,Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder})
 
-mk("TextLabel",{Parent=root,Size=UDim2.new(1,0,0,32),BackgroundTransparency=1,Text="⚡ ROBLOX FORGE AI",TextColor3=Color3.fromRGB(240,244,255),TextSize=20,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left,LayoutOrder=1})
-mk("TextLabel",{Parent=root,Size=UDim2.new(1,0,0,34),BackgroundTransparency=1,Text="OAuth yok • Pair Code ile web → Studio",TextColor3=Color3.fromRGB(145,160,184),TextSize=11,Font=Enum.Font.Gotham,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,LayoutOrder=2})
+mk("TextLabel",{Parent=root,Size=UDim2.new(1,0,0,32),BackgroundTransparency=1,Text="⚡ ROBLOX FORGE AI",TextColor3=Color3.fromRGB(242,246,255),TextSize=20,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left,LayoutOrder=1})
+mk("TextLabel",{Parent=root,Size=UDim2.new(1,0,0,34),BackgroundTransparency=1,Text="AAA WEB DASHBOARD • LIVE STUDIO AGENT",TextColor3=Color3.fromRGB(129,145,173),TextSize=10,Font=Enum.Font.Gotham,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,LayoutOrder=2})
 
 local function field(label, placeholder, order)
   local box = mk("Frame",{Parent=root,Size=UDim2.new(1,0,0,58),BackgroundTransparency=1,LayoutOrder=order})
-  mk("TextLabel",{Parent=box,Size=UDim2.new(1,0,0,18),BackgroundTransparency=1,Text=label,TextColor3=Color3.fromRGB(150,166,192),TextSize=10,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left})
-  return mk("TextBox",{Parent=box,Position=UDim2.new(0,0,0,20),Size=UDim2.new(1,0,0,34),BackgroundColor3=Color3.fromRGB(11,15,22),BorderColor3=Color3.fromRGB(45,57,78),TextColor3=Color3.fromRGB(235,241,250),PlaceholderColor3=Color3.fromRGB(92,107,130),PlaceholderText=placeholder,TextSize=11,Font=Enum.Font.Code,ClearTextOnFocus=false})
+  mk("TextLabel",{Parent=box,Size=UDim2.new(1,0,0,18),BackgroundTransparency=1,Text=label,TextColor3=Color3.fromRGB(147,163,191),TextSize=9,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left})
+  return mk("TextBox",{Parent=box,Position=UDim2.new(0,0,0,20),Size=UDim2.new(1,0,0,34),BackgroundColor3=Color3.fromRGB(13,18,28),BorderColor3=Color3.fromRGB(38,51,71),TextColor3=Color3.fromRGB(238,243,252),PlaceholderColor3=Color3.fromRGB(83,99,123),PlaceholderText=placeholder,TextSize=11,Font=Enum.Font.Code,ClearTextOnFocus=false})
 end
 
 local forgeKey = field("FORGE API KEY","rfa_live_...",3)
 local robloxKey = field("ROBLOX OPEN CLOUD API KEY (opsiyonel)","Roblox x-api-key",4)
 local noxeryKey = field("NOXERY API KEY","Noxery key",5)
-local pairCode = field("PAIR CODE","Web sitesinden 6 haneli kod",6)
+local pairCode = field("PAIR CODE","Dashboard'dan 6 haneli kod",6)
 local model = field("MODEL","gpt-6-astra",7)
 
 local row=mk("Frame",{Parent=root,Size=UDim2.new(1,0,0,38),BackgroundTransparency=1,LayoutOrder=8})
 mk("UIListLayout",{Parent=row,FillDirection=Enum.FillDirection.Horizontal,Padding=UDim.new(0,7)})
-local connect=mk("TextButton",{Parent=row,Size=UDim2.new(0.5,-4,1,0),BackgroundColor3=Color3.fromRGB(79,108,255),TextColor3=Color3.new(1,1,1),Text="PAIR / CONNECT",TextSize=11,Font=Enum.Font.GothamBold})
-local scan=mk("TextButton",{Parent=row,Size=UDim2.new(0.5,-4,1,0),BackgroundColor3=Color3.fromRGB(30,39,54),TextColor3=Color3.fromRGB(225,232,243),Text="SCAN",TextSize=11,Font=Enum.Font.GothamBold})
-local status=mk("TextLabel",{Parent=root,Size=UDim2.new(1,0,0,28),BackgroundColor3=Color3.fromRGB(12,29,25),TextColor3=Color3.fromRGB(102,235,180),Text="● OFFLINE",TextSize=10,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left,LayoutOrder=9})
+local connect=mk("TextButton",{Parent=row,Size=UDim2.new(0.5,-4,1,0),BackgroundColor3=Color3.fromRGB(85,106,245),TextColor3=Color3.new(1,1,1),Text="PAIR / CONNECT",TextSize=11,Font=Enum.Font.GothamBold})
+local scan=mk("TextButton",{Parent=row,Size=UDim2.new(0.5,-4,1,0),BackgroundColor3=Color3.fromRGB(26,35,50),TextColor3=Color3.fromRGB(224,232,243),Text="SCAN",TextSize=11,Font=Enum.Font.GothamBold})
+
+local status=mk("TextLabel",{Parent=root,Size=UDim2.new(1,0,0,30),BackgroundColor3=Color3.fromRGB(29,20,24),TextColor3=Color3.fromRGB(255,132,149),Text="● NOT CONNECTED",TextSize=10,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left,LayoutOrder=9})
 mk("UIPadding",{Parent=status,PaddingLeft=10})
-local log=mk("TextLabel",{Parent=root,Size=UDim2.new(1,0,0,150),BackgroundColor3=Color3.fromRGB(9,13,19),TextColor3=Color3.fromRGB(155,171,195),Text="Hazır.",TextSize=10,Font=Enum.Font.Code,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top,LayoutOrder=10})
+
+local log=mk("TextLabel",{Parent=root,Size=UDim2.new(1,0,0,162),BackgroundColor3=Color3.fromRGB(8,12,18),TextColor3=Color3.fromRGB(151,169,194),Text="Ready.",TextSize=10,Font=Enum.Font.Code,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top,LayoutOrder=10})
 mk("UIPadding",{Parent=log,PaddingTop=8,PaddingBottom=8,PaddingLeft=8,PaddingRight=8})
 
-local function say(s) log.Text = os.date("%H:%M:%S").."  "..tostring(s).."\\n"..log.Text end
+local toast = mk("Frame",{Parent=root,AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.5),Size=UDim2.new(0.82,0,0,92),BackgroundColor3=Color3.fromRGB(14,20,30),BorderColor3=Color3.fromRGB(50,66,92),Visible=false,ZIndex=20})
+mk("UICorner",{Parent=toast,CornerRadius=UDim.new(0,16)})
+local toastTitle=mk("TextLabel",{Parent=toast,Position=UDim2.new(0,14,0,12),Size=UDim2.new(1,-28,0,23),BackgroundTransparency=1,Text="PLUGIN CONNECTED",TextColor3=Color3.fromRGB(226,235,255),TextSize=15,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left,ZIndex=21})
+local toastText=mk("TextLabel",{Parent=toast,Position=UDim2.new(0,14,0,39),Size=UDim2.new(1,-28,0,40),BackgroundTransparency=1,Text="Studio heartbeat online.",TextColor3=Color3.fromRGB(139,154,181),TextSize=10,Font=Enum.Font.Gotham,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,ZIndex=21})
+
+local function say(s)
+  log.Text = os.date("%H:%M:%S").."  "..tostring(s).."\n"..log.Text
+end
+
 local function save()
-  plugin:SetSetting("forgeKey",forgeKey.Text); plugin:SetSetting("robloxKey",robloxKey.Text)
-  plugin:SetSetting("noxeryKey",noxeryKey.Text); plugin:SetSetting("pairCode",string.upper(pairCode.Text))
+  plugin:SetSetting("forgeKey",forgeKey.Text)
+  plugin:SetSetting("robloxKey",robloxKey.Text)
+  plugin:SetSetting("noxeryKey",noxeryKey.Text)
+  plugin:SetSetting("pairCode",string.upper(pairCode.Text))
   plugin:SetSetting("model",model.Text)
 end
+
 local function load()
   forgeKey.Text=tostring(plugin:GetSetting("forgeKey") or "")
   robloxKey.Text=tostring(plugin:GetSetting("robloxKey") or "")
@@ -68,10 +88,59 @@ end
 load()
 
 local function request(url, method, body, headers)
-  local h=headers or {}; h["Content-Type"]="application/json"
+  local h=headers or {}
+  h["Content-Type"]="application/json"
   local res=HttpService:RequestAsync({Url=url,Method=method or "GET",Headers=h,Body=body and HttpService:JSONEncode(body) or nil})
   if not res.Success then error("HTTP "..tostring(res.StatusCode)..": "..tostring(res.StatusMessage)) end
   return res.Body=="" and {} or HttpService:JSONDecode(res.Body)
+end
+
+local toastSerial=0
+local lastOnline=false
+local function connectionPopup(online, detail)
+  toastSerial=toastSerial+1
+  local serial=toastSerial
+  toast.Visible=true
+  toast.BackgroundColor3=online and Color3.fromRGB(11,34,27) or Color3.fromRGB(36,19,25)
+  toastTitle.Text=online and "PLUGIN CONNECTED" or "PLUGIN NOT CONNECTED"
+  toastTitle.TextColor3=online and Color3.fromRGB(101,232,175) or Color3.fromRGB(255,126,145)
+  toastText.Text=detail or (online and "Web Dashboard ↔ Studio live." or "Pair Code veya Forge API Key kontrolü gerekli.")
+  task.delay(3.2,function() if serial==toastSerial then toast.Visible=false end end)
+end
+
+local function setConnection(online, detail)
+  status.Text=online and "● CONNECTED" or "● NOT CONNECTED"
+  status.BackgroundColor3=online and Color3.fromRGB(9,34,27) or Color3.fromRGB(38,20,26)
+  status.TextColor3=online and Color3.fromRGB(92,228,173) or Color3.fromRGB(255,126,145)
+  if online~=lastOnline then connectionPopup(online,detail) end
+  lastOnline=online
+end
+
+local missionRoot = mk("Frame",{Parent=missionWidget,Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(7,11,18),BorderSizePixel=0})
+mk("UICorner",{Parent=missionRoot,CornerRadius=UDim.new(0,18)})
+mk("UIPadding",{Parent=missionRoot,PaddingTop=18,PaddingBottom=18,PaddingLeft=18,PaddingRight=18})
+local missionTop=mk("Frame",{Parent=missionRoot,Size=UDim2.new(1,0,0,42),BackgroundTransparency=1})
+mk("TextLabel",{Parent=missionTop,Position=UDim2.new(0,0,0,0),Size=UDim2.new(0.65,0,1,0),BackgroundTransparency=1,Text="FORGE AI • LIVE MISSION",TextColor3=Color3.fromRGB(235,241,252),TextSize=15,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left})
+local missionState=mk("TextLabel",{Parent=missionTop,Position=UDim2.new(0.65,0,0,5),Size=UDim2.new(0.35,0,1,-5),BackgroundTransparency=1,Text="READY",TextColor3=Color3.fromRGB(104,224,173),TextSize=9,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Right})
+local missionPrompt=mk("TextLabel",{Parent=missionRoot,Position=UDim2.new(0,0,0,54),Size=UDim2.new(1,0,0,84),BackgroundColor3=Color3.fromRGB(11,17,27),BorderColor3=Color3.fromRGB(29,41,58),Text="Waiting for prompt…",TextColor3=Color3.fromRGB(219,227,240),TextSize=11,Font=Enum.Font.Gotham,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top})
+mk("UIPadding",{Parent=missionPrompt,PaddingTop=12,PaddingBottom=12,PaddingLeft=12,PaddingRight=12})
+local progress=mk("TextLabel",{Parent=missionRoot,Position=UDim2.new(0,0,0,150),Size=UDim2.new(1,0,0,32),BackgroundTransparency=1,Text="000/000",TextColor3=Color3.fromRGB(113,135,255),TextSize=21,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left})
+local progressBar=mk("Frame",{Parent=missionRoot,Position=UDim2.new(0,0,0,190),Size=UDim2.new(1,0,0,8),BackgroundColor3=Color3.fromRGB(24,32,46),BorderSizePixel=0})
+mk("UICorner",{Parent=progressBar,CornerRadius=UDim.new(1,0)})
+local progressFill=mk("Frame",{Parent=progressBar,Size=UDim2.new(0,0,1,0),BackgroundColor3=Color3.fromRGB(91,116,255),BorderSizePixel=0})
+mk("UICorner",{Parent=progressFill,CornerRadius=UDim.new(1,0)})
+local missionDetail=mk("TextLabel",{Parent=missionRoot,Position=UDim2.new(0,0,0,214),Size=UDim2.new(1,0,0,72),BackgroundTransparency=1,Text="Prompt bekleniyor.",TextColor3=Color3.fromRGB(126,143,168),TextSize=10,Font=Enum.Font.Code,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top})
+
+local function mission(show,prompt,stateText,current,total,detail)
+  missionWidget.Enabled=show
+  if not show then return end
+  missionPrompt.Text=tostring(prompt or "Waiting for prompt…")
+  missionState.Text=tostring(stateText or "WORKING")
+  local n=tonumber(current) or 0
+  local t=math.max(tonumber(total) or 0,1)
+  progress.Text=string.format("%03d/%03d",n,t)
+  progressFill.Size=UDim2.new(math.clamp(n/t,0,1),0,1,0)
+  missionDetail.Text=tostring(detail or "")
 end
 
 local function claim()
@@ -80,13 +149,15 @@ local function claim()
   local userId=tostring(StudioService:GetUserId())
   local r=request(API.."/api/plugin/pair/claim","POST",{pair_code=pairCode.Text,forgeKey=forgeKey.Text,plugin_name="Roblox Forge AI Studio Plugin",roblox_user_id=userId})
   if not r.ok then error(r.error or "Pair başarısız.") end
-  status.Text="● ONLINE · "..r.pair_code
+  setConnection(true,"Studio User "..userId.." paired.")
   say("PAIR OK · Studio User "..userId)
 end
 
 local function heartbeat()
+  if forgeKey.Text=="" or pairCode.Text=="" then return end
   local r=request(API.."/api/plugin/pair/heartbeat","POST",{pair_code=pairCode.Text,forgeKey=forgeKey.Text})
   if not r.ok then error(r.error or "Heartbeat başarısız.") end
+  setConnection(true,"Heartbeat online.")
 end
 
 local function jsonFromText(s)
@@ -161,23 +232,33 @@ local function applyAction(a)
 end
 
 local function executePrompt(id,prompt)
-  say("PLAN · Prompt alındı")
+  say("PROMPT · "..prompt)
+  mission(true,prompt,"PLANNING",0,10,"Noxery plan engine çalışıyor…\nStudio context okunuyor ve küçük doğrulanabilir actions hazırlanıyor.")
   local plan=askNoxery(prompt.."\nÖnce analiz et, sonra küçük ve doğrulanabilir action listesi üret. Mevcut sistemi gereksiz yere silme.")
   local actions=plan.actions or {}
-  say("PLAN "..tostring(#actions).." ACTION")
+  local total=#actions
+  say("PLAN · "..tostring(total).." ACTION")
+  mission(true,prompt,"PLAN READY",0,total,"Plan hazır. Studio action pipeline başlıyor.")
   local results={}
   for i,a in ipairs(actions) do
-    say(string.format("ACTION %03d/%03d · %s",i,#actions,tostring(a.type)))
+    local detail=string.format("%s\n%s",tostring(a.type),tostring(a.path or a.name or ""))
+    say(string.format("ACTION %03d/%03d · %s",i,total,tostring(a.type)))
+    mission(true,prompt,string.format("ACTION %03d/%03d",i,total),i-1,total,detail)
     local ok,res=pcall(applyAction,a)
     if not ok then
       say("ACTION FAILED · "..tostring(res))
-      request(API.."/api/plugin/complete","POST",{pair_code=pairCode.Text,forgeKey=forgeKey.Text,command_id=id,status="error",error=tostring(res),result={step=i,total=#actions}})
+      mission(true,prompt,"FAILED",i,total,"Action failed:\n"..tostring(res))
+      request(API.."/api/plugin/complete","POST",{pair_code=pairCode.Text,forgeKey=forgeKey.Text,command_id=id,status="error",error=tostring(res),result={step=i,total=total}})
       return
     end
-    results[#results+1]=res; say("ACTION SUCCESS · "..tostring(res))
+    results[#results+1]=res
+    say("ACTION SUCCESS · "..tostring(res))
+    mission(true,prompt,string.format("ACTION %03d/%03d ✓",i,total),i,total,"SUCCESS · "..tostring(res))
   end
-  request(API.."/api/plugin/complete","POST",{pair_code=pairCode.Text,forgeKey=forgeKey.Text,command_id=id,status="completed",result={summary=plan.summary,actions=results,total=#actions}})
-  say("FORGE COMPLETE "..tostring(#actions).."/"..tostring(#actions))
+  request(API.."/api/plugin/complete","POST",{pair_code=pairCode.Text,forgeKey=forgeKey.Text,command_id=id,status="completed",result={summary=plan.summary,actions=results,total=total}})
+  say("FORGE COMPLETE "..tostring(total).."/"..tostring(total))
+  mission(true,prompt,"COMPLETE",total,total,(plan.summary or "Mission tamamlandı.").."\n\n"..tostring(total).." doğrulanabilir action Studio'da uygulandı.")
+  task.delay(5,function() missionWidget.Enabled=false end)
 end
 
 local running=false
@@ -190,28 +271,44 @@ local function poll()
       local r=request(API.."/api/plugin/command?pair_code="..HttpService:UrlEncode(pairCode.Text).."&forgeKey="..HttpService:UrlEncode(forgeKey.Text),"GET")
       if r.command then executePrompt(tostring(r.command.id),tostring(r.command.prompt)) end
     end)
-    if not ok then status.Text="● ERROR"; say("ERROR · "..tostring(err)) end
+    if not ok then
+      setConnection(false,tostring(err))
+      say("ERROR · "..tostring(err))
+    end
     running=false
   end)
 end
 
 connect.MouseButton1Click:Connect(function()
   local ok,err=pcall(claim)
-  if not ok then status.Text="● ERROR"; say("PAIR ERROR · "..tostring(err)) end
+  if not ok then
+    setConnection(false,tostring(err))
+    say("PAIR ERROR · "..tostring(err))
+  end
 end)
+
 scan.MouseButton1Click:Connect(function()
-  local sel=Selection:Get(); local names={}
+  local sel=Selection:Get()
+  local names={}
   for _,x in ipairs(sel) do names[#names+1]=x:GetFullName() end
   say("SCAN · Selection: "..(#names>0 and table.concat(names,", ") or "none"))
 end)
+
 button.Click:Connect(function() widget.Enabled=not widget.Enabled end)
-plugin.Unloading:Connect(function() running=false end)
+plugin.Unloading:Connect(function() running=false; missionWidget.Enabled=false end)
 
 task.spawn(function()
   while true do
     task.wait(3)
-    if widget.Enabled then poll() end
+    poll()
   end
 end)
 
-say("Ready · Web sitesinden Pair Code üretip buraya gir.")
+task.delay(1,function()
+  if forgeKey.Text~="" and pairCode.Text~="" then
+    local ok,err=pcall(heartbeat)
+    if not ok then setConnection(false,tostring(err)) end
+  end
+end)
+
+say("Ready · Dashboard'dan Pair Code oluştur, sonra Connect.")
