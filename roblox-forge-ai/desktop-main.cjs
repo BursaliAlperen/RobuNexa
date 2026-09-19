@@ -11,7 +11,7 @@ function logFile(){try{return path.join(app.getPath("userData"),"startup.log")}c
 function log(x){try{fs.appendFileSync(logFile(),new Date().toISOString()+" "+x+"\n")}catch{}}
 process.on("uncaughtException",e=>log("UNCAUGHT "+e.stack));
 process.on("unhandledRejection",e=>log("REJECTION "+(e?.stack||e)));
-function trusted(e){if(!win||win.isDestroyed()||e?.sender!==win.webContents)return false;const u=e.senderFrame?.url||"";if(u.startsWith("file://"))return true;return u===FORGE_URL||u.startsWith(FORGE_URL+"/")}
+function trusted(e){if(!win||win.isDestroyed()||e?.sender!==win.webContents)return false;const u=e.senderFrame?.url||"";if(u.startsWith("file://"))return true;try{const x=new URL(u);const base=new URL(FORGE_URL);return x.origin===base.origin&&x.pathname.startsWith("/")}catch{return false}}
 function emit(type,data){if(win&&!win.isDestroyed())win.webContents.send("forge-bridge-event",{type,...data})}
 function setState(state,detail=""){bridgeState=state;emit("state",{state,detail})}
 function startBridge(forgeKey,noxeryKey,autoDev=false){
@@ -77,7 +77,7 @@ function googleLogin(){
 }
 function createWindow(){
  win=new BrowserWindow({width:1440,height:920,minWidth:1050,minHeight:700,show:false,backgroundColor:"#05070b",autoHideMenuBar:true,title:"Roblox Forge AI",webPreferences:{preload:path.join(app.getAppPath(),"desktop-preload.cjs"),contextIsolation:true,nodeIntegration:false,sandbox:true}});
- win.once("ready-to-show",()=>win.show());win.webContents.on("did-fail-load",(_e,c,d,u)=>log("LOAD FAIL "+c+" "+d+" "+u));win.webContents.on("render-process-gone",(_e,d)=>log("RENDER GONE "+JSON.stringify(d)));win.webContents.on("console-message",(_e,l,m)=>log("CONSOLE "+l+" "+m));win.loadFile(path.join(app.getAppPath(),"desktop.html")).catch(e=>log("LOADFILE "+e.stack));win.on("closed",()=>{win=null;stopBridge()})
+ win.once("ready-to-show",()=>win.show());win.webContents.on("did-fail-load",(_e,c,d,u)=>log("LOAD FAIL "+c+" "+d+" "+u));win.webContents.on("render-process-gone",(_e,d)=>log("RENDER GONE "+JSON.stringify(d)));win.webContents.on("console-message",(_e,l,m)=>log("CONSOLE "+l+" "+m));win.loadURL(FORGE_URL+"/?desktop=1").catch(e=>log("LOADURL "+e.stack));win.on("closed",()=>{win=null;stopBridge()})
 }
 const gotLock=app.requestSingleInstanceLock();
 if(!gotLock)app.quit();else{
