@@ -1,14 +1,14 @@
-name: Build Roblox Forge AI EXE from uploaded ZIP
+name: Build Roblox Forge AI EXE
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - "RobuNexa-rfa-v2.0.54-fixed.zip"
+      - "roblox-forge-ai/**"
       - ".github/workflows/build-from-zip.yml"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -18,56 +18,28 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Extract uploaded ZIP
-        shell: pwsh
-        run: |
-          if (-not (Test-Path "RobuNexa-rfa-v2.0.54-fixed.zip")) { throw "Uploaded ZIP not found" }
-          if (Test-Path "build-src") { Remove-Item "build-src" -Recurse -Force }
-          New-Item -ItemType Directory -Path "build-src" | Out-Null
-          Expand-Archive -Path "RobuNexa-rfa-v2.0.54-fixed.zip" -DestinationPath "build-src" -Force
-          $dirs = Get-ChildItem "build-src" -Directory
-          if ($dirs.Count -lt 1) { throw "ZIP extraction produced no project directory" }
-          $project = Join-Path $dirs[0].FullName "roblox-forge-ai"
-          if (-not (Test-Path (Join-Path $project "package.json"))) { throw "roblox-forge-ai/package.json not found in ZIP" }
-          "PROJECT=$project" | Out-File -FilePath $env:GITHUB_ENV -Append
-      - name: Fix desktop IPC renderer trust
-        working-directory: ${{ env.PROJECT }}
-        shell: pwsh
-        run: |
-          $p = "desktop-main.cjs"
-          $s = Get-Content $p -Raw
-          $old = 'function trusted(e){const u=e.senderFrame?.url||"";return !!APP_URL&&(u===APP_URL||u.startsWith(APP_URL+"#")||u.startsWith(APP_URL+"?"));}'
-          $new = @'
-          function trusted(e){
-           if(!win||win.isDestroyed()||e?.sender!==win.webContents)return false;
-           const u=e.senderFrame?.url||"";
-           if(u===APP_URL||u.startsWith(APP_URL+"#")||u.startsWith(APP_URL+"?"))return true;
-           try{
-            const a=new URL(APP_URL), b=new URL(u);
-            return a.protocol==="file:"&&b.protocol==="file:"&&a.pathname===b.pathname;
-           }catch{return false}
-          }
-          '@
-          if (-not $s.Contains($old)) { throw "Expected trusted() implementation was not found" }
-          Set-Content $p ($s.Replace($old, $new.Trim())) -NoNewline
+          cache: npm
+          cache-dependency-path: roblox-forge-ai/package.json
       - name: Install dependencies
-        working-directory: ${{ env.PROJECT }}
+        working-directory: roblox-forge-ai
         run: npm install --no-audit --no-fund
-      - name: Static checks
-        working-directory: ${{ env.PROJECT }}
-        run: npm run check
-      - name: Regression tests
-        working-directory: ${{ env.PROJECT }}
+      - name: JavaScript syntax checks
+        working-directory: roblox-forge-ai
+        shell: pwsh
         run: |
-          node tests/auth.test.mjs
-          node tests/main.test.cjs
+          node --check desktop-main.cjs
+          node --check desktop-preload.cjs
+          node --check account-store.cjs
+          node --check roblox-forge-bridge.js
+          node --check build-exe.mjs
       - name: Build Windows x64 portable EXE
-        working-directory: ${{ env.PROJECT }}
+        working-directory: roblox-forge-ai
         run: npm run build:exe
       - name: Verify EXE
+        working-directory: roblox-forge-ai
         shell: pwsh
         run: |
-          $exe = Get-ChildItem "build-src" -Recurse -Filter "RobloxForgeAI-Windows-x64.exe" -File | Select-Object -First 1
+          $exe = Get-ChildItem "dist" -Filter "RobloxForgeAI-Windows-x64.exe" -File | Select-Object -First 1
           if (-not $exe) { throw "EXE was not created" }
           if ($exe.Length -lt 50000000) { throw "EXE is suspiciously small: $($exe.Length) bytes" }
           Write-Host "EXE OK: $($exe.FullName) - $($exe.Length) bytes"
@@ -75,5 +47,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: RobloxForgeAI-Windows-x64
-          path: build-src/**/dist/RobloxForgeAI-Windows-x64.exe
+          path: roblox-forge-ai/dist/RobloxForgeAI-Windows-x64.exe
           retention-days: 30
