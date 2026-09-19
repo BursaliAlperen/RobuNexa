@@ -61,7 +61,7 @@ async function askAstra(nox,messages,tools){
  throw Error(last||"Noxery API request failed");
 }
 
-async function runPrompt(nox,session,prompt,autoDev=false,actionMeta=null){
+async function runPrompt(nox,session,prompt,autoDev=false,actionMeta=null,provider="noxery",model="gpt-6-astra"){
  const system=[
   "You are GPT-6 Astra, the lead AI game-development director controlling the REAL open Roblox Studio through its MCP server. You are not a generic chatbot and must work against the actual current Studio project.",
   "MANDATORY: First inspect the live Studio session and DataModel before proposing or changing anything. Use list_roblox_studios, get_studio_state and relevant Explorer/script/screenshot tools available.",
@@ -112,7 +112,7 @@ function speakAction(text){
   spawn("powershell.exe",["-NoProfile","-Command","Add-Type -AssemblyName System.Speech; $s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.Speak(\""+safe+"\")"],{windowsHide:true,stdio:"ignore"});
  }catch{}
 }
-async function createForgePlan(nox,session,prompt){
+async function createForgePlan(nox,session,prompt,provider="noxery",model="gpt-6-astra"){
  const messages=[
   {role:"system",content:"You are the Roblox Forge AI planning engine. Do not call tools. Return ONLY valid JSON in this exact shape: {\\"summary\\":\\"...\\",\\"actions\\":[{\\"title\\":\\"...\\",\\"goal\\":\\"...\\",\\"verification\\":\\"...\\"}]}. Create 5 to 10 small, ordered, verifiable actions. The first action must inspect/analyze the live Roblox Studio project. Separate planning from implementation."},
   {role:"user",content:prompt}
@@ -125,7 +125,7 @@ async function createForgePlan(nox,session,prompt){
  return plan;
 }
 async function runPlannedForge(nox,session,prompt,autoDev=false){
- const plan=await createForgePlan(nox,session,prompt);
+ const plan=await createForgePlan(nox,session,prompt,provider,model);
  const total=plan.actions.length;
  console.log("\\n[PLAN 0/"+total+"] "+String(plan.summary||"Forge plan hazır."));
  console.log("[PLAN JSON] "+JSON.stringify(plan));
