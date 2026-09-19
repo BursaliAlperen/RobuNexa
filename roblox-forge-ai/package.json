@@ -1,8 +1,11 @@
 {
-  "name":"roblox-forge-ai-bridge",
-  "version":"1.0.2",
+  "name":"roblox-forge-ai-desktop",
+  "version":"2.0.0",
   "private":true,
-  "type":"module",
-  "scripts":{"build:exe":"node build-exe.mjs","start":"node roblox-forge-bridge.js"},
-  "dependencies":{"@modelcontextprotocol/client":"^2.0.0","esbuild":"^0.25.9"}
+  "description":"Roblox Forge AI desktop app with GPT-6 Astra and Roblox Studio MCP bridge",
+  "main":"desktop-main.cjs",
+  "scripts":{"start":"electron .","build:exe":"node build-exe.mjs"},
+  "dependencies":{"@modelcontextprotocol/client":"2.0.0"},
+  "devDependencies":{"electron":"^45.0.0","electron-builder":"^26.0.12","esbuild":"^0.25.9"},
+  "build":{"appId":"com.robloxforge.ai","productName":"Roblox Forge AI","asar":true,"files":["desktop-main.cjs","desktop-preload.cjs","roblox-forge-bridge.js","package.json"],"extraResources":[{"from":"dist/bridge.cjs","to":"bridge.cjs"}],"win":{"target":[{"target":"portable","arch":["x64"]}],"artifactName":"RobloxForgeAI-Windows-x64.exe"}}
 }
