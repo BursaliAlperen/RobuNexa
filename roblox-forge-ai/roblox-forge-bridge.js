@@ -4,57 +4,139 @@ import process from "node:process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import readline from "node:readline";
 
 const FORGE_URL="https://roblox-forge-ai.hatchable.site";
 const CONFIG_DIR=path.join(os.homedir(),".roblox-forge-ai");
 const CONFIG_FILE=path.join(CONFIG_DIR,"config.json");
+
 function loadConfig(){try{return JSON.parse(fs.readFileSync(CONFIG_FILE,"utf8"))}catch{return {}}}
 function saveConfig(c){try{fs.mkdirSync(CONFIG_DIR,{recursive:true});fs.writeFileSync(CONFIG_FILE,JSON.stringify(c,null,2),"utf8")}catch{}}
+
 async function getKeys(){
  const c=loadConfig();let forge=process.argv[2]||c.forgeKey;let nox=process.argv[3]||c.noxeryKey;
- if(!forge||!nox){
-  if(process.stdin.isTTY){const readline=await import("node:readline/promises");const rl=readline.createInterface({input:process.stdin,output:process.stdout});if(!forge)forge=(await rl.question("Forge API Key: ")).trim();if(!nox)nox=(await rl.question("Noxery API Key: ")).trim();rl.close()}
+ if(!nox&&process.stdin.isTTY){
+  const rl=readline.createInterface({input:process.stdin,output:process.stdout});
+  nox=await new Promise(resolve=>rl.question("Noxery API Key: ",v=>{rl.close();resolve(v.trim())}));
  }
- if(!forge||!nox)throw Error("Keys missing. Run with FORGE_KEY and NOXERY_KEY or enter them on first launch.");
- saveConfig({forgeKey:forge,noxeryKey:nox});return {forge,nox};
+ if(!nox)throw Error("Noxery API Key missing.");
+ saveConfig({forgeKey:forge||"",noxeryKey:nox});return {forge,nox};
 }
+
+function studioCommand(){
+ if(process.platform==="win32"){
+  const local=process.env.LOCALAPPDATA;if(!local)throw Error("LOCALAPPDATA bulunamadi.");
+  const mcp=path.join(local,"Roblox","mcp.bat");
+  if(!fs.existsSync(mcp))throw Error("Roblox Studio MCP bulunamadi: "+mcp+" | Studio > Assistant > MCP Server'i etkinlestir.");
+  return {command:"cmd.exe",args:["/d","/c",mcp]};
+ }
+ if(process.platform==="darwin")return {command:"/Applications/RobloxStudio.app/Contents/MacOS/StudioMCP",args:[]};
+ throw Error("Bu EXE Windows/macOS icin yapilandirildi.");
+}
+
 async function connectStudio(){
- if(process.platform==="win32"){const mcp=path.join(os.homedir(),"AppData","Local","Roblox","mcp.bat");if(!fs.existsSync(mcp))throw Error("Roblox Studio MCP not found: "+mcp+" . Enable Studio as MCP Server first.");return new StdioClientTransport({command:"cmd.exe",args:["/d","/s","/c",'"'+mcp+'"']})}
- if(process.platform==="darwin")return new StdioClientTransport({command:"/Applications/RobloxStudio.app/Contents/MacOS/StudioMCP",args:[]});
- throw Error("Linux bridge is not configured for Roblox Studio MCP.");
+ const transport=new StdioClientTransport({...studioCommand(),maxBufferSize:50*1024*1024});
+ const client=new Client({name:"RobloxForgeAI",version:"3.0.0"});
+ transport.onerror=e=>console.error("\n[MCP ERROR]",e?.message||e);
+ transport.onclose=()=>console.error("\n[MCP] Connection closed.");
+ await client.connect(transport);
+ const listed=await client.listTools();
+ return {client,transport,tools:listed.tools||[]};
 }
-async function main(){
- const {forge,nox}=await getKeys();const client=new Client({name:"RobloxForgeAI",version:"2.0.0"});await client.connect(await connectStudio());
- const listed=await client.listTools(),tools=listed.tools||[];console.log("Roblox Studio MCP connected. Tools:",tools.length);
- const compact=()=>tools.map(t=>({name:t.name,description:t.description,inputSchema:t.inputSchema}));
- const post=async(path,body,headers={})=>fetch(FORGE_URL+path,{method:"POST",headers:{"Content-Type":"application/json",...headers},body:JSON.stringify(body)});
- const heartbeat=async(status,extra={})=>{try{await post("/api/bridge/heartbeat",{status,platform:process.platform,tools:tools.length,...extra},{"x-forge-key":forge})}catch{}};
- await heartbeat("online",{version:"2.0.0"});setInterval(()=>heartbeat("online",{version:"2.0.0"}),10000);
- const ask=async messages=>{let last="";for(let attempt=1;attempt<=4;attempt++){try{const c=new AbortController();const timer=setTimeout(()=>c.abort(),60000);const r=await fetch("https://api.noxery.net/v1/chat/completions",{method:"POST",headers:{"Authorization":"Bearer "+nox,"Content-Type":"application/json"},signal:c.signal,body:JSON.stringify({model:"gpt-6-astra",messages,temperature:0.15,max_completion_tokens:9000,stream:false,tools:compact().map(t=>({type:"function",function:{name:t.name,description:t.description||"",parameters:t.inputSchema||{type:"object",properties:{}}}})),tool_choice:"auto"})});clearTimeout(timer);const d=await r.json();if(!r.ok)throw Error("Noxery API "+r.status+": "+JSON.stringify(d).slice(0,800));return d}catch(e){last=String(e?.message||e);if(attempt<4)await new Promise(r=>setTimeout(r,1500*attempt))}}throw Error(last||"Noxery API request failed")};
- const claim=async()=>{const r=await fetch(FORGE_URL+"/api/jobs/claim",{method:"POST",headers:{"x-forge-key":forge}});return r.json()};
- const complete=async(id,status,result,error="")=>post("/api/jobs/complete",{id,status,result,error},{"x-forge-key":forge});
- const execute=async job=>{
-  await heartbeat("working",{job_id:job.id});
-  const system="You are GPT-6 Astra controlling an open Roblox Studio session through its real MCP server. Execute the user request directly in Studio, not as a mockup. Inspect the existing DataModel before edits. Use Creator Store search tools when available and prefer usable/stylized assets; create secure server/client Luau, mobile UI, VFX and audio as appropriate; organize everything cleanly; run playtests when possible. Never claim an action succeeded until the MCP tool result confirms it. You may call any supplied MCP tool. When the task is complete, answer briefly with what was actually changed.";
-  let messages=[{role:"system",content:system},{role:"user",content:job.prompt}],trace=[];
-  for(let i=0;i<80;i++){
-   const d=await ask(messages);
-   const m=d?.choices?.[0]?.message||{};
-   if(m.tool_calls?.length){
-    messages.push(m);
-    for(const tc of m.tool_calls){
-     const name=tc?.function?.name;let args={};try{args=JSON.parse(tc?.function?.arguments||"{}")}catch{throw Error("Astra returned invalid tool arguments for "+name)}
-     const tool=tools.find(x=>x.name===name);if(!tool)throw Error("Astra requested unknown MCP tool: "+name);
-     console.log("["+i+"]",name);const result=await client.callTool({name,arguments:args});trace.push({tool:name,ok:!result.isError});await heartbeat("working",{job_id:job.id,step:i,tool:name});
-     messages.push({role:"tool",tool_call_id:tc.id,content:JSON.stringify(result).slice(0,30000)});
-    }
-    continue;
+
+async function askAstra(nox,messages,tools){
+ let last="";
+ for(let attempt=1;attempt<=4;attempt++){
+  try{
+   const c=new AbortController();const timer=setTimeout(()=>c.abort(),90000);
+   const r=await fetch("https://api.noxery.net/v1/chat/completions",{method:"POST",headers:{"Authorization":"Bearer "+nox,"Content-Type":"application/json"},signal:c.signal,body:JSON.stringify({
+    model:"gpt-6-astra",messages,temperature:0.15,max_completion_tokens:9000,stream:false,
+    tools:tools.map(t=>({type:"function",function:{name:t.name,description:t.description||"",parameters:t.inputSchema||{type:"object",properties:{}}}})),tool_choice:"auto"
+   })});
+   clearTimeout(timer);const raw=await r.text();let d;try{d=JSON.parse(raw)}catch{throw Error("Noxery invalid JSON: "+raw.slice(0,500))}
+   if(!r.ok)throw Error("Noxery API "+r.status+": "+JSON.stringify(d).slice(0,1000));
+   return d;
+  }catch(e){last=String(e?.message||e);if(attempt<4)await new Promise(r=>setTimeout(r,1500*attempt))}
+ }
+ throw Error(last||"Noxery API request failed");
+}
+
+async function runPrompt(nox,session,prompt){
+ const system="You are GPT-6 Astra controlling the REAL open Roblox Studio through its MCP server. Execute the user's request directly. Inspect the existing DataModel when needed. Use real MCP tools, Creator Store tools when available, secure server/client Luau, mobile UI and appropriate VFX/audio. Do not describe a mockup. Never claim success until an MCP tool result confirms it. Keep going until the requested task is actually completed.";
+ let messages=[{role:"system",content:system},{role:"user",content:prompt}],trace=[];
+ for(let i=0;i<80;i++){
+  const d=await askAstra(nox,messages,session.tools);const m=d?.choices?.[0]?.message||{};
+  if(m.tool_calls?.length){
+   messages.push(m);
+   for(const tc of m.tool_calls){
+    const name=tc?.function?.name;let args={};try{args=JSON.parse(tc?.function?.arguments||"{}")}catch{throw Error("Astra invalid tool arguments: "+name)}
+    if(!session.tools.find(x=>x.name===name))throw Error("Unknown MCP tool: "+name);
+    console.log("\n[MCP] "+name);
+    const result=await session.client.callTool({name,arguments:args});
+    trace.push({tool:name,ok:!result?.isError});
+    messages.push({role:"tool",tool_call_id:tc.id,content:JSON.stringify(result).slice(0,30000)});
    }
-   const content=String(m.content||"");if(!content)throw Error("Noxery/Astra returned an empty response at step "+i);
-   return {summary:content,steps:trace};
+   continue;
   }
-  throw Error("Step limit reached");
- };
- while(true){try{const r=await claim();if(r.job){try{const result=await execute(r.job);await complete(r.job.id,"completed",result);await heartbeat("online");console.log("Completed",r.job.id)}catch(e){await complete(r.job.id,"failed",null,String(e?.message||e));await heartbeat("online",{error:String(e?.message||e)});console.error(e)}}}catch(e){await heartbeat("error",{error:String(e?.message||e)});console.error("Bridge:",e?.message||e)}await new Promise(r=>setTimeout(r,2500))}
+  const content=String(m.content||"").trim();if(content)return {summary:content,steps:trace};
+  throw Error("Astra returned empty response.");
+ }
+ throw Error("Astra step limit reached.");
 }
-main().catch(e=>{console.error(e);process.exit(1)});
+
+async function postForge(pathname,body,forge){
+ return fetch(FORGE_URL+pathname,{method:"POST",headers:{"Content-Type":"application/json","x-forge-key":forge},body:JSON.stringify(body)});
+}
+
+async function jobLoop(forge,nox,session){
+ if(!forge)return;
+ const heartbeat=async(status,extra={})=>{try{await postForge("/api/bridge/heartbeat",{status,platform:process.platform,tools:session.tools.length,version:"3.0.0",...extra},forge)}catch{}};
+ await heartbeat("online");setInterval(()=>heartbeat("online"),10000);
+ while(true){
+  try{
+   const r=await postForge("/api/jobs/claim",{},forge);const d=await r.json();
+   if(d.job){
+    try{
+     await heartbeat("working",{job_id:d.job.id});
+     const result=await runPrompt(nox,session,d.job.prompt);
+     await postForge("/api/jobs/complete",{id:d.job.id,status:"completed",result},forge);
+     await heartbeat("online");console.log("\n[SITE JOB COMPLETED] "+d.job.id);
+    }catch(e){
+     const msg=String(e?.message||e);
+     await postForge("/api/jobs/complete",{id:d.job.id,status:"failed",result:null,error:msg},forge);
+     console.error("\n[SITE JOB FAILED] "+msg);
+    }
+   }
+  }catch(e){console.error("\n[JOB LOOP] "+(e?.message||e))}
+  await new Promise(r=>setTimeout(r,2500));
+ }
+}
+
+async function main(){
+ console.log("========================================\n Roblox Forge AI Bridge v3\n========================================");
+ const {forge,nox}=await getKeys();let session;
+ for(let attempt=1;;attempt++){
+  try{console.log("\n[1/2] Roblox Studio MCP baglaniyor...");session=await connectStudio();console.log("[OK] Studio baglandi. MCP tools: "+session.tools.length);break}
+  catch(e){console.error("[MCP] Baglanti basarisiz: "+(e?.message||e));if(attempt>=5)throw e;console.log("Studio MCP yeniden deneniyor...");await new Promise(r=>setTimeout(r,3000))}
+ }
+ console.log("[2/2] Astra hazir.");
+ console.log("\nKomut yaz ve Enter'a bas:");
+ console.log("  > create a studded lobby with 3 portals");
+ console.log("  > add a mobile inventory UI");
+ console.log("  > /status");
+ console.log("  > /exit\n");
+ if(forge)jobLoop(forge,nox,session).catch(e=>console.error("[SITE]",e));
+
+ const rl=readline.createInterface({input:process.stdin,output:process.stdout,prompt:"RobloxForgeAI > "});
+ rl.prompt();
+ rl.on("line",async line=>{
+  const prompt=line.trim();if(!prompt){rl.prompt();return}
+  if(prompt==="/exit"){await session.client.close().catch(()=>{});rl.close();return}
+  if(prompt==="/status"){console.log("[STATUS] Studio MCP connected | tools="+session.tools.length+" | Astra=ready");rl.prompt();return}
+  try{rl.pause();const result=await runPrompt(nox,session,prompt);console.log("\n[COMPLETED] "+result.summary);console.log("[MCP CALLS] "+result.steps.length)}
+  catch(e){console.error("\n[ERROR] "+(e?.message||e))}
+  rl.resume();rl.prompt();
+ });
+ rl.on("close",()=>process.exit(0));
+}
+main().catch(e=>{console.error("\n[FATAL] "+(e?.message||e));process.exit(1)});
