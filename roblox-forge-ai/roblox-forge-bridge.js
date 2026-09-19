@@ -102,9 +102,11 @@ async function postForge(pathname,body,forge){
  return fetch(FORGE_URL+pathname,{method:"POST",headers:{"Content-Type":"application/json","x-forge-key":forge},body:JSON.stringify(body)});
 }
 
-async function postActivity(forge,level,event,detail="",job_id=null){try{await postForge("/api/activity",{level,event,detail,job_id},forge)}catch{}}\n\nasync function jobLoop(forge,nox,session,autoDev=false){
+async function postActivity(forge,level,event,detail="",job_id=null){try{await postForge("/api/activity",{level,event,detail,job_id},forge)}catch{}}
+
+async function jobLoop(forge,nox,session,autoDev=false){
  if(!forge)return;
- const heartbeat=async(status,extra={})=>{try{await postForge("/api/bridge/heartbeat",{status,platform:process.platform,tools:session.tools.length,version:"3.0.0",...extra},forge)}catch{}};
+ const heartbeat=async(status,extra={})=>{try{await postForge("/api/bridge/heartbeat",{status,platform:process.platform,tools:session.tools.length,version:"3.1.0",auto_dev:autoDev,...extra},forge)}catch{}};
  await heartbeat("online");setInterval(()=>heartbeat("online"),10000);
  while(true){
   try{
@@ -112,12 +114,14 @@ async function postActivity(forge,level,event,detail="",job_id=null){try{await p
    if(d.job){
     try{
      await heartbeat("working",{job_id:d.job.id});
-     const result=await runPrompt(nox,session,d.job.prompt);
-     await postForge("/api/jobs/complete",{id:d.job.id,status:"completed",result},forge);\n     await postActivity(forge,"info","JOB COMPLETED",String(result.summary||"").slice(0,3500),d.job.id);
+     const result=await runPrompt(nox,session,d.job.prompt,autoDev);
+     await postForge("/api/jobs/complete",{id:d.job.id,status:"completed",result},forge);
+     await postActivity(forge,"info","JOB COMPLETED",String(result.summary||"").slice(0,3500),d.job.id);
      await heartbeat("online");console.log("\n[SITE JOB COMPLETED] "+d.job.id);
     }catch(e){
      const msg=String(e?.message||e);
-     await postForge("/api/jobs/complete",{id:d.job.id,status:"failed",result:null,error:msg},forge);\n     await postActivity(forge,"error","JOB FAILED",msg,d.job.id);
+     await postForge("/api/jobs/complete",{id:d.job.id,status:"failed",result:null,error:msg},forge);
+     await postActivity(forge,"error","JOB FAILED",msg,d.job.id);
      console.error("\n[SITE JOB FAILED] "+msg);
     }
    }
