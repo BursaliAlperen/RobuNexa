@@ -1,4 +1,4 @@
-name: Build Roblox Forge AI EXE
+name: Build Roblox Forge AI Desktop EXE
 on:
   workflow_dispatch:
   push:
@@ -7,7 +7,6 @@ on:
       - ".github/workflows/build-roblox-forge-exe.yml"
 permissions:
   contents: write
-
 jobs:
   build:
     runs-on: windows-latest
@@ -21,46 +20,31 @@ jobs:
           node-version: 25.5.0
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Build EXE
+      - name: Build desktop EXE
         run: npm run build:exe
-      - name: Verify
+      - name: Verify EXE
         shell: pwsh
         run: |
-          if (-not (Test-Path "dist/RobloxForgeAI.exe")) { throw "EXE olusturulamadi." }
-          $size=(Get-Item "dist/RobloxForgeAI.exe").Length
-          if ($size -lt 10000000) { throw "EXE boyutu gecersiz: $size bytes" }
-          Write-Host "RobloxForgeAI.exe OK - $size bytes"
-      - name: Package ZIP
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path release | Out-Null
-          Copy-Item dist/RobloxForgeAI.exe release/RobloxForgeAI.exe
-          Set-Content release/README.txt "Roblox Forge AI Bridge - EXE icinde Node.js runtime var."
-          Compress-Archive -Path release/* -DestinationPath RobloxForgeAI-Windows-x64.zip -Force
+          if (-not (Test-Path "dist/RobloxForgeAI-Windows-x64.exe")) { throw "EXE olusturulamadi." }
+          $size=(Get-Item "dist/RobloxForgeAI-Windows-x64.exe").Length
+          if ($size -lt 50000000) { throw "EXE boyutu gecersiz: $size bytes" }
+          Write-Host "RobloxForgeAI desktop EXE OK - $size bytes"
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: RobloxForgeAI-Windows-x64
-          path: roblox-forge-ai/dist/RobloxForgeAI.exe
+          path: roblox-forge-ai/dist/RobloxForgeAI-Windows-x64.exe
           retention-days: 30
-      - name: Upload ZIP
-        uses: actions/upload-artifact@v4
-        with:
-          name: RobloxForgeAI-Windows-x64-ZIP
-          path: roblox-forge-ai/RobloxForgeAI-Windows-x64.zip
-          retention-days: 30
-
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: rfa-v1.0.${{ github.run_number }}
-          name: Roblox Forge AI v1.0.${{ github.run_number }}
+          tag_name: rfa-v2.0.${{ github.run_number }}
+          name: Roblox Forge AI v2.0.${{ github.run_number }}
           body: |
-            Automatic Windows x64 release of Roblox Forge AI Bridge.
-            Download the EXE or ZIP below.
+            Roblox Forge AI single-entry Windows desktop app.
+            Includes the Forge UI, local Studio MCP bridge, and direct Astra command console.
           files: |
-            roblox-forge-ai/dist/RobloxForgeAI.exe
-            roblox-forge-ai/RobloxForgeAI-Windows-x64.zip
+            roblox-forge-ai/dist/RobloxForgeAI-Windows-x64.exe
           generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
