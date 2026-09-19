@@ -44,13 +44,13 @@ async function connectStudio(){
  return {client,transport,tools:listed.tools||[],chatMessages:null};
 }
 
-async function askAstra(nox,messages,tools){
+async function askAstra(nox,messages,tools,provider="noxery",model="gpt-6-astra"){
  let last="";
  for(let attempt=1;attempt<=4;attempt++){
   try{
    const c=new AbortController();const timer=setTimeout(()=>c.abort(),90000);
-   const r=await fetch("https://api.noxery.net/v1/chat/completions",{method:"POST",headers:{"Authorization":"Bearer "+nox,"Content-Type":"application/json"},signal:c.signal,body:JSON.stringify({
-    model:"gpt-6-astra",messages,temperature:0.15,max_completion_tokens:9000,stream:false,
+   const base=provider==="lemonade"?"http://127.0.0.1:13305/v1/chat/completions":"https://api.noxery.net/v1/chat/completions";const key=provider==="lemonade"?(process.env.LEMONADE_API_KEY||""):nox;const headers={"Content-Type":"application/json"};if(key)headers.Authorization="Bearer "+key;const r=await fetch(base,{method:"POST",headers,signal:c.signal,body:JSON.stringify({
+    model:provider==="lemonade"?model:"gpt-6-astra",messages,temperature:0.15,max_completion_tokens:9000,stream:false,
     tools:tools.map(t=>({type:"function",function:{name:t.name,description:t.description||"",parameters:t.inputSchema||{type:"object",properties:{}}}})),tool_choice:"auto"
    })});
    clearTimeout(timer);const raw=await r.text();let d;try{d=JSON.parse(raw)}catch{throw Error("Noxery invalid JSON: "+raw.slice(0,500))}
@@ -82,7 +82,7 @@ async function runPrompt(nox,session,prompt,autoDev=false,actionMeta=null,provid
  session.chatMessages=messages;
  messages.push({role:"user",content:prompt});
  for(let i=0;i<80;i++){
-  const d=await askAstra(nox,messages,session.tools);const m=d?.choices?.[0]?.message||{};
+  const d=await askAstra(nox,messages,session.tools,provider,model);const m=d?.choices?.[0]?.message||{};
   if(m.tool_calls?.length){
    messages.push(m);
    for(const tc of m.tool_calls){
@@ -117,7 +117,7 @@ async function createForgePlan(nox,session,prompt,provider="noxery",model="gpt-6
   {role:"system",content:"You are the Roblox Forge AI planning engine. Do not call tools. Return ONLY valid JSON in this exact shape: {\\"summary\\":\\"...\\",\\"actions\\":[{\\"title\\":\\"...\\",\\"goal\\":\\"...\\",\\"verification\\":\\"...\\"}]}. Create 5 to 10 small, ordered, verifiable actions. The first action must inspect/analyze the live Roblox Studio project. Separate planning from implementation."},
   {role:"user",content:prompt}
  ];
- const d=await askAstra(nox,messages,[]);
+ const d=await askAstra(nox,messages,[],provider,model)
  let raw=String(d?.choices?.[0]?.message?.content||"").trim().replace(/^\\`\\`\\`json\\s*/,"").replace(/\\s*\\`\\`\\`$/,"");
  let plan;try{plan=JSON.parse(raw)}catch(e){throw Error("Forge planner JSON invalid: "+raw.slice(0,1000))}
  if(!Array.isArray(plan.actions)||plan.actions.length<1)throw Error("Forge planner returned no actions.");
