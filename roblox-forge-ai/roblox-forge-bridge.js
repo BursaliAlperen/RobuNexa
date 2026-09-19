@@ -118,7 +118,7 @@ async function createForgePlan(nox,session,prompt,provider="noxery",model="gpt-6
   {role:"user",content:prompt}
  ];
  const d=await askAstra(nox,messages,[],provider,model)
- let raw=String(d?.choices?.[0]?.message?.content||"").trim().replace(/^\\`\\`\\`json\\s*/,"").replace(/\\s*\\`\\`\\`$/,"");
+ let raw=String(d?.choices?.[0]?.message?.content||"").trim().replace("\\`\\`\\`json","").replace("\\`\\`\\`","").trim();
  let plan;try{plan=JSON.parse(raw)}catch(e){throw Error("Forge planner JSON invalid: "+raw.slice(0,1000))}
  if(!Array.isArray(plan.actions)||plan.actions.length<1)throw Error("Forge planner returned no actions.");
  plan.actions=plan.actions.slice(0,10);
@@ -238,7 +238,7 @@ async function main(){
   const prompt=line.trim();if(!prompt){rl.prompt();return}
   if(prompt==="/exit"){await session.client.close().catch(()=>{});rl.close();return}
   if(prompt==="/status"){console.log("[STATUS] Studio MCP connected | tools="+session.tools.length+" | Astra=ready");rl.prompt();return}
-  try{rl.pause();const result=await runPlannedForge(nox,session,prompt,autoDev,provider,model);console.log("\n[COMPLETED] "+result.summary);console.log("[MCP CALLS] "+result.steps.length)}
+  try{rl.pause();const result=await runPlannedForge(nox,session,prompt,autoDev,provider,model);console.log("\n[COMPLETED] "+result.summary);console.log("[ACTIONS] "+result.results.length)}
   catch(e){console.error("\n[ERROR] "+(e?.message||e))}
   rl.resume();rl.prompt();
  });
