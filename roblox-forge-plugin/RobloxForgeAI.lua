@@ -149,7 +149,7 @@ local function claim()
 end
 
 local function heartbeat()
-  if forgeKey.Text=="" or pairCode.Text=="" then return end
+  if pairCode.Text=="" then return end
   local r=request(API.."/api/plugin/pair/heartbeat","POST",{pair_code=pairCode.Text})
   if not r.ok then error(r.error or "Heartbeat başarısız.") end
   setConnection(true,"Heartbeat online.")
