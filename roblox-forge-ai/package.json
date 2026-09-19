@@ -24,6 +24,7 @@
       "desktop-main.cjs",
       "desktop-preload.cjs",
       "desktop.html",
+      "account-store.cjs",
       "roblox-forge-bridge.js",
       "package.json"
     ],
