@@ -108,7 +108,7 @@ async function postActivity(forge,level,event,detail="",job_id=null){try{await p
 function speakAction(text){
  try{
   if(process.platform!=="win32")return;
-  const safe=String(text||"").replace(/"/g,'\\\"');
+  const safe=String(text||"").replace(/"/g,'\"');
   spawn("powershell.exe",["-NoProfile","-Command","Add-Type -AssemblyName System.Speech; $s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.Speak(\""+safe+"\")"],{windowsHide:true,stdio:"ignore"});
  }catch{}
 }
