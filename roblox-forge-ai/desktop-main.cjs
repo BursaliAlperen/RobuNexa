@@ -42,6 +42,29 @@ function startBridge(noxeryKey,autoDev=false,model="gpt-6-astra"){
  return {ok:true,state:"starting"};
 }
 function sendCommand(p){if(!bridge||bridge.killed||!bridge.stdin.writable)throw new Error("Bridge bağlı değil.");p=String(p||"").trim();if(!p)return {ok:false};bridge.stdin.write(p+"\n");emit("log",{stream:"command",text:"> "+p});accounts?.log("ai.command",{prompt:p.slice(0,500)});return {ok:true}}
+async function noxeryRequest(pathname,apiKey,body){
+ const key=String(apiKey||"").trim();
+ if(!key)throw new Error("Noxery API Key gerekli.");
+ const c=new AbortController();const timer=setTimeout(()=>c.abort(),90000);
+ try{
+  const r=await fetch("https://api.noxery.net/v1"+pathname,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key,"x-opencode-session":"roblox-forge-ai-desktop"},body:JSON.stringify(body),signal:c.signal});
+  const raw=await r.text();let d;try{d=JSON.parse(raw)}catch{d={raw}};
+  if(!r.ok){
+   if(r.status===401)throw new Error("Noxery API 401 — API Key geçersiz, iptal edilmiş veya süresi dolmuş.");
+   if(r.status===404)throw new Error("Noxery API 404 — model veya endpoint bulunamadı.");
+   if(r.status===429)throw new Error("Noxery API 429 — rate limit/kota aşıldı.");
+   throw new Error("Noxery API "+r.status+" — "+String(d?.error?.message||d?.message||raw).slice(0,700));
+  }
+  return d;
+ }finally{clearTimeout(timer)}
+}
+async function testNoxery(apiKey){
+ const key=String(apiKey||"").trim();if(!key)throw new Error("Noxery API Key gerekli.");
+ const r=await fetch("https://api.noxery.net/v1/models",{headers:{Authorization:"Bearer "+key,"Accept":"application/json"}});
+ const raw=await r.text();let d;try{d=JSON.parse(raw)}catch{d={}};
+ if(!r.ok){if(r.status===401)throw new Error("API Key geçersiz veya iptal edilmiş.");throw new Error("Noxery "+r.status);}
+ return {ok:true,models:Array.isArray(d.data)?d.data.map(x=>x.id):[],astra:Array.isArray(d.data)?d.data.some(x=>x.id==="gpt-6-astra"):true};
+}
 function stopBridge(){if(bridge&&!bridge.killed){try{bridge.stdin.write("/exit\n")}catch{}setTimeout(()=>{try{if(bridge&&!bridge.killed)bridge.kill()}catch{}},1500)}accounts?.log("bridge.stopped");return {ok:true}}
 function b64url(buf){return Buffer.from(buf).toString("base64").replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
 function googleLogin(){
@@ -83,6 +106,14 @@ if(!gotLock)app.quit();else{
  app.whenReady().then(()=>{
   app.setAppUserModelId("com.robloxforge.ai");accounts=new AccountStore(path.join(app.getPath("userData"),"account.json"));accounts.ensureLocal();
   session.defaultSession.setPermissionRequestHandler((_wc,p,cb)=>cb(p==="clipboard-read"||p==="clipboard-sanitized-write"));
+  ipcMain.handle("noxery-test",async(e,key)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return await testNoxery(key)});
+  ipcMain.handle("noxery-models",async(e,key)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return await testNoxery(key)});
+  ipcMain.handle("noxery-chat",async(e,a)=>{
+   if(!trusted(e))throw new Error("Untrusted renderer.");
+   const model=String(a?.model||"gpt-6-astra");
+   const messages=Array.isArray(a?.messages)?a.messages:[];
+   return await noxeryRequest("/chat/completions",a?.apiKey,{model,messages,max_completion_tokens:6000,stream:false});
+  });
   ipcMain.handle("bridge-start",(e,a)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return startBridge(a?.noxeryKey,!!a?.autoDev,a?.model||"gpt-6-astra")});
   ipcMain.handle("bridge-send",(e,p)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return sendCommand(p)});
   ipcMain.handle("bridge-stop",(e)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return stopBridge()});
