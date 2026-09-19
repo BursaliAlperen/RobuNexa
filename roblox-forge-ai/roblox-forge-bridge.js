@@ -137,7 +137,7 @@ async function runPlannedForge(nox,session,prompt,autoDev=false){
   console.log("\\n[ACTION "+String(index).padStart(3,"0")+"/"+String(total).padStart(3,"0")+" START] "+title);
   speakAction(String(index).padStart(3,"0")+". "+title);
   try{
-   const instruction="EXECUTE ONLY THIS APPROVED FORGE ACTION. Do not begin any other action.\\nACTION "+String(index).padStart(3,"0")+" / "+String(total).padStart(3,"0")+"\\nTITLE: "+title+"\\nGOAL: "+String(a.goal||"")+"\\nVERIFICATION: "+String(a.verification||"")+"\\nUse real Roblox Studio MCP tools. Inspect before modifying. Verify the result with tools. Return a concise evidence-based result.";
+   const instruction="PLAN KABUL EDİLDİ. EXECUTE ONLY THIS APPROVED FORGE ACTION. Do not begin any other action.\\nACTION "+String(index).padStart(3,"0")+" / "+String(total).padStart(3,"0")+"\\nTITLE: "+title+"\\nGOAL: "+String(a.goal||"")+"\\nVERIFICATION: "+String(a.verification||"")+"\\nUse real Roblox Studio MCP tools. Inspect before modifying. Verify the result with tools. Return a concise evidence-based result.";
    const r=await runPrompt(nox,session,instruction,autoDev,{index,total});
    results.push({id:String(index).padStart(3,"0"),title,result:r.summary});
    console.log("\\n[ACTION "+String(index).padStart(3,"0")+"/"+String(total).padStart(3,"0")+" SUCCESS] "+title);
