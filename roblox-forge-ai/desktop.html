@@ -1,71 +1,175 @@
 <!doctype html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Roblox Forge AI — Forge Workspace</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roblox Forge AI</title>
 <style>
-:root{--bg:#07101d;--panel:#0d1726;--panel2:#111e30;--line:#203149;--text:#eef4ff;--muted:#91a1b8;--blue:#5b7cff;--green:#24d08b;--red:#ff647c;--yellow:#f7c95c}
-*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:13px Inter,Segoe UI,system-ui,sans-serif}button,input,textarea{font:inherit}button{cursor:pointer}.app{height:100%;display:flex}.side{width:245px;background:#091321;border-right:1px solid var(--line);padding:15px;display:flex;flex-direction:column;gap:12px}.brand{font-weight:950;font-size:17px;padding:5px}.brand span{display:block;color:#70829d;font-size:9px;margin-top:4px}.nav{display:grid;gap:6px}.nav button{border:1px solid transparent;background:transparent;color:#9aabc1;text-align:left;border-radius:10px;padding:10px;font-weight:800}.nav button:hover,.nav button.active{background:#14233a;border-color:#263b5c;color:#fff}.sideState{margin-top:auto;border:1px solid var(--line);background:#0d1828;border-radius:12px;padding:10px;color:#91a1b8;font-size:10px;line-height:1.5}.main{flex:1;min-width:0;display:flex;flex-direction:column}.head{height:64px;flex:none;border-bottom:1px solid var(--line);background:#0a1422;display:flex;align-items:center;justify-content:space-between;padding:0 18px}.head b{font-size:14px}.head small{display:block;color:#71839b;font-size:9px;margin-top:3px}.headRight{display:flex;gap:8px;align-items:center}.status{font-size:9px;font-weight:950;padding:7px 10px;border-radius:999px;background:#25141a;color:var(--red)}.content{overflow:auto;flex:1;padding:22px}.page{max-width:1250px;margin:auto}.hero{margin-bottom:16px}.eyebrow{color:#6f89ff;font-weight:950;font-size:9px;letter-spacing:.14em}.hero h1{font-size:31px;letter-spacing:-.04em;margin:5px 0}.hero p{color:var(--muted);line-height:1.6;margin:0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.panel,.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}.card{cursor:pointer}.card:hover{border-color:#38578a}.metric{background:#0c1828;border:1px solid var(--line);border-radius:12px;padding:12px}.metric b{display:block;font-size:20px}.metric span{color:#788aa3;font-size:8px}.metric.live{position:relative;overflow:hidden}.metric.live:after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,#5b7cff,#24d08b);opacity:.8}.rail{display:grid;grid-template-columns:1.4fr .8fr;gap:10px}.railBox{background:#091523;border:1px solid #203149;border-radius:12px;padding:12px;min-height:90px}.railTitle{font-size:8px;font-weight:950;color:#6f86a7;letter-spacing:.12em;margin-bottom:7px}.railText{font:10px ui-monospace,monospace;color:#b4c2d8;line-height:1.55;white-space:pre-wrap}.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.kpi div{background:#0d1929;border:1px solid #203149;border-radius:9px;padding:9px}.kpi b{display:block;font-size:15px}.kpi span{font-size:7px;color:#7589a4}@media(max-width:900px){.rail{grid-template-columns:1fr}}.btn{border:1px solid #2b405f;background:#101d30;color:#dce7f7;border-radius:9px;padding:9px 12px;font-weight:850}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn.good{background:#123c31;border-color:#1e7657;color:#8ff2c7}.btn.danger{background:#3a1820;border-color:#713141;color:#ff9bad}.btn.big{padding:12px 16px;font-size:13px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.field{margin-bottom:11px}.field label{display:block;color:#8193ad;font-size:8px;font-weight:950;margin-bottom:5px}.field input,.field textarea{width:100%;background:#091421;border:1px solid #263b56;color:#eef4ff;border-radius:9px;padding:10px;outline:none}.field textarea{resize:vertical}.console{height:calc(100vh - 145px);display:flex;flex-direction:column}.messages{flex:1;overflow:auto;min-height:0}.msg{border:1px solid #203149;background:#0b1726;border-radius:10px;padding:10px;margin:7px 0;white-space:pre-wrap;line-height:1.55}.msg.user{background:#111f36;margin-left:8%}.who{color:#7690ff;font-size:8px;font-weight:950;margin-bottom:3px}.compose{display:flex;gap:8px;margin-top:9px}.compose input{flex:1}.log{background:#08121e;border:1px solid #1d3048;border-radius:9px;padding:10px;font:10px ui-monospace,monospace;color:#9eb0c8;white-space:pre-wrap;max-height:330px;overflow:auto}.phase{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.phase div{border:1px solid #243852;border-radius:8px;padding:9px;font-size:8px;font-weight:900;color:#7488a5}.phase .on{background:#17264b;border-color:#5b7cff;color:#b9c6ff}.drop{border:1px dashed #38547a;padding:18px;border-radius:11px;text-align:center;color:#8da0bb;background:#0a1625}.file{display:flex;justify-content:space-between;gap:8px;padding:8px;border:1px solid #22364f;border-radius:8px;margin-top:6px;font-size:9px}.pill{padding:5px 8px;border-radius:999px;background:#13213a;color:#91a6c7;font-size:8px;font-weight:900}.stop{display:none}.stop.show{display:inline-flex}@media(max-width:900px){.side{width:190px}.grid,.grid4{grid-template-columns:1fr 1fr}.phase{grid-template-columns:repeat(4,1fr)}}@media(max-width:650px){.side{width:150px}.grid,.grid4{grid-template-columns:1fr}.headRight .btn{display:none}}
+:root{
+ --bg:#080b12;--panel:#0d111a;--panel2:#111722;--panel3:#151c29;--line:#202938;
+ --text:#f4f7fb;--muted:#8d98aa;--soft:#c9d1de;--accent:#7c5cff;--accent2:#9a83ff;
+ --green:#35d39a;--red:#ff5d72;--yellow:#f2c55c;--shadow:0 18px 60px rgba(0,0,0,.28)
+}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:13px Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+button,input,textarea{font:inherit}button{cursor:pointer}
+.app{height:100%;display:grid;grid-template-columns:245px minmax(0,1fr) 290px;background:radial-gradient(circle at 55% 0%,rgba(124,92,255,.08),transparent 35%)}
+.sidebar{border-right:1px solid var(--line);background:#090d14;padding:14px;display:flex;flex-direction:column;min-width:0}
+.brand{display:flex;align-items:center;gap:10px;padding:8px 7px 16px}
+.logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#8d74ff,#5c42dd);display:grid;place-items:center;font-weight:1000;box-shadow:0 8px 25px rgba(124,92,255,.3)}
+.brand strong{font-size:14px}.brand span{display:block;color:#657083;font-size:8px;letter-spacing:.13em;margin-top:3px}
+.new{width:100%;border:1px solid #2b3546;background:#111722;color:#e8edf5;border-radius:10px;padding:10px;text-align:left;font-weight:800}
+.new:hover{border-color:#5c48b9;background:#151b29}
+.section{margin:18px 5px 7px;color:#596579;font-size:8px;font-weight:900;letter-spacing:.14em}
+.chatList{display:grid;gap:3px;overflow:auto}
+.chatItem{border:1px solid transparent;background:transparent;color:#aeb8c7;padding:9px;border-radius:9px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chatItem:hover,.chatItem.active{background:#121824;border-color:#202a3a;color:#fff}
+.bottom{margin-top:auto;border-top:1px solid var(--line);padding-top:10px}
+.sideBtn{width:100%;background:transparent;border:1px solid transparent;color:#9da8b9;padding:9px;border-radius:9px;text-align:left}
+.sideBtn:hover{background:#111722;color:#fff}
+.main{min-width:0;display:flex;flex-direction:column;height:100vh}
+.top{height:62px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:rgba(8,11,18,.9);backdrop-filter:blur(16px)}
+.topTitle{font-weight:900}.topSub{font-size:9px;color:#657083;margin-top:3px}
+.topActions{display:flex;gap:7px;align-items:center}.pill{border:1px solid var(--line);background:#0f141d;border-radius:999px;padding:7px 10px;font-size:9px;color:#9aa6b7}.dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:#5e6878;margin-right:5px}.dot.on{background:var(--green);box-shadow:0 0 10px rgba(53,211,154,.5)}.dot.err{background:var(--red)}
+.iconBtn{width:34px;height:34px;border:1px solid var(--line);background:#0e141e;color:#cbd3df;border-radius:9px}
+.chat{flex:1;min-height:0;display:flex;flex-direction:column}
+.messages{flex:1;overflow:auto;padding:28px max(22px,calc((100% - 900px)/2));scroll-behavior:smooth}
+.empty{height:100%;display:flex;align-items:center;justify-content:center}.welcome{text-align:center;max-width:720px}.welcome .orb{width:58px;height:58px;border-radius:18px;margin:0 auto 18px;background:linear-gradient(135deg,#8b74ff,#543bd0);display:grid;place-items:center;font-size:24px;box-shadow:0 18px 50px rgba(124,92,255,.25)}.welcome h1{font-size:34px;letter-spacing:-.045em;margin:0 0 8px}.welcome p{color:var(--muted);line-height:1.7;margin:0 auto 22px;max-width:620px}
+.suggestions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;text-align:left}.suggestion{border:1px solid var(--line);background:#0e141e;color:#cbd3df;border-radius:11px;padding:12px}.suggestion b{display:block;color:#fff;font-size:11px;margin-bottom:4px}.suggestion span{font-size:9px;color:#788496}
+.msg{max-width:900px;margin:0 auto 23px;display:flex;gap:11px}.avatar{flex:none;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-size:9px;font-weight:900;background:#182030;color:#aeb9c9}.msg.ai .avatar{background:linear-gradient(135deg,#7157e8,#4732af);color:#fff}.bubble{min-width:0;flex:1}.meta{font-size:9px;color:#667286;margin:2px 0 7px}.body{font-size:13px;line-height:1.75;color:#e4e9f1;white-space:pre-wrap;word-break:break-word}.body code{font-family:ui-monospace,monospace}.typing{display:inline-flex;gap:4px;padding:8px 0}.typing i{width:5px;height:5px;border-radius:50%;background:#8d79ef;animation:b .8s infinite alternate}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}@keyframes b{to{opacity:.25;transform:translateY(-2px)}}
+.composerWrap{padding:12px max(22px,calc((100% - 900px)/2)) 18px;background:linear-gradient(transparent,var(--bg) 25%)}
+.composer{border:1px solid #293344;background:#101620;border-radius:16px;box-shadow:var(--shadow);overflow:hidden}.composer:focus-within{border-color:#5a49b5;box-shadow:0 18px 60px rgba(54,35,130,.18)}
+textarea{display:block;width:100%;min-height:58px;max-height:180px;resize:none;background:transparent;border:0;outline:0;color:#f4f7fb;padding:15px 16px;font-size:13px;line-height:1.55}
+.composerBar{display:flex;align-items:center;justify-content:space-between;padding:7px 9px 9px;border-top:1px solid #1c2533}.leftTools,.rightTools{display:flex;gap:5px;align-items:center}.tool{border:1px solid transparent;background:transparent;color:#8995a8;border-radius:8px;padding:6px 8px;font-size:9px}.tool:hover{background:#171e2b;color:#dce3ee}.mode{background:#171d2a;border-color:#293344;color:#d5dbe5}.send{width:34px;height:34px;border:0;border-radius:10px;background:#f3f4f7;color:#111;display:grid;place-items:center;font-weight:1000}.send:hover{background:#fff;transform:translateY(-1px)}
+.context{border-left:1px solid var(--line);background:#090d14;padding:14px;overflow:auto}.ctxTitle{font-size:9px;font-weight:900;color:#647084;letter-spacing:.13em;margin:7px 0 9px}.ctxCard{border:1px solid var(--line);background:#0e141d;border-radius:12px;padding:12px;margin-bottom:9px}.ctxHead{display:flex;justify-content:space-between;gap:8px;align-items:center}.ctxHead b{font-size:10px}.ctxSmall{font-size:9px;color:#768294;line-height:1.55;margin-top:5px}.bigStatus{font-size:18px;font-weight:950;margin-top:3px}.green{color:var(--green)}.red{color:var(--red)}.yellow{color:var(--yellow)}
+.input{width:100%;background:#0a0f17;border:1px solid #273244;color:#edf2f8;border-radius:9px;padding:9px;outline:none}.input:focus{border-color:#6250c5}.select{width:100%}
+.primary{border:0;background:#7c5cff;color:#fff;border-radius:9px;padding:9px 11px;font-weight:850}.secondary{border:1px solid #2b3546;background:#121822;color:#dce4ef;border-radius:9px;padding:9px 11px;font-weight:800}.danger{border:1px solid #5b2631;background:#29131a;color:#ff9dac;border-radius:9px;padding:9px 11px;font-weight:800}
+.keyBox{display:flex;gap:6px}.keyBox input{flex:1}.eye{width:38px}
+.modeBox{display:grid;grid-template-columns:1fr 1fr;gap:5px}.modeChoice{border:1px solid var(--line);background:#0b1018;color:#8e99a9;border-radius:8px;padding:8px;font-size:9px}.modeChoice.active{border-color:#5846b2;background:#17122d;color:#fff}
+.fileList{display:grid;gap:5px}.file{display:flex;justify-content:space-between;gap:5px;padding:7px;border:1px solid var(--line);border-radius:8px;font-size:8px;color:#9ba7b8}.remove{background:none;border:0;color:#697588}
+.log{max-height:190px;overflow:auto;white-space:pre-wrap;font:8px/1.55 ui-monospace,monospace;color:#8290a5}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.68);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}.modal.show{display:flex}.modalCard{width:min(500px,100%);background:#101620;border:1px solid #2b3546;border-radius:18px;padding:22px;box-shadow:0 30px 100px #000}.modalCard h2{margin:0 0 7px}.modalCard p{color:#7e8b9d;font-size:10px;line-height:1.6}.modalActions{display:flex;justify-content:flex-end;gap:7px;margin-top:13px}.errorBox{display:none;margin-top:9px;border:1px solid #5a2632;background:#251219;color:#ffabb8;padding:9px;border-radius:9px;font-size:9px;line-height:1.5}.errorBox.show{display:block}
+@media(max-width:1050px){.app{grid-template-columns:210px minmax(0,1fr)}.context{display:none}}
+@media(max-width:700px){.app{grid-template-columns:1fr}.sidebar{display:none}.top{height:54px}.topActions .pill{display:none}.messages{padding:18px 13px}.composerWrap{padding:8px 10px 12px}.suggestions{grid-template-columns:1fr}.welcome h1{font-size:28px}.msg{margin-bottom:18px}}
 </style>
 </head>
 <body>
 <div class="app">
-<aside class="side">
-<div class="brand">Roblox Forge AI<span>AAA STUDIO BUILDER · LOCAL-FIRST</span></div>
-<div class="nav">
-<button class="active" data-page="forge">⚡ Forge AI</button>
-<button data-page="studio">🎮 Studio</button>
-<button data-page="planner">🧠 AAA Planner</button>
-<button data-page="chat">💬 AI Chat</button>
-<button data-page="files">📎 Files</button>
-<button data-page="logs">📋 Activity / Logs</button>
-<button data-page="settings">⚙ Settings</button>
-</div>
-<div class="sideState" id="sideState">Bridge offline<br>Forge AI hazır</div>
+<aside class="sidebar">
+  <div class="brand"><div class="logo">✦</div><div><strong>Roblox Forge AI</strong><span>GPT-6 ASTRA · STUDIO AGENT</span></div></div>
+  <button class="new" id="newChat">＋ New chat</button>
+  <div class="section">RECENT</div><div class="chatList" id="chatList"></div>
+  <div class="bottom">
+    <button class="sideBtn" id="apiBtn">⚙ API & Model</button>
+    <button class="sideBtn" id="studioBtn">◉ Roblox Studio</button>
+  </div>
 </aside>
 <main class="main">
-<header class="head"><div><b>Forge Workspace</b><small id="subtitle">Plan → Approval → GUI → Code → QA → Re-test</small></div><div class="headRight"><div id="status" class="status">OFFLINE</div><button id="stopTop" class="btn danger stop">■ STOP / DURDUR</button><button id="forgeTop" class="btn primary big">⚡ FORGE AI</button></div></header>
-<section id="content" class="content"></section>
-</main></div>
+  <header class="top">
+    <div><div class="topTitle">Forge AI</div><div class="topSub" id="topSub">Your Roblox development copilot</div></div>
+    <div class="topActions"><div class="pill" id="apiPill"><span class="dot"></span> API not connected</div><div class="pill" id="studioPill"><span class="dot"></span> Studio offline</div><button class="iconBtn" id="settingsBtn">⚙</button></div>
+  </header>
+  <section class="chat"><div class="messages" id="messages"></div>
+    <div class="composerWrap"><div class="composer">
+      <textarea id="prompt" placeholder="Roblox oyunun hakkında bir şey iste…"></textarea>
+      <div class="composerBar">
+        <div class="leftTools"><button class="tool" id="attach">＋ Dosya</button><button class="tool mode" id="modeBtn">Chat</button><span class="tool" id="modelTag">gpt-6-astra</span></div>
+        <div class="rightTools"><span class="tool" id="hint">Enter gönderir · Shift+Enter yeni satır</span><button class="send" id="send">↑</button></div>
+      </div>
+    </div></div>
+  </section>
+</main>
+<aside class="context">
+  <div class="ctxTitle">CONTEXT</div>
+  <div class="ctxCard"><div class="ctxHead"><b>AI MODEL</b><span class="pill">Noxery</span></div><div class="bigStatus">GPT-6 Astra</div><div class="ctxSmall">OpenAI-compatible Noxery endpoint</div></div>
+  <div class="ctxCard">
+    <div class="ctxHead"><b>API CONNECTION</b><span id="keyState" class="yellow">Not set</span></div>
+    <div class="ctxSmall">API key sadece bu bilgisayarda kullanılır.</div>
+    <button class="secondary" style="width:100%;margin-top:9px" id="testBtn">Test connection</button>
+  </div>
+  <div class="ctxTitle">STUDIO AGENT</div>
+  <div class="ctxCard">
+    <div class="ctxHead"><b>ROBLOX STUDIO</b><span id="studioState" class="red">OFFLINE</span></div>
+    <div class="ctxSmall" id="studioDetail">Normal sohbet Studio'ya bağlanmaz. Studio Agent modunda bağlanır.</div>
+    <div style="display:flex;gap:6px;margin-top:9px"><button class="primary" id="connectStudio">Connect</button><button class="danger" id="stopStudio">Stop</button></div>
+  </div>
+  <div class="ctxTitle">MODE</div>
+  <div class="modeBox"><button class="modeChoice active" id="chatMode">CHAT<br><span>Only answer</span></button><button class="modeChoice" id="agentMode">AGENT<br><span>Use Studio</span></button></div>
+  <div class="ctxTitle">FILES</div><div class="ctxCard"><div id="files" class="fileList"><span class="ctxSmall">No files attached.</span></div></div>
+  <div class="ctxTitle">LIVE LOG</div><div class="ctxCard"><div class="log" id="log">Ready.</div></div>
+</aside>
+</div>
+<div class="modal" id="apiModal">
+ <div class="modalCard">
+  <h2>Noxery bağlantısı</h2><p>Forge AI, OpenAI-compatible Noxery API kullanır. Base URL: https://api.noxery.net/v1 · Model: gpt-6-astra.</p>
+  <div style="margin-top:14px"><label style="font-size:9px;color:#8390a2;font-weight:900">NOXERY API KEY</label><div class="keyBox" style="margin-top:6px"><input class="input" id="keyInput" type="password" placeholder="nox-..."><button class="secondary eye" id="showKey">Göster</button></div></div>
+  <div class="errorBox" id="apiError"></div>
+  <div class="modalActions"><button class="secondary" id="cancelApi">Cancel</button><button class="primary" id="saveApi">Save & test</button></div>
+ </div>
+</div>
+<input id="fileInput" type="file" multiple hidden>
 <script>
 'use strict';
-const D=window.robloxForgeDesktop,content=document.getElementById('content'),msgs=[],files=[];
-let page='forge',phase=0,planning=false;
-const phases=['DISCOVER','PLAN','APPROVAL','GUI','CODE','QA','DONE'];
+const D=window.robloxForgeDesktop;
+const KEY='rfa_noxery_key', CHATS='rfa_chats_v3';
+let apiKey=localStorage.getItem(KEY)||'',mode='chat',messages=[],files=[],sending=false;
+let chats=JSON.parse(localStorage.getItem(CHATS)||'[]');
+const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-function toast(s){const x=document.getElementById('subtitle');x.textContent=s;setTimeout(()=>x.textContent='Plan → Approval → GUI → Code → QA → Re-test',3500)}
-function actionEventText(t){const s=String(t||'');const live=document.getElementById('liveAgent');if(live&&s.trim())live.textContent=s.slice(-240);let tools=(Number(document.getElementById('kpiTools')?.textContent)||0);if(/TOOL/.test(s)){tools++;const el=document.getElementById('kpiTools');if(el)el.textContent=tools}if(/QA|VERIFY|TEST/.test(s)){const el=document.getElementById('kpiQA');if(el)el.textContent=(Number(el.textContent)||0)+1}let m=s.match(/\[PLAN (\d+)\/(\d+)\]/);const counter=document.getElementById('actionCounter');if(m&&counter){counter.textContent=m[1]+'/'+m[2];document.getElementById('pipelineText').textContent='PLAN'}m=s.match(/\[ACTION (\d+)\/(\d+) (START|TOOL|SUCCESS|FAILED)\]/);if(m&&counter){counter.textContent=m[1]+'/'+m[2];const ka=document.getElementById('kpiActions');if(ka)ka.textContent=m[1];document.getElementById('pipelineText').textContent=m[3]==='SUCCESS'?'ACTION TAMAMLANDI':m[3]==='FAILED'?'ACTION HATA':'ACTION '+m[3]}}
-function add(role,t){msgs.push({role,t:String(t)});if(msgs.length>150)msgs.shift();renderMsgs();D?.log('chat.message',{role,text:String(t).slice(0,500)})}
-function renderMsgs(){const m=document.getElementById('messages');if(!m)return;m.innerHTML=msgs.map(x=>'<div class="msg '+x.role+'"><div class="who">'+(x.role==='user'?'YOU':x.role==='tool'?'FORGE':'ASTRA')+'</div>'+esc(x.t)+'</div>').join('');m.scrollTop=m.scrollHeight}
-function phaseSet(n){phase=Math.max(0,Math.min(6,n));const p=document.getElementById('phase');if(p)p.innerHTML=phases.map((x,i)=>'<div class="'+(i===phase?'on':'')+'">'+String(i+1).padStart(2,'0')+' · '+x+'</div>').join('')}
-function setBridgeState(s){const st=document.getElementById('status'),ss=document.getElementById('sideState');if(!st)return;st.textContent=s.toUpperCase();st.style.background=(s==='online'||s==='ready')?'#12372d':'#29151c';st.style.color=(s==='online'||s==='ready')?'#62e5ad':'#ff7d91';if(ss)ss.innerHTML='Bridge '+s+'<br>Forge AI '+(s==='online'?'aktif':'hazır')}
-function forge(){show('forge')}
-function forgePage(){content.innerHTML='<div class="page"><div class="hero"><div class="eyebrow">⚡ FORGE AI · ONE BUTTON WORKFLOW</div><h1>Roblox Studio için uçtan uca AI Builder.</h1><p>Tek komutla Studioyu keşfet, AAA plan üret, onay al, GUI/sistem/kod üret, test et ve sorunları tekrar düzelt. İstediğin anda STOP ile işlemi kes.</p></div><div class="rail"><div class="railBox"><div class="railTitle">LIVE AGENT</div><div class="railText" id="liveAgent">Waiting for Forge plan…</div></div><div class="railBox"><div class="railTitle">MISSION KPIs</div><div class="kpi"><div><b id="kpiActions">0</b><span>ACTIONS</span></div><div><b id="kpiTools">0</b><span>TOOLS</span></div><div><b id="kpiQA">0</b><span>QA</span></div></div></div></div><div class="grid4" style="margin-top:10px"><div class="metric live"><b>01</b><span>DISCOVER</span></div><div class="metric"><b>02</b><span>AAA PLAN</span></div><div class="metric"><b>03</b><span>GUI + CODE</span></div><div class="metric"><b>04</b><span>QA + RETEST</span></div></div><div class="panel" style="margin-top:12px"><div class="field"><label>PROJE HEDEFİ</label><textarea id="goal" rows="7" placeholder="Örn: Anime battleground. Mobil uyumlu, güçlü lobby, matchmaking, combat GUI, inventory, quests, DataStore, VFX/SFX, anti-exploit, economy ve retention sistemi. Önce mevcut Studioyu analiz et."></textarea></div><div class="actions"><button class="btn primary big" data-action="runForge">⚡ FORGE AI — HEPSİNİ BAŞLAT</button><button class="btn danger big" data-action="stop">■ STOP / DURDUR</button><button class="btn" data-action="attach">📎 100K KARAKTERE KADAR DOSYA EKLE</button></div><input id="fileInput" type="file" multiple hidden><div id="fileList"></div></div><div class="panel" style="margin-top:12px"><div class="sectionTitle"><b>Pipeline</b><span class="pill" id="actionCounter">0/0</span><span class="pill" id="pipelineText">Bekliyor</span></div><div class="phase" id="phase"></div></div><div class="panel" style="margin-top:12px"><div class="sectionTitle"><b>Forge AI Console</b><button class="btn" data-action="chat">Chat&#39;e Git</button></div><div id="messages" class="messages" style="max-height:330px"></div></div></div>';phaseSet(phase);renderMsgs();bindFiles()}
-function studioPage(){content.innerHTML='<div class="page"><div class="hero"><div class="eyebrow">🎮 ROBLOX STUDIO INTELLIGENCE</div><h1>Gerçek Studio kontrol döngüsü.</h1><p>Bridge bağlantısını yönet, Studioyu tara, Output/QA döngüsünü Forge AI pipelineına bağla.</p></div><div class="grid"><div class="card"><h3>Bridge</h3><p>Yerel MCP bridge ile Roblox Studio bağlantısı.</p><div class="actions"><button class="btn primary" data-action="connect">Bağlan</button><button class="btn danger" data-action="stop">Durdur</button></div></div><div class="card"><h3>Deep Scan</h3><p>DataModel, scripts, GUI, map, assets, remotes, performance ve mevcut sistemleri analiz et.</p><button class="btn" data-action="scan">Full Studio Scan</button></div><div class="card"><h3>QA Loop</h3><p>Build → Playtest → Output → Fix → Re-test. Yıkıcı değişikliklerden önce onay iste.</p></div></div><div class="panel" style="margin-top:12px"><div class="log" id="studioLog"></div></div></div>'}
-function plannerPage(){content.innerHTML='<div class="page"><div class="hero"><div class="eyebrow">🧠 AAA PLANNER</div><h1>Önce plan. Sonra üretim.</h1><p>Forge AI rastgele kod dökmez; mevcut Studio durumuna göre bağımlılık sıralı üretim planı çıkarır.</p></div><div class="panel"><div class="field"><label>GAME BRIEF</label><textarea id="planBrief" rows="10" placeholder="Tür, hedef platform, oyuncu sayısı, core loop, monetization, retention, görsel stil, performans hedefleri..."></textarea></div><button class="btn primary big" data-action="makePlan">AAA PLAN OLUŞTUR</button></div><div class="panel" style="margin-top:12px"><div class="phase" id="phase2"></div></div></div>';document.getElementById('phase2').innerHTML=phases.map((x,i)=>'<div class="'+(i===phase?'on':'')+'">'+String(i+1).padStart(2,'0')+' · '+x+'</div>').join('')}
-function chatPage(){content.innerHTML='<div class="page"><div class="hero"><div class="eyebrow">💬 ASTRA COMMAND CENTER</div><h1>Doğal dille komut ver.</h1><p>Planla, analiz et, GUI tasarla, kodla, test et veya durdur.</p></div><div class="panel console"><div id="messages" class="messages"></div><div class="compose"><input id="prompt" placeholder="Örn: mevcut combat sistemini analiz et ve eksik GUI&#39;yi planla..."><button class="btn primary" data-action="send">Gönder</button></div></div></div>';renderMsgs()}
-function filesPage(){content.innerHTML='<div class="page"><div class="hero"><div class="eyebrow">📎 PROJECT CONTEXT</div><h1>Dosya bağlamı</h1><p>Her dosya için maksimum 100.000 karakter. Lua, Luau, JSON, TXT, MD, CSV ve benzeri metin dosyalarını ekleyebilirsin.</p></div><div class="panel"><div class="drop">Dosyaları Forge AI&#39;a eklemek için aşağıdaki butonu kullan.<div class="actions" style="justify-content:center"><button class="btn primary" data-action="attach">Dosya Seç</button></div></div><div id="fileList"></div></div></div>';bindFiles()}
-function logsPage(){content.innerHTML='<div class="page"><div class="hero"><div class="eyebrow">📋 ACTIVITY</div><h1>Forge geçmişi</h1></div><div class="panel"><div class="log" id="logs"></div></div></div>';D?.snapshot().then(s=>{const x=document.getElementById('logs');if(x)x.textContent=(s.actions||[]).map(a=>new Date(a.createdAt).toLocaleString()+' · '+a.action+' '+JSON.stringify(a.detail||{})).join('\n\n')||'Henüz aktivite yok'})}
-function settingsPage(){content.innerHTML=`<div class="page"><div class="hero"><div class="eyebrow">⚙ SETTINGS</div><h1>Forge yapılandırması</h1></div><div class="panel"><div class="field"><label>AI PROVIDER</label><input value="Noxery Cloud" disabled></div><div class="field"><label>MODEL</label><input id="model"></div><div class="field"><label>NOXERY API KEY</label><input id="noxeryKey" type="password"></div><div class="actions"><button class="btn primary" data-action="connect">Bridge&#39;i Başlat</button></div><p style="color:#7f91aa;font-size:9px">Noxery API Key yalnızca bu bilgisayardaki EXE yapılandırmasında kullanılır. Varsayılan model GPT-6 Astra&#39;dır.</p></div></div>`;document.getElementById("model").value=localStorage.getItem("model")||"gpt-6-astra";document.getElementById("noxeryKey").value=localStorage.getItem("noxeryKey")||""}
-function show(p){page=p;document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===p));({forge:forgePage,studio:studioPage,planner:plannerPage,chat:chatPage,files:filesPage,logs:logsPage,settings:settingsPage}[p]||forgePage)()}
-function bindFiles(){const i=document.getElementById('fileInput');if(i)i.onchange=async e=>{for(const f of [...e.target.files]){const text=await f.text();if(text.length>100000){add('tool','[FILE] '+f.name+' reddedildi: 100.000 karakter sınırı.');continue}files.push({name:f.name,text});add('tool','[FILE] '+f.name+' eklendi ('+text.length+' karakter).')}renderFileList()}}
-function renderFileList(){document.querySelectorAll('#fileList').forEach(box=>box.innerHTML=files.map((f,i)=>'<div class="file"><span>'+esc(f.name)+' · '+f.text.length.toLocaleString()+' karakter</span><button class="btn danger" data-remove="'+i+'">Sil</button></div>').join(''))}
-async function connect(){let n=document.getElementById('noxeryKey')?.value.trim()||localStorage.getItem('noxeryKey')||'',model=document.getElementById('model')?.value.trim()||'gpt-6-astra';if(!n){show('settings');toast('Noxery API Key gerekli.');return}localStorage.setItem('noxeryKey',n);localStorage.setItem('model',model);try{await D.start(n,true,model);setBridgeState('starting')}catch(e){toast(e.message)}}
-function stop(){planning=false;document.querySelectorAll('.stop').forEach(x=>x.classList.remove('show'));D?.stop();add('tool','[STOP] Forge AI işlemi durduruldu.');setBridgeState('offline')}
-function makeContext(){return files.length?'\n\nATTACHED FILES:\n'+files.map(f=>'--- '+f.name+' ---\n'+f.text).join('\n'):''}
-async function runForge(goal){const g=(goal||document.getElementById('goal')?.value||'').trim();if(!g){toast('Önce proje hedefini yaz.');return}if(!D){toast('Desktop bridge bulunamadı.');return}planning=true;document.querySelectorAll('.stop').forEach(x=>x.classList.add('show'));phaseSet(0);document.getElementById('pipelineText').textContent='Forge AI başlıyor';const prompt=`FORGE AI FULL AUTONOMOUS DEVELOPMENT WORKFLOW. Kullanıcı hedefi: ${g}
-ÖNCE hiçbir dosyayı değiştirmeden Roblox Studioyu derinlemesine analiz et: DataModel, mevcut scripts/modules, GUI, remotes, assets, map, systems, performance, mobile, anti-exploit, DataStore ve Output.
-SONRA AAA seviyesinde bağımlılık sıralı plan çıkar: architecture, core loop, progression, UI/UX, GUI hierarchy, map, assets, VFX/SFX, economy, networking, security, retention, mobile/performance, QA.
-PLAN aşamasında değişiklik yapma; kullanıcı onayı gerektiren adımları açıkça işaretle.
-Onay varsa küçük ve doğrulanabilir adımlarla GUI + sistem + Luau kodu üret; her adımdan sonra compile/playtest/output kontrolü yap; hataları düzelt ve tekrar test et.
-Mevcut kodu gereksiz yere bozma. Var olan sistemi önce anla, sonra genişlet.
-Her aşamada ne yaptığını kısa raporla. STOP komutu gelirse anında dur.
-${makeContext()}`;add('user',g);try{await D.start(localStorage.getItem('noxeryKey')||'',true,'gpt-6-astra');D.send(prompt);for(let i=1;i<=6&&planning;i++){phaseSet(i);document.getElementById('pipelineText').textContent=phases[i]+' aşaması';await new Promise(r=>setTimeout(r,300))}}catch(e){add('tool','[ERROR] '+e.message)}finally{planning=false;document.querySelectorAll('.stop').forEach(x=>x.classList.remove('show'))}}
-document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>show(b.dataset.page));
-document.getElementById('forgeTop').onclick=forge;document.getElementById('stopTop').onclick=stop;
-content.addEventListener('click',e=>{const a=e.target.closest('[data-action]')?.dataset.action;if(e.target.closest('[data-remove]')){files.splice(Number(e.target.closest('[data-remove]').dataset.remove),1);renderFileList();return}if(a==='attach'){let i=document.getElementById('fileInput');if(!i){i=document.createElement('input');i.type='file';i.multiple=true;i.id='fileInput';i.style.display='none';document.body.appendChild(i);bindFiles()}i.click();return}if(a==='runForge')runForge();if(a==='stop')stop();if(a==='connect')connect();if(a==='scan')D?.send('DEEP STUDIO SCAN: mevcut projeyi sadece analiz et, değişiklik yapma.');if(a==='chat')show('chat');if(a==='makePlan'){const b=document.getElementById('planBrief')?.value.trim();if(b)runForge(b)}if(a==='send'){const p=document.getElementById('prompt')?.value.trim();if(p){add('user',p);document.getElementById('prompt').value='';D?.send(p)}}if(a==='key')D?.createKey().then(x=>{localStorage.setItem('forgeKey',x.key);toast('Forge API Key oluşturuldu.')})});
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.activeElement?.id==='prompt'){e.preventDefault();document.querySelector('[data-action="send"]')?.click()}});
-if(D)D.onEvent(e=>{if(e.type==='state'){setBridgeState(e.state);if(e.state==='online')toast('Roblox Studio bağlı.')}if(e.type==='log'){const t=String(e.text||'');actionEventText(t);if(t.trim())add('tool',t);const sl=document.getElementById('studioLog');if(sl)sl.textContent+=t}});
-show('forge');
+function saveChats(){localStorage.setItem(CHATS,JSON.stringify(chats.slice(-30)))}
+function log(t){const x=$('log');x.textContent=(x.textContent+'\n'+String(t)).slice(-5000);x.scrollTop=x.scrollHeight}
+function setApiUI(ok,text){$('apiPill').innerHTML='<span class="dot '+(ok?'on':'err')+'"></span> '+esc(text);$('keyState').textContent=ok?'Connected':'Not set';$('keyState').className=ok?'green':'yellow'}
+function renderChats(){const box=$('chatList');box.innerHTML='';chats.slice().reverse().forEach((c,i)=>{const b=document.createElement('button');b.className='chatItem'+(i===0?' active':'');b.textContent=c.title||'New chat';b.onclick=()=>loadChat(c);box.appendChild(b)})}
+function render(){const box=$('messages');if(!messages.length){box.innerHTML='<div class="empty"><div class="welcome"><div class="orb">✦</div><h1>What are we building?</h1><p>Roblox Forge AI is a single chat workspace for ideas, Luau, debugging, UI, systems and Studio actions. Ask naturally — GPT-6 Astra handles the rest.</p><div class="suggestions"><button class="suggestion" data-s="Analyze my current Roblox project"><b>Analyze my project</b><span>Audit architecture, scripts, UI and performance.</span></button><button class="suggestion" data-s="Design a complete AAA Roblox game concept"><b>Design a game</b><span>Core loop, progression, map, UI and monetization.</span></button><button class="suggestion" data-s="Find and fix the biggest problems in my Roblox project"><b>Debug my project</b><span>Inspect first, then propose targeted fixes.</span></button><button class="suggestion" data-s="Create a premium mobile-friendly inventory UI"><b>Build a UI</b><span>Plan it first, then run it in Studio when Agent mode is on.</span></button></div></div></div>';return}
+box.innerHTML=messages.map(m=>'<div class="msg '+(m.role==='user'?'user':'ai')+'"><div class="avatar">'+(m.role==='user'?'YOU':'✦')+'</div><div class="bubble"><div class="meta">'+(m.role==='user'?'You':'Forge AI')+'</div><div class="body">'+esc(m.content)+'</div></div></div>').join('');
+box.scrollTop=box.scrollHeight}
+function add(role,content){messages.push({role,content:String(content)});if(messages.length>100)messages=messages.slice(-100);render()}
+function newChat(){if(messages.length)saveCurrent();messages=[];files=[];render();renderFiles();$('prompt').focus()}
+function saveCurrent(){const first=messages.find(x=>x.role==='user');if(!first)return;const title=first.content.slice(0,54);chats=chats.filter(c=>c.id!==currentId);chats.push({id:currentId,title,messages});saveChats();renderChats()}
+let currentId=crypto.randomUUID?crypto.randomUUID():String(Date.now());
+function loadChat(c){currentId=c.id;messages=c.messages||[];render()}
+function setMode(x){mode=x;$('modeBtn').textContent=x==='chat'?'Chat':'Studio Agent';$('chatMode').classList.toggle('active',x==='chat');$('agentMode').classList.toggle('active',x==='agent');$('topSub').textContent=x==='chat'?'Your Roblox development copilot':'AI agent connected to Roblox Studio'}
+async function testApi(close=false){
+ const key=$('keyInput')?.value.trim()||apiKey;if(!key){setApiUI(false,'API not connected');return false}
+ try{const r=await D.testNoxery(key);apiKey=key;localStorage.setItem(KEY,key);setApiUI(true,'Noxery connected');log('API OK · gpt-6-astra available: '+(r.astra?'YES':'NO'));if(close)$('apiModal').classList.remove('show');return true}
+ catch(e){setApiUI(false,'API error');$('apiError').textContent=e.message;$('apiError').classList.add('show');log('API ERROR · '+e.message);return false}
+}
+async function send(){
+ if(sending)return;const text=$('prompt').value.trim();if(!text)return;
+ if(!apiKey){$('apiModal').classList.add('show');$('keyInput').value='';$('keyInput').focus();return}
+ sending=true;$('send').textContent='…';$('prompt').value='';add('user',text);saveCurrent();
+ const context=files.length?'\n\nAttached files:\n'+files.map(f=>'--- '+f.name+' ---\n'+f.text).join('\n'):'';
+ try{
+  if(mode==='chat'){
+   const history=messages.map(m=>({role:m.role,content:m.content}));
+   const system={role:'system',content:'You are Roblox Forge AI, a premium Roblox game-development copilot. Be practical, concise and technical. Help with Roblox Lua/Luau, architecture, UI/UX, game design, debugging, optimization and production planning. When the user asks you to change the live Roblox project, explain that Studio Agent mode is required and give the exact action plan. Never claim you changed Studio unless an actual Studio tool was used.'};
+   const d=await D.chat(apiKey,[system,...history.slice(-30),{role:'user',content:text+context}],'gpt-6-astra');
+   const out=d?.choices?.[0]?.message?.content||'No response returned.';
+   add('assistant',out);
+  }else{
+   if(!$('studioState').textContent.includes('ONLINE')){add('assistant','Studio Agent bağlı değil. Önce sağ panelden Connect ile Roblox Studio MCP bağlantısını kur.');return}
+   const instruction=text+context;
+   log('AGENT → '+text);
+   await D.send(instruction);
+   add('assistant','Studio Agent çalışıyor. Gerçek Studio işlemlerini ve doğrulamaları canlı akıştan göreceksin.');
+  }
+ }catch(e){add('assistant','⚠ '+e.message);log('ERROR · '+e.message)}finally{sending=false;$('send').textContent='↑';}
+}
+async function connectStudio(){
+ if(!apiKey){$('apiModal').classList.add('show');return}
+ try{await D.start(apiKey,true,'gpt-6-astra');$('studioState').textContent='STARTING';$('studioState').className='yellow';log('Studio MCP başlatılıyor…')}catch(e){log('STUDIO ERROR · '+e.message);$('studioState').textContent='ERROR';$('studioState').className='red'}
+}
+function renderFiles(){$('files').innerHTML=files.length?files.map((f,i)=>'<div class="file"><span>'+esc(f.name)+'</span><button class="remove" data-i="'+i+'">×</button></div>').join(''):'<span class="ctxSmall">No files attached.</span>'}
+$('newChat').onclick=newChat;$('send').onclick=send;$('apiBtn').onclick=()=>{$('apiModal').classList.add('show');$('keyInput').value=apiKey};$('settingsBtn').onclick=()=>{$('apiModal').classList.add('show');$('keyInput').value=apiKey};
+$('cancelApi').onclick=()=>$('apiModal').classList.remove('show');$('saveApi').onclick=()=>testApi(true);$('testBtn').onclick=()=>{if(!$('apiModal').classList.contains('show'))$('apiModal').classList.add('show');$('keyInput').value=apiKey;$('apiError').classList.remove('show');testApi(false)};
+$('showKey').onclick=()=>{$('keyInput').type=$('keyInput').type==='password'?'text':'password';$('showKey').textContent=$('keyInput').type==='password'?'Göster':'Gizle'};
+$('connectStudio').onclick=connectStudio;$('stopStudio').onclick=()=>D.stop();$('chatMode').onclick=()=>setMode('chat');$('agentMode').onclick=()=>setMode('agent');
+$('modeBtn').onclick=()=>setMode(mode==='chat'?'agent':'chat');$('attach').onclick=()=>$('fileInput').click();
+$('fileInput').onchange=async e=>{for(const f of [...e.target.files]){if(f.size>2_000_000)continue;files.push({name:f.name,text:await f.text()})}renderFiles();e.target.value=''};
+$('files').onclick=e=>{const i=e.target.closest('.remove')?.dataset.i;if(i!==undefined){files.splice(Number(i),1);renderFiles()}};
+$('prompt').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}};
+document.addEventListener('click',e=>{const s=e.target.closest('[data-s]')?.dataset.s;if(s){$('prompt').value=s;$('prompt').focus()}});
+D?.onEvent(e=>{if(e.type==='state'){const online=e.state==='online';$('studioPill').innerHTML='<span class="dot '+(online?'on':e.state==='error'?'err':'')+'"></span> '+e.state.toUpperCase();$('studioState').textContent=e.state.toUpperCase();$('studioState').className=online?'green':e.state==='error'?'red':'yellow';$('studioDetail').textContent=e.detail||'Roblox Studio MCP status'}if(e.type==='log'){const t=String(e.text||'');log(t);if(/\[ERROR\]|\[FATAL\]|401/.test(t))add('assistant','⚠ '+t.trim());if(/\[COMPLETED\]|\[FORGE COMPLETE/.test(t))add('assistant',t.trim())}});
+renderChats();renderFiles();render();setMode('chat');if(apiKey)testApi(false);
 </script>
-</body></html>
+</body>
+</html>
