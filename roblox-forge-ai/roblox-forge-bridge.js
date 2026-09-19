@@ -124,7 +124,7 @@ async function createForgePlan(nox,session,prompt,provider="noxery",model="gpt-6
  plan.actions=plan.actions.slice(0,10);
  return plan;
 }
-async function runPlannedForge(nox,session,prompt,autoDev=false){
+async function runPlannedForge(nox,session,prompt,autoDev=false,provider="noxery",model="gpt-6-astra"){
  const plan=await createForgePlan(nox,session,prompt,provider,model);
  const total=plan.actions.length;
  console.log("\\n[PLAN 0/"+total+"] "+String(plan.summary||"Forge plan hazır."));
@@ -138,7 +138,7 @@ async function runPlannedForge(nox,session,prompt,autoDev=false){
   speakAction(String(index).padStart(3,"0")+". "+title);
   try{
    const instruction="PLAN KABUL EDİLDİ. EXECUTE ONLY THIS APPROVED FORGE ACTION. Do not begin any other action.\\nACTION "+String(index).padStart(3,"0")+" / "+String(total).padStart(3,"0")+"\\nTITLE: "+title+"\\nGOAL: "+String(a.goal||"")+"\\nVERIFICATION: "+String(a.verification||"")+"\\nUse real Roblox Studio MCP tools. Inspect before modifying. Verify the result with tools. Return a concise evidence-based result.";
-   const r=await runPrompt(nox,session,instruction,autoDev,{index,total});
+   const r=await runPrompt(nox,session,instruction,autoDev,{index,total},provider,model);
    results.push({id:String(index).padStart(3,"0"),title,result:r.summary});
    console.log("\\n[ACTION "+String(index).padStart(3,"0")+"/"+String(total).padStart(3,"0")+" SUCCESS] "+title);
    speakAction(String(index).padStart(3,"0")+". tamamlandı.");
@@ -152,7 +152,7 @@ async function runPlannedForge(nox,session,prompt,autoDev=false){
  speakAction("Forge tamamlandı. "+total+" action başarıyla tamamlandı.");
  return {summary:plan.summary||"Forge tamamlandı.",plan,results};
 }
-async function jobLoop(forge,nox,session,autoDev=false){
+async function jobLoop(forge,nox,session,autoDev=false,provider="noxery",model="gpt-6-astra"){
  if(!forge)return;
  const heartbeat=async(status,extra={})=>{try{await postForge("/api/bridge/heartbeat",{status,platform:process.platform,tools:session.tools.length,version:"3.1.0",auto_dev:autoDev,...extra},forge)}catch{}};
  await heartbeat("online");setInterval(()=>heartbeat("online"),10000);
@@ -163,7 +163,7 @@ async function jobLoop(forge,nox,session,autoDev=false){
     try{
      await heartbeat("working",{job_id:d.job.id});
      await postActivity(forge,"info","JOB STARTED",d.job.prompt,d.job.id);
-     const result=await runPlannedForge(nox,session,d.job.prompt,autoDev);
+     const result=await runPlannedForge(nox,session,d.job.prompt,autoDev,provider,model);
      await postForge("/api/jobs/complete",{id:d.job.id,status:"completed",result},forge);
      await postActivity(forge,"info","JOB COMPLETED",String(result.summary||"").slice(0,3500),d.job.id);
      await heartbeat("online");console.log("\n[SITE JOB COMPLETED] "+d.job.id);
@@ -217,7 +217,7 @@ Begin by inspecting the live Studio project now.`;
 
 async function main(){
  console.log("========================================\n Roblox Forge AI Bridge v3\n========================================");
- const {forge,nox,autoDev}=await getKeys();let session;
+ const {forge,nox,autoDev}=await getKeys();const cfg=loadConfig();const provider=process.env.FORGE_PROVIDER||cfg.provider||"noxery";const model=process.env.FORGE_MODEL||cfg.model||(provider==="lemonade"?"auto":"gpt-6-astra");let session;
  for(let attempt=1;;attempt++){
   try{console.log("\n[1/2] Roblox Studio MCP baglaniyor...");session=await connectStudio();console.log("[OK] Studio baglandi. MCP tools: "+session.tools.length);break}
   catch(e){console.error("[MCP] Baglanti basarisiz: "+(e?.message||e));if(attempt>=5)throw e;console.log("Studio MCP yeniden deneniyor...");await new Promise(r=>setTimeout(r,3000))}
@@ -230,7 +230,7 @@ async function main(){
  console.log("  > add a mobile inventory UI");
  console.log("  > /status");
  console.log("  > /exit\n");
- if(forge){jobLoop(forge,nox,session,autoDev).catch(e=>console.error("[SITE]",e)); await postActivity(forge,"info","BRIDGE CONNECTED",`Studio MCP connected; Auto Development=${autoDev?"ON":"OFF"}`);}
+ if(forge){jobLoop(forge,nox,session,autoDev,provider,model).catch(e=>console.error("[SITE]",e)); await postActivity(forge,"info","BRIDGE CONNECTED",`Studio MCP connected; Auto Development=${autoDev?"ON":"OFF"}`);}
 
  const rl=readline.createInterface({input:process.stdin,output:process.stdout,prompt:"RobloxForgeAI > "});
  rl.prompt();
@@ -238,7 +238,7 @@ async function main(){
   const prompt=line.trim();if(!prompt){rl.prompt();return}
   if(prompt==="/exit"){await session.client.close().catch(()=>{});rl.close();return}
   if(prompt==="/status"){console.log("[STATUS] Studio MCP connected | tools="+session.tools.length+" | Astra=ready");rl.prompt();return}
-  try{rl.pause();const result=await runPlannedForge(nox,session,prompt,autoDev);console.log("\n[COMPLETED] "+result.summary);console.log("[MCP CALLS] "+result.steps.length)}
+  try{rl.pause();const result=await runPlannedForge(nox,session,prompt,autoDev,provider,model);console.log("\n[COMPLETED] "+result.summary);console.log("[MCP CALLS] "+result.steps.length)}
   catch(e){console.error("\n[ERROR] "+(e?.message||e))}
   rl.resume();rl.prompt();
  });
