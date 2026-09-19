@@ -61,7 +61,7 @@ async function askAstra(nox,messages,tools){
  throw Error(last||"Noxery API request failed");
 }
 
-async function runPrompt(nox,session,prompt,autoDev=false){
+async function runPrompt(nox,session,prompt,autoDev=false,actionMeta=null){
  const system=[
   "You are GPT-6 Astra, the lead AI game-development director controlling the REAL open Roblox Studio through its MCP server. You are not a generic chatbot and must work against the actual current Studio project.",
   "MANDATORY: First inspect the live Studio session and DataModel before proposing or changing anything. Use list_roblox_studios, get_studio_state and relevant Explorer/script/screenshot tools available.",
@@ -88,7 +88,7 @@ async function runPrompt(nox,session,prompt,autoDev=false){
    for(const tc of m.tool_calls){
     const name=tc?.function?.name;let args={};try{args=JSON.parse(tc?.function?.arguments||"{}")}catch{throw Error("Astra invalid tool arguments: "+name)}
     if(!session.tools.find(x=>x.name===name))throw Error("Unknown MCP tool: "+name);
-    console.log("\n[MCP] "+name);const result=await session.client.callTool({name,arguments:args});
+    if(actionMeta){console.log("\n[ACTION "+String(actionMeta.index).padStart(3,"0")+"/"+String(actionMeta.total).padStart(3,"0")+" TOOL] "+name)} else {console.log("\n[MCP] "+name)}const result=await session.client.callTool({name,arguments:args});
     trace.push({tool:name,ok:!result?.isError});messages.push({role:"tool",tool_call_id:tc.id,content:JSON.stringify(result).slice(0,30000)});
    }continue;
   }
