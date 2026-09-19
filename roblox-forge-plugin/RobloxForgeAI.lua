@@ -44,16 +44,15 @@ local function field(label, placeholder, order)
   return mk("TextBox",{Parent=box,Position=UDim2.new(0,0,0,20),Size=UDim2.new(1,0,0,34),BackgroundColor3=Color3.fromRGB(13,18,28),BorderColor3=Color3.fromRGB(38,51,71),TextColor3=Color3.fromRGB(238,243,252),PlaceholderColor3=Color3.fromRGB(83,99,123),PlaceholderText=placeholder,TextSize=11,Font=Enum.Font.Code,ClearTextOnFocus=false})
 end
 
-local forgeKey = field("FORGE API KEY","rfa_live_...",3)
-local robloxKey = field("ROBLOX OPEN CLOUD API KEY (opsiyonel)","Roblox x-api-key",4)
-local noxeryKey = field("NOXERY API KEY","Noxery key",5)
-local pairCode = field("PAIR CODE","Dashboard'dan 6 haneli kod",6)
-local model = field("MODEL","gpt-6-astra",7)
+local noxeryKey = field("NOXERY API KEY","Noxery key",3)
+local pairCode = field("PAIR CODE","Dashboard'dan 6 haneli kod",4)
+local model = field("MODEL","gpt-6-astra",5)
 
 local row=mk("Frame",{Parent=root,Size=UDim2.new(1,0,0,38),BackgroundTransparency=1,LayoutOrder=8})
 mk("UIListLayout",{Parent=row,FillDirection=Enum.FillDirection.Horizontal,Padding=UDim.new(0,7)})
-local connect=mk("TextButton",{Parent=row,Size=UDim2.new(0.5,-4,1,0),BackgroundColor3=Color3.fromRGB(85,106,245),TextColor3=Color3.new(1,1,1),Text="PAIR / CONNECT",TextSize=11,Font=Enum.Font.GothamBold})
-local scan=mk("TextButton",{Parent=row,Size=UDim2.new(0.5,-4,1,0),BackgroundColor3=Color3.fromRGB(26,35,50),TextColor3=Color3.fromRGB(224,232,243),Text="SCAN",TextSize=11,Font=Enum.Font.GothamBold})
+local connect=mk("TextButton",{Parent=row,Size=UDim2.new(0.33,-4,1,0),BackgroundColor3=Color3.fromRGB(85,106,245),TextColor3=Color3.new(1,1,1),Text="PAIR / CONNECT",TextSize=11,Font=Enum.Font.GothamBold})
+local scan=mk("TextButton",{Parent=row,Size=UDim2.new(0.34,-4,1,0),BackgroundColor3=Color3.fromRGB(26,35,50),TextColor3=Color3.fromRGB(224,232,243),Text="SCAN",TextSize=11,Font=Enum.Font.GothamBold})
+local importBtn=mk("TextButton",{Parent=row,Size=UDim2.new(0.33,-4,1,0),BackgroundColor3=Color3.fromRGB(22,31,45),TextColor3=Color3.fromRGB(224,232,243),Text="IMPORT",TextSize=11,Font=Enum.Font.GothamBold})
 
 local status=mk("TextLabel",{Parent=root,Size=UDim2.new(1,0,0,30),BackgroundColor3=Color3.fromRGB(29,20,24),TextColor3=Color3.fromRGB(255,132,149),Text="● NOT CONNECTED",TextSize=10,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left,LayoutOrder=9})
 mk("UIPadding",{Parent=status,PaddingLeft=10})
@@ -71,16 +70,12 @@ local function say(s)
 end
 
 local function save()
-  plugin:SetSetting("forgeKey",forgeKey.Text)
-  plugin:SetSetting("robloxKey",robloxKey.Text)
   plugin:SetSetting("noxeryKey",noxeryKey.Text)
   plugin:SetSetting("pairCode",string.upper(pairCode.Text))
   plugin:SetSetting("model",model.Text)
 end
 
 local function load()
-  forgeKey.Text=tostring(plugin:GetSetting("forgeKey") or "")
-  robloxKey.Text=tostring(plugin:GetSetting("robloxKey") or "")
   noxeryKey.Text=tostring(plugin:GetSetting("noxeryKey") or "")
   pairCode.Text=tostring(plugin:GetSetting("pairCode") or "")
   model.Text=tostring(plugin:GetSetting("model") or "gpt-6-astra")
@@ -145,9 +140,9 @@ end
 
 local function claim()
   save()
-  if forgeKey.Text=="" or pairCode.Text=="" then error("Forge API Key + Pair Code gerekli.") end
+  if pairCode.Text=="" then error("Pair Code gerekli.") end
   local userId=tostring(StudioService:GetUserId())
-  local r=request(API.."/api/plugin/pair/claim","POST",{pair_code=pairCode.Text,forgeKey=forgeKey.Text,plugin_name="Roblox Forge AI Studio Plugin",roblox_user_id=userId})
+  local r=request(API.."/api/plugin/pair/claim","POST",{pair_code=pairCode.Text,plugin_name="Roblox Forge AI Studio Plugin",roblox_user_id=userId})
   if not r.ok then error(r.error or "Pair başarısız.") end
   setConnection(true,"Studio User "..userId.." paired.")
   say("PAIR OK · Studio User "..userId)
@@ -155,7 +150,7 @@ end
 
 local function heartbeat()
   if forgeKey.Text=="" or pairCode.Text=="" then return end
-  local r=request(API.."/api/plugin/pair/heartbeat","POST",{pair_code=pairCode.Text,forgeKey=forgeKey.Text})
+  local r=request(API.."/api/plugin/pair/heartbeat","POST",{pair_code=pairCode.Text})
   if not r.ok then error(r.error or "Heartbeat başarısız.") end
   setConnection(true,"Heartbeat online.")
 end
@@ -248,14 +243,14 @@ local function executePrompt(id,prompt)
     if not ok then
       say("ACTION FAILED · "..tostring(res))
       mission(true,prompt,"FAILED",i,total,"Action failed:\n"..tostring(res))
-      request(API.."/api/plugin/complete","POST",{pair_code=pairCode.Text,forgeKey=forgeKey.Text,command_id=id,status="error",error=tostring(res),result={step=i,total=total}})
+      request(API.."/api/plugin/complete","POST",{pair_code=pairCode.Text,command_id=id,status="error",error=tostring(res),result={step=i,total=total}})
       return
     end
     results[#results+1]=res
     say("ACTION SUCCESS · "..tostring(res))
     mission(true,prompt,string.format("ACTION %03d/%03d ✓",i,total),i,total,"SUCCESS · "..tostring(res))
   end
-  request(API.."/api/plugin/complete","POST",{pair_code=pairCode.Text,forgeKey=forgeKey.Text,command_id=id,status="completed",result={summary=plan.summary,actions=results,total=total}})
+  request(API.."/api/plugin/complete","POST",{pair_code=pairCode.Text,command_id=id,status="completed",result={summary=plan.summary,actions=results,total=total}})
   say("FORGE COMPLETE "..tostring(total).."/"..tostring(total))
   mission(true,prompt,"COMPLETE",total,total,(plan.summary or "Mission tamamlandı.").."\n\n"..tostring(total).." doğrulanabilir action Studio'da uygulandı.")
   task.delay(5,function() missionWidget.Enabled=false end)
@@ -263,12 +258,12 @@ end
 
 local running=false
 local function poll()
-  if running or pairCode.Text=="" or forgeKey.Text=="" then return end
+  if running or pairCode.Text=="" then return end
   running=true
   task.spawn(function()
     local ok,err=pcall(function()
       heartbeat()
-      local r=request(API.."/api/plugin/command?pair_code="..HttpService:UrlEncode(pairCode.Text).."&forgeKey="..HttpService:UrlEncode(forgeKey.Text),"GET")
+      local r=request(API.."/api/plugin/command?pair_code="..HttpService:UrlEncode(pairCode.Text),"GET")
       if r.command then executePrompt(tostring(r.command.id),tostring(r.command.prompt)) end
     end)
     if not ok then
@@ -278,6 +273,18 @@ local function poll()
     running=false
   end)
 end
+
+importBtn.MouseButton1Click:Connect(function()
+  local ok,err=pcall(function()
+    local file=StudioService:PromptImportFileAsync({"rbxm","rbxmx"})
+    if not file then return end
+    say("IMPORT · "..tostring(file.Name))
+    mission(true,"RobloxForgeAI package import","FILE READY",0,1,"Studio dosyayı aldı. Explorer'da sağ tıklayıp Insert > Import Roblox Model kullanabilir veya dosyayı manuel import edebilirsin.")
+    connectionPopup(true,"RBXM dosyası seçildi: "..tostring(file.Name))
+    task.delay(2,function() missionWidget.Enabled=false end)
+  end)
+  if not ok then say("IMPORT ERROR · "..tostring(err)) end
+end)
 
 connect.MouseButton1Click:Connect(function()
   local ok,err=pcall(claim)
@@ -305,10 +312,10 @@ task.spawn(function()
 end)
 
 task.delay(1,function()
-  if forgeKey.Text~="" and pairCode.Text~="" then
+  if pairCode.Text~="" then
     local ok,err=pcall(heartbeat)
     if not ok then setConnection(false,tostring(err)) end
   end
 end)
 
-say("Ready · Dashboard'dan Pair Code oluştur, sonra Connect.")
+say("Ready · Dashboard'dan Pair Code oluştur; yalnızca Pair Code + Noxery API gerekir.")
