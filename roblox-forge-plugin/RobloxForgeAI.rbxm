@@ -53,6 +53,7 @@ end
 local noxeryKey = field("NOXERY API KEY","Noxery key",3)
 local pairCode = field("PAIR CODE","Dashboard'dan 6 haneli kod",4)
 local model = field("MODEL","gpt-6-astra",5)
+local style = field("GAME STYLE","Studded",6)
 
 local row=mk("Frame",{Parent=root,Size=UDim2.new(1,0,0,38),BackgroundTransparency=1,LayoutOrder=8})
 mk("UIListLayout",{Parent=row,FillDirection=Enum.FillDirection.Horizontal,Padding=UDim.new(0,7)})
@@ -80,12 +81,14 @@ local function save()
   plugin:SetSetting("noxeryKey",noxeryKey.Text)
   plugin:SetSetting("pairCode",string.upper(pairCode.Text))
   plugin:SetSetting("model",model.Text)
+  plugin:SetSetting("style",style.Text)
 end
 
 local function load()
   noxeryKey.Text=tostring(plugin:GetSetting("noxeryKey") or "")
   pairCode.Text=tostring(plugin:GetSetting("pairCode") or "")
   model.Text=tostring(plugin:GetSetting("model") or "gpt-6-astra")
+  style.Text=tostring(plugin:GetSetting("style") or "Studded")
 end
 load()
 
@@ -174,6 +177,7 @@ local function askNoxery(prompt)
   local system=[[
 You are Roblox Forge AI inside Roblox Studio.
 Return ONLY valid JSON, no markdown.
+You must preserve the user-selected visual style across GUI, map, props, materials, lighting, VFX and asset choices. Never mix visual languages unless explicitly requested.
 Schema: {"summary":"...","actions":[{"type":"create_folder|create_script|update_script|create_part|set_property|set_attribute|delete_instance","path":"Workspace/Foo","name":"Bar","className":"Script","source":"...","property":"Name","value":"...","attribute":"..."}]}
 Use small verifiable actions. Never delete or overwrite unrelated content.
 ]]
@@ -233,10 +237,13 @@ local function applyAction(a)
   error("Bilinmeyen action: "..tostring(typ))
 end
 
-local function executePrompt(id,prompt)
+local function executePrompt(id,prompt,selectedStyle,styleContract)
+  say("STYLE · "..tostring(selectedStyle or style.Text or "Studded"))
   say("PROMPT · "..prompt)
   mission(true,prompt,"PLANNING",0,10,"Noxery plan engine çalışıyor…\nStudio context okunuyor ve küçük doğrulanabilir actions hazırlanıyor.")
-  local plan=askNoxery(prompt.."\nÖnce analiz et, sonra küçük ve doğrulanabilir action listesi üret. Mevcut sistemi gereksiz yere silme.")
+  local contract=tostring(styleContract or "")
+  local styleInstruction=contract~="" and contract or ("[VISUAL DNA] STYLE: "..tostring(selectedStyle or style.Text or "Studded").." · Keep GUI, map, assets, materials, lighting and VFX visually consistent with this style.")
+  local plan=askNoxery(styleInstruction.."\n\nUSER PROMPT: "..prompt.."\nÖnce analiz et, sonra küçük ve doğrulanabilir action listesi üret. Mevcut sistemi gereksiz yere silme.")
   local actions=plan.actions or {}
   local total=#actions
   say("PLAN · "..tostring(total).." ACTION")
@@ -271,7 +278,7 @@ local function poll()
     local ok,err=pcall(function()
       heartbeat()
       local r=request(API.."/api/plugin/command?pair_code="..HttpService:UrlEncode(pairCode.Text),"GET")
-      if r.command then executePrompt(tostring(r.command.id),tostring(r.command.prompt)) end
+      if r.command then executePrompt(tostring(r.command.id),tostring(r.command.prompt),tostring(r.command.style or style.Text),tostring(r.command.style_contract or "")) end
     end)
     if not ok then
       setConnection(false,tostring(err))
