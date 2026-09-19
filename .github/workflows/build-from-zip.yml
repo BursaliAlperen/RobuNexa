@@ -55,15 +55,15 @@ jobs:
       - name: Verify EXE
         shell: pwsh
         run: |
-          $exe = Join-Path $env.PROJECT "dist/RobloxForgeAI-Windows-x64.exe"
-          if (-not (Test-Path $exe)) { throw "EXE was not created: $exe" }
-          $size = (Get-Item $exe).Length
+          $exe = Get-ChildItem "build-src" -Recurse -Filter "RobloxForgeAI-Windows-x64.exe" -File | Select-Object -First 1
+          if (-not $exe) { throw "EXE was not created" }
+          $size = $exe.Length
           if ($size -lt 50000000) { throw "EXE is suspiciously small: $size bytes" }
-          Write-Host "EXE OK: $size bytes"
+          Write-Host "EXE OK: $($exe.FullName) - $size bytes"
 
       - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
         with:
           name: RobloxForgeAI-Windows-x64
-          path: ${{ env.PROJECT }}/dist/RobloxForgeAI-Windows-x64.exe
+          path: build-src/**/dist/RobloxForgeAI-Windows-x64.exe
           retention-days: 30
