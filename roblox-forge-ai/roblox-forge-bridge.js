@@ -14,13 +14,13 @@ function loadConfig(){try{return JSON.parse(fs.readFileSync(CONFIG_FILE,"utf8"))
 function saveConfig(c){try{fs.mkdirSync(CONFIG_DIR,{recursive:true});fs.writeFileSync(CONFIG_FILE,JSON.stringify(c,null,2),"utf8")}catch{}}
 
 async function getKeys(){
- const c=loadConfig();let forge=process.argv[2]||c.forgeKey;let nox=process.argv[3]||c.noxeryKey;let autoDev=process.argv[4]==="1"||c.autoDev===true;
+ const c=loadConfig();let forge=process.argv[2]||c.forgeKey;let nox=process.argv[3]||c.noxeryKey;let autoDev=process.argv[4]==="1"||c.autoDev===true;let provider=process.argv[5]||c.provider||"noxery";let model=process.argv[6]||c.model||"";
  if(!nox&&process.stdin.isTTY){
   const rl=readline.createInterface({input:process.stdin,output:process.stdout});
   nox=await new Promise(resolve=>rl.question("Noxery API Key: ",v=>{rl.close();resolve(v.trim())}));
  }
  if(!nox)throw Error("Noxery API Key missing.");
- saveConfig({forgeKey:forge||"",noxeryKey:nox,autoDev});return {forge,nox,autoDev};
+ saveConfig({forgeKey:forge||"",noxeryKey:nox,autoDev,provider,model});return {forge,nox,autoDev,provider,model};
 }
 
 function studioCommand(){
@@ -217,7 +217,7 @@ Begin by inspecting the live Studio project now.`;
 
 async function main(){
  console.log("========================================\n Roblox Forge AI Bridge v3\n========================================");
- const {forge,nox,autoDev}=await getKeys();const cfg=loadConfig();const provider=process.env.FORGE_PROVIDER||cfg.provider||"noxery";const model=process.env.FORGE_MODEL||cfg.model||(provider==="lemonade"?"auto":"gpt-6-astra");let session;
+ const {forge,nox,autoDev,provider:configuredProvider,model:configuredModel}=await getKeys();const provider=process.env.FORGE_PROVIDER||configuredProvider||"noxery";const model=process.env.FORGE_MODEL||configuredModel||(provider==="lemonade"?"auto":"gpt-6-astra");let session;
  for(let attempt=1;;attempt++){
   try{console.log("\n[1/2] Roblox Studio MCP baglaniyor...");session=await connectStudio();console.log("[OK] Studio baglandi. MCP tools: "+session.tools.length);break}
   catch(e){console.error("[MCP] Baglanti basarisiz: "+(e?.message||e));if(attempt>=5)throw e;console.log("Studio MCP yeniden deneniyor...");await new Promise(r=>setTimeout(r,3000))}
