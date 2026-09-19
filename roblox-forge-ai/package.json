@@ -1,6 +1,6 @@
 {
   "name": "roblox-forge-ai-desktop",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "private": true,
   "description": "Roblox Forge AI desktop app with GPT-6 Astra and Roblox Studio MCP bridge",
   "main": "desktop-main.cjs",
