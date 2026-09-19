@@ -1,0 +1,50 @@
+name: Build Roblox Forge AI EXE
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "roblox-forge-ai/**"
+      - ".github/workflows/build-roblox-forge-exe.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: roblox-forge-ai
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: roblox-forge-ai/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build standalone EXE
+        shell: pwsh
+        run: |
+          npm run build:exe
+
+      - name: Verify EXE
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "dist/RobloxForgeAI.exe")) {
+            throw "RobloxForgeAI.exe olusturulamadi."
+          }
+          & "dist/RobloxForgeAI.exe" --version
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: RobloxForgeAI-Windows-x64
+          path: roblox-forge-ai/dist/RobloxForgeAI.exe
+          if-no-files-found: error
+          retention-days: 30
