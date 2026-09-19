@@ -41,7 +41,7 @@ async function connectStudio(){
  transport.onclose=()=>console.error("\n[MCP] Connection closed.");
  await client.connect(transport);
  const listed=await client.listTools();
- return {client,transport,tools:listed.tools||[]};
+ return {client,transport,tools:listed.tools||[],chatMessages:null};
 }
 
 async function askAstra(nox,messages,tools){
@@ -62,8 +62,22 @@ async function askAstra(nox,messages,tools){
 }
 
 async function runPrompt(nox,session,prompt){
- const system="You are GPT-6 Astra controlling the REAL open Roblox Studio through its MCP server. Execute the user's request directly. Inspect the existing DataModel when needed. Use real MCP tools, Creator Store tools when available, secure server/client Luau, mobile UI and appropriate VFX/audio. Do not describe a mockup. Never claim success until an MCP tool result confirms it. Keep going until the requested task is actually completed.";
- let messages=[{role:"system",content:system},{role:"user",content:prompt}],trace=[];
+ const system=[
+  "You are GPT-6 Astra, the lead AI game-development director controlling the REAL open Roblox Studio through its MCP server. You are not a generic chatbot and must work against the actual current Studio project.",
+  "MANDATORY: First inspect the live Studio session and DataModel before proposing or changing anything. Use list_roblox_studios, get_studio_state and relevant Explorer/script/screenshot tools available.",
+  "Determine whether the place is EMPTY/BASEPLATE-LIKE or an EXISTING PROJECT. Inspect Workspace, ReplicatedStorage, ServerScriptService, StarterPlayer, StarterGui, Lighting, SoundService, Teams, ServerStorage and important scripts/assets.",
+  "For an EXISTING PROJECT, produce an AAA audit: current systems, architecture, scripts, UI, map, assets, VFX/SFX, mobile support, performance risks, missing systems, bugs, retention loops and concrete upgrade opportunities. Preserve working systems unless asked to replace them.",
+  "For an EMPTY project, do not blindly build a random game. Generate 3-5 original, buildable Roblox concepts inspired by successful gameplay patterns, with core loop, viral hook, replayability, social loop, progression and feasible monetization options.",
+  "When asked for a plan, internally run specialist passes: Product/Trend Scout, Game Designer, Systems Architect, Luau Engineer, World Builder, UI/UX Designer, Creator Store Asset Scout, VFX/SFX Director, Economy/Retention Designer, Mobile/Performance Engineer and QA/Playtest Engineer. Synthesize one coherent plan.",
+  "Every AAA plan includes: game fantasy, 10-second hook, core loop, minute-to-minute loop, map zones, systems, data model, script tree, UI tree, mobile controls, Creator Store asset strategy, VFX/SFX direction, progression, economy, social/viral mechanics, monetization, onboarding, retention, anti-exploit basics, optimization, QA tests and phased build order.",
+  "For build/fix requests, use real MCP tools and execute changes in small verified phases. Read existing scripts before editing. Playtest and inspect console output after important changes. Never claim success without tool evidence.",
+  "Be technical and specific. Prefer simple robust systems over fake complexity. Use studded/dark premium UI when style is unspecified, PC + mobile support, and Creator Store assets where appropriate.",
+  "Remember the current session conversation context and previous Studio findings instead of restarting from zero.",
+  "For analysis/plan requests, separate CURRENT PROJECT AUDIT, OPPORTUNITIES, AAA PLAN, BUILD PHASES and NEXT ACTION. For build requests, act first and summarize verified results."
+ ].join("\n");
+ let messages=session.chatMessages||[{role:"system",content:system}],trace=[];
+ session.chatMessages=messages;
+ messages.push({role:"user",content:prompt});
  for(let i=0;i<80;i++){
   const d=await askAstra(nox,messages,session.tools);const m=d?.choices?.[0]?.message||{};
   if(m.tool_calls?.length){
@@ -71,19 +85,16 @@ async function runPrompt(nox,session,prompt){
    for(const tc of m.tool_calls){
     const name=tc?.function?.name;let args={};try{args=JSON.parse(tc?.function?.arguments||"{}")}catch{throw Error("Astra invalid tool arguments: "+name)}
     if(!session.tools.find(x=>x.name===name))throw Error("Unknown MCP tool: "+name);
-    console.log("\n[MCP] "+name);
-    const result=await session.client.callTool({name,arguments:args});
-    trace.push({tool:name,ok:!result?.isError});
-    messages.push({role:"tool",tool_call_id:tc.id,content:JSON.stringify(result).slice(0,30000)});
-   }
-   continue;
+    console.log("\n[MCP] "+name);const result=await session.client.callTool({name,arguments:args});
+    trace.push({tool:name,ok:!result?.isError});messages.push({role:"tool",tool_call_id:tc.id,content:JSON.stringify(result).slice(0,30000)});
+   }continue;
   }
-  const content=String(m.content||"").trim();if(content)return {summary:content,steps:trace};
+  const content=String(m.content||"").trim();
+  if(content)return {summary:content,steps:trace};
   throw Error("Astra returned empty response.");
  }
  throw Error("Astra step limit reached.");
 }
-
 async function postForge(pathname,body,forge){
  return fetch(FORGE_URL+pathname,{method:"POST",headers:{"Content-Type":"application/json","x-forge-key":forge},body:JSON.stringify(body)});
 }
