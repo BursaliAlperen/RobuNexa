@@ -50,9 +50,10 @@ local model = field("MODEL","gpt-6-astra",5)
 
 local row=mk("Frame",{Parent=root,Size=UDim2.new(1,0,0,38),BackgroundTransparency=1,LayoutOrder=8})
 mk("UIListLayout",{Parent=row,FillDirection=Enum.FillDirection.Horizontal,Padding=UDim.new(0,7)})
-local connect=mk("TextButton",{Parent=row,Size=UDim2.new(0.33,-4,1,0),BackgroundColor3=Color3.fromRGB(85,106,245),TextColor3=Color3.new(1,1,1),Text="PAIR / CONNECT",TextSize=11,Font=Enum.Font.GothamBold})
-local scan=mk("TextButton",{Parent=row,Size=UDim2.new(0.34,-4,1,0),BackgroundColor3=Color3.fromRGB(26,35,50),TextColor3=Color3.fromRGB(224,232,243),Text="SCAN",TextSize=11,Font=Enum.Font.GothamBold})
-local importBtn=mk("TextButton",{Parent=row,Size=UDim2.new(0.33,-4,1,0),BackgroundColor3=Color3.fromRGB(22,31,45),TextColor3=Color3.fromRGB(224,232,243),Text="IMPORT",TextSize=11,Font=Enum.Font.GothamBold})
+local connect=mk("TextButton",{Parent=row,Size=UDim2.new(0.25,-5,1,0),BackgroundColor3=Color3.fromRGB(85,106,245),TextColor3=Color3.new(1,1,1),Text="PAIR / CONNECT",TextSize=11,Font=Enum.Font.GothamBold})
+local scan=mk("TextButton",{Parent=row,Size=UDim2.new(0.25,-5,1,0),BackgroundColor3=Color3.fromRGB(26,35,50),TextColor3=Color3.fromRGB(224,232,243),Text="SCAN",TextSize=11,Font=Enum.Font.GothamBold})
+local importBtn=mk("TextButton",{Parent=row,Size=UDim2.new(0.25,-5,1,0),BackgroundColor3=Color3.fromRGB(22,31,45),TextColor3=Color3.fromRGB(224,232,243),Text="IMPORT",TextSize=11,Font=Enum.Font.GothamBold})
+local exportBtn=mk("TextButton",{Parent=row,Size=UDim2.new(0.25,-5,1,0),BackgroundColor3=Color3.fromRGB(22,31,45),TextColor3=Color3.fromRGB(224,232,243),Text="EXPORT",TextSize=11,Font=Enum.Font.GothamBold})
 
 local status=mk("TextLabel",{Parent=root,Size=UDim2.new(1,0,0,30),BackgroundColor3=Color3.fromRGB(29,20,24),TextColor3=Color3.fromRGB(255,132,149),Text="● NOT CONNECTED",TextSize=10,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left,LayoutOrder=9})
 mk("UIPadding",{Parent=status,PaddingLeft=10})
@@ -273,6 +274,14 @@ local function poll()
     running=false
   end)
 end
+
+exportBtn.MouseButton1Click:Connect(function()
+  local ok,err=pcall(function()
+    local saved=plugin:PromptSaveSelectionAsync("RobloxForgeAI_Selection")
+    if saved then say("EXPORT · Selection RBXM kaydedildi.") else say("EXPORT · Kullanıcı iptal etti.") end
+  end)
+  if not ok then say("EXPORT ERROR · "..tostring(err)) end
+end)
 
 importBtn.MouseButton1Click:Connect(function()
   local ok,err=pcall(function()
