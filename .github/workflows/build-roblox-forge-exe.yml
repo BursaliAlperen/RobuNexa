@@ -5,6 +5,9 @@ on:
     paths:
       - "roblox-forge-ai/**"
       - ".github/workflows/build-roblox-forge-exe.yml"
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -58,6 +61,6 @@ jobs:
           files: |
             roblox-forge-ai/dist/RobloxForgeAI.exe
             roblox-forge-ai/RobloxForgeAI-Windows-x64.zip
-          generate_release_notes: true
+          generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
