@@ -1,0 +1,76 @@
+name: Build Roblox Forge AI EXE
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "roblox-forge-ai/**"
+      - ".github/workflows/build-roblox-forge-exe.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: roblox-forge-ai
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build standalone Windows EXE
+        run: npm run build:exe
+
+      - name: Verify EXE
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "dist/RobloxForgeAI.exe")) {
+            throw "RobloxForgeAI.exe olusturulamadi."
+          }
+          $size = (Get-Item "dist/RobloxForgeAI.exe").Length
+          if ($size -lt 10000000) {
+            throw "EXE boyutu beklenenden kucuk: $size bytes"
+          }
+          Write-Host "EXE OK: $size bytes"
+
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "release" | Out-Null
+          Copy-Item "dist/RobloxForgeAI.exe" "release/RobloxForgeAI.exe"
+          @'
+          Roblox Forge AI Bridge
+          
+          1. Roblox Studio'yu ac.
+          2. Forge API Key ve Noxery API Key bilgilerini gir.
+          3. RobloxForgeAI.exe dosyasini calistir.
+          
+          EXE Node.js runtime'ini icinde tasir; ayri Node.js kurulumu gerekmez.
+          Roblox Studio MCP bridge dosyalarinin sistemde kurulu olmasi gerekir.
+          '@ | Set-Content -Encoding UTF8 "release/README.txt"
+          Compress-Archive -Path "release/*" -DestinationPath "RobloxForgeAI-Windows-x64.zip" -Force
+
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RobloxForgeAI-Windows-x64
+          path: roblox-forge-ai/dist/RobloxForgeAI.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RobloxForgeAI-Windows-x64-ZIP
+          path: roblox-forge-ai/RobloxForgeAI-Windows-x64.zip
+          if-no-files-found: error
+          retention-days: 30
