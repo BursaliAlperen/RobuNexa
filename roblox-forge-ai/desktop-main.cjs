@@ -14,13 +14,13 @@ process.on("unhandledRejection",e=>log("REJECTION "+(e?.stack||e)));
 function trusted(e){if(!win||win.isDestroyed()||e?.sender!==win.webContents)return false;const u=e.senderFrame?.url||"";if(u.startsWith("file://"))return true;try{const x=new URL(u);const base=new URL(FORGE_URL);return x.origin===base.origin&&x.pathname.startsWith("/")}catch{return false}}
 function emit(type,data){if(win&&!win.isDestroyed())win.webContents.send("forge-bridge-event",{type,...data})}
 function setState(state,detail=""){bridgeState=state;emit("state",{state,detail})}
-function startBridge(forgeKey,noxeryKey,autoDev=false){
+function startBridge(forgeKey,noxeryKey,autoDev=false,provider="noxery",model="gpt-6-astra"){
  forgeKey=String(forgeKey||"").trim();noxeryKey=String(noxeryKey||"").trim();
  if(!noxeryKey)throw new Error("Noxery API Key gerekli.");
  if(bridge&&!bridge.killed)return {ok:true,state:bridgeState};
  const bridgePath=path.join(process.resourcesPath,"bridge.cjs");
  if(!fs.existsSync(bridgePath))throw new Error("Bridge runtime bulunamadı: "+bridgePath);
- bridge=spawn(process.execPath,[bridgePath,forgeKey,noxeryKey,autoDev?"1":"0"],{env:{...process.env,ELECTRON_RUN_AS_NODE:"1",ELECTRON_NO_ASAR:"1"},stdio:["pipe","pipe","pipe"],windowsHide:false});
+ bridge=spawn(process.execPath,[bridgePath,forgeKey,noxeryKey,autoDev?"1":"0",String(provider||"noxery"),String(model||"gpt-6-astra")],{env:{...process.env,ELECTRON_RUN_AS_NODE:"1",ELECTRON_NO_ASAR:"1"},stdio:["pipe","pipe","pipe"],windowsHide:false});
  bridgeStartedAt=Date.now();bridgeLastOutputAt=Date.now();
  setState("starting","Roblox Studio MCP başlatılıyor...");
  bridge.stdout.on("data",b=>{
@@ -85,7 +85,7 @@ if(!gotLock)app.quit();else{
  app.whenReady().then(()=>{
   app.setAppUserModelId("com.robloxforge.ai");accounts=new AccountStore(path.join(app.getPath("userData"),"account.json"));accounts.ensureLocal();
   session.defaultSession.setPermissionRequestHandler((_wc,p,cb)=>cb(p==="clipboard-read"||p==="clipboard-sanitized-write"));
-  ipcMain.handle("bridge-start",(e,a)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return startBridge(a?.forgeKey,a?.noxeryKey,!!a?.autoDev)});
+  ipcMain.handle("bridge-start",(e,a)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return startBridge(a?.forgeKey,a?.noxeryKey,!!a?.autoDev,a?.provider||"noxery",a?.model||"gpt-6-astra")});
   ipcMain.handle("bridge-send",(e,p)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return sendCommand(p)});
   ipcMain.handle("bridge-stop",(e)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return stopBridge()});
   ipcMain.handle("bridge-status",(e)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return {state:bridgeState,alive:!!bridge&&!bridge.killed,pid:bridge?.pid||null,startedAt:bridgeStartedAt||null,lastOutputAt:bridgeLastOutputAt||null,ageMs:bridgeLastOutputAt?Date.now()-bridgeLastOutputAt:null}});
