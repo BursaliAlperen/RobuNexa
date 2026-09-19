@@ -2,11 +2,11 @@ const {contextBridge,ipcRenderer}=require("electron");
 function listen(type,handler){const fn=(_,data)=>{try{handler(data)}catch{}};ipcRenderer.on(type,fn);return ()=>ipcRenderer.removeListener(type,fn)}
 contextBridge.exposeInMainWorld("robloxForgeDesktop",{
  isDesktop:true,
- start:(forgeKey,noxeryKey,autoDev,provider,model)=>ipcRenderer.invoke("bridge-start",{forgeKey:String(forgeKey||""),noxeryKey:String(noxeryKey||""),autoDev:!!autoDev,provider:String(provider||"noxery"),model:String(model||"gpt-6-astra")}),
+ start:(noxeryKey,autoDev,model)=>ipcRenderer.invoke("bridge-start",{noxeryKey:String(noxeryKey||""),autoDev:!!autoDev,model:String(model||"gpt-6-astra")}),
  send:(prompt)=>ipcRenderer.invoke("bridge-send",String(prompt||"")),
  stop:()=>ipcRenderer.invoke("bridge-stop"),
  status:()=>ipcRenderer.invoke("bridge-status"),
- createKey:()=>ipcRenderer.invoke("forge-create-key"),
+ testNoxery:(key)=>ipcRenderer.invoke("noxery-test",String(key||"")),models:(key)=>ipcRenderer.invoke("noxery-models",String(key||"")),chat:(apiKey,messages,model)=>ipcRenderer.invoke("noxery-chat",{apiKey:String(apiKey||""),messages,model:String(model||"gpt-6-astra")}),
  account:()=>ipcRenderer.invoke("account-get"),
  getAccount:()=>ipcRenderer.invoke("account-get"),
  localAccount:()=>ipcRenderer.invoke("account-local"),
