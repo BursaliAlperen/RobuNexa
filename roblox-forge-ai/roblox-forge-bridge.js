@@ -104,6 +104,54 @@ async function postForge(pathname,body,forge){
 
 async function postActivity(forge,level,event,detail="",job_id=null){try{await postForge("/api/activity",{level,event,detail,job_id},forge)}catch{}}
 
+function speakAction(text){
+ try{
+  if(process.platform!=="win32")return;
+  const {spawn}=await import("node:child_process");
+  const safe=String(text||"").replace(/"/g,'\\\"');
+  spawn("powershell.exe",["-NoProfile","-Command","Add-Type -AssemblyName System.Speech; $s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.Speak(\""+safe+"\")"],{windowsHide:true,stdio:"ignore"});
+ }catch{}
+}
+async function createForgePlan(nox,session,prompt){
+ const messages=[
+  {role:"system",content:"You are the Roblox Forge AI planning engine. Do not call tools. Return ONLY valid JSON in this exact shape: {\\"summary\\":\\"...\\",\\"actions\\":[{\\"title\\":\\"...\\",\\"goal\\":\\"...\\",\\"verification\\":\\"...\\"}]}. Create 5 to 10 small, ordered, verifiable actions. The first action must inspect/analyze the live Roblox Studio project. Separate planning from implementation."},
+  {role:"user",content:prompt}
+ ];
+ const d=await askAstra(nox,messages,[]);
+ let raw=String(d?.choices?.[0]?.message?.content||"").trim().replace(/^\\`\\`\\`json\\s*/,"").replace(/\\s*\\`\\`\\`$/,"");
+ let plan;try{plan=JSON.parse(raw)}catch(e){throw Error("Forge planner JSON invalid: "+raw.slice(0,1000))}
+ if(!Array.isArray(plan.actions)||plan.actions.length<1)throw Error("Forge planner returned no actions.");
+ plan.actions=plan.actions.slice(0,10);
+ return plan;
+}
+async function runPlannedForge(nox,session,prompt,autoDev=false){
+ const plan=await createForgePlan(nox,session,prompt);
+ const total=plan.actions.length;
+ console.log("\\n[PLAN 0/"+total+"] "+String(plan.summary||"Forge plan hazır."));
+ console.log("[PLAN JSON] "+JSON.stringify(plan));
+ speakAction("Plan hazır. "+total+" action çalıştırılacak.");
+ const results=[];
+ for(let i=0;i<total;i++){
+  const a=plan.actions[i], index=i+1;
+  const title=String(a.title||"Forge action");
+  console.log("\\n[ACTION "+String(index).padStart(3,"0")+"/"+String(total).padStart(3,"0")+" START] "+title);
+  speakAction(String(index).padStart(3,"0")+". "+title);
+  try{
+   const instruction="EXECUTE ONLY THIS APPROVED FORGE ACTION. Do not begin any other action.\\nACTION "+String(index).padStart(3,"0")+" / "+String(total).padStart(3,"0")+"\\nTITLE: "+title+"\\nGOAL: "+String(a.goal||"")+"\\nVERIFICATION: "+String(a.verification||"")+"\\nUse real Roblox Studio MCP tools. Inspect before modifying. Verify the result with tools. Return a concise evidence-based result.";
+   const r=await runPrompt(nox,session,instruction,autoDev,{index,total});
+   results.push({id:String(index).padStart(3,"0"),title,result:r.summary});
+   console.log("\\n[ACTION "+String(index).padStart(3,"0")+"/"+String(total).padStart(3,"0")+" SUCCESS] "+title);
+   speakAction(String(index).padStart(3,"0")+". tamamlandı.");
+  }catch(e){
+   console.log("\\n[ACTION "+String(index).padStart(3,"0")+"/"+String(total).padStart(3,"0")+" FAILED] "+String(e?.message||e));
+   speakAction(String(index).padStart(3,"0")+". başarısız oldu.");
+   throw e;
+  }
+ }
+ console.log("\\n[FORGE COMPLETE "+total+"/"+total+"]");
+ speakAction("Forge tamamlandı. "+total+" action başarıyla tamamlandı.");
+ return {summary:plan.summary||"Forge tamamlandı.",plan,results};
+}
 async function jobLoop(forge,nox,session,autoDev=false){
  if(!forge)return;
  const heartbeat=async(status,extra={})=>{try{await postForge("/api/bridge/heartbeat",{status,platform:process.platform,tools:session.tools.length,version:"3.1.0",auto_dev:autoDev,...extra},forge)}catch{}};
@@ -115,7 +163,7 @@ async function jobLoop(forge,nox,session,autoDev=false){
     try{
      await heartbeat("working",{job_id:d.job.id});
      await postActivity(forge,"info","JOB STARTED",d.job.prompt,d.job.id);
-     const result=await runPrompt(nox,session,d.job.prompt,autoDev);
+     const result=await runPlannedForge(nox,session,d.job.prompt,autoDev);
      await postForge("/api/jobs/complete",{id:d.job.id,status:"completed",result},forge);
      await postActivity(forge,"info","JOB COMPLETED",String(result.summary||"").slice(0,3500),d.job.id);
      await heartbeat("online");console.log("\n[SITE JOB COMPLETED] "+d.job.id);
@@ -190,7 +238,7 @@ async function main(){
   const prompt=line.trim();if(!prompt){rl.prompt();return}
   if(prompt==="/exit"){await session.client.close().catch(()=>{});rl.close();return}
   if(prompt==="/status"){console.log("[STATUS] Studio MCP connected | tools="+session.tools.length+" | Astra=ready");rl.prompt();return}
-  try{rl.pause();const result=await runPrompt(nox,session,prompt,autoDev);console.log("\n[COMPLETED] "+result.summary);console.log("[MCP CALLS] "+result.steps.length)}
+  try{rl.pause();const result=await runPlannedForge(nox,session,prompt,autoDev);console.log("\n[COMPLETED] "+result.summary);console.log("[MCP CALLS] "+result.steps.length)}
   catch(e){console.error("\n[ERROR] "+(e?.message||e))}
   rl.resume();rl.prompt();
  });
