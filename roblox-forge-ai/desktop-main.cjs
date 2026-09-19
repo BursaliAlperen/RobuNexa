@@ -11,13 +11,13 @@ process.on("unhandledRejection",e=>{log("REJECTION "+(e?.stack||e));});
 function trusted(e){const u=e.senderFrame?.url||"";return u.startsWith("file://")||u===FORGE_URL||u.startsWith(FORGE_URL+"/");}
 function emit(type,data){if(win&&!win.isDestroyed())win.webContents.send("forge-bridge-event",{type,...data});}
 function setState(state,detail=""){bridgeState=state;emit("state",{state,detail});}
-function startBridge(forgeKey,noxeryKey){
+function startBridge(forgeKey,noxeryKey,autoDev=false){
  forgeKey=String(forgeKey||"").trim();noxeryKey=String(noxeryKey||"").trim();
  if(!noxeryKey)throw new Error("Noxery API Key gerekli.");
  if(bridge&&!bridge.killed)return {ok:true,state:bridgeState};
  const bridgePath=path.join(process.resourcesPath,"bridge.cjs");
  if(!fs.existsSync(bridgePath))throw new Error("Bridge runtime bulunamadı: "+bridgePath);
- bridge=spawn(process.execPath,[bridgePath,forgeKey,noxeryKey],{env:{...process.env,ELECTRON_RUN_AS_NODE:"1",ELECTRON_NO_ASAR:"1"},stdio:["pipe","pipe","pipe"],windowsHide:false});
+ bridge=spawn(process.execPath,[bridgePath,forgeKey,noxeryKey,autoDev?"1":"0"],{env:{...process.env,ELECTRON_RUN_AS_NODE:"1",ELECTRON_NO_ASAR:"1"},stdio:["pipe","pipe","pipe"],windowsHide:false});
  setState("starting","Roblox Studio MCP başlatılıyor...");
  bridge.stdout.on("data",b=>emit("log",{stream:"stdout",text:String(b)}));
  bridge.stderr.on("data",b=>emit("log",{stream:"stderr",text:String(b)}));
@@ -43,7 +43,7 @@ if(!gotLock){app.quit();}else{
  app.whenReady().then(()=>{
   app.setAppUserModelId("com.robloxforge.ai");
   session.defaultSession.setPermissionRequestHandler((_wc,p,cb)=>cb(p==="clipboard-read"||p==="clipboard-sanitized-write"));
-  ipcMain.handle("bridge-start",(e,a)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return startBridge(a?.forgeKey,a?.noxeryKey)});
+  ipcMain.handle("bridge-start",(e,a)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return startBridge(a?.forgeKey,a?.noxeryKey,!!a?.autoDev)});
   ipcMain.handle("bridge-send",(e,p)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return sendCommand(p)});
   ipcMain.handle("bridge-stop",(e)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return stopBridge()});
   ipcMain.handle("bridge-status",(e)=>{if(!trusted(e))throw new Error("Untrusted renderer.");return {state:bridgeState,alive:!!bridge&&!bridge.killed}});
