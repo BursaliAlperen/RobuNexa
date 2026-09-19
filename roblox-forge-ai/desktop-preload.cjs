@@ -2,7 +2,7 @@ const {contextBridge,ipcRenderer}=require("electron");
 function listen(type,handler){const fn=(_,data)=>{try{handler(data)}catch{}};ipcRenderer.on(type,fn);return ()=>ipcRenderer.removeListener(type,fn)}
 contextBridge.exposeInMainWorld("robloxForgeDesktop",{
  isDesktop:true,
- start:(forgeKey,noxeryKey,autoDev)=>ipcRenderer.invoke("bridge-start",{forgeKey:String(forgeKey||""),noxeryKey:String(noxeryKey||""),autoDev:!!autoDev}),
+ start:(forgeKey,noxeryKey,autoDev,provider,model)=>ipcRenderer.invoke("bridge-start",{forgeKey:String(forgeKey||""),noxeryKey:String(noxeryKey||""),autoDev:!!autoDev,provider:String(provider||"noxery"),model:String(model||"gpt-6-astra")}),
  send:(prompt)=>ipcRenderer.invoke("bridge-send",String(prompt||"")),
  stop:()=>ipcRenderer.invoke("bridge-stop"),
  status:()=>ipcRenderer.invoke("bridge-status"),
