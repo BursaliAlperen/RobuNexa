@@ -102,7 +102,7 @@ async function postForge(pathname,body,forge){
  return fetch(FORGE_URL+pathname,{method:"POST",headers:{"Content-Type":"application/json","x-forge-key":forge},body:JSON.stringify(body)});
 }
 
-async function postActivity(forge,level,event,detail="",job_id=null){try{await postForge("/api/activity",{level,event,detail,job_id},forge)}catch{}}\n\nasync function autoDevelopmentLoop(forge,nox,session){\n if(!forge)return;\n while(true){\n  try{\n   await heartbeatAuto(forge,session,"auto_working");\n   const prompt="AUTO DEVELOPMENT TICK: Inspect the current Roblox Studio project and autonomously select ONE small, high-impact improvement or bug fix. Implement it completely with real MCP tools, including required LocalScripts/ServerScripts/ModuleScripts, UI, assets, VFX/SFX and mobile support as appropriate. Verify in Studio and Output. Do not ask for approval because the user explicitly enabled Auto Development Mode. If no safe improvement is available, perform a detailed audit and wait.";\n   const result=await runPrompt(nox,session,prompt,true);\n   await postActivity(forge,"info","AUTO DEVELOPMENT COMPLETED",String(result.summary||"").slice(0,3500));\n   await heartbeatAuto(forge,session,"auto_online");\n  }catch(e){await postActivity(forge,"error","AUTO DEVELOPMENT ERROR",String(e?.message||e).slice(0,3500));}\n  await new Promise(r=>setTimeout(r,4000));\n }\n}\nasync function heartbeatAuto(forge,session,status){try{await postForge("/api/bridge/heartbeat",{status,platform:process.platform,tools:session.tools.length,version:"3.1.0",auto_dev:true},forge)}catch{}}\n\nasync function jobLoop(forge,nox,session,autoDev=false){
+async function postActivity(forge,level,event,detail="",job_id=null){try{await postForge("/api/activity",{level,event,detail,job_id},forge)}catch{}}\n\nasync function jobLoop(forge,nox,session,autoDev=false){
  if(!forge)return;
  const heartbeat=async(status,extra={})=>{try{await postForge("/api/bridge/heartbeat",{status,platform:process.platform,tools:session.tools.length,version:"3.0.0",...extra},forge)}catch{}};
  await heartbeat("online");setInterval(()=>heartbeat("online"),10000);
@@ -141,7 +141,7 @@ async function main(){
  console.log("  > add a mobile inventory UI");
  console.log("  > /status");
  console.log("  > /exit\n");
- if(forge){jobLoop(forge,nox,session,autoDev).catch(e=>console.error("[SITE]",e)); if(autoDev)autoDevelopmentLoop(forge,nox,session).catch(e=>console.error("[AUTO DEV]",e)); await postActivity(forge,"info","BRIDGE CONNECTED",`Studio MCP connected; Auto Development=${autoDev?"ON":"OFF"}`);}
+ if(forge){jobLoop(forge,nox,session,autoDev).catch(e=>console.error("[SITE]",e)); await postActivity(forge,"info","BRIDGE CONNECTED",`Studio MCP connected; Auto Development=${autoDev?"ON":"OFF"}`);}
 
  const rl=readline.createInterface({input:process.stdin,output:process.stdout,prompt:"RobloxForgeAI > "});
  rl.prompt();
