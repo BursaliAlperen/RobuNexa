@@ -14,13 +14,13 @@ function loadConfig(){try{return JSON.parse(fs.readFileSync(CONFIG_FILE,"utf8"))
 function saveConfig(c){try{fs.mkdirSync(CONFIG_DIR,{recursive:true});fs.writeFileSync(CONFIG_FILE,JSON.stringify(c,null,2),"utf8")}catch{}}
 
 async function getKeys(){
- const c=loadConfig();let forge=process.argv[2]||c.forgeKey;let nox=process.argv[3]||c.noxeryKey;
+ const c=loadConfig();let forge=process.argv[2]||c.forgeKey;let nox=process.argv[3]||c.noxeryKey;let autoDev=process.argv[4]==="1"||c.autoDev===true;
  if(!nox&&process.stdin.isTTY){
   const rl=readline.createInterface({input:process.stdin,output:process.stdout});
   nox=await new Promise(resolve=>rl.question("Noxery API Key: ",v=>{rl.close();resolve(v.trim())}));
  }
  if(!nox)throw Error("Noxery API Key missing.");
- saveConfig({forgeKey:forge||"",noxeryKey:nox});return {forge,nox};
+ saveConfig({forgeKey:forge||"",noxeryKey:nox,autoDev});return {forge,nox,autoDev};
 }
 
 function studioCommand(){
@@ -61,7 +61,7 @@ async function askAstra(nox,messages,tools){
  throw Error(last||"Noxery API request failed");
 }
 
-async function runPrompt(nox,session,prompt){
+async function runPrompt(nox,session,prompt,autoDev=false){
  const system=[
   "You are GPT-6 Astra, the lead AI game-development director controlling the REAL open Roblox Studio through its MCP server. You are not a generic chatbot and must work against the actual current Studio project.",
   "MANDATORY: First inspect the live Studio session and DataModel before proposing or changing anything. Use list_roblox_studios, get_studio_state and relevant Explorer/script/screenshot tools available.",
@@ -76,9 +76,9 @@ async function runPrompt(nox,session,prompt){
   "COMPLETENESS: never stop at a visual mockup. For every approved phase implement the complete connected feature, then inspect hierarchy/scripts, playtest, inspect Output/errors and fix failures before declaring completion.","For build/fix requests after explicit approval, use real MCP tools and execute ONLY the currently approved phase. Read existing scripts before editing. Playtest and inspect console output after important changes. Never claim success without tool evidence. When the approved phase is finished, STOP, report the verified result, and ask for approval for the next phase. Do not continue automatically.",
   "Be technical and specific. Prefer simple robust systems over fake complexity. Use studded/dark premium UI when style is unspecified, PC + mobile support, and Creator Store assets where appropriate.",
   "Remember the current session conversation context and previous Studio findings instead of restarting from zero.",
-  "For analysis/plan requests, separate CURRENT PROJECT AUDIT, OPPORTUNITIES, AAA PLAN, BUILD PHASES and NEXT ACTION. For ANY request that would modify Studio, first produce the plan and STOP for explicit approval unless the user message contains an explicit approval phrase such as PLAN KABUL EDİLDİ, ETABI KABUL ET or APPROVED. Never modify Studio merely because the user asked for a feature; the approval gate is mandatory."
+  "For analysis/plan requests, separate CURRENT PROJECT AUDIT, OPPORTUNITIES, AAA PLAN, BUILD PHASES and NEXT ACTION. For ANY request that would modify Studio, first produce the plan and STOP for explicit approval unless the user message contains an explicit approval phrase such as PLAN KABUL EDİLDİ, ETABI KABUL ET or APPROVED. Never modify Studio merely because the user asked for a feature; the approval gate is mandatory unless AUTO DEVELOPMENT MODE is explicitly enabled by the desktop user."
  ].join("\n");
- let messages=session.chatMessages||[{role:"system",content:system}],trace=[];
+ let messages=session.chatMessages||[{role:"system",content:system}],trace=[]; if(autoDev){messages[0].content+="\nAUTO DEVELOPMENT MODE IS EXPLICITLY ENABLED BY THE USER. You may autonomously choose and execute one small, high-value improvement at a time without asking for approval, but only after inspecting the live project. Never delete or replace working systems unnecessarily. After each completed improvement, verify it, log the result, then continue only if the next improvement is clearly safe and connected."; }
  session.chatMessages=messages;
  messages.push({role:"user",content:prompt});
  for(let i=0;i<80;i++){
@@ -102,7 +102,7 @@ async function postForge(pathname,body,forge){
  return fetch(FORGE_URL+pathname,{method:"POST",headers:{"Content-Type":"application/json","x-forge-key":forge},body:JSON.stringify(body)});
 }
 
-async function jobLoop(forge,nox,session){
+async function postActivity(forge,level,event,detail="",job_id=null){try{await postForge("/api/activity",{level,event,detail,job_id},forge)}catch{}}\n\nasync function autoDevelopmentLoop(forge,nox,session){\n if(!forge)return;\n while(true){\n  try{\n   await heartbeatAuto(forge,session,"auto_working");\n   const prompt="AUTO DEVELOPMENT TICK: Inspect the current Roblox Studio project and autonomously select ONE small, high-impact improvement or bug fix. Implement it completely with real MCP tools, including required LocalScripts/ServerScripts/ModuleScripts, UI, assets, VFX/SFX and mobile support as appropriate. Verify in Studio and Output. Do not ask for approval because the user explicitly enabled Auto Development Mode. If no safe improvement is available, perform a detailed audit and wait.";\n   const result=await runPrompt(nox,session,prompt,true);\n   await postActivity(forge,"info","AUTO DEVELOPMENT COMPLETED",String(result.summary||"").slice(0,3500));\n   await heartbeatAuto(forge,session,"auto_online");\n  }catch(e){await postActivity(forge,"error","AUTO DEVELOPMENT ERROR",String(e?.message||e).slice(0,3500));}\n  await new Promise(r=>setTimeout(r,4000));\n }\n}\nasync function heartbeatAuto(forge,session,status){try{await postForge("/api/bridge/heartbeat",{status,platform:process.platform,tools:session.tools.length,version:"3.1.0",auto_dev:true},forge)}catch{}}\n\nasync function jobLoop(forge,nox,session,autoDev=false){
  if(!forge)return;
  const heartbeat=async(status,extra={})=>{try{await postForge("/api/bridge/heartbeat",{status,platform:process.platform,tools:session.tools.length,version:"3.0.0",...extra},forge)}catch{}};
  await heartbeat("online");setInterval(()=>heartbeat("online"),10000);
@@ -113,11 +113,11 @@ async function jobLoop(forge,nox,session){
     try{
      await heartbeat("working",{job_id:d.job.id});
      const result=await runPrompt(nox,session,d.job.prompt);
-     await postForge("/api/jobs/complete",{id:d.job.id,status:"completed",result},forge);
+     await postForge("/api/jobs/complete",{id:d.job.id,status:"completed",result},forge);\n     await postActivity(forge,"info","JOB COMPLETED",String(result.summary||"").slice(0,3500),d.job.id);
      await heartbeat("online");console.log("\n[SITE JOB COMPLETED] "+d.job.id);
     }catch(e){
      const msg=String(e?.message||e);
-     await postForge("/api/jobs/complete",{id:d.job.id,status:"failed",result:null,error:msg},forge);
+     await postForge("/api/jobs/complete",{id:d.job.id,status:"failed",result:null,error:msg},forge);\n     await postActivity(forge,"error","JOB FAILED",msg,d.job.id);
      console.error("\n[SITE JOB FAILED] "+msg);
     }
    }
@@ -128,7 +128,7 @@ async function jobLoop(forge,nox,session){
 
 async function main(){
  console.log("========================================\n Roblox Forge AI Bridge v3\n========================================");
- const {forge,nox}=await getKeys();let session;
+ const {forge,nox,autoDev}=await getKeys();let session;
  for(let attempt=1;;attempt++){
   try{console.log("\n[1/2] Roblox Studio MCP baglaniyor...");session=await connectStudio();console.log("[OK] Studio baglandi. MCP tools: "+session.tools.length);break}
   catch(e){console.error("[MCP] Baglanti basarisiz: "+(e?.message||e));if(attempt>=5)throw e;console.log("Studio MCP yeniden deneniyor...");await new Promise(r=>setTimeout(r,3000))}
@@ -141,7 +141,7 @@ async function main(){
  console.log("  > add a mobile inventory UI");
  console.log("  > /status");
  console.log("  > /exit\n");
- if(forge)jobLoop(forge,nox,session).catch(e=>console.error("[SITE]",e));
+ if(forge){jobLoop(forge,nox,session,autoDev).catch(e=>console.error("[SITE]",e)); if(autoDev)autoDevelopmentLoop(forge,nox,session).catch(e=>console.error("[AUTO DEV]",e)); await postActivity(forge,"info","BRIDGE CONNECTED",`Studio MCP connected; Auto Development=${autoDev?"ON":"OFF"}`);}
 
  const rl=readline.createInterface({input:process.stdin,output:process.stdout,prompt:"RobloxForgeAI > "});
  rl.prompt();
@@ -149,7 +149,7 @@ async function main(){
   const prompt=line.trim();if(!prompt){rl.prompt();return}
   if(prompt==="/exit"){await session.client.close().catch(()=>{});rl.close();return}
   if(prompt==="/status"){console.log("[STATUS] Studio MCP connected | tools="+session.tools.length+" | Astra=ready");rl.prompt();return}
-  try{rl.pause();const result=await runPrompt(nox,session,prompt);console.log("\n[COMPLETED] "+result.summary);console.log("[MCP CALLS] "+result.steps.length)}
+  try{rl.pause();const result=await runPrompt(nox,session,prompt,autoDev);console.log("\n[COMPLETED] "+result.summary);console.log("[MCP CALLS] "+result.steps.length)}
   catch(e){console.error("\n[ERROR] "+(e?.message||e))}
   rl.resume();rl.prompt();
  });
