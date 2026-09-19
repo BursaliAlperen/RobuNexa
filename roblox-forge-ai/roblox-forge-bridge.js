@@ -7,7 +7,6 @@ import path from "node:path";
 import readline from "node:readline";
 import { spawn } from "node:child_process";
 
-const FORGE_URL="https://roblox-forge-ai.hatchable.site";
 const CONFIG_DIR=path.join(os.homedir(),".roblox-forge-ai");
 const CONFIG_FILE=path.join(CONFIG_DIR,"config.json");
 
@@ -15,13 +14,13 @@ function loadConfig(){try{return JSON.parse(fs.readFileSync(CONFIG_FILE,"utf8"))
 function saveConfig(c){try{fs.mkdirSync(CONFIG_DIR,{recursive:true});fs.writeFileSync(CONFIG_FILE,JSON.stringify(c,null,2),"utf8")}catch{}}
 
 async function getKeys(){
- const c=loadConfig();let forge=process.argv[2]||c.forgeKey;let nox=process.argv[3]||c.noxeryKey;let autoDev=process.argv[4]==="1"||c.autoDev===true;let provider=process.argv[5]||c.provider||"noxery";let model=process.argv[6]||c.model||"";
+ const c=loadConfig();let nox=process.argv[2]||c.noxeryKey;let autoDev=process.argv[3]==="1"||c.autoDev===true;let provider="noxery";let model=process.argv[4]||c.model||"gpt-6-astra";
  if(!nox&&process.stdin.isTTY){
   const rl=readline.createInterface({input:process.stdin,output:process.stdout});
   nox=await new Promise(resolve=>rl.question("Noxery API Key: ",v=>{rl.close();resolve(v.trim())}));
  }
  if(!nox)throw Error("Noxery API Key missing.");
- saveConfig({forgeKey:forge||"",noxeryKey:nox,autoDev,provider,model});return {forge,nox,autoDev,provider,model};
+ saveConfig({noxeryKey:nox,autoDev,provider:"noxery",model});return {nox,autoDev,provider:"noxery",model};
 }
 
 function studioCommand(){
@@ -50,8 +49,8 @@ async function askAstra(nox,messages,tools,provider="noxery",model="gpt-6-astra"
  for(let attempt=1;attempt<=4;attempt++){
   try{
    const c=new AbortController();const timer=setTimeout(()=>c.abort(),90000);
-   const base=provider==="lemonade"?"http://127.0.0.1:13305/v1/chat/completions":"https://api.noxery.net/v1/chat/completions";const key=provider==="lemonade"?(process.env.LEMONADE_API_KEY||""):nox;const headers={"Content-Type":"application/json"};if(key)headers.Authorization="Bearer "+key;const r=await fetch(base,{method:"POST",headers,signal:c.signal,body:JSON.stringify({
-    model:provider==="lemonade"?model:"gpt-6-astra",messages,temperature:0.15,max_completion_tokens:9000,stream:false,
+   const base="https://api.noxery.net/v1/chat/completions";const key=nox;const headers={"Content-Type":"application/json"};if(key)headers.Authorization="Bearer "+key;const r=await fetch(base,{method:"POST",headers,signal:c.signal,body:JSON.stringify({
+    model:"gpt-6-astra",messages,temperature:0.15,max_completion_tokens:9000,stream:false,
     tools:tools.map(t=>({type:"function",function:{name:t.name,description:t.description||"",parameters:t.inputSchema||{type:"object",properties:{}}}})),tool_choice:"auto"
    })});
    clearTimeout(timer);const raw=await r.text();let d;try{d=JSON.parse(raw)}catch{throw Error("Noxery invalid JSON: "+raw.slice(0,500))}
@@ -216,8 +215,8 @@ Begin by inspecting the live Studio project now.`;
 }
 
 async function main(){
- console.log("========================================\n Roblox Forge AI Bridge v3\n========================================");
- const {forge,nox,autoDev,provider:configuredProvider,model:configuredModel}=await getKeys();const provider=process.env.FORGE_PROVIDER||configuredProvider||"noxery";const model=process.env.FORGE_MODEL||configuredModel||(provider==="lemonade"?"auto":"gpt-6-astra");let session;
+ console.log("========================================\n Roblox Forge AI Bridge · Noxery GPT-6 Astra\n========================================");
+ const {nox,autoDev,provider,model}=await getKeys();let session;
  for(let attempt=1;;attempt++){
   try{console.log("\n[1/2] Roblox Studio MCP baglaniyor...");session=await connectStudio();console.log("[OK] Studio baglandi. MCP tools: "+session.tools.length);break}
   catch(e){console.error("[MCP] Baglanti basarisiz: "+(e?.message||e));if(attempt>=5)throw e;console.log("Studio MCP yeniden deneniyor...");await new Promise(r=>setTimeout(r,3000))}
@@ -230,8 +229,7 @@ async function main(){
  console.log("  > add a mobile inventory UI");
  console.log("  > /status");
  console.log("  > /exit\n");
- if(forge){jobLoop(forge,nox,session,autoDev,provider,model).catch(e=>console.error("[SITE]",e)); await postActivity(forge,"info","BRIDGE CONNECTED",`Studio MCP connected; Auto Development=${autoDev?"ON":"OFF"}`);}
-
+ 
  const rl=readline.createInterface({input:process.stdin,output:process.stdout,prompt:"RobloxForgeAI > "});
  rl.prompt();
  rl.on("line",async line=>{
