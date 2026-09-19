@@ -1,0 +1,69 @@
+name: Build Roblox Forge AI EXE from uploaded ZIP
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "RobuNexa-rfa-v2.0.54-fixed.zip"
+      - ".github/workflows/build-from-zip.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Extract uploaded ZIP
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "RobuNexa-rfa-v2.0.54-fixed.zip")) { throw "Uploaded ZIP not found" }
+          if (Test-Path "build-src") { Remove-Item "build-src" -Recurse -Force }
+          New-Item -ItemType Directory -Path "build-src" | Out-Null
+          Expand-Archive -Path "RobuNexa-rfa-v2.0.54-fixed.zip" -DestinationPath "build-src" -Force
+          $dirs = Get-ChildItem "build-src" -Directory
+          if ($dirs.Count -lt 1) { throw "ZIP extraction produced no project directory" }
+          $project = Join-Path $dirs[0].FullName "roblox-forge-ai"
+          if (-not (Test-Path (Join-Path $project "package.json"))) { throw "roblox-forge-ai/package.json not found in ZIP" }
+          Write-Host "Project: $project"
+          "PROJECT=$project" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Install dependencies
+        working-directory: ${{ env.PROJECT }}
+        run: npm install --no-audit --no-fund
+
+      - name: Static checks
+        working-directory: ${{ env.PROJECT }}
+        run: npm run check
+
+      - name: Regression tests
+        working-directory: ${{ env.PROJECT }}
+        run: |
+          node tests/auth.test.mjs
+          node tests/main.test.cjs
+
+      - name: Build Windows x64 portable EXE
+        working-directory: ${{ env.PROJECT }}
+        run: npm run build:exe
+
+      - name: Verify EXE
+        shell: pwsh
+        run: |
+          $exe = Join-Path $env.PROJECT "dist/RobloxForgeAI-Windows-x64.exe"
+          if (-not (Test-Path $exe)) { throw "EXE was not created: $exe" }
+          $size = (Get-Item $exe).Length
+          if ($size -lt 50000000) { throw "EXE is suspiciously small: $size bytes" }
+          Write-Host "EXE OK: $size bytes"
+
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RobloxForgeAI-Windows-x64
+          path: ${{ env.PROJECT }}/dist/RobloxForgeAI-Windows-x64.exe
+          retention-days: 30
