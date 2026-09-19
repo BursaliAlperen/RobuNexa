@@ -1,0 +1,336 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+<External>null</External>
+<External>nil</External>
+<Item class="Script" referent="RBXFORGEAI01">
+<Properties>
+<bool name="Disabled">false</bool>
+<Content name="LinkedSource"><null></null></Content>
+<string name="Name">RobloxForgeAI</string>
+<string name="ScriptGuid">{B7A92C27-77E1-4BB6-8A0E-FORGEAI2026}</string>
+<ProtectedString name="Source"><![CDATA[
+--!strict
+local HttpService = game:GetService("HttpService")
+local StudioService = game:GetService("StudioService")
+local ScriptEditorService = game:GetService("ScriptEditorService")
+local Selection = game:GetService("Selection")
+
+local API = "https://roblox-forge-ai.hatchable.site"
+local NOXERY = "https://api.noxery.net/v1/chat/completions"
+
+local toolbar = plugin:CreateToolbar("Roblox Forge AI")
+local button = toolbar:CreateButton("Forge AI", "Open Roblox Forge AI", "rbxassetid://14978048121", "Forge AI")
+button.ClickableWhenViewportHidden = true
+
+local widget = plugin:CreateDockWidgetPluginGuiAsync(
+  "RobloxForgeAI",
+  DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Right, false, false, 390, 620)
+)
+widget.Title = "Roblox Forge AI"
+widget.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local missionWidget = plugin:CreateDockWidgetPluginGuiAsync(
+  "RobloxForgeAIMission",
+  DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, false, true, 640, 380, 520, 300)
+)
+missionWidget.Title = "Forge AI · Live Mission"
+missionWidget.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local function mk(class, props)
+  local o = Instance.new(class)
+  for k,v in pairs(props) do o[k] = v end
+  return o
+end
+
+local root = mk("Frame",{Parent=widget,Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(8,12,19),BorderSizePixel=0})
+mk("UIPadding",{Parent=root,PaddingTop=12,PaddingBottom=12,PaddingLeft=12,PaddingRight=12})
+mk("UIListLayout",{Parent=root,Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder})
+
+mk("TextLabel",{Parent=root,Size=UDim2.new(1,0,0,32),BackgroundTransparency=1,Text="⚡ ROBLOX FORGE AI",TextColor3=Color3.fromRGB(242,246,255),TextSize=20,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left,LayoutOrder=1})
+mk("TextLabel",{Parent=root,Size=UDim2.new(1,0,0,34),BackgroundTransparency=1,Text="AAA WEB DASHBOARD • LIVE STUDIO AGENT",TextColor3=Color3.fromRGB(129,145,173),TextSize=10,Font=Enum.Font.Gotham,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,LayoutOrder=2})
+
+local function field(label, placeholder, order)
+  local box = mk("Frame",{Parent=root,Size=UDim2.new(1,0,0,58),BackgroundTransparency=1,LayoutOrder=order})
+  mk("TextLabel",{Parent=box,Size=UDim2.new(1,0,0,18),BackgroundTransparency=1,Text=label,TextColor3=Color3.fromRGB(147,163,191),TextSize=9,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left})
+  return mk("TextBox",{Parent=box,Position=UDim2.new(0,0,0,20),Size=UDim2.new(1,0,0,34),BackgroundColor3=Color3.fromRGB(13,18,28),BorderColor3=Color3.fromRGB(38,51,71),TextColor3=Color3.fromRGB(238,243,252),PlaceholderColor3=Color3.fromRGB(83,99,123),PlaceholderText=placeholder,TextSize=11,Font=Enum.Font.Code,ClearTextOnFocus=false})
+end
+
+local noxeryKey = field("NOXERY API KEY","Noxery key",3)
+local pairCode = field("PAIR CODE","Dashboard'dan 6 haneli kod",4)
+local model = field("MODEL","gpt-6-astra",5)
+
+local row=mk("Frame",{Parent=root,Size=UDim2.new(1,0,0,38),BackgroundTransparency=1,LayoutOrder=8})
+mk("UIListLayout",{Parent=row,FillDirection=Enum.FillDirection.Horizontal,Padding=UDim.new(0,7)})
+local connect=mk("TextButton",{Parent=row,Size=UDim2.new(0.33,-4,1,0),BackgroundColor3=Color3.fromRGB(85,106,245),TextColor3=Color3.new(1,1,1),Text="PAIR / CONNECT",TextSize=11,Font=Enum.Font.GothamBold})
+local scan=mk("TextButton",{Parent=row,Size=UDim2.new(0.34,-4,1,0),BackgroundColor3=Color3.fromRGB(26,35,50),TextColor3=Color3.fromRGB(224,232,243),Text="SCAN",TextSize=11,Font=Enum.Font.GothamBold})
+local importBtn=mk("TextButton",{Parent=row,Size=UDim2.new(0.33,-4,1,0),BackgroundColor3=Color3.fromRGB(22,31,45),TextColor3=Color3.fromRGB(224,232,243),Text="IMPORT",TextSize=11,Font=Enum.Font.GothamBold})
+
+local status=mk("TextLabel",{Parent=root,Size=UDim2.new(1,0,0,30),BackgroundColor3=Color3.fromRGB(29,20,24),TextColor3=Color3.fromRGB(255,132,149),Text="● NOT CONNECTED",TextSize=10,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left,LayoutOrder=9})
+mk("UIPadding",{Parent=status,PaddingLeft=10})
+
+local log=mk("TextLabel",{Parent=root,Size=UDim2.new(1,0,0,162),BackgroundColor3=Color3.fromRGB(8,12,18),TextColor3=Color3.fromRGB(151,169,194),Text="Ready.",TextSize=10,Font=Enum.Font.Code,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top,LayoutOrder=10})
+mk("UIPadding",{Parent=log,PaddingTop=8,PaddingBottom=8,PaddingLeft=8,PaddingRight=8})
+
+local toast = mk("Frame",{Parent=root,AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.5),Size=UDim2.new(0.82,0,0,92),BackgroundColor3=Color3.fromRGB(14,20,30),BorderColor3=Color3.fromRGB(50,66,92),Visible=false,ZIndex=20})
+mk("UICorner",{Parent=toast,CornerRadius=UDim.new(0,16)})
+local toastTitle=mk("TextLabel",{Parent=toast,Position=UDim2.new(0,14,0,12),Size=UDim2.new(1,-28,0,23),BackgroundTransparency=1,Text="PLUGIN CONNECTED",TextColor3=Color3.fromRGB(226,235,255),TextSize=15,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left,ZIndex=21})
+local toastText=mk("TextLabel",{Parent=toast,Position=UDim2.new(0,14,0,39),Size=UDim2.new(1,-28,0,40),BackgroundTransparency=1,Text="Studio heartbeat online.",TextColor3=Color3.fromRGB(139,154,181),TextSize=10,Font=Enum.Font.Gotham,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,ZIndex=21})
+
+local function say(s)
+  log.Text = os.date("%H:%M:%S").."  "..tostring(s).."\n"..log.Text
+end
+
+local function save()
+  plugin:SetSetting("noxeryKey",noxeryKey.Text)
+  plugin:SetSetting("pairCode",string.upper(pairCode.Text))
+  plugin:SetSetting("model",model.Text)
+end
+
+local function load()
+  noxeryKey.Text=tostring(plugin:GetSetting("noxeryKey") or "")
+  pairCode.Text=tostring(plugin:GetSetting("pairCode") or "")
+  model.Text=tostring(plugin:GetSetting("model") or "gpt-6-astra")
+end
+load()
+
+local function request(url, method, body, headers)
+  local h=headers or {}
+  h["Content-Type"]="application/json"
+  local res=HttpService:RequestAsync({Url=url,Method=method or "GET",Headers=h,Body=body and HttpService:JSONEncode(body) or nil})
+  if not res.Success then error("HTTP "..tostring(res.StatusCode)..": "..tostring(res.StatusMessage)) end
+  return res.Body=="" and {} or HttpService:JSONDecode(res.Body)
+end
+
+local toastSerial=0
+local lastOnline=false
+local function connectionPopup(online, detail)
+  toastSerial=toastSerial+1
+  local serial=toastSerial
+  toast.Visible=true
+  toast.BackgroundColor3=online and Color3.fromRGB(11,34,27) or Color3.fromRGB(36,19,25)
+  toastTitle.Text=online and "PLUGIN CONNECTED" or "PLUGIN NOT CONNECTED"
+  toastTitle.TextColor3=online and Color3.fromRGB(101,232,175) or Color3.fromRGB(255,126,145)
+  toastText.Text=detail or (online and "Web Dashboard ↔ Studio live." or "Pair Code veya Forge API Key kontrolü gerekli.")
+  task.delay(3.2,function() if serial==toastSerial then toast.Visible=false end end)
+end
+
+local function setConnection(online, detail)
+  status.Text=online and "● CONNECTED" or "● NOT CONNECTED"
+  status.BackgroundColor3=online and Color3.fromRGB(9,34,27) or Color3.fromRGB(38,20,26)
+  status.TextColor3=online and Color3.fromRGB(92,228,173) or Color3.fromRGB(255,126,145)
+  if online~=lastOnline then connectionPopup(online,detail) end
+  lastOnline=online
+end
+
+local missionRoot = mk("Frame",{Parent=missionWidget,Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(7,11,18),BorderSizePixel=0})
+mk("UICorner",{Parent=missionRoot,CornerRadius=UDim.new(0,18)})
+mk("UIPadding",{Parent=missionRoot,PaddingTop=18,PaddingBottom=18,PaddingLeft=18,PaddingRight=18})
+local missionTop=mk("Frame",{Parent=missionRoot,Size=UDim2.new(1,0,0,42),BackgroundTransparency=1})
+mk("TextLabel",{Parent=missionTop,Position=UDim2.new(0,0,0,0),Size=UDim2.new(0.65,0,1,0),BackgroundTransparency=1,Text="FORGE AI • LIVE MISSION",TextColor3=Color3.fromRGB(235,241,252),TextSize=15,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left})
+local missionState=mk("TextLabel",{Parent=missionTop,Position=UDim2.new(0.65,0,0,5),Size=UDim2.new(0.35,0,1,-5),BackgroundTransparency=1,Text="READY",TextColor3=Color3.fromRGB(104,224,173),TextSize=9,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Right})
+local missionPrompt=mk("TextLabel",{Parent=missionRoot,Position=UDim2.new(0,0,0,54),Size=UDim2.new(1,0,0,84),BackgroundColor3=Color3.fromRGB(11,17,27),BorderColor3=Color3.fromRGB(29,41,58),Text="Waiting for prompt…",TextColor3=Color3.fromRGB(219,227,240),TextSize=11,Font=Enum.Font.Gotham,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top})
+mk("UIPadding",{Parent=missionPrompt,PaddingTop=12,PaddingBottom=12,PaddingLeft=12,PaddingRight=12})
+local progress=mk("TextLabel",{Parent=missionRoot,Position=UDim2.new(0,0,0,150),Size=UDim2.new(1,0,0,32),BackgroundTransparency=1,Text="000/000",TextColor3=Color3.fromRGB(113,135,255),TextSize=21,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left})
+local progressBar=mk("Frame",{Parent=missionRoot,Position=UDim2.new(0,0,0,190),Size=UDim2.new(1,0,0,8),BackgroundColor3=Color3.fromRGB(24,32,46),BorderSizePixel=0})
+mk("UICorner",{Parent=progressBar,CornerRadius=UDim.new(1,0)})
+local progressFill=mk("Frame",{Parent=progressBar,Size=UDim2.new(0,0,1,0),BackgroundColor3=Color3.fromRGB(91,116,255),BorderSizePixel=0})
+mk("UICorner",{Parent=progressFill,CornerRadius=UDim.new(1,0)})
+local missionDetail=mk("TextLabel",{Parent=missionRoot,Position=UDim2.new(0,0,0,214),Size=UDim2.new(1,0,0,72),BackgroundTransparency=1,Text="Prompt bekleniyor.",TextColor3=Color3.fromRGB(126,143,168),TextSize=10,Font=Enum.Font.Code,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top})
+
+local function mission(show,prompt,stateText,current,total,detail)
+  missionWidget.Enabled=show
+  if not show then return end
+  missionPrompt.Text=tostring(prompt or "Waiting for prompt…")
+  missionState.Text=tostring(stateText or "WORKING")
+  local n=tonumber(current) or 0
+  local t=math.max(tonumber(total) or 0,1)
+  progress.Text=string.format("%03d/%03d",n,t)
+  progressFill.Size=UDim2.new(math.clamp(n/t,0,1),0,1,0)
+  missionDetail.Text=tostring(detail or "")
+end
+
+local function claim()
+  save()
+  if pairCode.Text=="" then error("Pair Code gerekli.") end
+  local userId=tostring(StudioService:GetUserId())
+  local r=request(API.."/api/plugin/pair/claim","POST",{pair_code=pairCode.Text,plugin_name="Roblox Forge AI Studio Plugin",roblox_user_id=userId})
+  if not r.ok then error(r.error or "Pair başarısız.") end
+  setConnection(true,"Studio User "..userId.." paired.")
+  say("PAIR OK · Studio User "..userId)
+end
+
+local function heartbeat()
+  if pairCode.Text=="" then return end
+  local r=request(API.."/api/plugin/pair/heartbeat","POST",{pair_code=pairCode.Text})
+  if not r.ok then error(r.error or "Heartbeat başarısız.") end
+  setConnection(true,"Heartbeat online.")
+end
+
+local function jsonFromText(s)
+  s=s:match("^%s*(.-)%s*$")
+  local ok,data=pcall(function() return HttpService:JSONDecode(s) end)
+  if ok then return data end
+  error("Noxery JSON döndürmedi.")
+end
+
+local function askNoxery(prompt)
+  if noxeryKey.Text=="" then error("Noxery API Key gerekli.") end
+  local system=[[
+You are Roblox Forge AI inside Roblox Studio.
+Return ONLY valid JSON, no markdown.
+Schema: {"summary":"...","actions":[{"type":"create_folder|create_script|update_script|create_part|set_property|set_attribute|delete_instance","path":"Workspace/Foo","name":"Bar","className":"Script","source":"...","property":"Name","value":"...","attribute":"..."}]}
+Use small verifiable actions. Never delete or overwrite unrelated content.
+]]
+  local body={model=model.Text~="" and model.Text or "gpt-6-astra",messages={{role="system",content=system},{role="user",content=prompt}},temperature=0.2}
+  local r=request(NOXERY,"POST",body,{Authorization="Bearer "..noxeryKey.Text})
+  local content=r.choices and r.choices[1] and r.choices[1].message and r.choices[1].message.content
+  if not content then error("Noxery response boş.") end
+  return jsonFromText(content)
+end
+
+local function resolve(path)
+  local current=game
+  for part in string.gmatch(path or "","[^/]+") do
+    if part~="game" and part~="" then current=current:FindFirstChild(part) end
+    if not current then return nil end
+  end
+  return current
+end
+
+local function makeParent(path)
+  return resolve(path or "game") or game
+end
+
+local function setValue(inst, prop, value)
+  if prop=="Name" then inst.Name=tostring(value)
+  elseif prop=="Anchored" and inst:IsA("BasePart") then inst.Anchored=(value==true or tostring(value)=="true")
+  elseif prop=="CanCollide" and inst:IsA("BasePart") then inst.CanCollide=(value==true or tostring(value)=="true")
+  elseif prop=="Transparency" and inst:IsA("BasePart") then inst.Transparency=tonumber(value) or 0
+  elseif prop=="Size" and inst:IsA("BasePart") then inst.Size=Vector3.new(tonumber(value.x) or 1,tonumber(value.y) or 1,tonumber(value.z) or 1)
+  elseif prop=="Position" and inst:IsA("BasePart") then inst.Position=Vector3.new(tonumber(value.x) or 0,tonumber(value.y) or 0,tonumber(value.z) or 0)
+  else error("Desteklenmeyen property: "..tostring(prop)) end
+end
+
+local function applyAction(a)
+  local typ=a.type
+  if typ=="create_folder" then
+    local x=Instance.new("Folder"); x.Name=a.name or "ForgeFolder"; x.Parent=makeParent(a.path); return x:GetFullName()
+  elseif typ=="create_script" then
+    local cls=a.className or "Script"; if cls~="Script" and cls~="LocalScript" and cls~="ModuleScript" then cls="Script" end
+    local x=Instance.new(cls); x.Name=a.name or "ForgeScript"; x.Parent=makeParent(a.path)
+    ScriptEditorService:UpdateSourceAsync(x,function() return tostring(a.source or "") end); return x:GetFullName()
+  elseif typ=="update_script" then
+    local x=resolve(a.path); if not x or not x:IsA("LuaSourceContainer") then error("Script bulunamadı: "..tostring(a.path)) end
+    ScriptEditorService:UpdateSourceAsync(x,function() return tostring(a.source or "") end); return x:GetFullName()
+  elseif typ=="create_part" then
+    local x=Instance.new("Part"); x.Name=a.name or "ForgePart"; x.Size=Vector3.new(4,1,4); x.Anchored=true; x.Parent=makeParent(a.path)
+    if a.position then x.Position=Vector3.new(tonumber(a.position.x) or 0,tonumber(a.position.y) or 0,tonumber(a.position.z) or 0) end
+    return x:GetFullName()
+  elseif typ=="set_property" then
+    local x=resolve(a.path); if not x then error("Instance bulunamadı: "..tostring(a.path)) end; setValue(x,a.property,a.value); return x:GetFullName().."."..tostring(a.property)
+  elseif typ=="set_attribute" then
+    local x=resolve(a.path); if not x then error("Instance bulunamadı: "..tostring(a.path)) end; x:SetAttribute(tostring(a.attribute),a.value); return x:GetFullName()
+  elseif typ=="delete_instance" then
+    local x=resolve(a.path); if not x or x==game or x==workspace then error("Silme engellendi: "..tostring(a.path)) end
+    local full=x:GetFullName(); x:Destroy(); return "DELETED "..full
+  end
+  error("Bilinmeyen action: "..tostring(typ))
+end
+
+local function executePrompt(id,prompt)
+  say("PROMPT · "..prompt)
+  mission(true,prompt,"PLANNING",0,10,"Noxery plan engine çalışıyor…\nStudio context okunuyor ve küçük doğrulanabilir actions hazırlanıyor.")
+  local plan=askNoxery(prompt.."\nÖnce analiz et, sonra küçük ve doğrulanabilir action listesi üret. Mevcut sistemi gereksiz yere silme.")
+  local actions=plan.actions or {}
+  local total=#actions
+  say("PLAN · "..tostring(total).." ACTION")
+  mission(true,prompt,"PLAN READY",0,total,"Plan hazır. Studio action pipeline başlıyor.")
+  local results={}
+  for i,a in ipairs(actions) do
+    local detail=string.format("%s\n%s",tostring(a.type),tostring(a.path or a.name or ""))
+    say(string.format("ACTION %03d/%03d · %s",i,total,tostring(a.type)))
+    mission(true,prompt,string.format("ACTION %03d/%03d",i,total),i-1,total,detail)
+    local ok,res=pcall(applyAction,a)
+    if not ok then
+      say("ACTION FAILED · "..tostring(res))
+      mission(true,prompt,"FAILED",i,total,"Action failed:\n"..tostring(res))
+      request(API.."/api/plugin/complete","POST",{pair_code=pairCode.Text,command_id=id,status="error",error=tostring(res),result={step=i,total=total}})
+      return
+    end
+    results[#results+1]=res
+    say("ACTION SUCCESS · "..tostring(res))
+    mission(true,prompt,string.format("ACTION %03d/%03d ✓",i,total),i,total,"SUCCESS · "..tostring(res))
+  end
+  request(API.."/api/plugin/complete","POST",{pair_code=pairCode.Text,command_id=id,status="completed",result={summary=plan.summary,actions=results,total=total}})
+  say("FORGE COMPLETE "..tostring(total).."/"..tostring(total))
+  mission(true,prompt,"COMPLETE",total,total,(plan.summary or "Mission tamamlandı.").."\n\n"..tostring(total).." doğrulanabilir action Studio'da uygulandı.")
+  task.delay(5,function() missionWidget.Enabled=false end)
+end
+
+local running=false
+local function poll()
+  if running or pairCode.Text=="" then return end
+  running=true
+  task.spawn(function()
+    local ok,err=pcall(function()
+      heartbeat()
+      local r=request(API.."/api/plugin/command?pair_code="..HttpService:UrlEncode(pairCode.Text),"GET")
+      if r.command then executePrompt(tostring(r.command.id),tostring(r.command.prompt)) end
+    end)
+    if not ok then
+      setConnection(false,tostring(err))
+      say("ERROR · "..tostring(err))
+    end
+    running=false
+  end)
+end
+
+importBtn.MouseButton1Click:Connect(function()
+  local ok,err=pcall(function()
+    local file=StudioService:PromptImportFileAsync({"rbxm","rbxmx"})
+    if not file then return end
+    say("IMPORT · "..tostring(file.Name))
+    mission(true,"RobloxForgeAI package import","FILE READY",0,1,"Studio dosyayı aldı. Explorer'da sağ tıklayıp Insert > Import Roblox Model kullanabilir veya dosyayı manuel import edebilirsin.")
+    connectionPopup(true,"RBXM dosyası seçildi: "..tostring(file.Name))
+    task.delay(2,function() missionWidget.Enabled=false end)
+  end)
+  if not ok then say("IMPORT ERROR · "..tostring(err)) end
+end)
+
+connect.MouseButton1Click:Connect(function()
+  local ok,err=pcall(claim)
+  if not ok then
+    setConnection(false,tostring(err))
+    say("PAIR ERROR · "..tostring(err))
+  end
+end)
+
+scan.MouseButton1Click:Connect(function()
+  local sel=Selection:Get()
+  local names={}
+  for _,x in ipairs(sel) do names[#names+1]=x:GetFullName() end
+  say("SCAN · Selection: "..(#names>0 and table.concat(names,", ") or "none"))
+end)
+
+button.Click:Connect(function() widget.Enabled=not widget.Enabled end)
+plugin.Unloading:Connect(function() running=false; missionWidget.Enabled=false end)
+
+task.spawn(function()
+  while true do
+    task.wait(3)
+    poll()
+  end
+end)
+
+task.delay(1,function()
+  if pairCode.Text~="" then
+    local ok,err=pcall(heartbeat)
+    if not ok then setConnection(false,tostring(err)) end
+  end
+end)
+
+say("Ready · Dashboard'dan Pair Code oluştur; yalnızca Pair Code + Noxery API gerekir.")
+
+]]></ProtectedString>
+</Properties>
+</Item>
+</roblox>
