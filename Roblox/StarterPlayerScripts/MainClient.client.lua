@@ -49,6 +49,7 @@ local Action = remoteFolder:WaitForChild("Action", 10)
 local State = remoteFolder:WaitForChild("State", 10)
 local Leaderboard = remoteFolder:WaitForChild("Leaderboard", 10)
 local World = remoteFolder:WaitForChild("World", 10)
+local World = remoteFolder:WaitForChild("World", 10)
 if not Start or not Action or not State or not Leaderboard or not World then return end
 
 local gui = Instance.new("ScreenGui")
@@ -224,6 +225,7 @@ local instruction=txt(hud,"TAP",UDim2.new(.08,0,.20,0),UDim2.new(.84,0,0,45),20,
 local tap=button(hud,"TAP!",UDim2.new(.10,0,.66,0),UDim2.new(.80,0,0,90),true); tap.TextSize=30
 local count=txt(hud,"3",UDim2.new(.15,0,.37,0),UDim2.new(.70,0,0,120),76,C.ORANGE,true,true); count.Visible=false
 local currentId:string?=nil
+local objectiveText=instruction
 
 local function sendAction()
 	if not currentId then return end
@@ -242,6 +244,13 @@ World.OnClientEvent:Connect(function(data)
 	end
 end)
 
+World.OnClientEvent:Connect(function(data)
+	if typeof(data)=="table" and data.state=="WorldReady" then
+		local char=player.Character; local hum=char and char:FindFirstChildOfClass("Humanoid"); local cam=workspace.CurrentCamera
+		if hum and cam then cam.CameraType=Enum.CameraType.Custom; cam.CameraSubject=hum end
+	end
+end)
+
 State.OnClientEvent:Connect(function(data)
 	if typeof(data)~="table" then return end
 	if data.state=="Started" then
@@ -256,6 +265,12 @@ State.OnClientEvent:Connect(function(data)
 			for _,n in ipairs({"3","2","1","GO!"}) do count.Text=n; task.wait(n=="GO!" and .4 or .7) end
 			count.Visible=false
 		end)
+	elseif data.state=="Objective" then
+		instruction.Text=tostring(data.text or "PLAY")
+	elseif data.state=="Hit" then
+		instruction.Text="DİKKAT! ENGEL!"
+	elseif data.state=="Reaction" then
+		if data.active then instruction.Text="⚡ TAP NOW!" elseif data.result=="GOOD" then instruction.Text="MÜKEMMEL!" else instruction.Text="GEÇ KALDIN / ERKEN!" end
 	elseif data.state=="Score" then
 		scoreText.Text=tostring(data.score or 0); comboText.Text="x"..tostring(data.multiplier or 1)
 	elseif data.state=="Time" then
