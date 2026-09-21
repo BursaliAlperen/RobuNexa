@@ -4,7 +4,7 @@ Mobile-first Roblox mini-game hub.
 
 ## 10-stage development
 
-1. Foundation — folder architecture, shared config, remotes, bootstrap.
+1. Foundation — folder architecture, shared config, remotes, bootstrap. **Implemented.**
 2. Responsive GUI — 16:9 landscape, portrait fallback, safe-area, scalable cards.
 3. Game selection — data-driven 10-game catalog.
 4. Mini-game framework — server sessions, start/finish lifecycle, cleanup.
