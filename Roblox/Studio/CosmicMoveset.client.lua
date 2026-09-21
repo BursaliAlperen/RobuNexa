@@ -533,21 +533,44 @@ local function runCosmic(abilityTool: Tool)
         playCameraShake(math.min(duration, 0.65), 0.18 * intensity)
     end)
 
-    -- Still attempt to use any valid decoded KeyframeSequence data that exists,
-    -- but never move the player to the source asset's original world position.
-    local rigs = asset:FindFirstChild("CosmicRigs")
+    -- Only use a decoded KeyframeSequence when it actually contains pose
+    -- transforms. The GitHub hierarchy-only manifest otherwise contains
+    -- identity/default CFrames and would constantly overwrite the real
+    -- character animation.
+    local decodedAnimator = nil
     local anims = asset:FindFirstChild("Anims")
     local playerAnim = anims and anims:FindFirstChild("Player")
-    if rigs and anims and playerAnim then
-        local safeOk, safeErr = pcall(function()
-            PlayKeyframeSequence(character, playerAnim, 1)
-        end)
-        if not safeOk then
-            warn("[Cosmic] Optional decoded keyframe animation skipped: " .. tostring(safeErr))
+    if playerAnim then
+        local hasTransformData = false
+        for _, keyframe in ipairs(playerAnim:GetKeyframes()) do
+            for _, pose in ipairs(keyframe:GetDescendants()) do
+                if pose:IsA("Pose") and pose.Weight > 0 then
+                    if pose.CFrame ~= CFrame.identity then
+                        hasTransformData = true
+                        break
+                    end
+                end
+            end
+            if hasTransformData then break end
+        end
+
+        if hasTransformData then
+            local safeOk, result = pcall(function()
+                return PlayKeyframeSequence(character, playerAnim, 1)
+            end)
+            if safeOk then
+                decodedAnimator = result
+            else
+                warn("[Cosmic] Decoded keyframe animation skipped: " .. tostring(result))
+            end
         end
     end
 
     task.wait(duration)
+
+    if decodedAnimator then
+        decodedAnimator.Stop()
+    end
 
     camera.CameraType = originalCameraType or Enum.CameraType.Custom
     camera.CameraSubject = originalCameraSubject or humanoid
