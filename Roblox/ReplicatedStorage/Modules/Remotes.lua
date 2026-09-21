@@ -1,7 +1,7 @@
 --!strict
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local folder = ReplicatedStorage:FindFirstChild("Remotes")
-if not folder then folder=Instance.new("Folder"); folder.Name="Remotes"; folder.Parent=ReplicatedStorage end
+local ReplicatedStorage=game:GetService("ReplicatedStorage")
+local folder=ReplicatedStorage:FindFirstChild("Remotes") or Instance.new("Folder")
+folder.Name="Remotes"; folder.Parent=ReplicatedStorage
 local function remote(name:string)
 	local r=folder:FindFirstChild(name)
 	if r and r:IsA("RemoteEvent") then return r end
@@ -11,6 +11,7 @@ return {
 	GameStateChanged=remote("GameStateChanged"),
 	SubmitScore=remote("SubmitScore"),
 	RequestStart=remote("RequestStart"),
+	RequestAction=remote("RequestAction"),
 	RequestLeaderboard=remote("RequestLeaderboard"),
 	LeaderboardResult=remote("LeaderboardResult"),
 }
