@@ -368,29 +368,77 @@ local function runCosmic()
     restoreAnimator(humanoid)
 end
 
-local tool = Instance.new("Tool")
-tool.Name = "Cosmic"
-tool.ToolTip = "Play Cosmic moveset"
-tool.RequiresHandle = false
-tool.CanBeDropped = false
-tool.Parent = player:WaitForChild("Backpack")
-
-tool.Activated:Connect(function()
-    tool.Enabled = false
-
-    local ok, err = xpcall(runCosmic, debug.traceback)
-    if not ok then
-        warn("[Cosmic] " .. err)
-
-        local character = player.Character
-        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-        local root = character and character:FindFirstChild("HumanoidRootPart")
-
-        if root then root.Anchored = false end
-        if humanoid then restoreAnimator(humanoid) end
+local function bindCosmicTool(tool: Tool)
+    if tool:GetAttribute("RobuNexaCosmicBound") then
+        return
     end
 
-    if tool.Parent then
-        tool.Enabled = true
+    if tool:GetAttribute("RobuNexaMoveset") ~= "Cosmic" and tool.Name ~= "Cosmic" then
+        return
     end
+
+    tool.RequiresHandle = false
+    tool.CanBeDropped = false
+    tool:SetAttribute("RobuNexaCosmicBound", true)
+
+    tool.Activated:Connect(function()
+        if not tool.Enabled then
+            return
+        end
+
+        tool.Enabled = false
+
+        local ok, err = xpcall(runCosmic, debug.traceback)
+        if not ok then
+            warn("[Cosmic] " .. err)
+
+            local character = player.Character
+            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+            local root = character and character:FindFirstChild("HumanoidRootPart")
+
+            if root then root.Anchored = false end
+            if humanoid then restoreAnimator(humanoid) end
+        end
+
+        if tool.Parent then
+            tool.Enabled = true
+        end
+    end)
+end
+
+local function scanForCosmicTools(container: Instance)
+    for _, child in ipairs(container:GetChildren()) do
+        if child:IsA("Tool") then
+            bindCosmicTool(child)
+        end
+    end
+
+    container.ChildAdded:Connect(function(child)
+        if child:IsA("Tool") then
+            bindCosmicTool(child)
+        end
+    end)
+end
+
+local backpack = player:WaitForChild("Backpack")
+scanForCosmicTools(backpack)
+
+player.CharacterAdded:Connect(function(character)
+    scanForCosmicTools(character)
 end)
+
+if player.Character then
+    scanForCosmicTools(player.Character)
+end
+
+-- Fallback: if the server distributor is not installed, always create
+-- the primary Cosmic tool locally so the moveset remains usable.
+if not backpack:FindFirstChild("Cosmic") then
+    local tool = Instance.new("Tool")
+    tool.Name = "Cosmic"
+    tool.ToolTip = "Play Cosmic moveset"
+    tool.RequiresHandle = false
+    tool.CanBeDropped = false
+    tool:SetAttribute("RobuNexaMoveset", "Cosmic")
+    tool.Parent = backpack
+end
