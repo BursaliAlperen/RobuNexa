@@ -77,7 +77,7 @@ stageAspect.DominantAxis = Enum.DominantAxis.Width
 stageAspect.Parent = stage
 
 local stageSize = Instance.new("UISizeConstraint")
-stageSize.MinSize = Vector2.new(640, 360)
+stageSize.MinSize = Vector2.new(0, 0)
 stageSize.MaxSize = Vector2.new(1600, 900)
 stageSize.Parent = stage
 
