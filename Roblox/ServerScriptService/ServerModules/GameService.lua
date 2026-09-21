@@ -10,7 +10,13 @@ local Remotes=require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Re
 local GameService={}
 local sessions:{[Player]:any}={}
 local worlds=workspace:FindFirstChild("MiniGameWorlds") or Instance.new("Folder",workspace); worlds.Name="MiniGameWorlds"
-local function safeCall(fn) local ok,r=pcall(fn); if not ok then warn("[GameService] "..tostring(r)) end return ok,r end
+local function safeCall(fn)
+    local ok, result = pcall(fn)
+    if not ok then
+        warn("[GameService] " .. tostring(result))
+    end
+    return ok, result
+end
 function GameService.Start(player:Player,id:string)
 	if typeof(id)~="string" or #id>40 then return false end
 	local def=Config.GetGame(id); if not def or sessions[player] then return false end
@@ -40,7 +46,14 @@ function GameService.Action(player:Player,payload:any)
 	if typeof(payload)~="table" then return end
 	if typeof(payload.Action)~="string" or #payload.Action>32 then return end
 	if payload.Value~=nil and typeof(payload.Value)~="number" and typeof(payload.Value)~="string" and typeof(payload.Value)~="boolean" then return end
-	if s.Context and type(s.Context.onAction)=="function" then safeCall(function() s.Context:onAction(payload) end) end
+	if s.Context and type(s.Context.onAction)=="function" then
+        local ok = safeCall(function()
+            s.Context:onAction(payload)
+        end)
+        if not ok and sessions[player] == s then
+            GameService.Finish(player, 0, false)
+        end
+    end
 end
 function GameService.Finish(player:Player,score:number,victory:boolean)
 	local s=sessions[player]; if not s or not s.Locked then return end
