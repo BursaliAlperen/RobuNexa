@@ -48,7 +48,8 @@ local Start = remoteFolder:WaitForChild("Start", 10)
 local Action = remoteFolder:WaitForChild("Action", 10)
 local State = remoteFolder:WaitForChild("State", 10)
 local Leaderboard = remoteFolder:WaitForChild("Leaderboard", 10)
-if not Start or not Action or not State or not Leaderboard then return end
+local World = remoteFolder:WaitForChild("World", 10)
+if not Start or not Action or not State or not Leaderboard or not World then return end
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "RobuNexaUI"
@@ -229,6 +230,17 @@ local function sendAction()
 	Action:FireServer(currentId, {kind="tap", value=math.random(1,10)})
 end
 tap.Activated:Connect(sendAction)
+
+World.OnClientEvent:Connect(function(data)
+	if typeof(data)~="table" then return end
+	if data.state=="WorldReady" then
+		-- The server has built the selected game arena. Camera is returned to the character.
+		local character=player.Character
+		local hum=character and character:FindFirstChildOfClass("Humanoid")
+		local camera=workspace.CurrentCamera
+		if hum and camera then camera.CameraType=Enum.CameraType.Custom; camera.CameraSubject=hum end
+	end
+end)
 
 State.OnClientEvent:Connect(function(data)
 	if typeof(data)~="table" then return end
