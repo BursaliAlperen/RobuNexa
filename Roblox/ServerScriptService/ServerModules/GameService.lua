@@ -4,6 +4,8 @@ local Players=game:GetService("Players")
 local Config=require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("GameConfig"))
 local WorldBuilder=require(script.Parent:WaitForChild("WorldBuilder"))
 local LightingService=require(script.Parent:WaitForChild("LightingService"))
+local DataService=require(script.Parent:WaitForChild("DataService"))
+local LeaderboardService=require(script.Parent:WaitForChild("LeaderboardService"))
 local Remotes=require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Remotes"))
 local GameService={}
 local sessions:{[Player]:any}={}
@@ -28,9 +30,7 @@ function GameService.Start(player:Player,id:string)
 	if not okStart then sessions[player]=nil; folder:Destroy(); return false end
 	session.Module=mod; session.Context=ctx
 	Remotes.GameStateChanged:FireClient(player,{State="Started",GameId=id,Duration=def.Duration})
-	task.delay(def.Duration,function()
-		if sessions[player]==session then GameService.Finish(player,ctx.Score,true) end
-	end)
+	task.delay(def.Duration,function() if sessions[player]==session then GameService.Finish(player,ctx.Score,true) end end)
 	return true
 end
 function GameService.Action(player:Player,payload:any)
@@ -40,9 +40,7 @@ function GameService.Action(player:Player,payload:any)
 	if typeof(payload)~="table" then return end
 	if typeof(payload.Action)~="string" or #payload.Action>32 then return end
 	if payload.Value~=nil and typeof(payload.Value)~="number" and typeof(payload.Value)~="string" and typeof(payload.Value)~="boolean" then return end
-	if s.Context and type(s.Context.onAction)=="function" then
-		safeCall(function() s.Context:onAction(payload) end)
-	end
+	if s.Context and type(s.Context.onAction)=="function" then safeCall(function() s.Context:onAction(payload) end) end
 end
 function GameService.Finish(player:Player,score:number,victory:boolean)
 	local s=sessions[player]; if not s or not s.Locked then return end
@@ -53,6 +51,7 @@ function GameService.Finish(player:Player,score:number,victory:boolean)
 	if s.Module and type(s.Module.cleanup)=="function" then safeCall(function() s.Module.cleanup(player) end) end
 	if s.Context and s.Context.World and s.Context.World.Parent then s.Context.World:Destroy() end
 	sessions[player]=nil
+	safeCall(function() DataService.SetBest(player,s.Id,score); DataService.Save(player); LeaderboardService.Submit(s.Id,player.UserId,score) end)
 	Remotes.GameStateChanged:FireClient(player,{State="Finished",GameId=s.Id,Score=score,Victory=victory==true})
 end
 function GameService.Stop(player:Player) if sessions[player] then GameService.Finish(player,0,false) end end
@@ -62,5 +61,12 @@ Remotes.RequestStart.OnServerEvent:Connect(function(player,payload)
 	GameService.Start(player,payload.GameId)
 end)
 Remotes.RequestAction.OnServerEvent:Connect(function(player,payload) GameService.Action(player,payload) end)
+Remotes.RequestLeaderboard.OnServerEvent:Connect(function(player,payload)
+	if typeof(payload)~="table" or typeof(payload.GameId)~="string" then return end
+	local def=Config.GetGame(payload.GameId); if not def then return end
+	local list=LeaderboardService.Get(payload.GameId); local rank=LeaderboardService.GetRank(payload.GameId,player.UserId)
+	Remotes.LeaderboardResult:FireClient(player,{GameId=payload.GameId,Top=list,Rank=rank})
+end)
+Players.PlayerAdded:Connect(function(p) task.spawn(DataService.Load,p) end)
 Players.PlayerRemoving:Connect(function(p) GameService.Stop(p) end)
 return GameService
