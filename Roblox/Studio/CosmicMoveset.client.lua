@@ -174,45 +174,70 @@ local function PlayKeyframeSequence(model, keyframeSequence, speedMult)
     }
 end
 
-local function playFallbackVFX(character: Model, abilityName: string)
-    local root = character:FindFirstChild("HumanoidRootPart")
-    if not root then return nil end
+local function getSkillProfile(tool: Tool)
+    local name = string.lower(tool:GetAttribute("AbilityName") or tool.Name or "cosmic")
 
-    local folder = Instance.new("Folder")
-    folder.Name = "RobuNexaRuntimeVFX"
-    folder.Parent = workspace
+    if string.find(name, "awakening", 1, true) then
+        return {
+            burst = 220,
+            radius = 11,
+            duration = 2.2,
+            armSwing = 1.2,
+            colorA = Color3.fromRGB(170, 70, 255),
+            colorB = Color3.fromRGB(55, 220, 255),
+        }
+    elseif string.find(name, "impact", 1, true) then
+        return {
+            burst = 160,
+            radius = 16,
+            duration = 1.25,
+            armSwing = 1.0,
+            colorA = Color3.fromRGB(255, 90, 210),
+            colorB = Color3.fromRGB(120, 70, 255),
+        }
+    elseif string.find(name, "burst", 1, true) then
+        return {
+            burst = 130,
+            radius = 10,
+            duration = 1.4,
+            armSwing = 1.0,
+            colorA = Color3.fromRGB(80, 210, 255),
+            colorB = Color3.fromRGB(160, 80, 255),
+        }
+    end
 
-    local attachment = Instance.new("Attachment")
-    attachment.Parent = root
+    return {
+        burst = 95,
+        radius = 8,
+        duration = 1.1,
+        armSwing = 0.8,
+        colorA = Color3.fromRGB(140, 90, 255),
+        colorB = Color3.fromRGB(70, 220, 255),
+    }
+end
 
+local function makeEmitter(parent: Instance, colorA: Color3, colorB: Color3, speed: NumberRange, lifetime: NumberRange, size: NumberSequence)
     local emitter = Instance.new("ParticleEmitter")
-    emitter.Name = "AbilityParticles"
-    emitter.Texture = "rbxasset://textures/particles/sparkles_main.dds"
     emitter.Rate = 0
-    emitter.Lifetime = NumberRange.new(0.25, 0.65)
-    emitter.Speed = NumberRange.new(18, 34)
+    emitter.Lifetime = lifetime
+    emitter.Speed = speed
     emitter.SpreadAngle = Vector2.new(360, 360)
     emitter.Rotation = NumberRange.new(0, 360)
-    emitter.RotSpeed = NumberRange.new(-240, 240)
+    emitter.RotSpeed = NumberRange.new(-260, 260)
     emitter.LightEmission = 1
-    emitter.Size = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 1.4),
-        NumberSequenceKeypoint.new(0.45, 0.8),
-        NumberSequenceKeypoint.new(1, 0),
-    })
+    emitter.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+    emitter.Color = ColorSequence.new(colorA, colorB)
+    emitter.Size = size
     emitter.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.05),
-        NumberSequenceKeypoint.new(0.7, 0.25),
+        NumberSequenceKeypoint.new(0, 0.03),
+        NumberSequenceKeypoint.new(0.65, 0.2),
         NumberSequenceKeypoint.new(1, 1),
     })
-    emitter.Parent = attachment
+    emitter.Parent = parent
+    return emitter
+end
 
-    local highlight = Instance.new("Highlight")
-    highlight.FillTransparency = 0.72
-    highlight.OutlineTransparency = 0.15
-    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    highlight.Parent = character
-
+local function createShockwave(folder: Folder, position: Vector3, radius: number, color: Color3, duration: number)
     local ring = Instance.new("Part")
     ring.Name = "Shockwave"
     ring.Anchored = true
@@ -221,82 +246,170 @@ local function playFallbackVFX(character: Model, abilityName: string)
     ring.CanTouch = false
     ring.Shape = Enum.PartType.Cylinder
     ring.Material = Enum.Material.Neon
-    ring.Size = Vector3.new(0.18, 2, 2)
-    ring.CFrame = root.CFrame * CFrame.Angles(0, 0, math.rad(90))
-    ring.Transparency = 0.15
+    ring.Color = color
+    ring.Transparency = 0.08
+    ring.Size = Vector3.new(0.16, 2, 2)
+    ring.CFrame = CFrame.new(position) * CFrame.Angles(0, 0, math.rad(90))
     ring.Parent = folder
 
-    local ringMesh = Instance.new("SpecialMesh")
-    ringMesh.MeshType = Enum.MeshType.Cylinder
-    ringMesh.Parent = ring
+    local mesh = Instance.new("SpecialMesh")
+    mesh.MeshType = Enum.MeshType.Cylinder
+    mesh.Parent = ring
 
-    local burstCount = 80
-    if string.find(string.lower(abilityName), "awakening") then
-        burstCount = 150
-    elseif string.find(string.lower(abilityName), "impact") then
-        burstCount = 110
-    elseif string.find(string.lower(abilityName), "burst") then
-        burstCount = 95
-    end
+    local started = os.clock()
+    task.spawn(function()
+        while ring.Parent do
+            local t = os.clock() - started
+            local a = math.clamp(t / duration, 0, 1)
+            ring.Size = Vector3.new(0.16, 2 + radius * a, 2 + radius * a)
+            ring.Transparency = 0.08 + (0.92 * a)
+            if a >= 1 then break end
+            RunService.RenderStepped:Wait()
+        end
+        if ring.Parent then ring:Destroy() end
+    end)
+end
 
-    emitter:Emit(burstCount)
+local function playVisibleSkillVFX(character: Model, tool: Tool)
+    local root = character:FindFirstChild("HumanoidRootPart")
+    if not root then return 0 end
 
-    local start = os.clock()
-    local connection
-    connection = RunService.RenderStepped:Connect(function()
-        if not root.Parent or not ring.Parent then
-            if connection then connection:Disconnect() end
+    local profile = getSkillProfile(tool)
+    local folder = Instance.new("Folder")
+    folder.Name = "RobuNexa_SkillVFX"
+    folder.Parent = workspace
+
+    local attachment = Instance.new("Attachment")
+    attachment.Parent = root
+
+    local emitter = makeEmitter(
+        attachment,
+        profile.colorA,
+        profile.colorB,
+        NumberRange.new(16, 34),
+        NumberRange.new(0.28, 0.72),
+        NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1.35),
+            NumberSequenceKeypoint.new(0.45, 0.8),
+            NumberSequenceKeypoint.new(1, 0),
+        })
+    )
+
+    emitter:Emit(profile.burst)
+
+    local light = Instance.new("PointLight")
+    light.Brightness = 7
+    light.Range = profile.radius * 2.2
+    light.Color = profile.colorA
+    light.Parent = root
+
+    createShockwave(folder, root.Position - Vector3.new(0, 2.7, 0), profile.radius, profile.colorA, profile.duration)
+
+    local pulse = Instance.new("Part")
+    pulse.Name = "CosmicCore"
+    pulse.Shape = Enum.PartType.Ball
+    pulse.Anchored = true
+    pulse.CanCollide = false
+    pulse.CanQuery = false
+    pulse.CanTouch = false
+    pulse.Material = Enum.Material.Neon
+    pulse.Color = profile.colorB
+    pulse.Transparency = 0.12
+    pulse.Size = Vector3.new(1, 1, 1)
+    pulse.CFrame = CFrame.new(root.Position)
+    pulse.Parent = folder
+
+    local started = os.clock()
+    local conn
+    conn = RunService.RenderStepped:Connect(function()
+        if not root.Parent or not folder.Parent then
+            conn:Disconnect()
             return
         end
 
-        local t = os.clock() - start
-        local a = math.clamp(t / 0.9, 0, 1)
-        ring.CFrame = CFrame.new(root.Position) * CFrame.Angles(0, 0, math.rad(90))
-        ring.Size = Vector3.new(0.18, 2 + a * 24, 2 + a * 24)
-        ring.Transparency = 0.15 + a * 0.85
-        highlight.FillTransparency = 0.72 + a * 0.28
+        local t = os.clock() - started
+        local a = math.clamp(t / profile.duration, 0, 1)
+        pulse.CFrame = CFrame.new(root.Position + Vector3.new(0, math.sin(t * 7) * 0.35, 0))
+        local s = 1 + (profile.radius * 0.45) * math.sin(math.min(t / profile.duration, 1) * math.pi)
+        pulse.Size = Vector3.new(s, s, s)
+        pulse.Transparency = 0.12 + 0.88 * a
+        light.Brightness = 7 * (1 - a)
 
-        if t >= 0.9 then
-            connection:Disconnect()
-            ring:Destroy()
+        if t >= profile.duration then
+            conn:Disconnect()
             attachment:Destroy()
-            highlight:Destroy()
-            folder:Destroy()
+            light:Destroy()
+            if pulse.Parent then pulse:Destroy() end
+            if folder.Parent then folder:Destroy() end
         end
     end)
 
-    return 0.9
+    return profile.duration
 end
 
-local function playFallbackCharacterAnimation(character: Model, duration: number)
+local function playVisibleSkillAnimation(character: Model, duration: number, intensity: number)
     local root = character:FindFirstChild("HumanoidRootPart")
     local torso = character:FindFirstChild("UpperTorso") or character:FindFirstChild("Torso")
-    local rightShoulder = torso and torso:FindFirstChild("Right Shoulder")
-    local leftShoulder = torso and torso:FindFirstChild("Left Shoulder")
-    if not root then return end
+    if not root or not torso then return end
 
-    local originalRoot = root.CFrame
+    local rightShoulder = torso:FindFirstChild("RightShoulder") or torso:FindFirstChild("Right Shoulder")
+    local leftShoulder = torso:FindFirstChild("LeftShoulder") or torso:FindFirstChild("Left Shoulder")
+    local neck = torso:FindFirstChild("Neck")
+
+    local originalCFrame = root.CFrame
     local originalRight = rightShoulder and rightShoulder.Transform
     local originalLeft = leftShoulder and leftShoulder.Transform
+    local originalNeck = neck and neck.Transform
 
-    local start = os.clock()
-    while os.clock() - start < duration and character.Parent do
-        local t = (os.clock() - start) / duration
-        local pulse = math.sin(t * math.pi * 3)
-        root.CFrame = originalRoot * CFrame.new(0, math.sin(t * math.pi) * 0.18, 0) * CFrame.Angles(0, t * math.pi * 2, pulse * 0.035)
+    local started = os.clock()
+    while root.Parent and os.clock() - started < duration do
+        local t = (os.clock() - started) / duration
+        local wave = math.sin(t * math.pi * 4)
+        local lift = math.sin(t * math.pi)
 
-        if rightShoulder then
-            rightShoulder.Transform = originalRight * CFrame.Angles(-pulse * 0.7, 0, -0.25)
+        root.CFrame = originalCFrame
+            * CFrame.new(0, lift * 0.22 * intensity, 0)
+            * CFrame.Angles(0, wave * 0.07 * intensity, wave * 0.04 * intensity)
+
+        if rightShoulder and originalRight then
+            rightShoulder.Transform = originalRight
+                * CFrame.Angles(-wave * 0.85 * intensity - lift * 0.55 * intensity, 0, -0.2 * intensity)
         end
-        if leftShoulder then
-            leftShoulder.Transform = originalLeft * CFrame.Angles(pulse * 0.7, 0, 0.25)
+        if leftShoulder and originalLeft then
+            leftShoulder.Transform = originalLeft
+                * CFrame.Angles(wave * 0.85 * intensity + lift * 0.55 * intensity, 0, 0.2 * intensity)
         end
+        if neck and originalNeck then
+            neck.Transform = originalNeck * CFrame.Angles(0, wave * 0.08 * intensity, 0)
+        end
+
         RunService.RenderStepped:Wait()
     end
 
-    if root.Parent then root.CFrame = originalRoot end
+    if root.Parent then root.CFrame = originalCFrame end
     if rightShoulder and originalRight then rightShoulder.Transform = originalRight end
     if leftShoulder and originalLeft then leftShoulder.Transform = originalLeft end
+    if neck and originalNeck then neck.Transform = originalNeck end
+end
+
+local function playCameraShake(duration: number, magnitude: number)
+    local started = os.clock()
+    while os.clock() - started < duration do
+        local t = os.clock() - started
+        local falloff = 1 - math.clamp(t / duration, 0, 1)
+        camera.CFrame = camera.CFrame
+            * CFrame.new(
+                (math.random() - 0.5) * magnitude * falloff,
+                (math.random() - 0.5) * magnitude * falloff,
+                0
+            )
+            * CFrame.Angles(
+                0,
+                0,
+                (math.random() - 0.5) * math.rad(3) * falloff
+            )
+        RunService.RenderStepped:Wait()
+    end
 end
 
 local function getCosmicAsset()
@@ -392,115 +505,52 @@ local function waitForAnimation(animator)
     animator:Stop()
 end
 
-local function runCosmic(abilityTool)
+local function runCosmic(abilityTool: Tool)
     local character, humanoid, root = getCharacter()
-    local originalCFrame = root.CFrame
     local originalCameraType = camera.CameraType
     local originalCameraSubject = camera.CameraSubject
 
     local asset = getCosmicAsset()
     if not asset then return end
 
+    -- The decoded repository asset is a hierarchy-only reconstruction. Its
+    -- original Pose.CFrame / MeshId / ParticleEmitter property payload is not
+    -- available, so trying to play those off-screen source rigs cannot show
+    -- the intended result. Keep the player in place and render the skill VFX
+    -- directly around the real character instead.
+    camera.CameraType = Enum.CameraType.Custom
+    camera.CameraSubject = humanoid
+
+    local profile = getSkillProfile(abilityTool)
+    local duration = playVisibleSkillVFX(character, abilityTool)
+    local intensity = math.clamp(profile.armSwing, 0.6, 1.4)
+
+    task.spawn(function()
+        playVisibleSkillAnimation(character, math.max(duration, 0.8), intensity)
+    end)
+
+    task.spawn(function()
+        playCameraShake(math.min(duration, 0.65), 0.18 * intensity)
+    end)
+
+    -- Still attempt to use any valid decoded KeyframeSequence data that exists,
+    -- but never move the player to the source asset's original world position.
     local rigs = asset:FindFirstChild("CosmicRigs")
     local anims = asset:FindFirstChild("Anims")
-
-    if not rigs or not anims then
-        warn("[Cosmic] CosmicRigs or Anims is missing inside CosmicG.")
-        return
-    end
-
-    local godRig = rigs:FindFirstChild("GOD")
-    local sceneRig = rigs:FindFirstChild("SceneRig")
-
-    local godAnim = anims:FindFirstChild("GOD")
-    local sceneAnim = anims:FindFirstChild("SceneRig")
-    local playerAnim = anims:FindFirstChild("Player")
-    local playerTwoAnim = anims:FindFirstChild("PlayerTwo")
-
-    local backgroundAnimations = {}
-    local playerAnimation
-
-    stopDefaultAnimator(humanoid)
-
-    root.CFrame = CFrame.new(
-        876.199097, 1882.01294, -397.585388,
-        -0.565931678, 4.82408259e-17, 0.824452102,
-        -5.49948317e-17, 1, 2.07622863e-17,
-        -0.824452102, 3.35905705e-17, -0.565931678
-    )
-    root.Anchored = true
-
-    createSkybox()
-
-    -- Studio cannot use getcustomasset("Cosmic.mp3").
-    -- Put your Roblox audio asset ID here if you want the sound.
-    local COSMIC_AUDIO_ID = ""
-    if COSMIC_AUDIO_ID ~= "" then
-        local sound = Instance.new("Sound")
-        sound.SoundId = "rbxassetid://" .. COSMIC_AUDIO_ID
-        sound.Volume = 1
-        sound.Parent = workspace
-        sound:Play()
-        sound.Ended:Connect(function()
-            sound:Destroy()
+    local playerAnim = anims and anims:FindFirstChild("Player")
+    if rigs and anims and playerAnim then
+        local safeOk, safeErr = pcall(function()
+            PlayKeyframeSequence(character, playerAnim, 1)
         end)
-    end
-
-    if godRig and godAnim then
-        table.insert(backgroundAnimations, PlayKeyframeSequence(godRig, godAnim))
-    end
-
-    if sceneRig and sceneAnim then
-        table.insert(backgroundAnimations, PlayKeyframeSequence(sceneRig, sceneAnim))
-    end
-
-    if playerAnim then
-        playerAnimation = PlayKeyframeSequence(character, playerAnim)
-    end
-
-    -- The GitHub decoded manifest contains the instance hierarchy, but the
-    -- original Pose.CFrame/particle property payload is not present. If that
-    -- data is missing, run a deterministic local fallback so clicking a skill
-    -- still produces animation + VFX instead of a silent activation.
-    local abilityName = abilityTool and abilityTool:GetAttribute("AbilityName") or "Cosmic"
-    local fallbackDuration = playFallbackVFX(character, abilityName) or 0.9
-    task.spawn(function()
-        playFallbackCharacterAnimation(character, math.max(fallbackDuration, 1.25))
-    end)
-
-    task.delay(8, function()
-        for _, anim in ipairs(backgroundAnimations) do
-            if anim then anim.AddSkip(8) end
-        end
-        if playerAnimation then
-            playerAnimation.AddSkip(9.9)
-        end
-    end)
-
-    waitForAnimation(playerAnimation)
-
-    root.CFrame = originalCFrame
-    task.wait(2.9)
-
-    if playerTwoAnim then
-        local playerAnimation2 = PlayKeyframeSequence(character, playerTwoAnim)
-
-        if playerAnimation2 then
-            playerAnimation2.AddSkip(27.8)
-            waitForAnimation(playerAnimation2)
+        if not safeOk then
+            warn("[Cosmic] Optional decoded keyframe animation skipped: " .. tostring(safeErr))
         end
     end
 
-    root.Anchored = false
-    root.CFrame = originalCFrame
+    task.wait(duration)
+
     camera.CameraType = originalCameraType or Enum.CameraType.Custom
     camera.CameraSubject = originalCameraSubject or humanoid
-
-    for _, anim in ipairs(backgroundAnimations) do
-        if anim then anim.Stop() end
-    end
-
-    restoreAnimator(humanoid)
 end
 
 local function bindCosmicTool(tool: Tool)
