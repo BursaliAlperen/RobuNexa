@@ -1,4 +1,3 @@
---!strict
 -- ROBUNEXA SINGLE CLIENT
 -- 1 LocalScript only: StarterPlayer > StarterPlayerScripts > MainClient
 -- Mobile-first UI, game-specific controls, camera feedback and VFX feedback.
@@ -190,7 +189,7 @@ for i=1,4 do
 	local b=Instance.new("TextButton"); b.Name="Choice"..i; b.Text=""; b.AutoButtonColor=false; b.BorderSizePixel=0; b.Visible=false; b.LayoutOrder=i; b.Parent=choiceFrame; corner(b,14); choiceButtons[i]=b
 end
 
-local currentId:string?=nil
+local currentId=nil
 local targetRound=false
 local memoryInput=false
 
