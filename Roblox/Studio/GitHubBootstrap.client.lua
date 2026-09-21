@@ -1,20 +1,25 @@
--- RobuNexa / Cosmic GitHub bootstrap
--- IMPORTANT: Roblox LocalScripts cannot execute arbitrary Lua downloaded from GitHub.
--- This bootstrap intentionally does NOT use loadstring/executor APIs.
--- It only verifies that the GitHub source is reachable.
--- For true automatic syncing, use a Studio plugin or publish the code as a Roblox asset/package.
+--!strict
+-- StarterPlayerScripts client bootstrap.
+--
+-- This script deliberately does NOT fetch or execute arbitrary GitHub Lua.
+-- The server owns the HTTP/loadstring step and creates the GUI for each player.
+-- Keeping this file client-side preserves the requested StarterPlayerScripts
+-- integration point without relying on executor-only game:HttpGet/loadstring APIs.
 
-local HttpService = game:GetService("HttpService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local RAW_URL = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/Roblox/Studio/CosmicMoveset.client.lua"
+local REMOTE_NAME = "RobuNexaGitHubGuiReady"
 
-local ok, result = pcall(function()
-    return HttpService:GetAsync(RAW_URL, false)
+local remote = ReplicatedStorage:WaitForChild(REMOTE_NAME, 30)
+if not remote or not remote:IsA("RemoteEvent") then
+	warn("[RobuNexa] GitHub GUI bridge RemoteEvent was not created.")
+	return
+end
+
+remote.OnClientEvent:Connect(function()
+	-- Reserved for future client-only GUI hooks.
+	-- The actual GUI factory is executed server-side and its ScreenGui
+	-- replicates to this player's PlayerGui.
 end)
 
-if ok then
-    print("[RobuNexa] GitHub source reachable. " .. tostring(#result) .. " bytes.")
-    print("[RobuNexa] Automatic execution of downloaded Lua is blocked by Roblox security.")
-else
-    warn("[RobuNexa] GitHub fetch failed: " .. tostring(result))
-end
+print("[RobuNexa] StarterPlayerScripts GitHub GUI bridge ready.")

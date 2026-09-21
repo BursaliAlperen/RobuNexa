@@ -1,70 +1,114 @@
 -- RobuNexa Studio GitHub Sync Plugin
--- One-time install as a Studio Plugin. After that, use the toolbar button to sync
--- CosmicMoveset.client.lua directly into StarterPlayer/StarterPlayerScripts.
--- Roblox runtime LocalScripts cannot download and execute arbitrary Lua from GitHub.
+-- Syncs trusted GitHub Lua source into Roblox Studio.
+--
+-- This is a Studio-time importer, not a runtime executor.
+-- It fetches the source with HttpService and writes Script.Source directly
+-- inside StarterPlayerScripts.
 
 local HttpService = game:GetService("HttpService")
 local Selection = game:GetService("Selection")
 local ChangeHistoryService = game:GetService("ChangeHistoryService")
 
-local RAW_URL = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/Roblox/Studio/CosmicMoveset.client.lua"
-local TARGET_NAME = "CosmicMoveset"
+local OWNER = "BursaliAlperen"
+local REPO = "RobuNexa"
+local REF = "rbxm-moveset-system"
 
-local toolbar = plugin:CreateToolbar("RobuNexa")
-local button = toolbar:CreateButton("Sync Cosmic", "Sync CosmicMoveset from GitHub", "")
-button.ClickableWhenViewportHidden = true
+local GUI_URL = string.format(
+	"https://raw.githubusercontent.com/%s/%s/%s/Roblox/GitHubGUI/ClientMain.client.lua",
+	OWNER,
+	REPO,
+	REF
+)
 
-local function sync()
-    local ok, source = pcall(function()
-        return HttpService:GetAsync(RAW_URL, false)
-    end)
+local MOVES_URL = string.format(
+	"https://raw.githubusercontent.com/%s/%s/%s/Roblox/Studio/CosmicMoveset.client.lua",
+	OWNER,
+	REPO,
+	REF
+)
 
-    if not ok then
-        warn("[RobuNexa] GitHub sync failed: " .. tostring(source))
-        return false
-    end
+local toolbar = plugin:CreateToolbar("RobuNexa GitHub")
+local syncGuiButton = toolbar:CreateButton(
+	"Sync GUI",
+	"Fetch GitHub GUI Lua into StarterPlayerScripts",
+	""
+)
+syncGuiButton.ClickableWhenViewportHidden = true
 
-    if type(source) ~= "string" or #source < 100 then
-        warn("[RobuNexa] GitHub returned invalid/empty source.")
-        return false
-    end
+local syncMovesButton = toolbar:CreateButton(
+	"Sync Moveset",
+	"Fetch Cosmic client Lua into StarterPlayerScripts",
+	""
+)
+syncMovesButton.ClickableWhenViewportHidden = true
 
-    local starterPlayer = game:GetService("StarterPlayer")
-    local scripts = starterPlayer:FindFirstChild("StarterPlayerScripts")
-    if not scripts then
-        scripts = Instance.new("StarterPlayerScripts")
-        scripts.Name = "StarterPlayerScripts"
-        scripts.Parent = starterPlayer
-    end
+local function getStarterScripts()
+	local starterPlayer = game:GetService("StarterPlayer")
+	local scripts = starterPlayer:FindFirstChildOfClass("StarterPlayerScripts")
 
-    local target = scripts:FindFirstChild(TARGET_NAME)
-    if target and not target:IsA("LocalScript") then
-        target:Destroy()
-        target = nil
-    end
+	if not scripts then
+		scripts = Instance.new("StarterPlayerScripts")
+		scripts.Parent = starterPlayer
+	end
 
-    if not target then
-        target = Instance.new("LocalScript")
-        target.Name = TARGET_NAME
-        target.Parent = scripts
-    end
-
-    local sourceOk, sourceErr = pcall(function()
-        target.Source = source
-    end)
-
-    if not sourceOk then
-        warn("[RobuNexa] Could not write Script.Source: " .. tostring(sourceErr))
-        return false
-    end
-
-    Selection:Set({target})
-    ChangeHistoryService:SetWaypoint("RobuNexa GitHub Sync")
-    print("[RobuNexa] CosmicMoveset synced: " .. tostring(#source) .. " bytes")
-    return true
+	return scripts
 end
 
-button.Click:Connect(sync)
+local function writeLocalScript(name, source)
+	local scripts = getStarterScripts()
 
--- Sync immediately when the plugin is first run.
-sync()
+	local target = scripts:FindFirstChild(name)
+	if target and not target:IsA("LocalScript") then
+		target:Destroy()
+		target = nil
+	end
+
+	if not target then
+		target = Instance.new("LocalScript")
+		target.Name = name
+		target.Parent = scripts
+	end
+
+	local ok, err = pcall(function()
+		target.Source = source
+	end)
+
+	if not ok then
+		warn("[RobuNexa] Could not write " .. name .. ": " .. tostring(err))
+		return false
+	end
+
+	Selection:Set({target})
+	ChangeHistoryService:SetWaypoint("RobuNexa GitHub Sync: " .. name)
+	print("[RobuNexa] Synced " .. name .. " (" .. tostring(#source) .. " bytes)")
+	return true
+end
+
+local function sync(url, targetName)
+	local ok, source = pcall(function()
+		return HttpService:GetAsync(url, false)
+	end)
+
+	if not ok then
+		warn("[RobuNexa] GitHub sync failed: " .. tostring(source))
+		return false
+	end
+
+	if type(source) ~= "string" or #source < 20 then
+		warn("[RobuNexa] GitHub returned invalid/empty source for " .. targetName)
+		return false
+	end
+
+	return writeLocalScript(targetName, source)
+end
+
+syncGuiButton.Click:Connect(function()
+	sync(GUI_URL, "RobuNexaGitHubGUI")
+end)
+
+syncMovesButton.Click:Connect(function()
+	sync(MOVES_URL, "CosmicMoveset")
+end)
+
+-- Sync the GUI automatically the first time the plugin is run.
+sync(GUI_URL, "RobuNexaGitHubGUI")
