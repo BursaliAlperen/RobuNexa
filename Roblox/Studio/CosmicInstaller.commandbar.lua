@@ -262,6 +262,7 @@ for name, url in pairs(SOURCES) do
 end
 
 print("[RobuNexa] Total reconstructed Instances: " .. tostring(total))
+installMoveset()
 print("[RobuNexa] IMPORTANT: decoded manifests do not contain all original MeshId/TextureId/Pose.CFrame values.")
 print("[RobuNexa] The source manifests are installed successfully; missing binary/property data must be restored from the original .rbxmx when available.")
 print("================================================")
