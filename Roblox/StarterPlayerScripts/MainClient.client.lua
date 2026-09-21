@@ -178,9 +178,28 @@ local function panel(parent: Instance, pos: UDim2, size: UDim2, color: Color3?)
     f.BorderSizePixel = 0
     f.Position = pos
     f.Size = size
+    f.ClipsDescendants = false
     f.Parent = parent
     corner(f, 18)
     stroke(f, C.WHITE, 0.94, 1)
+
+    -- Roblox-stud inspired micro detailing: subtle corner studs.
+    local corners = {
+        {0, 0}, {1, 0}, {0, 1}, {1, 1},
+    }
+    for _, point in ipairs(corners) do
+        local stud = Instance.new("Frame")
+        stud.Name = "Stud"
+        stud.AnchorPoint = Vector2.new(point[1], point[2])
+        stud.Position = UDim2.new(point[1], point[1] == 0 and 8 or -8, point[2], point[2] == 0 and 8 or -8)
+        stud.Size = UDim2.fromOffset(6, 6)
+        stud.BackgroundColor3 = C.CREAM
+        stud.BackgroundTransparency = 0.78
+        stud.BorderSizePixel = 0
+        stud.ZIndex = 2
+        stud.Parent = f
+        corner(stud, 99)
+    end
     return f
 end
 
