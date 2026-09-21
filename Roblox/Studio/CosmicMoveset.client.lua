@@ -174,6 +174,131 @@ local function PlayKeyframeSequence(model, keyframeSequence, speedMult)
     }
 end
 
+local function playFallbackVFX(character: Model, abilityName: string)
+    local root = character:FindFirstChild("HumanoidRootPart")
+    if not root then return nil end
+
+    local folder = Instance.new("Folder")
+    folder.Name = "RobuNexaRuntimeVFX"
+    folder.Parent = workspace
+
+    local attachment = Instance.new("Attachment")
+    attachment.Parent = root
+
+    local emitter = Instance.new("ParticleEmitter")
+    emitter.Name = "AbilityParticles"
+    emitter.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+    emitter.Rate = 0
+    emitter.Lifetime = NumberRange.new(0.25, 0.65)
+    emitter.Speed = NumberRange.new(18, 34)
+    emitter.SpreadAngle = Vector2.new(360, 360)
+    emitter.Rotation = NumberRange.new(0, 360)
+    emitter.RotSpeed = NumberRange.new(-240, 240)
+    emitter.LightEmission = 1
+    emitter.Size = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 1.4),
+        NumberSequenceKeypoint.new(0.45, 0.8),
+        NumberSequenceKeypoint.new(1, 0),
+    })
+    emitter.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.05),
+        NumberSequenceKeypoint.new(0.7, 0.25),
+        NumberSequenceKeypoint.new(1, 1),
+    })
+    emitter.Parent = attachment
+
+    local highlight = Instance.new("Highlight")
+    highlight.FillTransparency = 0.72
+    highlight.OutlineTransparency = 0.15
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.Parent = character
+
+    local ring = Instance.new("Part")
+    ring.Name = "Shockwave"
+    ring.Anchored = true
+    ring.CanCollide = false
+    ring.CanQuery = false
+    ring.CanTouch = false
+    ring.Shape = Enum.PartType.Cylinder
+    ring.Material = Enum.Material.Neon
+    ring.Size = Vector3.new(0.18, 2, 2)
+    ring.CFrame = root.CFrame * CFrame.Angles(0, 0, math.rad(90))
+    ring.Transparency = 0.15
+    ring.Parent = folder
+
+    local ringMesh = Instance.new("SpecialMesh")
+    ringMesh.MeshType = Enum.MeshType.Cylinder
+    ringMesh.Parent = ring
+
+    local burstCount = 80
+    if string.find(string.lower(abilityName), "awakening") then
+        burstCount = 150
+    elseif string.find(string.lower(abilityName), "impact") then
+        burstCount = 110
+    elseif string.find(string.lower(abilityName), "burst") then
+        burstCount = 95
+    end
+
+    emitter:Emit(burstCount)
+
+    local start = os.clock()
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        if not root.Parent or not ring.Parent then
+            if connection then connection:Disconnect() end
+            return
+        end
+
+        local t = os.clock() - start
+        local a = math.clamp(t / 0.9, 0, 1)
+        ring.CFrame = CFrame.new(root.Position) * CFrame.Angles(0, 0, math.rad(90))
+        ring.Size = Vector3.new(0.18, 2 + a * 24, 2 + a * 24)
+        ring.Transparency = 0.15 + a * 0.85
+        highlight.FillTransparency = 0.72 + a * 0.28
+
+        if t >= 0.9 then
+            connection:Disconnect()
+            ring:Destroy()
+            attachment:Destroy()
+            highlight:Destroy()
+            folder:Destroy()
+        end
+    end)
+
+    return 0.9
+end
+
+local function playFallbackCharacterAnimation(character: Model, duration: number)
+    local root = character:FindFirstChild("HumanoidRootPart")
+    local torso = character:FindFirstChild("UpperTorso") or character:FindFirstChild("Torso")
+    local rightShoulder = torso and torso:FindFirstChild("Right Shoulder")
+    local leftShoulder = torso and torso:FindFirstChild("Left Shoulder")
+    if not root then return end
+
+    local originalRoot = root.CFrame
+    local originalRight = rightShoulder and rightShoulder.Transform
+    local originalLeft = leftShoulder and leftShoulder.Transform
+
+    local start = os.clock()
+    while os.clock() - start < duration and character.Parent do
+        local t = (os.clock() - start) / duration
+        local pulse = math.sin(t * math.pi * 3)
+        root.CFrame = originalRoot * CFrame.new(0, math.sin(t * math.pi) * 0.18, 0) * CFrame.Angles(0, t * math.pi * 2, pulse * 0.035)
+
+        if rightShoulder then
+            rightShoulder.Transform = originalRight * CFrame.Angles(-pulse * 0.7, 0, -0.25)
+        end
+        if leftShoulder then
+            leftShoulder.Transform = originalLeft * CFrame.Angles(pulse * 0.7, 0, 0.25)
+        end
+        RunService.RenderStepped:Wait()
+    end
+
+    if root.Parent then root.CFrame = originalRoot end
+    if rightShoulder and originalRight then rightShoulder.Transform = originalRight end
+    if leftShoulder and originalLeft then leftShoulder.Transform = originalLeft end
+end
+
 local function getCosmicAsset()
     local asset = ReplicatedStorage:FindFirstChild("CosmicG")
     if not asset then
@@ -267,7 +392,7 @@ local function waitForAnimation(animator)
     animator:Stop()
 end
 
-local function runCosmic()
+local function runCosmic(abilityTool)
     local character, humanoid, root = getCharacter()
     local originalCFrame = root.CFrame
     local originalCameraType = camera.CameraType
@@ -333,6 +458,16 @@ local function runCosmic()
         playerAnimation = PlayKeyframeSequence(character, playerAnim)
     end
 
+    -- The GitHub decoded manifest contains the instance hierarchy, but the
+    -- original Pose.CFrame/particle property payload is not present. If that
+    -- data is missing, run a deterministic local fallback so clicking a skill
+    -- still produces animation + VFX instead of a silent activation.
+    local abilityName = abilityTool and abilityTool:GetAttribute("AbilityName") or "Cosmic"
+    local fallbackDuration = playFallbackVFX(character, abilityName) or 0.9
+    task.spawn(function()
+        playFallbackCharacterAnimation(character, math.max(fallbackDuration, 1.25))
+    end)
+
     task.delay(8, function()
         for _, anim in ipairs(backgroundAnimations) do
             if anim then anim.AddSkip(8) end
@@ -388,7 +523,7 @@ local function bindCosmicTool(tool: Tool)
 
         tool.Enabled = false
 
-        local ok, err = xpcall(runCosmic, debug.traceback)
+        local ok, err = xpcall(function() runCosmic(tool) end, debug.traceback)
         if not ok then
             warn("[Cosmic] " .. err)
 
