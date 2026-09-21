@@ -1,35 +1,24 @@
-# Stage 3 — Game Selection → 3D World
+# Stage 3 — 10 Real Core Mechanics
 
-The two-script runtime now turns a selected game into a real server-built 3D arena.
+The two-script runtime now contains playable server-authoritative core mechanics for all ten games.
 
-## Flow
+- **Dodge Run:** physical obstacles damage/reset combo when touched; player must move through the arena.
+- **Target Rush:** physical targets appear in the arena and reward contact.
+- **Stack Tower:** each valid tap places another physical block and increases tower height/score.
+- **Coin Rush:** physical neon coin pickups reward collection.
+- **Jump Challenge:** a sequence of elevated platforms rewards reaching later platforms.
+- **Reaction Test:** server-controlled signal windows reward fast taps and penalize early/late taps.
+- **Color Rush:** server rounds issue objective prompts and taps advance rounds.
+- **Memory Match:** server rounds issue sequence objectives and taps advance them.
+- **Falling Platforms:** touched platforms temporarily disappear and return, rewarding traversal.
+- **Floor Is Lava:** safe green tiles reward movement; lava tiles reset the player and combo.
 
-Games screen → Start RemoteEvent → server validates game ID → server creates `workspace.RobuNexaWorld/ActiveGameWorld` → player is moved into the arena → `WorldReady` is sent to the client → game HUD continues.
+The server owns scoring, game validation, sessions and world creation. Client input is only a request.
 
-## Current arenas
+### Studio setup
 
-All 10 game IDs have distinct arena colors and dimensions:
-- Dodge Run
-- Target Rush
-- Stack Tower
-- Coin Rush
-- Jump Challenge
-- Reaction Test
-- Color Rush
-- Memory Match
-- Falling Platforms
-- Floor Is Lava
+Only two instances are required:
+- ServerScriptService > RobuNexaServer (Script)
+- StarterPlayer > StarterPlayerScripts > MainClient (LocalScript)
 
-Stage 3 currently establishes the reusable 3D arena pipeline. The individual game mechanics, hazards, targets, coins, platforms, checkpoints, VFX/SFX and camera sequences are next.
-
-## Studio setup
-
-Keep only:
-- `ServerScriptService > RobuNexaServer` (Script)
-- `StarterPlayer > StarterPlayerScripts > MainClient` (LocalScript)
-
-Press Play, open OYUNLAR, select a game. The server builds the corresponding 3D arena automatically.
-
-## Safety
-
-The server validates the requested game ID and owns world creation. The client only requests a game; it does not create or award the authoritative world/score.
+Press Play → OYUNLAR → select a game.
