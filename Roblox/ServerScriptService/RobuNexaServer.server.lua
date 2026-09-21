@@ -504,7 +504,7 @@ Action.OnServerEvent:Connect(function(p,id,payload)
 		if not current or not current.Parent then return end
 		local prevX=st.lastX
 		local overlap=st.width/2+current.Size.X/2-math.abs(current.Position.X-prevX)
-		local y=3+(st.height+1)*2.05
+		local y=3+(st.height-1)*2.05
 		if overlap<=1 then
 			vfx(s.root,current.Position,COLORS.red,24,.5)
 			fire(p,{state="StackMiss"})
