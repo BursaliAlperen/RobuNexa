@@ -182,6 +182,9 @@ local flash=Instance.new("Frame"); flash.Size=UDim2.fromScale(1,1); flash.Backgr
 
 local choiceFrame=Instance.new("Frame"); choiceFrame.BackgroundTransparency=1; choiceFrame.Position=UDim2.new(.12,0,.55,0); choiceFrame.Size=UDim2.new(.76,0,0,150); choiceFrame.Visible=false; choiceFrame.Parent=hud
 local choiceLayout=Instance.new("UIGridLayout"); choiceLayout.CellSize=UDim2.new(.48,0,0,64); choiceLayout.CellPadding=UDim2.new(.02,0,0,10); choiceLayout.Parent=choiceFrame
+local targetPreview=Instance.new("Frame"); targetPreview.AnchorPoint=Vector2.new(.5,.5); targetPreview.Position=UDim2.new(.5,0,.50,0); targetPreview.Size=UDim2.fromOffset(74,74); targetPreview.BackgroundColor3=C.PANEL2; targetPreview.BackgroundTransparency=.05; targetPreview.Visible=false; targetPreview.ZIndex=8; targetPreview.Parent=hud; corner(targetPreview,99); stroke(targetPreview,.75)
+local targetLabel=txt(hud,"",UDim2.new(.5,-100,0,0),UDim2.fromOffset(200,28),13,C.CREAM,true,true); targetLabel.AnchorPoint=Vector2.new(.5,0); targetLabel.Position=UDim2.new(.5,0,.59,0); targetLabel.Visible=false; targetLabel.ZIndex=9
+
 local choiceButtons={}
 for i=1,4 do
 	local b=Instance.new("TextButton"); b.Name="Choice"..i; b.Text=""; b.AutoButtonColor=false; b.BorderSizePixel=0; b.Visible=false; b.LayoutOrder=i; b.Parent=choiceFrame; corner(b,14); choiceButtons[i]=b
@@ -218,8 +221,8 @@ local function flash(color)
 end
 
 local function hideChoices()
-	choiceFrame.Visible=false
-	for i=1,4 do choiceButtons[i].Visible=false end
+	choiceFrame.Visible=false; targetPreview.Visible=false; targetLabel.Visible=false
+	for i=1,4 do choiceButtons[i].Visible=false; choiceButtons[i].BackgroundTransparency=0 end
 	targetRound=false; memoryInput=false
 end
 
@@ -299,12 +302,11 @@ State.OnClientEvent:Connect(function(data)
 	elseif data.state=="Objective" then
 		instruction.Text=tostring(data.text or "PLAY")
 		if data.value=="color" and data.colorIndex then
-			targetRound=true; memoryInput=false; choiceFrame.Visible=true
-			for i,b in ipairs(choiceButtons) do b.Visible=true; b.BackgroundColor3=data.color or C.PANEL2; b.Text="RENK "..i; b.TextColor3=C.WHITE end
-			-- Only the target index is communicated visually by the objective tint.
-			-- All buttons get the target color in the world; screen remains neutral enough for the tap choice.
+			targetRound=true; memoryInput=false; choiceFrame.Visible=true; targetPreview.Visible=true; targetLabel.Visible=true
+			targetPreview.BackgroundColor3=data.color or C.PANEL2
+			targetLabel.Text="HEDEF RENGİ"
 			for i,b in ipairs(choiceButtons) do
-				b.BackgroundColor3=({C.RED,C.BLUE,C.GREEN,C.YELLOW})[i] or C.PANEL2
+				b.Visible=true; b.BackgroundColor3=({C.RED,C.BLUE,C.GREEN,C.YELLOW})[i] or C.PANEL2; b.Text="RENK "..i; b.TextColor3=C.WHITE
 			end
 			instruction.Text="HEDEF RENGİ SEÇ"
 		elseif data.value=="memoryInput" then
@@ -314,7 +316,7 @@ State.OnClientEvent:Connect(function(data)
 			hideChoices()
 		end
 	elseif data.state=="MemoryShow" then
-		memoryInput=false; choiceFrame.Visible=false
+		memoryInput=false; targetPreview.Visible=false; targetLabel.Visible=false; choiceFrame.Visible=false
 		instruction.Text="SIRAYI EZBERLE!"
 		task.spawn(function()
 			for _,index in ipairs(data.sequence or {}) do
