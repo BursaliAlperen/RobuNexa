@@ -545,9 +545,6 @@ do
 	end
 
 	for i,g in ipairs(Games) do
-		local b=button(nil,nil,UDim2.new(),UDim2.new(),nil,false)
-		-- detached button is not used; create directly below for clarity.
-		b:Destroy()
 		local tb=Instance.new("TextButton")
 		tb.Text=string.format("%02d",i)
 		tb.AutoButtonColor=false
