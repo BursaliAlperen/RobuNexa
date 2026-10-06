@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:css='false' b:js='false' expr:dir='data:blog.languageDirection' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gdata/b' xmlns:data='http://www.google.com/2005/gdata/data' xmlns:expr='http://www.google.com/2005/gdata/expr'>
+<head>
+    <meta charset='UTF-8'/>
+    <meta content='width=device-width, initial-scale=1.0' name='viewport'/>
+    <title><data:blog.pageTitle/></title>
+    
+    <!-- Google Fonts: Inter, Orbitron, JetBrains Mono -->
+    <link rel='preconnect' href='https://fonts.googleapis.com'/>
+    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin='anonymous'/>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&amp;family=JetBrains+Mono:wght@700&amp;family=Orbitron:wght@800;900&amp;display=swap' rel='stylesheet'/>
+
+    <b:skin><![CDATA[
+    /* ═══════════════════════════════════════════════════════════════════
+       SCRIPTVAULT BLOGGER THEME - MASTER STYLESHEET
+       Palette: Pure Black (#000000), Cyan (#00e5ff), Purple (#a855f7)
+       Performance: Zero backdrop-filter, zero infinite animations, GPU optimized
+       ═══════════════════════════════════════════════════════════════════ */
+
+    :root {
+        --bg-color: #000000;
+        --card-bg: #0c0c14;
+        --card-bg-gradient: linear-gradient(135deg, #0c0c14 0%, #08080e 100%);
+        --accent-cyan: #00e5ff;
+        --accent-purple: #a855f7;
+        --text-main: #ffffff;
+        --text-muted: #b8b8c8;
+        --border-cyan: rgba(0, 229, 255, 0.12);
+        --border-cyan-hover: rgba(0, 229, 255, 0.28);
+        --font-main: 'Inter', sans-serif;
+        --font-heading: 'Orbitron', sans-serif;
+        --font-code: 'JetBrains Mono', monospace;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        font-family: var(--font-main);
+        font-weight: 500;
+        line-height: 1.6;
+        overflow-x: hidden;
+        selection-background-color: var(--accent-cyan);
+        selection-color: var(--bg-color);
+    }
+
+    ::selection {
+        background: var(--accent-cyan);
+        color: var(--bg-color);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: var(--bg-color);
+    }
+    ::-webkit-scrollbar-thumb {
+        background: rgba(0, 229, 255, 0.3);
+        border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-cyan);
+    }
+
+    /* Ambient Background & Grid (Static) */
+    .ambient-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-image: 
+            radial-gradient(circle at 10% 20%, rgba(0, 229, 255, 0.04) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.04) 0%, transparent 40%);
+        z-index: -2;
+        pointer-events: none;
+    }
+
+    .grid-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-image: linear-gradient(rgba(0, 229, 255, 0.015) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(0, 229, 255, 0.015) 1px, transparent 1px);
+        background-size: 40px 40px;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    /* Header Navbar (Sticky) */
+    header.site-header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background-color: rgba(0, 0, 0, 0.92);
+        border-bottom: 1px solid var(--border-cyan);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        contain: layout style paint;
+    }
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+    }
+
+    .logo-container svg {
+        width: 32px;
+        height: 32px;
+        fill: var(--accent-cyan);
+        filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.4));
+    }
+
+    .logo-text {
+        font-family: var(--font-heading);
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: var(--text-main);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+    }
+
+    .nav-menu {
+        display: flex;
+        gap: 24px;
+        list-style: none;
+    }
+
+    .nav-menu a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        transition: color 0.2s ease;
+    }
+
+    .nav-menu a:hover {
+        color: var(--accent-cyan);
+        text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+    }
+
+    /* Main Container & Layout */
+    .site-main-wrap {
+        max-width: 1300px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+        .site-main-wrap {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Post Cards */
+    .post-card {
+        background: var(--card-bg-gradient);
+        border: 1px solid var(--border-cyan);
+        border-radius: 12px;
+        padding: 1.8rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        contain: layout style paint;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .post-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+    }
+
+    .post-title {
+        font-family: var(--font-heading);
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 0.8rem;
+    }
+
+    .post-title a {
+        color: var(--text-main);
+        text-decoration: none;
+        text-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+        transition: color 0.2s;
+    }
+
+    .post-title a:hover {
+        color: var(--accent-cyan);
+    }
+
+    .post-meta {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+
+    .post-snippet {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .post-footer-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .btn-readmore {
+        background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+        color: var(--bg-color);
+        padding: 0.6rem 1.4rem;
+        font-family: var(--font-heading);
+        font-weight: 800;
+        font-size: 0.85rem;
+        text-decoration: none;
+        border-radius: 6px;
+        text-transform: uppercase;
+        box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
+    }
+
+    .labels-list {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .label-pill {
+        background: rgba(0, 229, 255, 0.06);
+        border: 1px solid var(--border-cyan);
+        color: var(--accent-cyan);
+        padding: 0.2rem 0.6rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+
+    /* Sidebar Widgets */
+    aside.sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .widget {
+        background: var(--card-bg-gradient);
+        border: 1px solid var(--border-cyan);
+        border-radius: 12px;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        contain: layout style paint;
+    }
+
+    .widget::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+    }
+
+    .widget h2, .widget h3 {
+        font-family: var(--font-heading);
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: var(--text-main);
+        margin-bottom: 1rem;
+        text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+        border-bottom: 1px solid var(--border-cyan);
+        padding-bottom: 0.5rem;
+    }
+
+    .widget ul {
+        list-style: none;
+    }
+
+    .widget ul li {
+        margin-bottom: 0.6rem;
+    }
+
+    .widget ul li a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+    }
+
+    .widget ul li a:hover {
+        color: var(--accent-cyan);
+    }
+
+    /* Pagination */
+    .blog-pager {
+        display: flex;
+        justify-content: space-between;
+        margin: 2rem 0;
+    }
+
+    .blog-pager-older-link, .blog-pager-newer-link {
+        background: var(--card-bg);
+        border: 1px solid var(--border-cyan);
+        color: var(--accent-cyan);
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-family: var(--font-heading);
+        font-weight: 800;
+        font-size: 0.85rem;
+    }
+
+    /* Footer */
+    footer.site-footer {
+        text-align: center;
+        padding: 2.5rem 1rem;
+        border-top: 1px solid var(--border-cyan);
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-top: 3rem;
+    }
+
+    footer.site-footer a {
+        color: var(--accent-cyan);
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    /* Badge Dot Pulse (The only permitted infinite animation) */
+    @keyframes pulseDot {
+        0% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.85); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--accent-cyan);
+        border-radius: 50%;
+        display: inline-block;
+        animation: pulseDot 1.8s infinite ease-in-out;
+    }
+    ]]></b:skin>
+</head>
+
+<body>
+    <div class='ambient-bg'/>
+    <div class='grid-overlay'/>
+
+    <!-- HEADER -->
+    <header class='site-header'>
+        <a class='logo-container' expr:href='data:blog.homepageUrl'>
+            <svg viewBox='0 0 24 24'><path d='M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3zm0 2.18l7 2.33v5.15c0 4.54-3.12 8.78-7 9.87-3.88-1.09-7-5.33-7-9.87V6.51l7-2.33z'/></svg>
+            <span class='logo-text'>ScriptVault</span>
+        </a>
+        <ul class='nav-menu'>
+            <li><a expr:href='data:blog.homepageUrl'>Home</a></li>
+            <li><a href='/search/label/Scripts'>Scripts</a></li>
+            <li><a href='https://youtube.com' target='_blank'>YouTube</a></li>
+        </ul>
+    </header>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class='site-main-wrap'>
+        <!-- POSTS SECTION -->
+        <main class='main-content'>
+            <b:section id='main-content-section' showaddelement='yes'>
+                <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' version='2'>
+                    <b:includable id='main'>
+                        <b:loop values='data:posts' var='post'>
+                            <article class='post-card'>
+                                <h2 class='post-title'>
+                                    <a expr:href='data:post.url'><data:post.title/></a>
+                                </h2>
+                                <div class='post-meta'>
+                                    <span><data:post.dateHeader/></span>
+                                </div>
+                                <div class='post-snippet'>
+                                    <b:if cond='data:post.snippet'>
+                                        <data:post.snippet/>
+                                    <b:else/>
+                                        <data:post.body/>
+                                    </b:if>
+                                </div>
+                                <div class='post-footer-actions'>
+                                    <a class='btn-readmore' expr:href='data:post.url'>Get Script</a>
+                                    <div class='labels-list'>
+                                        <b:if cond='data:post.labels'>
+                                            <b:loop values='data:post.labels' var='label'>
+                                                <a class='label-pill' expr:href='data:label.url'><data:label.name/></a>
+                                            </b:loop>
+                                        </b:if>
+                                    </div>
+                                </div>
+                            </article>
+                        </b:loop>
+
+                        <!-- Pager -->
+                        <div class='blog-pager'>
+                            <b:if cond='data:olderPageUrl'>
+                                <a class='blog-pager-older-link' expr:href='data:olderPageUrl'>&amp;larr; Older Scripts</a>
+                            </b:if>
+                            <b:if cond='data:newerPageUrl'>
+                                <a class='blog-pager-newer-link' expr:href='data:newerPageUrl'>Newer Scripts &amp;rarr;</a>
+                            </b:if>
+                        </div>
+                    </b:includable>
+                </b:widget>
+            </b:section>
+        </main>
+
+        <!-- SIDEBAR -->
+        <aside class='sidebar'>
+            <b:section id='sidebar-section' showaddelement='yes'>
+                <b:widget id='HTML1' locked='false' title='Featured Notice' type='HTML' version='2'>
+                    <b:includable id='main'>
+                        <div class='widget'>
+                            <h3><data:title/></h3>
+                            <div style='color: var(--text-muted); font-size: 0.9rem;'>
+                                Welcome to ScriptVault! The ultimate secure hub for Roblox scripts, executors, and bypass tools. All scripts verified.
+                            </div>
+                        </div>
+                    </b:includable>
+                </b:widget>
+                <b:widget id='Label1' locked='false' title='Categories' type='Label' version='2'>
+                    <b:includable id='main'>
+                        <div class='widget'>
+                            <h3>Categories</h3>
+                            <ul>
+                                <b:loop values='data:labels' var='label'>
+                                    <li><a expr:href='data:label.url'><data:label.name/> (<data:label.count/>)</a></li>
+                                </b:loop>
+                            </ul>
+                        </div>
+                    </b:includable>
+                </b:widget>
+            </b:section>
+        </aside>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class='site-footer'>
+        <p>&#169; 2026 ScriptVault. Built for Roblox Developers. | <a href='https://youtube.com' target='_blank'>YouTube Channel</a></p>
+    </footer>
+</body>
+</html>
