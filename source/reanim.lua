@@ -924,12 +924,22 @@ do
 	local NAMWindowWidth = math.min(480, math.max(300, NAMScreenSize.X - 24))
 	local NAMWindowHeight = math.min(320, math.max(220, NAMScreenSize.Y - 48))
 	UIMainWindow.Size = UDim2.fromOffset(NAMWindowWidth, NAMWindowHeight)
-	UIMainWindow.BackgroundTransparency = 0
-	UIMainWindow.BackgroundColor3 = Color3.new(1, 1, 1)
+	UIMainWindow.BackgroundTransparency = 0.12
+	UIMainWindow.BackgroundColor3 = Color3.fromRGB(15, 18, 30)
 	UIMainWindow.BorderSizePixel = 0
 	Stylize(UIMainWindow, {
 		Glow = true
 	})
+	UIMainWindow.BackgroundTransparency = 0.12
+	UIMainWindow.BackgroundColor3 = Color3.fromRGB(15, 18, 30)
+	local glassCorner = Instance.new("UICorner")
+	glassCorner.CornerRadius = UDim.new(0, 14)
+	glassCorner.Parent = UIMainWindow
+	local glassStroke = Instance.new("UIStroke")
+	glassStroke.Color = Color3.fromRGB(160, 180, 255)
+	glassStroke.Transparency = 0.58
+	glassStroke.Thickness = 1
+	glassStroke.Parent = UIMainWindow
 	local _clicksndclicked = false
 	UserInputService.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -1012,43 +1022,54 @@ do
 		end)
 	end
 	
-	-- Clean, high-contrast navigation bar. Keep it above every content layer
-	-- and explicitly active so mouse, touch and controller input can reach it.
+	-- Glass navigation rebuilt with an explicit hit-test fallback for touch/executor GUIs.
 	local NAMTabBar = Util.Instance("Frame", UIMainWindow)
-	NAMTabBar.Name = "NAMTabBar"
-	NAMTabBar.Position = UDim2.new(0, 8, 0, 32)
-	NAMTabBar.Size = UDim2.new(1, -16, 0, 30)
-	NAMTabBar.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+	NAMTabBar.Name = "NAMGlassNavigation"
+	NAMTabBar.Position = UDim2.new(0, 10, 0, 34)
+	NAMTabBar.Size = UDim2.new(1, -20, 0, 30)
+	NAMTabBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	NAMTabBar.BackgroundTransparency = 0.91
 	NAMTabBar.BorderSizePixel = 0
-	NAMTabBar.Active = true
-	NAMTabBar.Interactable = true
-	NAMTabBar.ZIndex = 100
+	NAMTabBar.Active = false
+	NAMTabBar.ZIndex = 50
+	local navCorner = Instance.new("UICorner")
+	navCorner.CornerRadius = UDim.new(0, 9)
+	navCorner.Parent = NAMTabBar
+	local navStroke = Instance.new("UIStroke")
+	navStroke.Color = Color3.fromRGB(170, 190, 255)
+	navStroke.Transparency = 0.72
+	navStroke.Thickness = 1
+	navStroke.Parent = NAMTabBar
 	NAMTabButtons = {}
 	local tabNames = {"NAM", "ANIMATIONS", "REANIM", "SETTINGS", "ABOUT"}
 	for index, tabName in ipairs(tabNames) do
 		local tab = Util.Instance("TextButton", NAMTabBar)
 		tab.Name = tabName .. "Tab"
-		tab.Position = UDim2.new((index - 1) / #tabNames, 3, 0, 3)
-		tab.Size = UDim2.new(1 / #tabNames, -6, 1, -6)
-		tab.BackgroundColor3 = Color3.fromRGB(35, 35, 44)
+		tab.Position = UDim2.new((index - 1) / #tabNames, 4, 0, 4)
+		tab.Size = UDim2.new(1 / #tabNames, -8, 1, -8)
+		tab.BackgroundColor3 = Color3.fromRGB(135, 155, 255)
+		tab.BackgroundTransparency = 1
 		tab.BorderSizePixel = 0
 		tab.Font = Enum.Font.GothamSemibold
 		tab.Text = ({NAM = "HOME", ANIMATIONS = "ANIMS", REANIM = "RIG", SETTINGS = "SETTINGS", ABOUT = "ABOUT"})[tabName]
-		tab.TextColor3 = Color3.fromRGB(220, 220, 230)
+		tab.TextColor3 = Color3.fromRGB(225, 230, 245)
 		tab.TextSize = 10
 		tab.TextScaled = false
 		tab.TextWrapped = true
-		tab.AutoButtonColor = true
+		tab.AutoButtonColor = false
 		tab.Active = true
 		tab.Interactable = true
 		tab.Selectable = true
-		tab.ZIndex = 101
+		tab.ZIndex = 52
+		local tabCorner = Instance.new("UICorner")
+		tabCorner.CornerRadius = UDim.new(0, 6)
+		tabCorner.Parent = tab
 		NAMTabButtons[tabName] = tab
 	end
 
 	AWindowContent = Util.Instance("Frame", UIMainWindow)
-	AWindowContent.Position = UDim2.new(0, 0, 0, 66)
-	AWindowContent.Size = UDim2.new(1, 0, 1, -71)
+	AWindowContent.Position = UDim2.new(0, 0, 0, 70)
+	AWindowContent.Size = UDim2.new(1, 0, 1, -75)
 	AWindowContent.BackgroundTransparency = 1
 	AWindowContent.ClipsDescendants = true
 	AWindowContent.ZIndex = 0
@@ -1260,7 +1281,7 @@ do -- homepage
 	text.Position = UDim2.new(0.5, 0, 1, -25)
 	text.ZIndex = 3
 	text.Parent = CracktroFrame
-	local text0 = Util.MakeText("Discord: discord.gg/NASNUKRBVM")
+	local text0 = Util.MakeText("ROBUNEXA | READY")
 	text0.AnchorPoint = Vector2.new(0.5, 1)
 	text0.Position = UDim2.new(0.5, 0, 1, -17)
 	text0.ZIndex = 3
@@ -1291,7 +1312,7 @@ do -- homepage
 		"I am pretty new in this community! :D",
 		"\"Dreams come true!\"",
 		"Idea originated from a dream.",
-		"If you love this program, join my Discord!",
+		"Thanks for using RobuNexa!",
 	}
 	local text3 = nil
 	local function changequote()
@@ -7921,25 +7942,7 @@ UI.CreateText(CreditsPage, "expose more backend functions for me like a good boy
 UI.CreateText(CreditsPage, "<b>NAM | MAMALALANAM</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "ill be taking ALL your convertions >:D", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "actually, im just taking the names, search it up on script sources, read the source, convert it and stuff then done", 12, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "<font color=\"#4444FF\"><b>Empyrean Reanimate (click for Discord)</b></font>", 12, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		Util.Notify("Link copied!")
-		pcall(setclipboard, "https://discord.gg/UJ7YtqadPJ")
-		pcall(request, {
-			Url = "http://127.0.0.1:6463/rpc?v=1",
-			Method = "POST",
-			Headers = {
-				["Content-Type"] = 'application/json',
-				["Origin"] = "https://discord.com",
-			},
-			Body = HttpService:JSONEncode({
-				cmd = "INVITE_BROWSER",
-				nonce = HttpService:GenerateGUID(false),
-				args = {code = "UJ7YtqadPJ"},
-			}),
-		})
-	end
-end)
+UI.CreateText(CreditsPage, "<b>Empyrean Reanimate</b>", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "your tool fling is great reference!", 12, Enum.TextXAlignment.Center)
 UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "<b>* Greetings to *</b>", 15, Enum.TextXAlignment.Center)
@@ -7973,25 +7976,7 @@ end)
 UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "<b>NAM | by mamalalanam</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "all rights reserved", 14, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "<font color=\"#4444FF\">[ Discord invite ]</font>", 15, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		Util.Notify("Link copied!")
-		pcall(setclipboard, "https://discord.gg/NASNUKRBVM")
-		pcall(request, {
-			Url = "http://127.0.0.1:6463/rpc?v=1",
-			Method = "POST",
-			Headers = {
-				["Content-Type"] = 'application/json',
-				["Origin"] = "https://discord.com",
-			},
-			Body = HttpService:JSONEncode({
-				cmd = "INVITE_BROWSER",
-				nonce = HttpService:GenerateGUID(false),
-				args = {code = "NASNUKRBVM"},
-			}),
-		})
-	end
-end)
+UI.CreateText(CreditsPage, "RobuNexa community links removed", 15, Enum.TextXAlignment.Center)
 local ChangelogsPage = UI.CreatePage()
 ChangelogsPage.ZIndex = 1
 ChangelogsPage.Position = UDim2.new(0.5, 360, 0.5, 0)
@@ -8289,7 +8274,9 @@ clearcontenthash.Activated:Connect(function()
 	end
 end)
 
+local NAMCurrentTab = nil
 NAMSelectTab = function(tabName)
+	if NAMCurrentTab == tabName then return end
 	local pages = {
 		NAM = MainPage,
 		ANIMATIONS = DancesPage,
@@ -8299,31 +8286,34 @@ NAMSelectTab = function(tabName)
 	local selectedPage = pages[tabName]
 	local isReanim = tabName == "REANIM"
 	if not isReanim and not selectedPage then return end
+	NAMCurrentTab = tabName
 
-	-- Hide all normal pages first, then position and enable only the chosen page.
+	-- Never allow an invisible page to sit over the selected page and eat input.
 	for _, child in WindowContent:GetChildren() do
 		if child:IsA("GuiObject") then
 			child.Visible = false
-			child.Interactable = false
+			pcall(function() child.Interactable = false end)
+			child.Active = false
 		end
 	end
 	WindowContent.Visible = not isReanim
-	WindowContent.Interactable = not isReanim
-	WindowContent.Position = isReanim and UDim2.new(0, 0, 0, 0) or UDim2.new(0, 120, 0, 0)
-	WindowContent.Size = isReanim and UDim2.new(1, 0, 1, 0) or UDim2.new(1, -120, 1, 0)
+	pcall(function() WindowContent.Interactable = not isReanim end)
+	WindowContent.Position = UDim2.new(0, 0, 0, 0)
+	WindowContent.Size = UDim2.new(1, 0, 1, 0)
 
 	if selectedPage then
-		selectedPage.AnchorPoint = Vector2.new(0.5, 0.5)
-		selectedPage.Position = UDim2.new(0.5, 0, 0.5, 0)
+		selectedPage.AnchorPoint = Vector2.new(0, 0)
+		selectedPage.Position = UDim2.new(0, 4, 0, 4)
 		selectedPage.Size = UDim2.new(1, -8, 1, -8)
 		selectedPage.Visible = true
-		selectedPage.Interactable = true
+		selectedPage.Active = false
+		pcall(function() selectedPage.Interactable = true end)
 	end
 
 	ReanimPage.Visible = isReanim
-	ReanimPage.Interactable = isReanim
+	pcall(function() ReanimPage.Interactable = isReanim end)
 	ReanimPage.Position = UDim2.new(0, 0, 0, 0)
-	ReanimPage.Size = isReanim and UDim2.new(1, 0, 1, 0) or UDim2.new(0, 120, 1, 0)
+	ReanimPage.Size = UDim2.new(1, 0, 1, 0)
 	for _, child in AWindowContent:GetChildren() do
 		if child:IsA("ImageLabel") then child.Visible = false end
 	end
@@ -8333,22 +8323,35 @@ NAMSelectTab = function(tabName)
 	end
 	for name, button in NAMTabButtons do
 		local active = name == tabName
-		button.BackgroundColor3 = active and Color3.fromRGB(108, 55, 160) or Color3.fromRGB(35, 35, 44)
-		button.TextColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(220, 220, 230)
+		button.BackgroundTransparency = active and 0.12 or 1
+		button.BackgroundColor3 = active and Color3.fromRGB(135, 155, 255) or Color3.fromRGB(255, 255, 255)
+		button.TextColor3 = active and Color3.fromRGB(15, 18, 30) or Color3.fromRGB(225, 230, 245)
 		button.Active = true
-		button.Interactable = true
-		button.ZIndex = 101
+		pcall(function() button.Interactable = true end)
+		button.ZIndex = 52
 	end
 end
+
+-- Buttons handle keyboard/controller activation normally.
 for tabName, button in NAMTabButtons do
-	local function switchToTab()
-		NAMSelectTab(tabName)
-	end
-	button.Activated:Connect(switchToTab)
-	-- MouseButton1Click is a fallback for executor environments where Activated
-	-- does not reliably fire for injected ScreenGui controls.
-	button.MouseButton1Click:Connect(switchToTab)
+	button.Activated:Connect(function() NAMSelectTab(tabName) end)
 end
+
+-- Reliable fallback: manually hit-test taps/clicks against the visible tab rectangles.
+-- This bypasses other injected GUI layers that can swallow Roblox button events.
+UserInputService.InputBegan:Connect(function(input)
+	if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then return end
+	local point = Vector2.new(input.Position.X, input.Position.Y)
+	for tabName, button in NAMTabButtons do
+		if button.Visible and button.Active then
+			local pos, size = button.AbsolutePosition, button.AbsoluteSize
+			if point.X >= pos.X and point.X <= pos.X + size.X and point.Y >= pos.Y and point.Y <= pos.Y + size.Y then
+				NAMSelectTab(tabName)
+				return
+			end
+		end
+	end
+end)
 NAMSelectTab("NAM")
 
 ForceModuleReload(false)
