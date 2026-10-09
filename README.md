@@ -2,10 +2,15 @@
 
 A compact animation hub with a curated catalog.
 
-## Catalog
-- **Hakari's Dance**
-- **Gojo Awake** (module configured; animation asset must be present as `content/GojoAwake.anim`)
-- **Cursed car anim** (renamed from Patchma Hub)
-- **Limb Reanimator** is the only reanimation option shown.
+## UI
+- Top tabs: **NAM**, **ANIMATIONS**, **REANIM**, **SETTINGS**, and **ABOUT**.
+- Only the selected main panel is shown.
+- Dark UI with compact purple/pink tab borders and mobile-friendly controls.
 
-Unrelated dance packs and unused media are removed from the shipped content. The UI and asset download URLs are branded for NAM.
+## Catalog
+- **Hakari's Dance** — uses `content/Hakari.anim` and `content/Hakari.mp3`.
+- **Gojo Awake** — self-contained R6 keyframe sequence; no separate animation file is required.
+- **Cursed car anim** — the renamed moveset formerly labeled Patchma Hub.
+- **Limb Reanimator** — the only selectable reanimation mode, with Start/Stop and Refresh controls.
+
+The REANIM tab checks for an R6 character with the required body parts and joints, then shows **SUPPORTED GAME DETECTED** or **UNSUPPORTED GAME !!! >:D**. The original parser delimiter containing `:3` is intentionally unchanged because it is internal to the module hash and is not displayed in the UI.
