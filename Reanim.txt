@@ -37,7 +37,8 @@ local ContextActionService = cloneref(game:GetService("ContextActionService"))
 -- MOBİL TESPİT VE UI ÖLÇEKLEME
 local IsMobile = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
 local UI_SCALE = IsMobile and 1.3 or 1.0
-local IsTablet = IsMobile and Camera and Camera.ViewportSize.X > 900 or false
+local currentCamera = workspace.CurrentCamera
+local IsTablet = IsMobile and currentCamera ~= nil and currentCamera.ViewportSize.X > 900 or false
 if IsTablet then UI_SCALE = 1.5 end
 
 local Util = {}
