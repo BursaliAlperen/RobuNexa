@@ -1,27 +1,31 @@
 # NAM → RobuNexa migration
 
-## Changes made on this branch
+## Changes made on robunexa-nam-adaptation
 
-- `Reanim.txt` now loads the legacy built-in module files from RobuNexa's `content/` directory.
-- Vendored these upstream modules into `content/`: `v_moveset1.lua`, `v_moveset2.lua`, `v_moveset3.lua`, `v_dance1.lua`, `v_dance2.lua`, `d_limbmap.lua`, and `d_hatsmap.lua`.
-- Preserved the upstream MIT license in `content/LICENSE-Uhhhhhh.txt`.
-- Added a RobuNexa `CHANGELOGS` file and updated the changelog link.
-- Removed the Pusher listener that executed arbitrary server-supplied Lua through `loadstring`.
-- Added the R6 KeyframeSequence generator and guide under `Animations/R6/`.
+- Reanim.txt now uses RobuNexa-hosted built-in modules and a pinned immutable content snapshot.
+- Vendored the upstream MIT modules: v_moveset1.lua, v_moveset2.lua, v_moveset3.lua, v_dance1.lua, v_dance2.lua, v_robunexa_anime.lua, d_limbmap.lua, and d_hatsmap.lua.
+- Preserved the upstream MIT license in content/LICENSE-Uhhhhhh.txt.
+- Added 15 original R6 animation sequences and a NAM dance module that exposes them in the Dances list.
+- Added LoadRobuNexa.lua, a launcher pinned to a specific Reanim.txt commit.
+- Removed the legacy Pusher listener that executed arbitrary server-supplied Lua through loadstring.
+- Removed unnecessary third-party MP3 downloads that were only used for local file comparisons.
+- Replaced the community store manifest with an intentionally empty RobuNexa manifest. Optional legacy UI media binaries have not been mirrored.
 
-## Important remaining limitations
+## Security and compatibility notes
 
-This is a partial migration, not a verified end-to-end executor release. The legacy store still refers to `STEVE-916-create/Uhhhhhh-Store`; its store manifest and assets have not yet been copied. The startup UI also requests assets from RobuNexa's `uiassets/` folder, but the original image/music assets have not been mirrored there. Those features may be unavailable until their files are migrated.
+This is a migration build, not a certified release. The script still uses executor-specific APIs such as request, readfile, writefile, loadstring, and getcustomasset. It is not a normal Roblox Studio LocalScript. Local files under NAMReanim/Modules/ are executable user code; only keep modules you wrote or reviewed.
 
-The script still uses executor-specific APIs such as `request`, `readfile`, `writefile`, `loadstring`, and `getcustomasset`. This is not a Roblox Studio LocalScript and cannot run unchanged in Studio. The built-in modules are downloaded as Lua source and compiled locally; review them before use. Do not reintroduce the removed Pusher remote-code handler.
+Built-in Lua modules are downloaded from a pinned immutable commit and compiled locally. Animation payloads are data, Base64-decoded to the native KeyframeSequence format, and never compiled as Lua. The old Pusher jumpscare remote-code execution handler is removed.
 
 ## Testing still required
 
-- Test syntax and startup in the target executor; no live executor runtime was available for this edit.
-- Verify the limb-map/hat-map modules and animation playback with a classic R6 avatar.
-- Mirror and verify all referenced store/UI assets before claiming full dependency independence.
-- Export generated KeyframeSequences from Studio and confirm they play before publishing asset IDs.
+- Test startup and module parsing in the intended executor.
+- Verify all 15 animation sequences on a classic R6 avatar; pose quality may need tuning.
+- Verify limb/hat reanimation behavior in a private test place. Compatibility varies by experience and executor.
+- Export the Studio-generated KeyframeSequences and publish them manually if public Roblox animation IDs are needed.
 
-## R6 animation files
+## Official documentation
 
-The generator creates starter KeyframeSequence instances in Studio. It does not contain already-published Roblox animation asset IDs or guarantee production-ready animation timing.
+- [Animation Editor](https://create.roblox.com/docs/animation/editor)
+- [KeyframeSequence API](https://create.roblox.com/docs/reference/engine/classes/KeyframeSequence)
+- [Export/import animations](https://create.roblox.com/docs/education/build-it-play-it-island-of-move/sharing-animations)
