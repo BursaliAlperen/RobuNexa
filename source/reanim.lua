@@ -8295,8 +8295,12 @@ NAMSelectTab = function(tabName)
 	WindowContent.Size = UDim2.new(1, 0, 1, 0)
 	for _, child in AWindowContent:GetChildren() do
 		if child:IsA("ImageLabel") then
-			child.Visible = not isReanim
+			child.Visible = false
 		end
+	end
+	local reanimLayout = ReanimPage:FindFirstChildOfClass("UIListLayout")
+	if reanimLayout then
+		reanimLayout.VerticalAlignment = isReanim and Enum.VerticalAlignment.Top or Enum.VerticalAlignment.Bottom
 	end
 	for name, button in NAMTabButtons do
 		local active = name == tabName
