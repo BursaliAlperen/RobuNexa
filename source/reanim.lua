@@ -883,8 +883,9 @@ local function SetUITheme(index)
 		UISound.Click.SoundId = theme[4]
 	end
 end
-SaveData.UITheme = SaveData.UITheme or 1
-SetUITheme(SaveData.UITheme)
+-- NAM theme is intentionally locked to Sakura.
+SaveData.UITheme = 15
+SetUITheme(15)
 
 local ReanimPage
 local NAMTabButtons
@@ -2369,28 +2370,7 @@ end)
 UI.CreateSwitch(SettingsPage, "Skip Intro", SaveData.SkipIntro).Changed:Connect(function(value)
 	SaveData.SkipIntro = value
 end)
-UI.CreateDropdown(SettingsPage, "UI Theme", {
-	"RGB/Default",
-	"ALONE",
-	"Oxide",
-	"Cursed car anim",
-	"Genesis V4",
-	"Crimson",
-	"r/masterhacker",
-	"Homer Simpson",
-	"Immortality Lord",
-	"LIGHT RGB",
-	"LIGHT ALONE",
-	"Roserika",
-	"FastTracker II Blue",
-	"Cherry Blossom",
-	"Sakura",
-	"Tommorow Night 80s", -- my personal IDE theme
-	"User Defined (see README)",
-}, SaveData.UITheme).Changed:Connect(function(val)
-	SaveData.UITheme = val
-	SetUITheme(SaveData.UITheme)
-end)
+UI.CreateText(SettingsPage, "UI Theme: Sakura (locked)", 16, Enum.TextXAlignment.Left)
 UI.CreateSeparator(SettingsPage)
 
 local MusicName = UI.CreateText(SettingsPage, "", 15, Enum.TextXAlignment.Center)
@@ -7817,12 +7797,12 @@ for i=1, 64 do
 	table.insert(UhhhhhhFirep, {i / 64, 0.98 + math.random() * 0.04, math.random(), math.random() - 0.5})
 end
 local UhhhhhhFirea = {
-	"XX    XX XX      XX      XX      XX      XX      XX     ",
-	"XX    XX XX      XX      XX      XX      XX      XX     ",
-	"XX    XX XXXXXX  XXXXXX  XXXXXX  XXXXXX  XXXXXX  XXXXXX ",
-	"XX    XX XX   XX XX   XX XX   XX XX   XX XX   XX XX   XX",
-	"XXX  XXX XX   XX XX   XX XX   XX XX   XX XX   XX XX   XX",
-	" XXXXXX  XX   XX XX   XX XX   XX XX   XX XX   XX XX   XX",
+	"NN   NN    AAAA    MM    MM",
+	"NNN  NN   AA  AA   MMM  MMM",
+	"NN N NN   AA  AA   MM MM MM",
+	"NN  NNN   AAAAAA   MM    MM",
+	"NN   NN   AA  AA   MM    MM",
+	"NN   NN   AA  AA   MM    MM",
 }
 local UhhhhhhFirex = #UhhhhhhFirea[1]
 local UhhhhhhFirey = #UhhhhhhFirea
