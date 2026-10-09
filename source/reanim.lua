@@ -6298,9 +6298,10 @@ do
 	local function NAMCheckLimbSupport()
 	local character = Player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	local root = character and character:FindFirstChild("HumanoidRootPart")
-	local torso = character and character:FindFirstChild("Torso")
-	local supported = humanoid ~= nil and humanoid.RigType == Enum.HumanoidRigType.R6 and root ~= nil and torso ~= nil
+	if not character or not humanoid then return false end
+	local root = character:FindFirstChild("HumanoidRootPart")
+	local torso = character:FindFirstChild("Torso")
+	local supported = humanoid.RigType == Enum.HumanoidRigType.R6 and root ~= nil and torso ~= nil
 	if supported then
 		for _, name in {"Head", "Left Arm", "Right Arm", "Left Leg", "Right Leg"} do
 			if not character:FindFirstChild(name) then supported = false break end
@@ -7198,7 +7199,7 @@ do
 	local actions, actionsmap = ContextActions._Actions, ContextActions._ActionsMap
 	function ContextActions:RunBinding(caac, input)
 		local s, result = xpcall(caac.Callback, function(m)
-			warn(debug.traceback("Uhhhhhh :: Custom ContextActions Error - " .. m))
+			warn(debug.traceback("NAM :: Custom ContextActions Error - " .. m))
 		end, caac.Name, input.UserInputState, input)
 		if s then
 			if result == Enum.ContextActionResult.Sink then
