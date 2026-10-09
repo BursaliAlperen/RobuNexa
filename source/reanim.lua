@@ -2309,15 +2309,7 @@ SettingsPage.Interactable = false
 SettingsPage.Visible = false
 UI.CreateText(SettingsPage, "<b>SETTINGS</b>\\nAdvanced controls. Most users can leave these unchanged.", 17, Enum.TextXAlignment.Center)
 UI.CreateButton(SettingsPage, "&lt; Back to NAM", 18).Activated:Connect(function()
-	SettingsPage.Interactable = false
-	local tween = TweenService:Create(SettingsPage, TweenInfo.new(0.25, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
-		Position = UDim2.new(0.5, 360, 0.5, 0),
-	})
-	tween:Play()
-	tween.Completed:Connect(function()
-		SettingsPage.Visible = false
-		MainPage.Interactable = true
-	end)
+	if NAMSelectTab then NAMSelectTab("NAM") end
 end)
 
 CracktroFrame.InputEnded:Connect(function(input)
@@ -2341,17 +2333,8 @@ UI.CreateText(MainPage, "by mamalalanam", 13, Enum.TextXAlignment.Center)
 UI.CreateText(MainPage, "Anime animations • simple controls", 12, Enum.TextXAlignment.Center)
 UI.CreateText(SettingsPage, `NAM | by mamalalanam | v{UhhhhhhVersion}`, 15, Enum.TextXAlignment.Right)
 UI.CreateSeparator(SettingsPage)
-UI.CreateButton(SettingsPage, " &lt; Back to NAM", 20).Activated:Connect(function()
-	CracktroFrame.Interactable = false
-	CracktroFrame.Visible = true
-	MainPage.Interactable = false
-	local tween = TweenService:Create(CracktroFrame, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
-		Position = UDim2.new(0.5, 0, 0.5, 0),
-	})
-	tween:Play()
-	tween.Completed:Connect(function()
-		CracktroFrame.Interactable = true
-	end)
+UI.CreateButton(SettingsPage, "&lt; Back to NAM", 18).Activated:Connect(function()
+	if NAMSelectTab then NAMSelectTab("NAM") end
 end)
 UI.CreateSwitch(SettingsPage, "Skip Intro", SaveData.SkipIntro).Changed:Connect(function(value)
 	SaveData.SkipIntro = value
