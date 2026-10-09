@@ -7288,11 +7288,8 @@ task.wait(1.5)
 Util.UINotify("just kidding lol")
 task.wait(8)
 end
-local checkfiles = {
-["Dances/myuu.mp3"] = game:HttpGet("https://raw.githubusercontent.com/Nitro-GT/music/refs/heads/main/myuu.mp3"),
-["Dances/emoboy.mp3"] = game:HttpGet("https://raw.githubusercontent.com/Nitro-GT/music/refs/heads/main/emoboy.mp3"),
-["KDV3/Sphere.mp3"] = game:HttpGet("https://raw.githubusercontent.com/Solary-3/Scripts/refs/heads/Audios-1/Sphere.mp3"),
-}
+-- Avoid fetching unrelated third-party audio merely to compare local files.
+local checkfiles = {}
 local function checkfile(id)
 if isfile(id) then
 local content = checkfiles[id]
