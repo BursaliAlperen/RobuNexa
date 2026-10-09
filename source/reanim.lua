@@ -1012,37 +1012,43 @@ do
 		end)
 	end
 	
+	-- Clean, high-contrast navigation bar. Keep it above every content layer
+	-- and explicitly active so mouse, touch and controller input can reach it.
 	local NAMTabBar = Util.Instance("Frame", UIMainWindow)
 	NAMTabBar.Name = "NAMTabBar"
-	NAMTabBar.Position = UDim2.new(0, 0, 0, 30)
-	NAMTabBar.Size = UDim2.new(1, 0, 0, 26)
-	NAMTabBar.BackgroundColor3 = Color3.fromRGB(5, 5, 8)
-	NAMTabBar.BorderSizePixel = 1
-	NAMTabBar.BorderColor3 = Color3.fromRGB(205, 90, 255)
-	NAMTabBar.ZIndex = 20
+	NAMTabBar.Position = UDim2.new(0, 8, 0, 32)
+	NAMTabBar.Size = UDim2.new(1, -16, 0, 30)
+	NAMTabBar.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+	NAMTabBar.BorderSizePixel = 0
+	NAMTabBar.Active = true
+	NAMTabBar.Interactable = true
+	NAMTabBar.ZIndex = 100
 	NAMTabButtons = {}
-	for index, tabName in ipairs({"NAM", "ANIMATIONS", "REANIM", "SETTINGS", "ABOUT"}) do
+	local tabNames = {"NAM", "ANIMATIONS", "REANIM", "SETTINGS", "ABOUT"}
+	for index, tabName in ipairs(tabNames) do
 		local tab = Util.Instance("TextButton", NAMTabBar)
 		tab.Name = tabName .. "Tab"
-		tab.Position = UDim2.new((index - 1) / 5, 2, 0, 2)
-		tab.Size = UDim2.new(1 / 5, -4, 1, -4)
-		tab.BackgroundColor3 = Color3.fromRGB(10, 10, 14)
-		tab.BorderSizePixel = 1
-		tab.BorderColor3 = Color3.fromRGB(150, 65, 190)
-		tab.Font = Enum.Font.Code
-		tab.Text = ({NAM = "HOME", ANIMATIONS = "ANIMS", REANIM = "REANIM", SETTINGS = "SETTINGS", ABOUT = "ABOUT"})[tabName] or tabName
-		tab.TextColor3 = Color3.fromRGB(245, 235, 255)
+		tab.Position = UDim2.new((index - 1) / #tabNames, 3, 0, 3)
+		tab.Size = UDim2.new(1 / #tabNames, -6, 1, -6)
+		tab.BackgroundColor3 = Color3.fromRGB(35, 35, 44)
+		tab.BorderSizePixel = 0
+		tab.Font = Enum.Font.GothamSemibold
+		tab.Text = ({NAM = "HOME", ANIMATIONS = "ANIMS", REANIM = "RIG", SETTINGS = "SETTINGS", ABOUT = "ABOUT"})[tabName]
+		tab.TextColor3 = Color3.fromRGB(220, 220, 230)
 		tab.TextSize = 10
 		tab.TextScaled = false
 		tab.TextWrapped = true
 		tab.AutoButtonColor = true
-		tab.ZIndex = 21
+		tab.Active = true
+		tab.Interactable = true
+		tab.Selectable = true
+		tab.ZIndex = 101
 		NAMTabButtons[tabName] = tab
 	end
 
 	AWindowContent = Util.Instance("Frame", UIMainWindow)
-	AWindowContent.Position = UDim2.new(0, 0, 0, 56)
-	AWindowContent.Size = UDim2.new(1, 0, 1, -61)
+	AWindowContent.Position = UDim2.new(0, 0, 0, 66)
+	AWindowContent.Size = UDim2.new(1, 0, 1, -71)
 	AWindowContent.BackgroundTransparency = 1
 	AWindowContent.ClipsDescendants = true
 	AWindowContent.ZIndex = 0
@@ -8292,35 +8298,34 @@ NAMSelectTab = function(tabName)
 	}
 	local selectedPage = pages[tabName]
 	local isReanim = tabName == "REANIM"
+	if not isReanim and not selectedPage then return end
 
-	-- Hide every normal page first; selected pages may have been left off-screen
-	-- by the old slide transitions, so reset the active page to the center.
+	-- Hide all normal pages first, then position and enable only the chosen page.
 	for _, child in WindowContent:GetChildren() do
 		if child:IsA("GuiObject") then
-			local active = child == selectedPage and not isReanim
-			child.Visible = active
-			child.Interactable = active
+			child.Visible = false
+			child.Interactable = false
 		end
 	end
 	WindowContent.Visible = not isReanim
+	WindowContent.Interactable = not isReanim
 	WindowContent.Position = UDim2.new(0, 0, 0, 0)
-	WindowContent.Size = UDim2.new(1, 0, 1, 0)
+	WindowContent.Size = UDim2.new(1, -120, 1, 0)
 
-	if selectedPage and not isReanim then
+	if selectedPage then
 		selectedPage.AnchorPoint = Vector2.new(0.5, 0.5)
 		selectedPage.Position = UDim2.new(0.5, 0, 0.5, 0)
-		selectedPage.Size = UDim2.new(0, 360, 0, 245)
+		selectedPage.Size = UDim2.new(1, -8, 1, -8)
 		selectedPage.Visible = true
 		selectedPage.Interactable = true
 	end
 
 	ReanimPage.Visible = isReanim
+	ReanimPage.Interactable = isReanim
 	ReanimPage.Position = UDim2.new(0, 0, 0, 0)
 	ReanimPage.Size = isReanim and UDim2.new(1, 0, 1, 0) or UDim2.new(0, 120, 1, 0)
 	for _, child in AWindowContent:GetChildren() do
-		if child:IsA("ImageLabel") then
-			child.Visible = false
-		end
+		if child:IsA("ImageLabel") then child.Visible = false end
 	end
 	local reanimLayout = ReanimPage:FindFirstChildOfClass("UIListLayout")
 	if reanimLayout then
@@ -8328,15 +8333,21 @@ NAMSelectTab = function(tabName)
 	end
 	for name, button in NAMTabButtons do
 		local active = name == tabName
-		button.BackgroundColor3 = active and Color3.fromRGB(43, 15, 56) or Color3.fromRGB(10, 10, 14)
-		button.BorderColor3 = active and Color3.fromRGB(240, 115, 255) or Color3.fromRGB(150, 65, 190)
-		button.TextColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(210, 195, 220)
+		button.BackgroundColor3 = active and Color3.fromRGB(108, 55, 160) or Color3.fromRGB(35, 35, 44)
+		button.TextColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(220, 220, 230)
+		button.Active = true
+		button.Interactable = true
+		button.ZIndex = 101
 	end
 end
 for tabName, button in NAMTabButtons do
-	button.Activated:Connect(function()
+	local function switchToTab()
 		NAMSelectTab(tabName)
-	end)
+	end
+	button.Activated:Connect(switchToTab)
+	-- MouseButton1Click is a fallback for executor environments where Activated
+	-- does not reliably fire for injected ScreenGui controls.
+	button.MouseButton1Click:Connect(switchToTab)
 end
 NAMSelectTab("NAM")
 
