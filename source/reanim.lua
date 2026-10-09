@@ -6564,28 +6564,11 @@ _G_Uhhhhhh.Fling = function(part)
 end
 
 do
-	SaveData.SelectedReanimator = SaveData.SelectedReanimator or 1
-	local ReanimateMethodSelect = UI.CreateDropdown(MainPage, "Reanimator", {"Limb Reanimator", "Hats Reanimator"}, SaveData.SelectedReanimator)
-	local ReanimatorConfigTitle = UI.CreateText(MainPage, "-=+ Limb Reanimator Config +=-", 15, Enum.TextXAlignment.Center)
+	-- NAM keeps Limb Reanimator as the only selectable reanimation mode.
+	SaveData.SelectedReanimator = 1
 	local SelectedReanimator = LimbReanimator
-	if SaveData.SelectedReanimator == 2 then
-		SelectedReanimator = HatReanimator
-		ReanimatorConfigTitle.Text = "-=+ Hats Reanimator Config +=-"
-	end
+	UI.CreateText(MainPage, "-=+ Limb Reanimator Config +=-", 15, Enum.TextXAlignment.Center)
 	local ReanimatorConfigCanvas = UI.CreateCanvas(MainPage)
-	ReanimateMethodSelect.Changed:Connect(function(value)
-		SaveData.SelectedReanimator = value
-		if value == 1 then
-			SelectedReanimator = LimbReanimator
-			ReanimatorConfigTitle.Text = "-=+ Limb Reanimator Config +=-"
-		end
-		if value == 2 then
-			SelectedReanimator = HatReanimator
-			ReanimatorConfigTitle.Text = "-=+ Hats Reanimator Config +=-"
-		end
-		Util.ClearAllChildrenGui(ReanimatorConfigCanvas)
-		SelectedReanimator.Config(ReanimatorConfigCanvas)
-	end)
 	SelectedReanimator.Config(ReanimatorConfigCanvas)
 	UI.CreateText(ReanimPage, "Enjoy my really awful UI design! It's awful, but hey atleast clicking Reanimate is faster!", 8, Enum.TextXAlignment.Center)
 	local ReanimateText = UI.CreateText(ReanimPage, "Running: NONE", 15, Enum.TextXAlignment.Center)
