@@ -1,5 +1,5 @@
 -- NAM curated animation catalog
--- Self-contained Gojo Awake animation: no external .anim asset required.
+-- Gojo Awake loads its animation track from content/Gojo.anim.
 local modules = {}
 local function AddModule(m) table.insert(modules, m) end
 
@@ -7,7 +7,7 @@ AddModule(function()
 	local m = {}
 	m.ModuleType = "DANCE"
 	m.Name = "Gojo Awake"
-	m.Description = "A short anime-style awakening pose sequence for R6."
+	m.Description = "Gojo Awake R6 keyframe animation loaded from Gojo.anim."
 	m.Assets = {"Gojo.anim"}
 	m.Config = function(parent: GuiBase2d) end
 
