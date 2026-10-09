@@ -16,3 +16,6 @@
 - Not tested in a live Roblox executor or a live game. Pose quality, executor compatibility, and limb-reanimation behavior still need runtime testing.
 
 See README.md and NAM-ROBUNEXA-MIGRATION.md for setup, limitations and safety notes.
+
+- Added native binary Hakari dance .anim from the upstream Uhhhhhh content repository with attribution.
+- Documented public Gojo/Sukuna/Kira Creator Store listings separately; did not rehost those marketplace assets.
