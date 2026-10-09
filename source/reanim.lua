@@ -887,6 +887,7 @@ SaveData.UITheme = SaveData.UITheme or 1
 SetUITheme(SaveData.UITheme)
 
 local ReanimPage
+local NAMTabButtons
 local CracktroFrameText = "NAM | by mamalalanam | v" .. UhhhhhhVersion
 local UIMainWindow, AWindowContent, WindowContent
 
@@ -1016,7 +1017,7 @@ do
 	NAMTabBar.BorderSizePixel = 1
 	NAMTabBar.BorderColor3 = Color3.fromRGB(205, 90, 255)
 	NAMTabBar.ZIndex = 20
-	local NAMTabButtons = {}
+	NAMTabButtons = {}
 	for index, tabName in ipairs({"NAM", "ANIMATIONS", "REANIM", "SETTINGS", "ABOUT"}) do
 		local tab = Util.Instance("TextButton", NAMTabBar)
 		tab.Name = tabName .. "Tab"
