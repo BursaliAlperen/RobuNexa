@@ -9,7 +9,8 @@ RobuNexa, NAM Reanimate altyapısının bu depoda barındırılan bir uyarlamas�
 - `Reanim.txt` — NAM Reanimate ana betiği.
 - `LoadRobuNexa.lua` — sabit bir commit'e işaret eden GitHub başlatıcısı.
 - `content/` — NAM'ın yerleşik moveset, dance, limb-map ve hat-map modülleri.
-- `Animations/R6/` — 15 animasyon dosyası ve Roblox Studio KeyframeSequence oluşturucusu.
+- `Animations/R6/` — 15 özgün anime-esintili animasyon verisi ve Studio KeyframeSequence oluşturucusu.
+- `assets/anime/Hakari.anim` — upstream depodan aynen alınan gerçek ikili Hakari dans dosyası.
 - `Modules/RobuNexaConfig.lua` — pasif URL/yol yapılandırması örneği.
 - `NAM-ROBUNEXA-MIGRATION.md` — geçiş ve güvenlik notları.
 - `store/list.txt` — bu sürümde bilerek boş bırakılmış topluluk mağazası manifesti.
@@ -21,7 +22,7 @@ Yalnızca güvendiğin bir executor ortamında ve test etme iznin olan yerlerde 
 Executor'a şu satırı yapıştır:
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/2d1070e80dd105635ded81148a7976cf8314fd1e/Reanim.txt"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/1b9267f0f788fdfea3bfb1a5e2197b359676537f/Reanim.txt"))()
 ```
 
 Alternatif olarak `LoadRobuNexa.lua` dosyasının içeriğini çalıştırabilirsin. Ana betik URL'si değiştirilemez bir Git commit'ine sabitlenmiştir; yerleşik modüller de sabitlenmiş bir depo anlık görüntüsünden alınır. Bu, sürümü tekrarlanabilir yapar ama kodu çalıştırmadan önce inceleme gereğini ortadan kaldırmaz.
@@ -54,14 +55,13 @@ Alternatif olarak `LoadRobuNexa.lua` dosyasının içeriğini çalıştırabilir
 | RN Sword Slash | Yalnızca görsel kılıç savurma pozu |
 | RN Jump Land | Zıplama/iniş pozu; kök parçayı hareket ettirmez |
 | RN Point | İşaret etme |
+| Hakari's Dance | Kaynak depodan alınmış, döngülü Hakari dansı (native .anim) |
 
-Bunlar bu depo için oluşturulmuş anime-esintili özgün hareketlerdir; belirli bir anime karakterinden veya sahnesinden kopyalanmış dosyalar değildir. Yumruk, tekme ve kılıç savurma animasyonları **hasar, hitbox, silah veya sunucu taraflı hareket eklemez**.
+RN ile başlayan 15 hareket bu depo için oluşturulmuş özgün anime-esintili pozlardır; belirli bir anime sahnesinden kopyalanmamıştır. Hakari's Dance ayrı bir gerçek native .anim dosyasıdır ve kaynak/atıf bilgisi assets/anime/README.md içinde verilir. Yumruk, tekme ve kılıç savurma animasyonları **hasar, hitbox, silah veya sunucu taraflı hareket eklemez**.
 
 ## .anim dosyaları nasıl yükleniyor?
 
-NAM'ın `AnimLib.Track.fromfile` fonksiyonu JSON değil, little-endian STEVE KeyframeSequence ikili biçimini bekler. Bu depodaki `.anim` kaynakları, GitHub dosya düzenleme arayüzü ikili dosya yazamadığı için Base64 metin sarmalayıcısı olarak saklanır. Başlatıcı, sabitlenmiş RobuNexa animasyon bağlantısını algılar, Base64 içeriğini çözer ve gerçek ikili dosyayı `NAMReanim/Content/Anims/` altına yazar; ardından NAM'ın animasyon okuyucusu dosyayı açar.
-
-Bu yüzden tarayıcıdan doğrudan bir raw `.anim` bağlantısı indirirsen hazır ikili dosya değil Base64 metni görürsün. NAM içindeki yükleyiciyi kullan veya dosyayı başka yerde kullanacaksan Base64'ü önce çöz.
+NAM'ın `AnimLib.Track.fromfile` fonksiyonu JSON değil, little-endian STEVE KeyframeSequence ikili biçimini bekler. RobuNexa'ya özel 15 hareket Animations/R6/*.anim altında Base64 metin sarmalayıcısıdır; yükleyici bunları çözüp NAMReanim/Content/Anims/ altına native dosya olarak yazar. Buna karşılık assets/anime/Hakari.anim gerçek binary .anim dosyasıdır ve aynen indirilip kullanılır. Dosyaların türü assets/anime/README.md içinde açıklanır.
 
 ## Güvenlik
 
@@ -71,6 +71,16 @@ Bu yüzden tarayıcıdan doğrudan bir raw `.anim` bağlantısı indirirsen haz�
 - Topluluk mağazası bu sürümde bilerek boştur.
 - NAM hâlâ executor API'leri ve yerleşik Lua modüllerini yüklemek için `loadstring` kullanır. `NAMReanim/Modules/` altındaki her dosya çalıştırılabilir kullanıcı kodudur; yalnızca yazdığın veya dikkatlice incelediğin modülleri bırak.
 - Bilinmeyen loadstring kodlarını çalıştırma, hesap çerezlerini/oturum token'larını paylaşma ve güvenmediğin bir betik için güvenlik korumalarını kapatma.
+
+## Bulunan hazır anime emote bağlantıları
+
+Bunlar Roblox Creator Store'da yayımlanmış emote kayıtlarına ait keşif bağlantılarıdır; indirilebilir .anim kaynak dosyası değildirler ve bu depoya kopyalanmamıştır. Bazıları ücretli olabilir ve kullanım koşulları yayımlayan içerik sahibine bağlıdır:
+
+- [Gojo Emote (Rolimon's kaydı)](https://www.rolimons.com/item/74198526108091) — yayımlanmış emote kaydı.
+- [Sukuna Domain Expansion](https://www.rolimons.com/item/101430160520995) ve [Sukuna Aura Idle](https://www.rolimons.com/item/89424059240713) — yayımlanmış emote kayıtları.
+- [Kira Laugh — Death Note](https://www.rolimons.com/item/119613379552783) — yayımlanmış emote kaydı.
+
+Bu item ID'leri NAM'ın native .anim parser'ına doğrudan verilemez. Bunların ham animasyon verisini izinsiz çıkarmak yerine dosyanın sahibi/üreticisi tarafından sağlanan .anim veya .rbxm dışa aktarımını kullan.
 
 ## Bilinen sınırlamalar
 
