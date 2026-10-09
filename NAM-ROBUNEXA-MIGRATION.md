@@ -5,11 +5,11 @@
 - Reanim.txt now uses RobuNexa-hosted built-in modules and a pinned immutable content snapshot.
 - Vendored the upstream MIT modules: v_moveset1.lua, v_moveset2.lua, v_moveset3.lua, v_dance1.lua, v_dance2.lua, v_robunexa_anime.lua, d_limbmap.lua, and d_hatsmap.lua.
 - Preserved the upstream MIT license in content/LICENSE-Uhhhhhh.txt.
-- Added 15 original R6 animation sequences and a NAM dance module that exposes them in the Dances list.
+- Added 15 original R6 animation sequences and a NAM dance module, plus the native Hakari dance binary (assets/anime/Hakari.anim) and a Hakari entry in Dances.
 - Added LoadRobuNexa.lua, a launcher pinned to a specific Reanim.txt commit.
 - Removed the legacy Pusher listener that executed arbitrary server-supplied Lua through loadstring.
 - Removed unnecessary third-party MP3 downloads that were only used for local file comparisons.
-- Replaced the community store manifest with an intentionally empty RobuNexa manifest. Optional legacy UI media binaries have not been mirrored.
+- Replaced the community store manifest with an intentionally empty RobuNexa manifest. Optional legacy UI media binaries have not been mirrored. No directly downloadable/clearly licensed native .anim files for Gojo, Sukuna or Kira were found in the searched public repositories; public marketplace listings are documented in README instead.
 
 ## Security and compatibility notes
 
