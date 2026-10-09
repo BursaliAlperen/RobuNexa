@@ -82,6 +82,18 @@ Bunlar Roblox Creator Store'da yayımlanmış emote kayıtlarına ait keşif ba�
 
 Bu item ID'leri NAM'ın native .anim parser'ına doğrudan verilemez. Bunların ham animasyon verisini izinsiz çıkarmak yerine dosyanın sahibi/üreticisi tarafından sağlanan .anim veya .rbxm dışa aktarımını kullan.
 
+## “Line 1” hatası
+
+Reanim.txt'nin ilk satırı Lua yorum bloğu açan `--[[` satırıdır; tek başına bir hata değildir. Başlatıcı yalnızca Reanim.txt'yi indirmeli/çalıştırmalıdır; Hakari.anim veya diğer .anim dosyalarını `loadstring` ile çalıştırma. İndirme adresi HTML/404 metni döndürürse executor bunu Lua sanıp 1. satırda hata gösterebilir.
+
+Hata devam ederse executor'daki **tam kırmızı hata satırını** (özellikle `unexpected symbol`, `compile`, `HTTP` veya `attempt to` kısmını) ve hangi dosyayı çalıştırdığını gönder. Ekran görüntüsü ya da tam hata metni olmadan line 1 hatasının nedenini doğrulayamam.
+
+## Animasyon dosyası aramak için topluluk
+
+- [The Church of Animation — Discord](https://discord.com/servers/the-church-of-animation-838578081190641715): Roblox animasyonları, R6/R15 rig'leri ve animasyon paylaşımı üzerine bir topluluk. İstenen Sukuna/Gojo/Hakari/Kira dosyalarının bu sunucuda kesin olarak bulunduğunu doğrulamadım; üreticisinden izinli .anim/.rbxm dışa aktarımı istemek için bir yer olarak listeleniyor.
+- [Roblox Studio: animasyonları dışa/içe aktarma](https://create.roblox.com/docs/education/build-it-play-it-island-of-move/sharing-animations): Dosyanın sahibi animasyonu paylaşabiliyorsa resmi dışa aktarma yolu.
+
+
 ## Bilinen sınırlamalar
 
 - Bu değişiklik sırasında canlı executor testi yapılmadı; açılış ve animasyon oynatma elle test edilmelidir.
