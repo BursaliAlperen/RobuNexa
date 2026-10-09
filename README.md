@@ -13,4 +13,4 @@ A compact animation hub with a curated catalog.
 - **Cursed car anim** — the renamed moveset formerly labeled Patchma Hub.
 - **Limb Reanimator** — the only selectable reanimation mode, with Start/Stop and Refresh controls.
 
-The REANIM tab checks for an R6 character with the required body parts and joints, then shows **SUPPORTED GAME DETECTED** or **UNSUPPORTED GAME !!! >:D**. The original parser delimiter containing `:3` is intentionally unchanged because it is internal to the module hash and is not displayed in the UI.
+The REANIM tab checks for an R6 character with the required body parts and joints, then shows **SUPPORTED GAME DETECTED** or **UNSUPPORTED GAME !!! >:D**. A required internal module-hash delimiter is preserved for compatibility and is not displayed in the UI.
