@@ -2,7 +2,7 @@
 -- Entry point pinned to an immutable GitHub commit.
 -- Review the repository source before running this in an executor.
 
-local URL = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/560c820396690bf113e29ed0e75964190f4fd4b2/Reanim.txt"
+local URL = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/58e52e21ec08f436f05b8f9bf8cc0456f3acbf78/Reanim.txt"
 
 local ok, source = pcall(function()
     return game:HttpGet(URL)
