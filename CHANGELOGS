@@ -1,0 +1,7 @@
+# RobuNexa NAM Reanimate
+
+- Initial RobuNexa-hosted content migration.
+- Vendored the legacy vanilla moveset, dance, limb-map and hat-map modules under the upstream MIT license.
+- Removed the legacy Pusher listener that executed remotely supplied Lua.
+
+See `NAM-ROBUNEXA-MIGRATION.md` for remaining migration notes.
