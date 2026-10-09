@@ -920,7 +920,10 @@ do
 	UIMainWindow.Active = true
 	UIMainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
 	UIMainWindow.Position = UDim2.new(0.5, 0, 0.5, 0)
-	UIMainWindow.Size = UDim2.new(0, 480, 0, 280)
+	local NAMScreenSize = Util.GetScreenSize()
+	local NAMWindowWidth = math.min(480, math.max(300, NAMScreenSize.X - 24))
+	local NAMWindowHeight = math.min(320, math.max(220, NAMScreenSize.Y - 48))
+	UIMainWindow.Size = UDim2.fromOffset(NAMWindowWidth, NAMWindowHeight)
 	UIMainWindow.BackgroundTransparency = 0
 	UIMainWindow.BackgroundColor3 = Color3.new(1, 1, 1)
 	UIMainWindow.BorderSizePixel = 0
@@ -1125,7 +1128,7 @@ do
 			SaveData.WindowClosedPosition = {MainWindowPosClose.X.Scale, MainWindowPosClose.X.Offset, MainWindowPosClose.Y.Scale, MainWindowPosClose.Y.Offset}
 			TweenService:Create(UIMainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Position = MainWindowPosOpen,
-				Size = UDim2.fromOffset(480, 280)
+				Size = UDim2.fromOffset(NAMWindowWidth, NAMWindowHeight)
 			}):Play()
 			TweenService:Create(TopBarClose.A, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Rotation = 0
