@@ -2,7 +2,7 @@
 -- GitHub .anim files are Base64-encoded native STEVE KeyframeSequence data.
 -- Reanim.txt decodes them before writing the local .anim file.
 local modules = {}
-local ROOT = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/73b25f63ae441d7cd930d3e9dc46384d44711cd0/Animations/R6/"
+local ROOT = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/0f521269b5a7673857b381d0f93bd62072c86c21/Animations/R6/"
 
 local function addDance(displayName, description, localFile, sourceFile, looped)
     table.insert(modules, function()
@@ -43,5 +43,12 @@ addDance("RN Anime Dash", "Forward-lean pose only; does not propel the character
 addDance("RN Victory Pose", "Original celebratory pose.", "RobuNexa_Victory.anim", "victory_pose.anim", false)
 addDance("RN Anime Punch", "Visual punch animation only; no hitbox or damage.", "RobuNexa_Punch.anim", "punch.anim", false)
 addDance("RN Spin Kick", "Visual spin-kick animation only; no hitbox or damage.", "RobuNexa_SpinKick.anim", "spin_kick.anim", false)
+addDance("RN Anime Run", "Original alternating R6 run cycle.", "RobuNexa_Run.anim", "run.anim", true)
+addDance("RN Salute", "Original salute gesture.", "RobuNexa_Salute.anim", "salute.anim", false)
+addDance("RN Bow", "Original bow gesture.", "RobuNexa_Bow.anim", "bow.anim", false)
+addDance("RN Power Charge", "Original power-up pose loop.", "RobuNexa_PowerCharge.anim", "power_charge.anim", true)
+addDance("RN Sword Slash", "Visual slash pose only; no weapon, hitbox or damage.", "RobuNexa_SwordSlash.anim", "sword_slash.anim", false)
+addDance("RN Jump Land", "Original jump/landing pose sequence; no root movement.", "RobuNexa_JumpLand.anim", "jump_land.anim", false)
+addDance("RN Point", "Original pointing gesture.", "RobuNexa_Point.anim", "point.anim", false)
 
 return modules
