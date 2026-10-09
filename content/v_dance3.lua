@@ -1,5 +1,5 @@
 -- NAM curated animation catalog
--- Gojo Awake supports R6 by collapsing common R15 limb pose names to R6 joints.
+-- Gojo Awake uses a converted AnimLib track and advances on elapsed animation time.
 local modules = {}
 local function AddModule(m) table.insert(modules, m) end
 
@@ -64,7 +64,7 @@ AddModule(function()
 	m.ModuleType = "DANCE"
 	m.Name = "Gojo Awake"
 	m.Description = "Gojo awakening animation, adapted for R6 rigs."
-	m.Assets = {"GojoAwaken.anim"}
+	m.Assets = {"GojoAwakeTrack.anim"}
 	m.Config = function(parent: GuiBase2d) end
 
 	local animator
@@ -81,7 +81,7 @@ AddModule(function()
 		animator = nil
 		resetPose(figure)
 		local ok, track = pcall(function()
-			return AnimLib.Track.fromfile(AssetGetPathFromFilename("GojoAwaken.anim"))
+			return AnimLib.Track.fromfile(AssetGetPathFromFilename("GojoAwakeTrack.anim"))
 		end)
 		if not ok or not track then
 			notifyUser("NAM: GojoAwaken.anim could not be read.")
@@ -106,6 +106,9 @@ AddModule(function()
 		animator = AnimLib.Animator.new()
 		animator.rig = figure
 		animator.looped = false
+		-- Animator.new() defaults to a time map that pins t to zero.
+		-- Gojo has no music clock, so advance directly in animation seconds.
+		animator.map = nil
 		animator.track = track
 		startedAt = os.clock()
 	end
