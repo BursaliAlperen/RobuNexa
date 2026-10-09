@@ -8,7 +8,7 @@ AddModule(function()
 	m.ModuleType = "DANCE"
 	m.Name = "Gojo Awake"
 	m.Description = "A short anime-style awakening pose sequence for R6."
-	m.Assets = {}
+	m.Assets = {"Gojo.anim"}
 	m.Config = function(parent: GuiBase2d) end
 
 	local animator
@@ -78,7 +78,7 @@ AddModule(function()
 		animator = AnimLib.Animator.new()
 		animator.rig = figure
 		animator.looped = false
-		animator.track = awakeningTrack
+		animator.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("Gojo.anim")) or awakeningTrack
 		startedAt = os.clock()
 	end
 	local function resetPose(figure: Model?)
