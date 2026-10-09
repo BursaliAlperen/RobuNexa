@@ -1,23 +1,38 @@
-# RobuNexa — R6 KeyframeSequences
+# RobuNexa — R6 animation library
 
-This folder contains an original Studio-side generator for three classic R6 starter animations:
+This directory contains **15 original R6 animation sequences** and a Roblox Studio generator.
 
-- `RobuNexa_R6_Idle` — gentle idle loop
-- `RobuNexa_R6_Wave` — short wave gesture
-- `RobuNexa_R6_Walk` — simple alternating walk cycle
+## Included animations
 
-## Create and export the KeyframeSequence files
+- idle — idle
+- walk and run — locomotion loops
+- wave, salute, bow, point — gestures
+- anime_guard and power_charge — looping poses
+- dash, punch, spin_kick, sword_slash, jump_land, victory_pose — short pose sequences
 
-1. Open a place you own in Roblox Studio and use a classic **R6** rig.
-2. Paste `GenerateR6Keyframes.lua` into the Studio Command Bar (or run it as a temporary Script in Studio).
-3. The script creates editable `KeyframeSequence` instances under `ReplicatedStorage`.
-4. Inspect each sequence on an R6 rig in Animation Editor; adjust poses/timing if needed.
-5. Move the sequence under the rig's `AnimSaves` folder and use **Save to File** to export it as `.rbxmx`.
+These are anime-inspired original motions, not extracted copies of specific anime scenes or characters. Punch/slash/kick animations are visual only: they do not add hitboxes, damage, root propulsion, or server-side effects.
 
-These are starter animations generated locally in Studio, not published Roblox animation asset IDs. Publish them from Animation Editor if you need asset IDs. Studio-generated exports are preferable to hand-written XML because they preserve Roblox's expected serialization.
+## Using them in NAM Reanimate
 
-## Scope and safety
+1. Run LoadRobuNexa.lua from an executor environment you trust.
+2. Wait for built-in modules to load.
+3. Open the Dances list and select an RN ... entry.
+4. The module downloads the pinned .anim source, decodes its Base64 wrapper to the native STEVE KeyframeSequence format, and saves it under NAMReanim/Content/Anims/.
+5. If an animation fails, open Init Logs and inspect the download/parse error.
 
-These files are for Roblox Studio projects you own. This folder intentionally does not alter `Reanim.txt` or connect animation loading to an executor, third-party remote code, or the former UHHH service. The existing `Reanim.txt` contains a WebSocket handler that executes received text with `loadstring`; changing its upstream URLs alone would not remove that remote-code-execution risk.
+The GitHub text interface cannot store arbitrary binary bytes through the ordinary text-file action used for this repository. Therefore the .anim source files are Base64 text wrappers around the native binary format. They are **not JSON** and must be decoded before AnimLib.Track.fromfile reads them. The included pinned loader does that automatically.
 
-See the official [KeyframeSequence reference](https://create.roblox.com/docs/reference/engine/classes/KeyframeSequence) and [animation export guide](https://create.roblox.com/docs/education/build-it-play-it-island-of-move/sharing-animations).
+## Studio workflow
+
+1. Open a place you own in Roblox Studio and insert a classic **R6** rig.
+2. Run GenerateR6Keyframes.lua in Studio's Command Bar.
+3. Inspect the generated KeyframeSequence instances and adjust the timing/poses as needed.
+4. Save/export through the Animation Editor. Roblox's native workflow exports a .rbxm/.rbxmx file and can publish an animation asset ID.
+
+The generator creates editable starter sequences; it does not publish asset IDs automatically. See the official [Animation Editor docs](https://create.roblox.com/docs/animation/editor), [KeyframeSequence reference](https://create.roblox.com/docs/reference/engine/classes/KeyframeSequence), and [export/import guide](https://create.roblox.com/docs/education/build-it-play-it-island-of-move/sharing-animations).
+
+## Compatibility
+
+- R6 only. R15 poses use a different joint layout.
+- The executor build uses NAM's AnimLib parser; this is not a standalone Roblox Studio LocalScript.
+- No live executor test was available during the repository edit.
