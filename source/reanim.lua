@@ -1030,9 +1030,9 @@ do
 		tab.BorderSizePixel = 1
 		tab.BorderColor3 = Color3.fromRGB(150, 65, 190)
 		tab.Font = Enum.Font.Code
-		tab.Text = tabName
+		tab.Text = ({NAM = "HOME", ANIMATIONS = "ANIMS", REANIM = "REANIM", SETTINGS = "SETTINGS", ABOUT = "ABOUT"})[tabName] or tabName
 		tab.TextColor3 = Color3.fromRGB(245, 235, 255)
-		tab.TextSize = 11
+		tab.TextSize = 10
 		tab.TextScaled = false
 		tab.TextWrapped = true
 		tab.AutoButtonColor = true
@@ -8284,25 +8284,39 @@ clearcontenthash.Activated:Connect(function()
 end)
 
 NAMSelectTab = function(tabName)
-	local selectedPage = ({
+	local pages = {
 		NAM = MainPage,
 		ANIMATIONS = DancesPage,
 		SETTINGS = SettingsPage,
 		ABOUT = CreditsPage,
-	})[tabName]
+	}
+	local selectedPage = pages[tabName]
+	local isReanim = tabName == "REANIM"
+
+	-- Hide every normal page first; selected pages may have been left off-screen
+	-- by the old slide transitions, so reset the active page to the center.
 	for _, child in WindowContent:GetChildren() do
 		if child:IsA("GuiObject") then
-			child.Visible = child == selectedPage
-			child.Interactable = child == selectedPage
+			local active = child == selectedPage and not isReanim
+			child.Visible = active
+			child.Interactable = active
 		end
 	end
-	local isReanim = tabName == "REANIM"
 	WindowContent.Visible = not isReanim
+	WindowContent.Position = UDim2.new(0, 0, 0, 0)
+	WindowContent.Size = UDim2.new(1, 0, 1, 0)
+
+	if selectedPage and not isReanim then
+		selectedPage.AnchorPoint = Vector2.new(0.5, 0.5)
+		selectedPage.Position = UDim2.new(0.5, 0, 0.5, 0)
+		selectedPage.Size = UDim2.new(0, 360, 0, 245)
+		selectedPage.Visible = true
+		selectedPage.Interactable = true
+	end
+
 	ReanimPage.Visible = isReanim
 	ReanimPage.Position = UDim2.new(0, 0, 0, 0)
 	ReanimPage.Size = isReanim and UDim2.new(1, 0, 1, 0) or UDim2.new(0, 120, 1, 0)
-	WindowContent.Position = UDim2.new(0, 0, 0, 0)
-	WindowContent.Size = UDim2.new(1, 0, 1, 0)
 	for _, child in AWindowContent:GetChildren() do
 		if child:IsA("ImageLabel") then
 			child.Visible = false
