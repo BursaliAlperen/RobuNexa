@@ -1,0 +1,2 @@
+# RobuNexa community marketplace is intentionally empty for this release.
+# Add reviewed modules using the documented format before listing them here.
