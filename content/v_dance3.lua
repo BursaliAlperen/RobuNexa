@@ -21,6 +21,14 @@ local R6PoseAliases = {
 	RightFoot = "Right Leg",
 }
 
+local function notifyUser(message)
+	if Util and type(Util.Notify) == "function" then
+		pcall(function() Util.Notify(message) end)
+	else
+		warn(message)
+	end
+end
+
 local function makeR6Compatible(track)
 	if type(track) ~= "table" or type(track.Keyframes) ~= "table" then return nil end
 	for _, keyframe in track.Keyframes do
@@ -76,12 +84,12 @@ AddModule(function()
 			return AnimLib.Track.fromfile(AssetGetPathFromFilename("GojoAwaken.anim"))
 		end)
 		if not ok or not track then
-			Util.Notify("NAM: GojoAwaken.anim could not be read.")
+			notifyUser("NAM: GojoAwaken.anim could not be read.")
 			return
 		end
 		track = makeR6Compatible(track)
 		if not track or #track.Keyframes == 0 then
-			Util.Notify("NAM: GojoAwaken.anim has no usable keyframes.")
+			notifyUser("NAM: GojoAwaken.anim has no usable keyframes.")
 			return
 		end
 		local actualDuration = tonumber(track.Time)
@@ -91,7 +99,7 @@ AddModule(function()
 			end
 		end
 		if not actualDuration or actualDuration <= 0 then
-			Util.Notify("NAM: GojoAwaken.anim has an invalid duration.")
+			notifyUser("NAM: GojoAwaken.anim has an invalid duration.")
 			return
 		end
 		duration = actualDuration
@@ -113,7 +121,7 @@ AddModule(function()
 		if not ok then
 			animator = nil
 			resetPose(figure)
-			Util.Notify("NAM: Gojo Awake stopped safely; this rig/animation format is incompatible.")
+			notifyUser("NAM: Gojo Awake stopped safely; this rig/animation format is incompatible.")
 		end
 	end
 	m.Destroy = function(figure: Model?)
