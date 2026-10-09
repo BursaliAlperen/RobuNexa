@@ -1,0 +1,90 @@
+{
+  "format": "robunexa.anim.v1",
+  "name": "Anime Victory Pose",
+  "rig": "R6",
+  "fps": 12,
+  "looped": false,
+  "description": "Original celebratory pose.",
+  "frames": [
+    {
+      "t": 0,
+      "joints": {
+        "Right Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Left Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Neck": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      }
+    },
+    {
+      "t": 0.35,
+      "joints": {
+        "Right Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": 155
+        },
+        "Left Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": -155
+        },
+        "Neck": {
+          "x": -8,
+          "y": 0,
+          "z": 0
+        }
+      }
+    },
+    {
+      "t": 0.8,
+      "joints": {
+        "Right Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": 145
+        },
+        "Left Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": -145
+        },
+        "Neck": {
+          "x": 4,
+          "y": 0,
+          "z": 0
+        }
+      }
+    },
+    {
+      "t": 1.2,
+      "joints": {
+        "Right Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": 155
+        },
+        "Left Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": -155
+        },
+        "Neck": {
+          "x": -8,
+          "y": 0,
+          "z": 0
+        }
+      }
+    }
+  ]
+}
