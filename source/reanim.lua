@@ -887,7 +887,7 @@ SaveData.UITheme = SaveData.UITheme or 1
 SetUITheme(SaveData.UITheme)
 
 local ReanimPage
-local CracktroFrameText = "Uhhhhhh Reanimate V" .. UhhhhhhVersion
+local CracktroFrameText = "NAM | Anime Reanimator V" .. UhhhhhhVersion
 local UIMainWindow, AWindowContent, WindowContent
 
 local _funcrefreshes = {}
@@ -2379,7 +2379,7 @@ task.spawn(function()
 			"         Uhhhhhh   ",
 		},
 		{
-			"+-[ Uhhhhhh Reanimate ]-----------------[#]-+",
+			"+-[ NAM Reanimate ]-----------------[#]-+",
 			"|    ___                                    |",
 			"|   / o \\   Hello, world! Programmed to     |",
 			"|   \\ l /   work and not to feel.           |",
@@ -8035,7 +8035,7 @@ UI.CreateButton(CreditsPage, "&lt; Hurry back", 20).Activated:Connect(function()
 end)
 local UhhhhhhFire = UI.CreateText(CreditsPage, "", 12, Enum.TextXAlignment.Center)
 Util.ForceTextSize(UhhhhhhFire)
-UI.CreateText(CreditsPage, "Reanimate by STEVE :D", 15, Enum.TextXAlignment.Right)
+UI.CreateText(CreditsPage, "NAM | by mamalalanam", 15, Enum.TextXAlignment.Right)
 local UhhhhhhFiret = UI.CreateSlider(CreditsPage, "Transparency", 0.25, 0, 1, 0)
 local UhhhhhhFirep = {}
 for i=1, 64 do
@@ -8220,7 +8220,7 @@ UI.CreateText(CreditsPage, "If you want to add content to NAM, like animations o
 	end
 end)
 UI.CreateSeparator(CreditsPage)
-UI.CreateText(CreditsPage, "<b>(C) 2026 STEVETHEREALONE</b>", 14, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "<b>NAM | by mamalalanam</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "all rights reserved", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "<font color=\"#4444FF\">[ Discord invite ]</font>", 15, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -8451,7 +8451,7 @@ local function ForceModuleReload(force)
 		task.wait()
 		InitLogsText.Text ..= "\n[LOG] Loadstringing VANILLA " .. x .. "..."
 		xpcall(function()
-			local func, comperr = loadstring(data, "Uhhhhhh :: VANILLA " .. x)
+			local func, comperr = loadstring(data, "NAM :: MODULE " .. x)
 			if func then
 				AddModules(func())
 			elseif comperr then
@@ -8470,7 +8470,7 @@ local function ForceModuleReload(force)
 				InitLogsText.Text ..= "\n[LOG] Reading local USER " .. x .. "..."
 				local data = readfile(path)
 				InitLogsText.Text ..= "\n[LOG] Loadstringing USER " .. x .. "..."
-				local func, comperr = loadstring(data, "Uhhhhhh :: " .. x)
+				local func, comperr = loadstring(data, "NAM :: " .. x)
 				if func then
 					AddModules(func())
 				elseif comperr then

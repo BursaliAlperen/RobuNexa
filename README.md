@@ -1,11 +1,11 @@
 # NAM — by mamalalanam
 
-NAM is a compact animation hub.
+A compact animation hub with a curated catalog.
 
-## Included
+## Catalog
 - **Hakari's Dance**
-- **Gojo Awake**
+- **Gojo Awake** (module configured; animation asset must be present as `content/GojoAwake.anim`)
 - **Cursed car anim** (renamed from Patchma Hub)
-- **Limb Reanimator** only in the reanimation selector
+- **Limb Reanimator** is the only reanimation option shown.
 
-Unrelated dance packs, unused movesets, and their media are excluded from the shipped catalog.
+Unrelated dance packs and unused media are removed from the shipped content. The UI and asset download URLs are branded for NAM.

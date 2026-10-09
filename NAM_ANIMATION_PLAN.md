@@ -1,22 +1,10 @@
-# NAM animation plan
+# NAM — by mamalalanam
 
-Brand: NAM
-Creator credit: by mamalalanam
+## Main catalog
+- Dances: Hakari's Dance, Gojo Awake
+- Moveset: Cursed car anim (formerly Patchma Hub)
+- Reanimation: Limb Reanimator only
+- Supported notification: R6 + Torso detected -> `Supported game detect`
+- Unsupported notification: otherwise -> `Unsupported game !!! >:D`
 
-## Keep
-- Hakari's Dance
-- Patchma Hub
-
-## Add when supplied by the owner
-- Anime animation packs
-- Car animation
-
-## Remove from the visible animation catalog
-- TikTok/trend dances not explicitly kept
-- Unused unrelated dance packs
-
-## Naming
-- Use clear display names.
-- Store animation files in `content/`.
-- Keep each module's asset references synchronized with filenames.
-- Do not delete shared runtime files until all dependencies have been replaced.
+The Gojo Awake module expects `content/GojoAwake.anim`. Ensure that the uploaded binary animation is committed at that exact path for the entry to play.
