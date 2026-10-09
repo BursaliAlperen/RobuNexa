@@ -1,5 +1,5 @@
--- NAM curated animation catalog
--- Gojo Awake uses a converted AnimLib track and advances on elapsed animation time.
+-- NAM curated animation catalog.
+-- All uploaded KeyframeSequence assets are converted to AnimLib tracks by GitHub Actions.
 local modules = {}
 local function AddModule(m) table.insert(modules, m) end
 
@@ -23,18 +23,17 @@ local R6PoseAliases = {
 
 local function notifyUser(message)
 	if Util and type(Util.Notify) == "function" then
-		pcall(function() Util.Notify(message) end)
-	else
-		warn(message)
+		local ok = pcall(function() Util.Notify(message) end)
+		if ok then return end
 	end
+	warn(message)
 end
 
 local function makeR6Compatible(track)
 	if type(track) ~= "table" or type(track.Keyframes) ~= "table" then return nil end
 	for _, keyframe in track.Keyframes do
 		if type(keyframe.Poses) == "table" then
-			local merged = {}
-			local order = {}
+			local merged, order = {}, {}
 			for _, pose in keyframe.Poses do
 				local target = R6PoseAliases[pose.Name] or pose.Name
 				if not merged[target] then
@@ -43,8 +42,6 @@ local function makeR6Compatible(track)
 					merged[target] = copy
 					table.insert(order, target)
 				else
-					-- R15 upper/lower limb joints collapse into one R6 limb.
-					-- Compose their offsets so the major movement is retained.
 					local existing = merged[target]
 					if typeof(existing.CFrame) == "CFrame" and typeof(pose.CFrame) == "CFrame" then
 						existing.CFrame = existing.CFrame * pose.CFrame
@@ -59,79 +56,140 @@ local function makeR6Compatible(track)
 	return track
 end
 
-AddModule(function()
-	local m = {}
-	m.ModuleType = "DANCE"
-	m.Name = "Gojo Awake"
-	m.Description = "Gojo awakening animation, adapted for R6 rigs."
-	m.Assets = {"GojoAwakeTrack.anim"}
-	m.Config = function(parent: GuiBase2d) end
+local function addAnimationModule(config)
+	AddModule(function()
+		local m = {}
+		m.ModuleType = "DANCE"
+		m.Name = config.name
+		m.Description = config.description
+		m.Assets = {config.asset}
+		m.Config = function(parent: GuiBase2d) end
 
-	local animator
-	local startedAt = 0
-	local duration = 3.2
-	local function resetPose(figure: Model?)
-		if not figure then return end
-		for _, joint in figure:GetDescendants() do
-			if joint:IsA("Motor6D") then joint.Transform = CFrame.identity end
-		end
-	end
+		local animator
+		local startedAt = 0
+		local duration = 0
+		local lastLift = 0
+		local rootPart
 
-	m.Init = function(figure: Model)
-		animator = nil
-		resetPose(figure)
-		local ok, track = pcall(function()
-			return AnimLib.Track.fromfile(AssetGetPathFromFilename("GojoAwakeTrack.anim"))
-		end)
-		if not ok or not track then
-			notifyUser("NAM: GojoAwakeTrack.anim could not be read.")
-			return
-		end
-		track = makeR6Compatible(track)
-		if not track or #track.Keyframes == 0 then
-			notifyUser("NAM: GojoAwakeTrack.anim has no usable keyframes.")
-			return
-		end
-		local actualDuration = tonumber(track.Time)
-		if not actualDuration or actualDuration <= 0 then
-			for _, keyframe in track.Keyframes do
-				actualDuration = math.max(actualDuration or 0, tonumber(keyframe.Time) or 0)
+		local function resetPose(figure: Model?)
+			if not figure then return end
+			for _, joint in figure:GetDescendants() do
+				if joint:IsA("Motor6D") then joint.Transform = CFrame.identity end
 			end
 		end
-		if not actualDuration or actualDuration <= 0 then
-			notifyUser("NAM: GojoAwakeTrack.anim has an invalid duration.")
-			return
+
+		local function releaseLift()
+			if rootPart and rootPart.Parent and lastLift ~= 0 then
+				rootPart.CFrame = rootPart.CFrame - Vector3.new(0, lastLift, 0)
+			end
+			lastLift = 0
+			rootPart = nil
 		end
-		duration = actualDuration
-		animator = AnimLib.Animator.new()
-		animator.rig = figure
-		animator.looped = false
-		-- Animator.new() defaults to a time map that pins t to zero.
-		-- Gojo has no music clock, so advance directly in animation seconds.
-		animator.map = nil
-		animator.track = track
-		startedAt = os.clock()
-	end
-	m.Update = function(dt: number, figure: Model)
-		if not animator then return end
-		local elapsed = os.clock() - startedAt
-		if elapsed >= duration then
+
+		m.Init = function(figure: Model)
 			animator = nil
+			releaseLift()
 			resetPose(figure)
-			return
+			local ok, track = pcall(function()
+				return AnimLib.Track.fromfile(AssetGetPathFromFilename(config.asset))
+			end)
+			if not ok or not track then
+				notifyUser("NAM: " .. config.asset .. " could not be read. Wait for the animation conversion workflow to finish.")
+				return
+			end
+			track = makeR6Compatible(track)
+			if not track or #track.Keyframes == 0 then
+				notifyUser("NAM: " .. config.asset .. " has no usable keyframes.")
+				return
+			end
+			local actualDuration = tonumber(track.Time) or 0
+			if actualDuration <= 0 then
+				for _, keyframe in track.Keyframes do
+					actualDuration = math.max(actualDuration, tonumber(keyframe.Time) or 0)
+				end
+			end
+			if actualDuration <= 0 then
+				notifyUser("NAM: " .. config.asset .. " has an invalid duration.")
+				return
+			end
+			duration = actualDuration
+			animator = AnimLib.Animator.new()
+			animator.rig = figure
+			animator.looped = false
+			animator.map = nil
+			animator.track = track
+			rootPart = figure:FindFirstChild("HumanoidRootPart")
+			lastLift = 0
+			startedAt = os.clock()
 		end
-		local ok = pcall(function() animator:Step(elapsed) end)
-		if not ok then
+
+		m.Update = function(dt: number, figure: Model)
+			if not animator then return end
+			local elapsed = os.clock() - startedAt
+			if elapsed >= duration then
+				animator = nil
+				releaseLift()
+				resetPose(figure)
+				return
+			end
+			local ok = pcall(function() animator:Step(elapsed) end)
+			if not ok then
+				animator = nil
+				releaseLift()
+				resetPose(figure)
+				notifyUser("NAM: " .. config.name .. " stopped safely; this rig/animation format is incompatible.")
+				return
+			end
+
+			-- Smoothly lift only during the authored move's central action window.
+			-- Apply the frame-to-frame delta so horizontal movement is not frozen.
+			if rootPart and rootPart.Parent and config.lift > 0 then
+				local progress = math.clamp(elapsed / duration, 0, 1)
+				local windowStart, windowEnd = config.liftStart, config.liftEnd
+				local lift = 0
+				if progress > windowStart and progress < windowEnd then
+					local alpha = (progress - windowStart) / (windowEnd - windowStart)
+					lift = config.lift * math.sin(math.pi * alpha)
+				end
+				rootPart.CFrame = rootPart.CFrame + Vector3.new(0, lift - lastLift, 0)
+				lastLift = lift
+			end
+		end
+
+		m.Destroy = function(figure: Model?)
 			animator = nil
+			releaseLift()
 			resetPose(figure)
-			notifyUser("NAM: Gojo Awake stopped safely; this rig/animation format is incompatible.")
 		end
-	end
-	m.Destroy = function(figure: Model?)
-		animator = nil
-		resetPose(figure)
-	end
-	return m
-end)
+		return m
+	end)
+end
+
+addAnimationModule({
+	name = "Gojo Awake",
+	description = "Gojo awakening animation adapted for R6, with a smooth timed lift.",
+	asset = "GojoAwakeTrack.anim",
+	lift = 18,
+	liftStart = 0.18,
+	liftEnd = 0.72,
+})
+
+addAnimationModule({
+	name = "Gojo 200% Hollow Purple",
+	description = "Hollow Purple attack animation adapted for R6, with a timed sky lift.",
+	asset = "HollowPurple1Track.anim",
+	lift = 34,
+	liftStart = 0.16,
+	liftEnd = 0.82,
+})
+
+addAnimationModule({
+	name = "Mahoraga Destroy Purple",
+	description = "Mahoraga Purple destruction animation adapted for R6.",
+	asset = "MahoragaDestroyPurpleTrack.anim",
+	lift = 0,
+	liftStart = 0,
+	liftEnd = 0,
+})
 
 return modules
