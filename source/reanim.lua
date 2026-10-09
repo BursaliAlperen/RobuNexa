@@ -2795,7 +2795,7 @@ local function CreateHumanoidCharacter()
 	char.Name = "(C) Uhhhhhh V" .. UhhhhhhVersion
 
 	local god = Util.Instance("ForceField", char)
-	god.Name = "heyy!! :33"
+	god.Name = "NAM >:D"
 	god.Visible = false
 
 	local hum = Util.Instance("Humanoid", char)
@@ -3541,7 +3541,7 @@ Reanimate.CreateCharacter = function(InitCFrame)
 	local RCHumanoid, RCRootPart = RC.Humanoid, RC.HumanoidRootPart
 	local RCHead, RCTorso, RCRootJoint, RCNeck = RC.Head, RC.Torso, RCRootPart.RootJoint, RC.Torso.Neck
 	--[[local Anchor = Instance.new("Part", RCRootPart)
-	Anchor.Name = "i can take explosions >:3"
+	Anchor.Name = "NAM >:D"
 	Anchor.Transparency = 1
 	Anchor.Anchored = false
 	Anchor.CanCollide = false
@@ -3563,7 +3563,7 @@ Reanimate.CreateCharacter = function(InitCFrame)
 				SeatWeld = SeatWeld:Destroy()
 			end
 			SeatWeld = Instance.new("Weld")
-			SeatWeld.Name = "hell yeah!! :3"
+			SeatWeld.Name = "NAM >:D"
 			SeatWeld.Parent = RCRootPart
 			SeatWeld.Part0 = part
 			SeatWeld.Part1 = RCRootPart
