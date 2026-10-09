@@ -7,4 +7,4 @@
 - Supported notification: R6 + Torso detected -> `Supported game detect`
 - Unsupported notification: otherwise -> `Unsupported game !!! >:D`
 
-The Gojo Awake module downloads and plays the uploaded binary animation at `content/GojoAwaken.anim` (copied from the root upload). The former placeholder animation has been removed.
+The original `content/GojoAwaken.anim` is a Roblox binary KeyframeSequence (RBXM), not the custom binary format consumed by `AnimLib.Track.fromfile`. The workflow `convert-gojo-track.yml` converts it into `content/GojoAwakeTrack.anim` as AnimLib-compatible JSON. The Gojo module loads that converted track and sets `animator.map = nil`, preventing the default time map from freezing playback at t=0.
