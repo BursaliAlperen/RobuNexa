@@ -1,95 +1,91 @@
 # RobuNexa — NAM Reanimate (R6)
 
-RobuNexa is a repository-side adaptation of the NAM Reanimate script. This branch keeps the existing reanimation/moveset framework, hosts the built-in Lua modules in this repository, removes the old Pusher remote-code execution listener, and adds original R6 anime-inspired dance/pose modules.
+RobuNexa, NAM Reanimate altyapısının bu depoda barındırılan bir uyarlamasıdır. Eski içerik/modül bağlantıları RobuNexa'ya taşındı, uzaktan gelen Pusher mesajlarını Lua kodu olarak çalıştıran bölüm kaldırıldı ve **15 özgün R6 anime-esintili animasyon** Dances listesine eklendi.
 
-> **Status:** migration build, not a certified release. It has not been executed in a live executor during this repository edit. Test in a private place or a Roblox Studio test project first.
+> **Durum:** Bu bir geçiş/test derlemesidir; canlı executor içinde çalıştırılarak doğrulanmadı. Önce kendi özel test ortamında dene. Her Roblox deneyiminde veya her executor'da çalışacağı garanti edilmez.
 
-## Contents
+## Dosya yapısı
 
-- `Reanim.txt` — main NAM Reanimate entry point.
-- `LoadRobuNexa.lua` — GitHub loadstring launcher pinned to a specific Reanim.txt commit.
-- `content/` — built-in NAM modules and the upstream MIT license notice.
-- `Animations/R6/` — 15 original R6 animation sequences, plus the Studio generator.
-- `Modules/RobuNexaConfig.lua` — passive URL/path configuration example.
-- `NAM-ROBUNEXA-MIGRATION.md` — migration notes and remaining limitations.
-- `store/list.txt` — intentionally empty community marketplace manifest for this release.
+- `Reanim.txt` — NAM Reanimate ana betiği.
+- `LoadRobuNexa.lua` — sabit bir commit'e işaret eden GitHub başlatıcısı.
+- `content/` — NAM'ın yerleşik moveset, dance, limb-map ve hat-map modülleri.
+- `Animations/R6/` — 15 animasyon dosyası ve Roblox Studio KeyframeSequence oluşturucusu.
+- `Modules/RobuNexaConfig.lua` — pasif URL/yol yapılandırması örneği.
+- `NAM-ROBUNEXA-MIGRATION.md` — geçiş ve güvenlik notları.
+- `store/list.txt` — bu sürümde bilerek boş bırakılmış topluluk mağazası manifesti.
 
-## Quick start (executor)
+## Hızlı başlatma (executor)
 
-Use only an executor/environment you trust, and only in places where you have permission to test. The script requires executor-specific filesystem/network functions; it is **not** a normal Roblox Studio LocalScript.
+Yalnızca güvendiğin bir executor ortamında ve test etme iznin olan yerlerde kullan. Bu betik standart Roblox Studio LocalScript'i değildir; executor'a özgü dosya ve HTTP fonksiyonları gerektirir.
 
-Run this in the executor:
+Executor'a şu satırı yapıştır:
 
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/2d1070e80dd105635ded81148a7976cf8314fd1e/Reanim.txt"))()
 ```
 
-Or run the contents of `LoadRobuNexa.lua`.
+Alternatif olarak `LoadRobuNexa.lua` dosyasının içeriğini çalıştırabilirsin. Ana betik URL'si değiştirilemez bir Git commit'ine sabitlenmiştir; yerleşik modüller de sabitlenmiş bir depo anlık görüntüsünden alınır. Bu, sürümü tekrarlanabilir yapar ama kodu çalıştırmadan önce inceleme gereğini ortadan kaldırmaz.
 
-The URL pins the entry point to an immutable commit. Built-in modules and animation files are also fetched from a pinned repository snapshot by the entry point. A pinned URL helps make the fetched version reproducible; it does not replace reviewing code before running it.
+## İlk çalıştırma
 
-## First launch
+1. Klasik **R6** avatar ile başla. Eklenen animasyonlar R15 için tasarlanmamıştır.
+2. Başlatıcıyı çalıştır ve betiğin `NAMReanim/` klasörlerini oluşturmasını bekle.
+3. NAM arayüzünde yerleşik modüllerin yüklenmesini bekle.
+4. **Dances** listesini açıp `RN ...` ile başlayan animasyonlardan birini seç.
+5. Bir modül yüklenmezse **Init Logs** bölümünü açıp ilk HTTP/compile hatasını incele. 404 veya derleme hatası sürüyorsa tekrar tekrar çalıştırma.
+6. Eski yerel önbellek sorun çıkarırsa önce `NAMReanim/BuiltinModules/` veya `NAMReanim/Content/Anims/` klasörlerini yedekle; ardından ilgili dosyaları temizle. Ayarları sıfırlamak istemiyorsan `NAMReanim/tree.ehehetilde` dosyasını silme.
 
-1. Start with an R6 avatar. R15 is not supported by the included animation set.
-2. Execute the launcher and allow the script to create its `NAMReanim/` folders.
-3. Open the NAM UI and let the built-in modules finish loading.
-4. Open the Dances list and choose one of the `RN ...` animations.
-5. If a module fails, open **Init Logs** and inspect the first download/compile error. Do not keep retrying if the log reports an HTTP 404 or a compile error.
-6. To reset a stale local cache, close the script and back up then remove the relevant files under `NAMReanim/BuiltinModules/` or `NAMReanim/Content/Anims/`. Do not delete your save file unless you want to reset settings.
+## Eklenen 15 animasyon
 
-## Included original R6 animations
-
-The animation motions below were authored for this repository and are anime-inspired, not copies of a named anime character or show:
-
-| Name in the Dances list | Behavior |
+| Dances listesindeki ad | Tür |
 |---|---|
-| RN Anime Idle | Looping idle pose |
-| RN Anime Walk | Looping walk cycle |
-| RN Anime Run | Looping run cycle |
-| RN Wave | Greeting wave |
-| RN Anime Guard | Looping guard pose |
-| RN Anime Dash | Forward-lean pose; no root propulsion |
-| RN Victory Pose | Celebration |
-| RN Anime Punch | Visual pose only; no hitbox or damage |
-| RN Spin Kick | Visual pose only; no hitbox or damage |
-| RN Salute | Salute gesture |
-| RN Bow | Bow gesture |
-| RN Power Charge | Looping power-up pose |
-| RN Sword Slash | Visual pose only; no weapon/hitbox/damage |
-| RN Jump Land | Jump/landing pose sequence; no root movement |
-| RN Point | Pointing gesture |
+| RN Anime Idle | Döngülü bekleme pozu |
+| RN Anime Walk | Döngülü yürüme |
+| RN Anime Run | Döngülü koşma |
+| RN Wave | Selamlama/el sallama |
+| RN Anime Guard | Döngülü savunma pozu |
+| RN Anime Dash | Öne eğilme pozu; karakteri ileri itmez |
+| RN Victory Pose | Zafer pozu |
+| RN Anime Punch | Yalnızca görsel yumruk animasyonu |
+| RN Spin Kick | Yalnızca görsel tekme pozu |
+| RN Salute | Selam verme |
+| RN Bow | Eğilerek selamlama |
+| RN Power Charge | Döngülü güç toplama pozu |
+| RN Sword Slash | Yalnızca görsel kılıç savurma pozu |
+| RN Jump Land | Zıplama/iniş pozu; kök parçayı hareket ettirmez |
+| RN Point | İşaret etme |
 
-These are animation poses only. They do not implement attacks, damage, hitboxes, teleportation, or server-side movement.
+Bunlar bu depo için oluşturulmuş anime-esintili özgün hareketlerdir; belirli bir anime karakterinden veya sahnesinden kopyalanmış dosyalar değildir. Yumruk, tekme ve kılıç savurma animasyonları **hasar, hitbox, silah veya sunucu taraflı hareket eklemez**.
 
-## Security model
+## .anim dosyaları nasıl yükleniyor?
 
-- The old Pusher WebSocket listener that compiled and executed remote `jumpscare` event text using `loadstring` has been removed.
-- Built-in module and animation URLs are pinned to a reviewed immutable commit.
-- Animation payloads are data. They are decoded and passed to NAM's KeyframeSequence parser; they are not compiled as Lua.
-- The community store is intentionally empty. No third-party community module catalogue is loaded by default.
-- NAM still uses executor APIs and `loadstring` to load its built-in Lua modules. Any local file placed in `NAMReanim/Modules/` is user code and may execute. Only keep modules you wrote or reviewed.
-- Never paste an unknown loadstring, share account cookies/session tokens, or disable security protections to run an untrusted script.
+NAM'ın `AnimLib.Track.fromfile` fonksiyonu JSON değil, little-endian STEVE KeyframeSequence ikili biçimini bekler. Bu depodaki `.anim` kaynakları, GitHub dosya düzenleme arayüzü ikili dosya yazamadığı için Base64 metin sarmalayıcısı olarak saklanır. Başlatıcı, sabitlenmiş RobuNexa animasyon bağlantısını algılar, Base64 içeriğini çözer ve gerçek ikili dosyayı `NAMReanim/Content/Anims/` altına yazar; ardından NAM'ın animasyon okuyucusu dosyayı açar.
 
-## About the `.anim` files
+Bu yüzden tarayıcıdan doğrudan bir raw `.anim` bağlantısı indirirsen hazır ikili dosya değil Base64 metni görürsün. NAM içindeki yükleyiciyi kullan veya dosyayı başka yerde kullanacaksan Base64'ü önce çöz.
 
-NAM's `AnimLib.Track.fromfile` expects the little-endian STEVE KeyframeSequence format, not JSON. GitHub-hosted `.anim` files in this branch are stored as Base64 text so the repository editing interface can preserve the binary payload. The RobuNexa loader detects these pinned animation URLs, decodes them, and writes native binary `.anim` files to `NAMReanim/Content/Anims/` before NAM reads them.
+## Güvenlik
 
-If you download a raw `.anim` URL directly in a browser, you will get the encoded source text, not a ready-to-import binary file. Use the loader or decode the Base64 content before importing elsewhere.
+- Eski Pusher WebSocket dinleyicisi kaldırıldı. Önceki kod, uzaktan gelen `jumpscare` mesajının içeriğini `loadstring` ile derleyip çalıştırabiliyordu.
+- Yerleşik Lua modülleri ve animasyon dosyaları sabitlenmiş commit'lerden yüklenir.
+- Animasyon içeriği veri olarak çözülür; Lua kodu olarak çalıştırılmaz.
+- Topluluk mağazası bu sürümde bilerek boştur.
+- NAM hâlâ executor API'leri ve yerleşik Lua modüllerini yüklemek için `loadstring` kullanır. `NAMReanim/Modules/` altındaki her dosya çalıştırılabilir kullanıcı kodudur; yalnızca yazdığın veya dikkatlice incelediğin modülleri bırak.
+- Bilinmeyen loadstring kodlarını çalıştırma, hesap çerezlerini/oturum token'larını paylaşma ve güvenmediğin bir betik için güvenlik korumalarını kapatma.
 
-## Remaining limitations
+## Bilinen sınırlamalar
 
-- No live executor test was available during this migration; executor API compatibility may vary.
-- Legacy UI audio/image binaries have not been mirrored. Core modules and animations are hosted here, but optional UI media may be missing.
-- The store is empty by design. Add only reviewed modules with clear licensing and pinned asset URLs.
-- The R6 Studio generator creates editable `KeyframeSequence` objects; it does not publish animation asset IDs automatically.
-- The repository does not promise compatibility with every Roblox experience or every executor.
+- Bu değişiklik sırasında canlı executor testi yapılmadı; açılış ve animasyon oynatma elle test edilmelidir.
+- Eski arayüzün bazı ses/görsel ikili dosyaları taşınmadı; bu yüzden isteğe bağlı UI medyası eksik olabilir.
+- Topluluk mağazası boş. Sonradan modül eklenecekse kaynak, lisans ve bağlantılar incelemelidir.
+- Roblox Studio oluşturucusu düzenlenebilir KeyframeSequence nesneleri oluşturur; otomatik olarak yayınlanmış animasyon ID'si üretmez.
+- Limb/hat reanimation uyumluluğu deneyime ve executor'a göre değişebilir.
 
-## Official references
+## Roblox'un resmî belgeleri
 
-- [Roblox Animation Editor](https://create.roblox.com/docs/animation/editor)
+- [Animation Editor](https://create.roblox.com/docs/animation/editor)
 - [KeyframeSequence API](https://create.roblox.com/docs/reference/engine/classes/KeyframeSequence)
-- [Export and import animations in Studio](https://create.roblox.com/docs/education/build-it-play-it-island-of-move/sharing-animations)
+- [Studio'da animasyon dışa/içe aktarma](https://create.roblox.com/docs/education/build-it-play-it-island-of-move/sharing-animations)
 
-## License and attribution
+## Lisans ve atıf
 
-The vendored legacy built-in modules are under the upstream MIT license; see `content/LICENSE-Uhhhhhh.txt`. The RobuNexa animation motions are original repository content. Respect Roblox's terms, game owners' rules, and third-party asset licenses.
+Taşınan eski yerleşik modüller upstream MIT lisansı altındadır; `content/LICENSE-Uhhhhhh.txt` dosyasına bak. RobuNexa animasyon hareketleri bu depo için özgün olarak oluşturulmuştur. Roblox kurallarına, deneyim sahibinin kurallarına ve üçüncü taraf varlık lisanslarına uy.
