@@ -1,6 +1,6 @@
 # RobuNexa — R6 animation library
 
-This directory contains **15 original R6 animation sequences** and a Roblox Studio generator.
+This directory has 15 original R6 animation sequences (Base64-wrapped native data) and a Roblox Studio generator. A separate ready-to-use native binary Hakari dance is stored at assets/anime/Hakari.anim.
 
 ## Included animations
 
@@ -30,6 +30,12 @@ The GitHub text interface cannot store arbitrary binary bytes through the ordina
 4. Save/export through the Animation Editor. Roblox's native workflow exports a .rbxm/.rbxmx file and can publish an animation asset ID.
 
 The generator creates editable starter sequences; it does not publish asset IDs automatically. See the official [Animation Editor docs](https://create.roblox.com/docs/animation/editor), [KeyframeSequence reference](https://create.roblox.com/docs/reference/engine/classes/KeyframeSequence), and [export/import guide](https://create.roblox.com/docs/education/build-it-play-it-island-of-move/sharing-animations).
+
+## Ready-to-use native animation added
+
+- assets/anime/Hakari.anim is the original native binary asset copied from [STEVE-916-create/Uhhhhhh, content/Hakari.anim](https://github.com/STEVE-916-create/Uhhhhhh/blob/5047db0f1880c8405546bf860db7bf6bf2f84e82/content/Hakari.anim). Its source blob SHA is 021b9bc624177cd1f56faabec91b362d1410a184. The upstream repository's MIT license is preserved at content/LICENSE-Uhhhhhh.txt; provenance and scope are recorded in assets/anime/README.md.
+
+Other public Gojo/Sukuna/Kira results found during the search were Creator Store item listings, not distributable native .anim files. They are linked from the main README rather than copied into this repository.
 
 ## Compatibility
 
