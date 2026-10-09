@@ -84,12 +84,12 @@ AddModule(function()
 			return AnimLib.Track.fromfile(AssetGetPathFromFilename("GojoAwakeTrack.anim"))
 		end)
 		if not ok or not track then
-			notifyUser("NAM: GojoAwaken.anim could not be read.")
+			notifyUser("NAM: GojoAwakeTrack.anim could not be read.")
 			return
 		end
 		track = makeR6Compatible(track)
 		if not track or #track.Keyframes == 0 then
-			notifyUser("NAM: GojoAwaken.anim has no usable keyframes.")
+			notifyUser("NAM: GojoAwakeTrack.anim has no usable keyframes.")
 			return
 		end
 		local actualDuration = tonumber(track.Time)
@@ -99,7 +99,7 @@ AddModule(function()
 			end
 		end
 		if not actualDuration or actualDuration <= 0 then
-			notifyUser("NAM: GojoAwaken.anim has an invalid duration.")
+			notifyUser("NAM: GojoAwakeTrack.anim has an invalid duration.")
 			return
 		end
 		duration = actualDuration
