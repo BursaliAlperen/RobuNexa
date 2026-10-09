@@ -73,15 +73,7 @@ def main() -> int:
     if not source.is_file():
         raise FileNotFoundError(f"Input animation not found: {source}")
 
-    # If this file has already been converted, leave it untouched.
-    if output.exists():
-        try:
-            existing = json.loads(output.read_text(encoding="utf-8"))
-            if isinstance(existing, dict) and isinstance(existing.get("Keyframes"), list):
-                print(f"Already converted: {output}")
-                return 0
-        except (UnicodeDecodeError, json.JSONDecodeError):
-            pass
+    # Always rebuild from the original RBXM source so updated uploads are converted too.
 
     model = parse_rbxm(str(source))
     all_instances = []
