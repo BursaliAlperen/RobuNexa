@@ -6677,6 +6677,21 @@ do
 	function Track.fromfile(path)
 		local s, data = pcall(readfile, path)
 		if s and data then
+			if data:sub(1, 1) == "{" then
+				local decodedOk, decoded = pcall(function()
+					return HttpService:JSONDecode(data)
+				end)
+				if decodedOk and type(decoded) == "table" and type(decoded.Keyframes) == "table" then
+					for _, keyframe in decoded.Keyframes do
+						for _, pose in keyframe.Poses or {} do
+							if type(pose.CFrame) == "table" then
+								pose.CFrame = CFrame.new(table.unpack(pose.CFrame))
+							end
+						end
+					end
+					return decoded
+				end
+			end
 			local buf = buffer.fromstring(data)
 			return Track.frombuffer(buf)
 		end
