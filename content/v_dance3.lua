@@ -192,4 +192,13 @@ addAnimationModule({
 	liftEnd = 0,
 })
 
+addAnimationModule({
+	name = "Cid Overdrive",
+	description = "Cid Overdrive animation adapted for R6.",
+	asset = "CidOverdriveTrack.anim",
+	lift = 0,
+	liftStart = 0,
+	liftEnd = 0,
+})
+
 return modules
