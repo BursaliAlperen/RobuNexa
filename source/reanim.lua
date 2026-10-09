@@ -1119,7 +1119,7 @@ do
 				MainWindowTweening = false
 			end)
 		else
-			TopBarText.Text = "    Genesis FE | v" .. UhhhhhhVersion
+			TopBarText.Text = "    NAM | by mamalalanam | v" .. UhhhhhhVersion
 			WindowContent.Visible = true
 			MainWindowPosClose = UIMainWindow.Position
 			SaveData.WindowClosedPosition = {MainWindowPosClose.X.Scale, MainWindowPosClose.X.Offset, MainWindowPosClose.Y.Scale, MainWindowPosClose.Y.Offset}
@@ -2529,7 +2529,7 @@ end)
 
 local function CreateHumanoidCharacter()
 	local char = Util.Instance("Model")
-	char.Name = "(C) Uhhhhhh V" .. UhhhhhhVersion
+	char.Name = "(C) NAM V" .. UhhhhhhVersion
 
 	local god = Util.Instance("ForceField", char)
 	god.Name = "NAM >:D"
@@ -4552,7 +4552,7 @@ function HatReanimator.Start()
 			p.CanTouch = false
 			p.CanQuery = false
 			p.Transparency = 0.75
-			p.Name = "(C) Uhhhhhh V" .. UhhhhhhVersion .. " :: HAT PLACEHOLDER"
+			p.Name = "(C) NAM V" .. UhhhhhhVersion .. " :: HAT PLACEHOLDER"
 			for _,v in p:GetDescendants() do
 				if v:IsA("LuaSourceContainer") then
 					v:Destroy()
@@ -6330,9 +6330,16 @@ do
 	return supported
 end
 
+if Player.Character then
+	task.delay(1, NAMCheckLimbSupport)
+end
+Player.CharacterAdded:Connect(function()
+	task.delay(1, NAMCheckLimbSupport)
+end)
+
 local ReanimateStartButton, ReanimateStartButtonText = UI.CreateButton(ReanimPage, "Start", 20)
 	ReanimateStartButton.Activated:Connect(function()
-		if not Reanimate.Current then NAMCheckLimbSupport() end
+		if not Reanimate.Current and not NAMCheckLimbSupport() then return end
 		ReanimateStartButton.Interactable = false
 		if Reanimate.Current then
 			ReanimateStartButtonText.Text = "Stopping"
@@ -7903,7 +7910,7 @@ UI.CreateText(CreditsPage, "thats a good lua code snippet trade :)", 12, Enum.Te
 UI.CreateText(CreditsPage, "<b>Roblox</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "this program's primary target", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "expose more backend functions for me like a good boy", 12, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "<b>rqz's Genesis FE</b>", 14, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "<b>NAM | MAMALALANAM</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "ill be taking ALL your convertions >:D", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "actually, im just taking the names, search it up on script sources, read the source, convert it and stuff then done", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "<font color=\"#4444FF\"><b>Empyrean Reanimate (click for Discord)</b></font>", 12, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
@@ -8282,12 +8289,13 @@ NAMSelectTab = function(tabName)
 		ABOUT = CreditsPage,
 	})[tabName]
 	for _, child in WindowContent:GetChildren() do
-		if child:IsA("ScrollingFrame") then
+		if child:IsA("GuiObject") then
 			child.Visible = child == selectedPage
 			child.Interactable = child == selectedPage
 		end
 	end
 	local isReanim = tabName == "REANIM"
+	WindowContent.Visible = not isReanim
 	ReanimPage.Visible = isReanim
 	ReanimPage.Position = UDim2.new(0, 0, 0, 0)
 	ReanimPage.Size = isReanim and UDim2.new(1, 0, 1, 0) or UDim2.new(0, 120, 1, 0)
