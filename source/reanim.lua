@@ -921,11 +921,11 @@ do
 	UIMainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
 	UIMainWindow.Position = UDim2.new(0.5, 0, 0.5, 0)
 	local NAMScreenSize = Util.GetScreenSize()
-	local NAMWindowWidth = math.min(480, math.max(300, NAMScreenSize.X - 24))
-	local NAMWindowHeight = math.min(320, math.max(220, NAMScreenSize.Y - 48))
+	local NAMWindowWidth = math.min(680, math.max(300, NAMScreenSize.X - 24))
+	local NAMWindowHeight = math.min(460, math.max(250, NAMScreenSize.Y - 48))
 	UIMainWindow.Size = UDim2.fromOffset(NAMWindowWidth, NAMWindowHeight)
-	UIMainWindow.BackgroundTransparency = 0.12
-	UIMainWindow.BackgroundColor3 = Color3.fromRGB(15, 18, 30)
+	UIMainWindow.BackgroundTransparency = 0.04
+	UIMainWindow.BackgroundColor3 = Color3.fromRGB(15, 16, 19)
 	UIMainWindow.BorderSizePixel = 0
 	Stylize(UIMainWindow, {
 		Glow = true
@@ -936,8 +936,8 @@ do
 	glassCorner.CornerRadius = UDim.new(0, 14)
 	glassCorner.Parent = UIMainWindow
 	local glassStroke = Instance.new("UIStroke")
-	glassStroke.Color = Color3.fromRGB(160, 180, 255)
-	glassStroke.Transparency = 0.58
+	glassStroke.Color = Color3.fromRGB(153, 255, 58)
+	glassStroke.Transparency = 0.42
 	glassStroke.Thickness = 1
 	glassStroke.Parent = UIMainWindow
 	local _clicksndclicked = false
@@ -981,15 +981,15 @@ do
 	TopBarText.Size = UDim2.new(1, -35, 1, 0)
 	TopBarText.BackgroundTransparency = 1
 	TopBarText.ClipsDescendants = true
-	TopBarText.Font = Enum.Font.Code
-	TopBarText.TextColor3 = Color3.new(1, 1, 1)
-	TopBarText.TextSize = 20
+	TopBarText.Font = Enum.Font.GothamSemibold
+	TopBarText.TextColor3 = Color3.fromRGB(240, 242, 245)
+	TopBarText.TextSize = 18
 	TopBarText.TextXAlignment = Enum.TextXAlignment.Left
-	TopBarText.Text = "    NAM | by mamalalanam | v" .. UhhhhhhVersion
+	TopBarText.Text = "    Cursed Car Anim | v" .. UhhhhhhVersion
 	TopBarText.RichText = true
 	RegisterTextLabel(TopBarText)
 	Util.ForceTextSize(TopBarText)
-	CracktroFrameText = "NAM | by mamalalanam"
+	CracktroFrameText = "Cursed Car Anim"
 	
 	local TopBarClose = Util.Instance("TextButton", TopBarFrame)
 	TopBarClose.AnchorPoint = Vector2.new(1, 0)
@@ -1025,10 +1025,10 @@ do
 	-- Glass navigation rebuilt with an explicit hit-test fallback for touch/executor GUIs.
 	local NAMTabBar = Util.Instance("Frame", UIMainWindow)
 	NAMTabBar.Name = "NAMGlassNavigation"
-	NAMTabBar.Position = UDim2.new(0, 10, 0, 34)
-	NAMTabBar.Size = UDim2.new(1, -20, 0, 30)
+	NAMTabBar.Position = UDim2.new(0, 10, 0, 36)
+	NAMTabBar.Size = UDim2.new(1, -20, 0, 38)
 	NAMTabBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	NAMTabBar.BackgroundTransparency = 0.91
+	NAMTabBar.BackgroundTransparency = 0.94
 	NAMTabBar.BorderSizePixel = 0
 	NAMTabBar.Active = false
 	NAMTabBar.ZIndex = 50
@@ -1036,8 +1036,8 @@ do
 	navCorner.CornerRadius = UDim.new(0, 9)
 	navCorner.Parent = NAMTabBar
 	local navStroke = Instance.new("UIStroke")
-	navStroke.Color = Color3.fromRGB(170, 190, 255)
-	navStroke.Transparency = 0.72
+	navStroke.Color = Color3.fromRGB(153, 255, 58)
+	navStroke.Transparency = 0.78
 	navStroke.Thickness = 1
 	navStroke.Parent = NAMTabBar
 	NAMTabButtons = {}
@@ -1047,12 +1047,12 @@ do
 		tab.Name = tabName .. "Tab"
 		tab.Position = UDim2.new((index - 1) / #tabNames, 4, 0, 4)
 		tab.Size = UDim2.new(1 / #tabNames, -8, 1, -8)
-		tab.BackgroundColor3 = Color3.fromRGB(135, 155, 255)
+		tab.BackgroundColor3 = Color3.fromRGB(153, 255, 58)
 		tab.BackgroundTransparency = 1
 		tab.BorderSizePixel = 0
 		tab.Font = Enum.Font.GothamSemibold
-		tab.Text = ({NAM = "HOME", ANIMATIONS = "ANIMS", REANIM = "RIG", SETTINGS = "SETTINGS", ABOUT = "ABOUT"})[tabName]
-		tab.TextColor3 = Color3.fromRGB(225, 230, 245)
+		tab.Text = ({NAM = "HOME", ANIMATIONS = "ANIMS", REANIM = "LIMBS", SETTINGS = "SETTINGS", ABOUT = "ABOUT"})[tabName]
+		tab.TextColor3 = Color3.fromRGB(235, 237, 240)
 		tab.TextSize = 10
 		tab.TextScaled = false
 		tab.TextWrapped = true
@@ -8324,8 +8324,8 @@ NAMSelectTab = function(tabName)
 	for name, button in NAMTabButtons do
 		local active = name == tabName
 		button.BackgroundTransparency = active and 0.12 or 1
-		button.BackgroundColor3 = active and Color3.fromRGB(135, 155, 255) or Color3.fromRGB(255, 255, 255)
-		button.TextColor3 = active and Color3.fromRGB(15, 18, 30) or Color3.fromRGB(225, 230, 245)
+		button.BackgroundColor3 = active and Color3.fromRGB(153, 255, 58) or Color3.fromRGB(255, 255, 255)
+		button.TextColor3 = active and Color3.fromRGB(17, 19, 14) or Color3.fromRGB(235, 237, 240)
 		button.Active = true
 		pcall(function() button.Interactable = true end)
 		button.ZIndex = 52
