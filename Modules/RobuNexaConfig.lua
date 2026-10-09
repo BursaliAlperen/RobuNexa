@@ -1,17 +1,17 @@
 -- RobuNexa repository locations.
 -- This module only defines URLs; it does not fetch or execute remote content.
--- Keep remote files as passive assets/data unless they have been reviewed locally.
+-- Revision is an immutable commit containing the reviewed migration assets.
 
 local RobuNexa = {}
 
 RobuNexa.Repository = "BursaliAlperen/RobuNexa"
-RobuNexa.Branch = "main"
-RobuNexa.RawRoot = "https://raw.githubusercontent.com/" .. RobuNexa.Repository .. "/" .. RobuNexa.Branch .. "/"
+RobuNexa.Revision = "61eb806d301615ff83e0b926ca0fc7abb6304dae"
+RobuNexa.RawRoot = "https://raw.githubusercontent.com/" .. RobuNexa.Repository .. "/" .. RobuNexa.Revision .. "/"
 
--- Only paths verified to be part of this repository are listed here.
 RobuNexa.Paths = {
     R6AnimationGenerator = "Animations/R6/GenerateR6Keyframes.lua",
     R6AnimationGuide = "Animations/R6/README.md",
+    NAMAnimationModule = "content/v_robunexa_anime.lua",
 }
 
 function RobuNexa.RawUrl(path)
