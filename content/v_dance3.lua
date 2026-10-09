@@ -141,8 +141,7 @@ local function addAnimationModule(config)
 				return
 			end
 
-			-- Smoothly lift only during the authored move's central action window.
-			-- Apply the frame-to-frame delta so horizontal movement is not frozen.
+			-- Smooth lift during the configured central action window.
 			if rootPart and rootPart.Parent and config.lift > 0 then
 				local progress = math.clamp(elapsed / duration, 0, 1)
 				local windowStart, windowEnd = config.liftStart, config.liftEnd
@@ -176,20 +175,20 @@ addAnimationModule({
 
 addAnimationModule({
 	name = "Gojo 200% Hollow Purple",
-	description = "Hollow Purple attack animation adapted for R6, with a timed sky lift.",
+	description = "Hollow Purple attack animation adapted for R6.",
 	asset = "HollowPurple1Track.anim",
-	lift = 34,
-	liftStart = 0.16,
-	liftEnd = 0.82,
+	lift = 0,
+	liftStart = 0,
+	liftEnd = 0,
 })
 
 addAnimationModule({
 	name = "Mahoraga Destroy Purple",
-	description = "Mahoraga Purple destruction animation adapted for R6.",
+	description = "Mahoraga Purple destruction animation adapted for R6, with a smooth timed lift.",
 	asset = "MahoragaDestroyPurpleTrack.anim",
-	lift = 0,
-	liftStart = 0,
-	liftEnd = 0,
+	lift = 34,
+	liftStart = 0.16,
+	liftEnd = 0.82,
 })
 
 addAnimationModule({
