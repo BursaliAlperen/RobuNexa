@@ -463,7 +463,7 @@ TweenService:Create(Downloading, TweenInfo.new(0.5), {
 Size = UDim2.new(1, 0, 0, 32)
 }):Play()
 task.wait(0.5)
-local s, assetsof = pcall(game.HttpGet, game, "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/uiassets/?ref=robunexa-nam-adaptation")
+local s, assetsof = pcall(game.HttpGet, game, "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/uiassets/?ref=8a74012668df7bc4120916b45b118515dc3e75d5")
 if s and assetsof then
 s, assetsof = pcall(HttpService.JSONDecode, HttpService, assetsof)
 if s and assetsof then
@@ -5966,7 +5966,7 @@ if s and resp and resp.StatusCode == 200 then
 _Assetdownloadingcount -= 1
 _UpdateDownloadStatus()
 local body = resp.Body
-if source:find("raw.githubusercontent.com/BursaliAlperen/RobuNexa/robunexa-nam-adaptation/Animations/R6/") and source:sub(-5) == ".anim" then
+if source:find("raw.githubusercontent.com/BursaliAlperen/RobuNexa/") and source:find("/Animations/R6/") and source:sub(-5) == ".anim" then
 body = DecodeBase64(body)
 end
 pcall(writefile, path, body)
@@ -5984,14 +5984,14 @@ end)
 return false
 end
 local function AssetDownload(filename)
-local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/robunexa-nam-adaptation/content/" .. EnsureUrlEncode(filename)
+local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/8a74012668df7bc4120916b45b118515dc3e75d5/content/" .. EnsureUrlEncode(filename)
 local split = string.split(filename, "@")
 if #split > 1 then
 filename = table.remove(split, 1)
 source = table.concat(split, "@")
 end
 if source:sub(1, 7) == "MARKET/" then
-source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/robunexa-nam-adaptation/store/" .. EnsureUrlEncode(source:sub(8))
+source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/8a74012668df7bc4120916b45b118515dc3e75d5/store/" .. EnsureUrlEncode(source:sub(8))
 end
 local path = AssetGetPathFromFilename(filename)
 return AssetDownloadAgent(source, filename, path)
@@ -6824,7 +6824,7 @@ task.spawn(function()
 UI.CreateText(ChangelogsPage, "Changelogs", 30, Enum.TextXAlignment.Center)
 local content = UI.CreateText(ChangelogsPage, "Loading...", 12, Enum.TextXAlignment.Left)
 xpcall(function()
-local logs = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/robunexa-nam-adaptation/CHANGELOGS")
+local logs = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/8a74012668df7bc4120916b45b118515dc3e75d5/CHANGELOGS")
 content.Text = "Rendering error."
 for _,v in string.split(logs, "\n") do
 if v:sub(1, 2) == "# " then UI.CreateText(ChangelogsPage, "<b>" .. v:sub(3) .. "</b>", 15, Enum.TextXAlignment.Left)
@@ -6857,13 +6857,13 @@ end)
 local InitLogsText = UI.CreateText(InitLogsPage, "Loading...", 12, Enum.TextXAlignment.Left)
 local function _contentgetgithubraw(path)
 InitLogsText.Text ..= "\n[LOG] [GitGET] GET api./" .. path
-local s, resp = pcall(request, {Method = "GET", Url = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/" .. path .. "?ref=robunexa-nam-adaptation", Headers = {Accept = "application/vnd.github.VERSION.raw"}})
+local s, resp = pcall(request, {Method = "GET", Url = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/" .. path .. "?ref=8a74012668df7bc4120916b45b118515dc3e75d5", Headers = {Accept = "application/vnd.github.VERSION.raw"}})
 if s and resp and resp.StatusCode == 200 then return resp.Body end
 if s and resp then InitLogsText.Text ..= "\n[WARN] [GitGET] GET api./" .. path .. " " .. resp.StatusCode
 elseif s then InitLogsText.Text ..= "\n[WARN] [GitGET] GET api./" .. path .. " NIL"
 else InitLogsText.Text ..= "\n[WARN] [GitGET] GET api./" .. path .. " ERR " .. resp end
 InitLogsText.Text ..= "\n[LOG] [GitGET] GET raw./" .. path
-s, resp = pcall(request, {Method = "GET", Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/robunexa-nam-adaptation/content/" .. path})
+s, resp = pcall(request, {Method = "GET", Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/8a74012668df7bc4120916b45b118515dc3e75d5/content/" .. path})
 if s and resp and resp.StatusCode == 200 then return resp.Body end
 if s and resp then InitLogsText.Text ..= "\n[WARN] [GitGET] GET raw./" .. path .. " " .. resp.StatusCode
 elseif s then InitLogsText.Text ..= "\n[WARN] [GitGET] GET raw./" .. path .. " NIL"
@@ -6884,7 +6884,7 @@ local filesofbuiltins_d = {"d_limbmap.lua", "d_hatsmap.lua"}
 SaveData.ContentHash = SaveData.ContentHash or {}
 if force ~= "SKIPHASH" then
 xpcall(function()
-local s, resp = pcall(request, {Method = "GET", Url = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/?ref=robunexa-nam-adaptation"})
+local s, resp = pcall(request, {Method = "GET", Url = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/?ref=8a74012668df7bc4120916b45b118515dc3e75d5"})
 if s and resp and resp.StatusCode == 200 then
 s, resp = pcall(HttpService.JSONDecode, HttpService, resp.Body)
 if s and resp then
@@ -7050,7 +7050,7 @@ local GetMarketList_cache = {}
 local function GetMarketList()
 local aitemus, file2name, file2aitemu = GetMarketList_cache.aitemus, GetMarketList_cache.file2name, GetMarketList_cache.file2aitemu
 if not aitemus or not file2name or not file2aitemu then
-local marketteresult = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/robunexa-nam-adaptation/store/list.txt")
+local marketteresult = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/8a74012668df7bc4120916b45b118515dc3e75d5/store/list.txt")
 marketteresult = string.split(marketteresult, "\n")
 aitemus = {}
 local aitemu = {}
@@ -7062,7 +7062,7 @@ if k == "name" then aitemu.Name = v continue end
 if k == "user" then aitemu.User = v continue end
 if k == "desc" then aitemu.Description = v continue end
 if k == "cost" then aitemu.Cost = v continue end
-if k == "file" then aitemu.Source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/robunexa-nam-adaptation/store/" .. v aitemu.File = string.gsub(v, "/", ".") continue end
+if k == "file" then aitemu.Source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/8a74012668df7bc4120916b45b118515dc3e75d5/store/" .. v aitemu.File = string.gsub(v, "/", ".") continue end
 end
 if next(aitemu) == nil then continue end
 table.insert(aitemus, aitemu)
