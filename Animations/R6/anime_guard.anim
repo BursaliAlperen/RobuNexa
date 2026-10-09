@@ -1,0 +1,100 @@
+{
+  "format": "robunexa.anim.v1",
+  "name": "Anime Guard",
+  "rig": "R6",
+  "fps": 12,
+  "looped": true,
+  "description": "Original defensive anime-style pose; not based on a specific copyrighted character.",
+  "frames": [
+    {
+      "t": 0,
+      "joints": {
+        "Right Shoulder": {
+          "x": -35,
+          "y": 0,
+          "z": 65
+        },
+        "Left Shoulder": {
+          "x": -20,
+          "y": 0,
+          "z": -70
+        },
+        "Right Hip": {
+          "x": 8,
+          "y": 0,
+          "z": 0
+        },
+        "Left Hip": {
+          "x": -8,
+          "y": 0,
+          "z": 0
+        },
+        "Neck": {
+          "x": -5,
+          "y": 0,
+          "z": 0
+        }
+      }
+    },
+    {
+      "t": 0.5,
+      "joints": {
+        "Right Shoulder": {
+          "x": -30,
+          "y": 0,
+          "z": 55
+        },
+        "Left Shoulder": {
+          "x": -25,
+          "y": 0,
+          "z": -62
+        },
+        "Right Hip": {
+          "x": 5,
+          "y": 0,
+          "z": 0
+        },
+        "Left Hip": {
+          "x": -5,
+          "y": 0,
+          "z": 0
+        },
+        "Neck": {
+          "x": 3,
+          "y": 0,
+          "z": 0
+        }
+      }
+    },
+    {
+      "t": 1,
+      "joints": {
+        "Right Shoulder": {
+          "x": -35,
+          "y": 0,
+          "z": 65
+        },
+        "Left Shoulder": {
+          "x": -20,
+          "y": 0,
+          "z": -70
+        },
+        "Right Hip": {
+          "x": 8,
+          "y": 0,
+          "z": 0
+        },
+        "Left Hip": {
+          "x": -8,
+          "y": 0,
+          "z": 0
+        },
+        "Neck": {
+          "x": -5,
+          "y": 0,
+          "z": 0
+        }
+      }
+    }
+  ]
+}
