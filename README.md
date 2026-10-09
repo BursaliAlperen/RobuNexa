@@ -1,113 +1,35 @@
-# RobuNexa — NAM Reanimate (R6)
+# RobuNexa — NAM Reanimate
 
-RobuNexa, NAM Reanimate altyapısının bu depoda barındırılan bir uyarlamasıdır. Eski içerik/modül bağlantıları RobuNexa'ya taşındı, uzaktan gelen Pusher mesajlarını Lua kodu olarak çalıştıran bölüm kaldırıldı ve **15 özgün R6 anime-esintili animasyon** Dances listesine eklendi.
+A work-in-progress NAM Reanimate adaptation. It has not been validated in a live executor.
 
-> **Durum:** Bu bir geçiş/test derlemesidir; canlı executor içinde çalıştırılarak doğrulanmadı. Önce kendi özel test ortamında dene. Her Roblox deneyiminde veya her executor'da çalışacağı garanti edilmez.
+## Your uploaded animations
 
-## Dosya yapısı
+The `.rbxmanims/` folder is the drop zone for your native Roblox animation model files:
 
-- `Reanim.txt` — NAM Reanimate ana betiği.
-- `LoadRobuNexa.lua` — sabit bir commit'e işaret eden GitHub başlatıcısı.
-- `content/` — NAM'ın yerleşik moveset, dance, limb-map ve hat-map modülleri.
-- `Animations/R6/` — 15 özgün anime-esintili animasyon verisi ve Studio KeyframeSequence oluşturucusu.
-- `assets/anime/Hakari.anim` — upstream depodan aynen alınan gerçek ikili Hakari dans dosyası.
-- `Modules/RobuNexaConfig.lua` — pasif URL/yol yapılandırması örneği.
-- `NAM-ROBUNEXA-MIGRATION.md` — geçiş ve güvenlik notları.
-- `store/list.txt` — bu sürümde bilerek boş bırakılmış topluluk mağazası manifesti.
+- `aizen.rbxm` — contains a `KeyframeSequence` named `aizen`. The readable model data shows a `RootPart` pose, but no clear limb poses, so it needs further compatibility inspection before it can be treated as a usable character animation.
+- `gojo awake.rbxm` — contains a `KeyframeSequence` named `gojo awake` and readable R6-style body part names such as `Torso`, `Head`, `Left Leg`, and `Right Arm`. This looks more promising for R6, but still needs runtime validation.
 
-## Hızlı başlatma (executor)
+I have verified that both files are Roblox binary model packages and that each contains a `KeyframeSequence`. They are stored in the repository, but they have **not yet been converted into NAM's custom `.anim` format or wired into the Dances list**. That conversion is the next step; simply uploading `.rbxm` files does not make the current executor loader play them.
 
-Yalnızca güvendiğin bir executor ortamında ve test etme iznin olan yerlerde kullan. Bu betik standart Roblox Studio LocalScript'i değildir; executor'a özgü dosya ve HTTP fonksiyonları gerektirir.
+For future files, upload them to `.rbxmanims/` and use descriptive names. Keep the original files unchanged until their sequences and rig compatibility have been checked.
 
-Executor'a şu satırı yapıştır:
+## Repository files
 
-```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/1b9267f0f788fdfea3bfb1a5e2197b359676537f/Reanim.txt"))()
-```
+- `Reanim.txt` — main NAM Reanimate script.
+- `LoadRobuNexa.lua` — pinned GitHub launcher.
+- `content/` — NAM built-in modules and upstream license notice.
+- `assets/anime/Hakari.anim` — native binary Hakari dance asset mirrored with attribution.
+- `.rbxmanims/` — uploaded Aizen and Gojo animation models.
 
-Alternatif olarak `LoadRobuNexa.lua` dosyasının içeriğini çalıştırabilirsin. Ana betik URL'si değiştirilemez bir Git commit'ine sabitlenmiştir; yerleşik modüller de sabitlenmiş bir depo anlık görüntüsünden alınır. Bu, sürümü tekrarlanabilir yapar ama kodu çalıştırmadan önce inceleme gereğini ortadan kaldırmaz.
+## Animation format and import/export
 
-## İlk çalıştırma
+Roblox Studio exports saved animations as `.rbxm` model files containing a `KeyframeSequence`. NAM's current animation reader expects a different native `.anim` format, so each model must be inspected and converted or loaded through a compatible path before integration.
 
-1. Klasik **R6** avatar ile başla. Eklenen animasyonlar R15 için tasarlanmamıştır.
-2. Başlatıcıyı çalıştır ve betiğin `NAMReanim/` klasörlerini oluşturmasını bekle.
-3. NAM arayüzünde yerleşik modüllerin yüklenmesini bekle.
-4. **Dances** listesini açıp `RN ...` ile başlayan animasyonlardan birini seç.
-5. Bir modül yüklenmezse **Init Logs** bölümünü açıp ilk HTTP/compile hatasını incele. 404 veya derleme hatası sürüyorsa tekrar tekrar çalıştırma.
-6. Eski yerel önbellek sorun çıkarırsa önce `NAMReanim/BuiltinModules/` veya `NAMReanim/Content/Anims/` klasörlerini yedekle; ardından ilgili dosyaları temizle. Ayarları sıfırlamak istemiyorsan `NAMReanim/tree.ehehetilde` dosyasını silme.
+Official documentation: [Export and Import Animations](https://create.roblox.com/docs/education/build-it-play-it-island-of-move/sharing-animations) · [KeyframeSequence API](https://create.roblox.com/docs/reference/engine/classes/KeyframeSequence)
 
-## Eklenen 15 animasyon
+## Security and licensing
 
-| Dances listesindeki ad | Tür |
-|---|---|
-| RN Anime Idle | Döngülü bekleme pozu |
-| RN Anime Walk | Döngülü yürüme |
-| RN Anime Run | Döngülü koşma |
-| RN Wave | Selamlama/el sallama |
-| RN Anime Guard | Döngülü savunma pozu |
-| RN Anime Dash | Öne eğilme pozu; karakteri ileri itmez |
-| RN Victory Pose | Zafer pozu |
-| RN Anime Punch | Yalnızca görsel yumruk animasyonu |
-| RN Spin Kick | Yalnızca görsel tekme pozu |
-| RN Salute | Selam verme |
-| RN Bow | Eğilerek selamlama |
-| RN Power Charge | Döngülü güç toplama pozu |
-| RN Sword Slash | Yalnızca görsel kılıç savurma pozu |
-| RN Jump Land | Zıplama/iniş pozu; kök parçayı hareket ettirmez |
-| RN Point | İşaret etme |
-| Hakari's Dance | Kaynak depodan alınmış, döngülü Hakari dansı (native .anim) |
-
-RN ile başlayan 15 hareket bu depo için oluşturulmuş özgün anime-esintili pozlardır; belirli bir anime sahnesinden kopyalanmamıştır. Hakari's Dance ayrı bir gerçek native .anim dosyasıdır ve kaynak/atıf bilgisi assets/anime/README.md içinde verilir. Yumruk, tekme ve kılıç savurma animasyonları **hasar, hitbox, silah veya sunucu taraflı hareket eklemez**.
-
-## .anim dosyaları nasıl yükleniyor?
-
-NAM'ın `AnimLib.Track.fromfile` fonksiyonu JSON değil, little-endian STEVE KeyframeSequence ikili biçimini bekler. RobuNexa'ya özel 15 hareket Animations/R6/*.anim altında Base64 metin sarmalayıcısıdır; yükleyici bunları çözüp NAMReanim/Content/Anims/ altına native dosya olarak yazar. Buna karşılık assets/anime/Hakari.anim gerçek binary .anim dosyasıdır ve aynen indirilip kullanılır. Dosyaların türü assets/anime/README.md içinde açıklanır.
-
-## Güvenlik
-
-- Eski Pusher WebSocket dinleyicisi kaldırıldı. Önceki kod, uzaktan gelen `jumpscare` mesajının içeriğini `loadstring` ile derleyip çalıştırabiliyordu.
-- Yerleşik Lua modülleri ve animasyon dosyaları sabitlenmiş commit'lerden yüklenir.
-- Animasyon içeriği veri olarak çözülür; Lua kodu olarak çalıştırılmaz.
-- Topluluk mağazası bu sürümde bilerek boştur.
-- NAM hâlâ executor API'leri ve yerleşik Lua modüllerini yüklemek için `loadstring` kullanır. `NAMReanim/Modules/` altındaki her dosya çalıştırılabilir kullanıcı kodudur; yalnızca yazdığın veya dikkatlice incelediğin modülleri bırak.
-- Bilinmeyen loadstring kodlarını çalıştırma, hesap çerezlerini/oturum token'larını paylaşma ve güvenmediğin bir betik için güvenlik korumalarını kapatma.
-
-## Bulunan hazır anime emote bağlantıları
-
-Bunlar Roblox Creator Store'da yayımlanmış emote kayıtlarına ait keşif bağlantılarıdır; indirilebilir .anim kaynak dosyası değildirler ve bu depoya kopyalanmamıştır. Bazıları ücretli olabilir ve kullanım koşulları yayımlayan içerik sahibine bağlıdır:
-
-- [Gojo Emote (Rolimon's kaydı)](https://www.rolimons.com/item/74198526108091) — yayımlanmış emote kaydı.
-- [Sukuna Domain Expansion](https://www.rolimons.com/item/101430160520995) ve [Sukuna Aura Idle](https://www.rolimons.com/item/89424059240713) — yayımlanmış emote kayıtları.
-- [Kira Laugh — Death Note](https://www.rolimons.com/item/119613379552783) — yayımlanmış emote kaydı.
-
-Bu item ID'leri NAM'ın native .anim parser'ına doğrudan verilemez. Bunların ham animasyon verisini izinsiz çıkarmak yerine dosyanın sahibi/üreticisi tarafından sağlanan .anim veya .rbxm dışa aktarımını kullan.
-
-## “Line 1” hatası
-
-Reanim.txt'nin ilk satırı Lua yorum bloğu açan `--[[` satırıdır; tek başına bir hata değildir. Başlatıcı yalnızca Reanim.txt'yi indirmeli/çalıştırmalıdır; Hakari.anim veya diğer .anim dosyalarını `loadstring` ile çalıştırma. İndirme adresi HTML/404 metni döndürürse executor bunu Lua sanıp 1. satırda hata gösterebilir.
-
-Hata devam ederse executor'daki **tam kırmızı hata satırını** (özellikle `unexpected symbol`, `compile`, `HTTP` veya `attempt to` kısmını) ve hangi dosyayı çalıştırdığını gönder. Ekran görüntüsü ya da tam hata metni olmadan line 1 hatasının nedenini doğrulayamam.
-
-## Animasyon dosyası aramak için topluluk
-
-- [The Church of Animation — Discord](https://discord.com/servers/the-church-of-animation-838578081190641715): Roblox animasyonları, R6/R15 rig'leri ve animasyon paylaşımı üzerine bir topluluk. İstenen Sukuna/Gojo/Hakari/Kira dosyalarının bu sunucuda kesin olarak bulunduğunu doğrulamadım; üreticisinden izinli .anim/.rbxm dışa aktarımı istemek için bir yer olarak listeleniyor.
-- [Roblox Studio: animasyonları dışa/içe aktarma](https://create.roblox.com/docs/education/build-it-play-it-island-of-move/sharing-animations): Dosyanın sahibi animasyonu paylaşabiliyorsa resmi dışa aktarma yolu.
-
-
-## Bilinen sınırlamalar
-
-- Bu değişiklik sırasında canlı executor testi yapılmadı; açılış ve animasyon oynatma elle test edilmelidir.
-- Eski arayüzün bazı ses/görsel ikili dosyaları taşınmadı; bu yüzden isteğe bağlı UI medyası eksik olabilir.
-- Topluluk mağazası boş. Sonradan modül eklenecekse kaynak, lisans ve bağlantılar incelemelidir.
-- Roblox Studio oluşturucusu düzenlenebilir KeyframeSequence nesneleri oluşturur; otomatik olarak yayınlanmış animasyon ID'si üretmez.
-- Limb/hat reanimation uyumluluğu deneyime ve executor'a göre değişebilir.
-
-## Roblox'un resmî belgeleri
-
-- [Animation Editor](https://create.roblox.com/docs/animation/editor)
-- [KeyframeSequence API](https://create.roblox.com/docs/reference/engine/classes/KeyframeSequence)
-- [Studio'da animasyon dışa/içe aktarma](https://create.roblox.com/docs/education/build-it-play-it-island-of-move/sharing-animations)
-
-## Lisans ve atıf
-
-Taşınan eski yerleşik modüller upstream MIT lisansı altındadır; `content/LICENSE-Uhhhhhh.txt` dosyasına bak. RobuNexa animasyon hareketleri bu depo için özgün olarak oluşturulmuştur. Roblox kurallarına, deneyim sahibinin kurallarına ve üçüncü taraf varlık lisanslarına uy.
+- The legacy Pusher listener that compiled and executed arbitrary remote event text was removed from the adaptation.
+- Review Lua modules before running them; executor scripts depend on executor-specific APIs and this project has not been live-tested.
+- `content/LICENSE-Uhhhhhh.txt` is retained because upstream-derived modules require their license notice. It is not a runtime script; no separate `Uhhh.txt` or `Uhhh.tct` file exists in the current repository tree.
+- Only add third-party animation files when you have permission to use and redistribute them.
