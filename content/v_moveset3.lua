@@ -29,8 +29,8 @@ end
 AddModule(function()
 	local m = {}
 	m.ModuleType = "MOVESET"
-	m.Name = "Patchma Hub"
-	m.Description = "A port of MyWorld's hub to Uhhhhhh\nsee the configurations to set ur anims"
+	m.Name = "Cursed car anim"
+	m.Description = "Cursed car animation moveset"
 	m.Assets = {}
 
 	local emptyfunction = function() end

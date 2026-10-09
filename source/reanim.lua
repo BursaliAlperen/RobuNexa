@@ -2599,9 +2599,9 @@ task.spawn(function()
 	end)
 	switchart()
 end)
-UI.CreateText(MainPage, `Reanimate V{UhhhhhhVersion}, By STEVE :D`, 15, Enum.TextXAlignment.Right)
+UI.CreateText(MainPage, `NAM | by mamalalanam | v{UhhhhhhVersion}`, 15, Enum.TextXAlignment.Right)
 UI.CreateSeparator(MainPage)
-UI.CreateButton(MainPage, " &lt; Back to cool scene", 20).Activated:Connect(function()
+UI.CreateButton(MainPage, " &lt; Back to NAM", 20).Activated:Connect(function()
 	CracktroFrame.Interactable = false
 	CracktroFrame.Visible = true
 	MainPage.Interactable = false
@@ -7239,7 +7239,7 @@ local function AssetGetPathFromFilename(filename)
 end
 local _Assetdownloading = {}
 local function AssetDownload(filename)
-	local source = "https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh/main/content/" .. filename
+	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. filename
 	local split = string.split(filename, "@")
 	if #split > 1 then
 		filename = table.remove(split, 1)
@@ -7713,6 +7713,7 @@ local function GetModuleHash(m)
 end
 local function AddMoveset(m)
 	if type(m) == "table" then
+		if m.Name ~= "Cursed car anim" and not m.NAMShow then return end
 		if not m.Name then return end
 		if not m.Description then return end
 		if not m.Config then return end
@@ -7778,6 +7779,7 @@ local function AddMoveset(m)
 end
 local function AddDance(m)
 	if type(m) == "table" then
+		if m.Name ~= "Hakari's Dance" and m.Name ~= "Gojo Awake" and not m.NAMShow then return end
 		if not m.Name then return end
 		if not m.Description then return end
 		if not m.Assets then return end
@@ -8142,7 +8144,7 @@ UI.CreateText(CreditsPage, "pls dont kick dubmood's ass lol", 12, Enum.TextXAlig
 UI.CreateText(CreditsPage, "<b>pouet.net</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "other than rez' and anat's demos theres lots of good demos there", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "tho im considered a LAMER with no scene ID loool", 12, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "so uhhhhhh....", 12, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "NAM", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "...greetings to lamers and fuckings to elites?", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "<b>github.com</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "YES!! KEEP SAVING ME FROM MY DATA CORRUPTION!!!", 12, Enum.TextXAlignment.Center)
@@ -8211,10 +8213,10 @@ UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "DISCLAIMER: Some random quotes made here are jokes (e.g.: 'this script mogs genesis') and should not be taken seriously. This also includes all the self-glazing quotes. It's your choice to agree with them or not, and if you do or don't, don't come harass/mock any individuals from it. In the end, a joke quote is a joke quote.", 15, Enum.TextXAlignment.Center)
 UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "This \"software\" is FREE, meaning YOU SHOULD NOT REDISTRIBUTE WITH RENUMERATIVE INTENT!!", 15, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "If you want to add content to Uhhhhhh, like Dances or Movesets, go to <font color=\"#4444FF\">this thing</font>.", 15, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
+UI.CreateText(CreditsPage, "If you want to add content to NAM, like animations or movesets, go to <font color=\"#4444FF\">this thing</font>.", 15, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		Util.Notify("Link copied!")
-		pcall(setclipboard, "https://github.com/STEVE-916-create/Uhhhhhh/")
+		pcall(setclipboard, "https://github.com/BursaliAlperen/RobuNexa/")
 	end
 end)
 UI.CreateSeparator(CreditsPage)
@@ -8321,7 +8323,7 @@ local function getgithubraw(path)
 	InitLogsText.Text ..= "\n[LOG] [GitGET] GET api./" .. path
 	local s, resp = pcall(request, {
 		Method = "GET",
-		Url = "https://api.github.com/repos/STEVE-916-create/Uhhhhhh/contents/content/" .. path,
+		Url = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/" .. path,
 		Headers = {
 			Accept = "application/vnd.github.VERSION.raw"
 		}
@@ -8339,7 +8341,7 @@ local function getgithubraw(path)
 	InitLogsText.Text ..= "\n[LOG] [GitGET] GET raw./" .. path
 	s, resp = pcall(request, {
 		Method = "GET",
-		Url = "https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh/main/content/" .. path,
+		Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. path,
 	})
 	if s and resp and resp.StatusCode == 200 then
 		return resp.Body
@@ -8359,14 +8361,14 @@ local function ForceModuleReload(force)
 	ClearModules()
 	Util.Notify("Loading...")
 	InitLogsText.Text ..= "\n[LOG] Checking SHA1 hashes..."
-	local filesofbuiltins = {"v_moveset1.lua", "v_moveset2.lua", "v_moveset3.lua", "v_dance1.lua", "v_dance2.lua", "d_limbmap.lua", "d_hatsmap.lua"}
-	local filesofbuiltins_m = {"v_moveset1.lua", "v_moveset2.lua", "v_moveset3.lua", "v_dance1.lua", "v_dance2.lua"}
-	local filesofbuiltins_d = {"d_limbmap.lua", "d_hatsmap.lua"}
+	local filesofbuiltins = {"v_moveset3.lua", "v_dance1.lua", "v_dance3.lua", "d_limbmap.lua"}
+	local filesofbuiltins_m = {"v_moveset3.lua", "v_dance1.lua", "v_dance3.lua"}
+	local filesofbuiltins_d = {"d_limbmap.lua"}
 	SaveData.ContentHash = SaveData.ContentHash or {}
 	xpcall(function()
 		local s, resp = pcall(request, {
 			Method = "GET",
-			Url = "https://api.github.com/repos/STEVE-916-create/Uhhhhhh/contents/content/",
+			Url = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/",
 		})
 		if s and resp and resp.StatusCode == 200 then
 			s, resp = pcall(HttpService.JSONDecode, HttpService, resp.Body)
@@ -8487,9 +8489,19 @@ local function ForceModuleReload(force)
 	IsUhhhhhhFullyLoaded = true
 	if not Reanimate.Character then return end
 	Reanimate.CreateCharacter()
+	task.delay(2, function()
+		local character = Players.LocalPlayer.Character
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		local supported = humanoid and humanoid.RigType == Enum.HumanoidRigType.R6 and character:FindFirstChild("Torso") ~= nil
+		if supported then
+			Util.Notify("Supported game detect")
+		else
+			Util.Notify("Unsupported game !!! >:D")
+		end
+	end)
 end
 UI.CreateSeparator(MainPage)
-UI.CreateText(MainPage, "<b>MODULES MANAGEMENT</b>", 15, Enum.TextXAlignment.Center)
+UI.CreateText(MainPage, "<b>NAM MODULES</b>", 15, Enum.TextXAlignment.Center)
 UI.CreateButton(MainPage, "Reload Modules", 20).Activated:Connect(function()
 	CracktroFrame.Interactable = false
 	CracktroFrame.Visible = true
@@ -8503,7 +8515,7 @@ UI.CreateButton(MainPage, "Reload Modules", 20).Activated:Connect(function()
 	end)
 	ForceModuleReload(true)
 end)
-UI.CreateText(MainPage, "\n\n\n<b>DANGER ZONE</b>", 15, Enum.TextXAlignment.Center)
+UI.CreateText(MainPage, "\n\n\n<b>ADVANCED</b>", 15, Enum.TextXAlignment.Center)
 local clearcontenthash, clearcontenthashtext = UI.CreateButton(MainPage, "CLEAR ALL DOWNLOADED CONTENT", 15)
 local clearcontenthashclicks = 0
 clearcontenthash.Activated:Connect(function()
