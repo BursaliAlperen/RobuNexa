@@ -2,7 +2,7 @@
 -- GitHub .anim files are Base64-encoded native STEVE KeyframeSequence data.
 -- Reanim.txt decodes them before writing the local .anim file.
 local modules = {}
-local ROOT = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/robunexa-nam-adaptation/Animations/R6/"
+local ROOT = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/73b25f63ae441d7cd930d3e9dc46384d44711cd0/Animations/R6/"
 
 local function addDance(displayName, description, localFile, sourceFile, looped)
     table.insert(modules, function()
