@@ -8309,8 +8309,8 @@ NAMSelectTab = function(tabName)
 	end
 	WindowContent.Visible = not isReanim
 	WindowContent.Interactable = not isReanim
-	WindowContent.Position = UDim2.new(0, 0, 0, 0)
-	WindowContent.Size = UDim2.new(1, -120, 1, 0)
+	WindowContent.Position = isReanim and UDim2.new(0, 0, 0, 0) or UDim2.new(0, 120, 0, 0)
+	WindowContent.Size = isReanim and UDim2.new(1, 0, 1, 0) or UDim2.new(1, -120, 1, 0)
 
 	if selectedPage then
 		selectedPage.AnchorPoint = Vector2.new(0.5, 0.5)
