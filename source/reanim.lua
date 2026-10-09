@@ -985,11 +985,11 @@ do
 	TopBarText.TextColor3 = Color3.fromRGB(240, 242, 245)
 	TopBarText.TextSize = 18
 	TopBarText.TextXAlignment = Enum.TextXAlignment.Left
-	TopBarText.Text = "    Cursed Car Anim | v" .. UhhhhhhVersion
+	TopBarText.Text = "    NAM Animation | v" .. UhhhhhhVersion
 	TopBarText.RichText = true
 	RegisterTextLabel(TopBarText)
 	Util.ForceTextSize(TopBarText)
-	CracktroFrameText = "Cursed Car Anim"
+	CracktroFrameText = "NAM Animation"
 	
 	local TopBarClose = Util.Instance("TextButton", TopBarFrame)
 	TopBarClose.AnchorPoint = Vector2.new(1, 0)
