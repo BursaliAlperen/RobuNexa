@@ -189,6 +189,7 @@ end
 local function addAnimationModule(config)
 	AddModule(function()
 		local m = {}
+		m.NAMShow = true -- explicitly allow this custom animation in AddDance
 		m.ModuleType = "DANCE"
 		m.Name = config.name
 		m.Description = config.description
