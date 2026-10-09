@@ -1,37 +1,27 @@
-# NAM → RobuNexa migration notes
+# NAM → RobuNexa migration
 
-This branch prepares the repository-side migration without replacing the existing 7,407-line `Reanim.txt` blindly.
+## Changes made on this branch
 
-## Current state
+- `Reanim.txt` now loads the legacy built-in module files from RobuNexa's `content/` directory.
+- Vendored these upstream modules into `content/`: `v_moveset1.lua`, `v_moveset2.lua`, `v_moveset3.lua`, `v_dance1.lua`, `v_dance2.lua`, `d_limbmap.lua`, and `d_hatsmap.lua`.
+- Preserved the upstream MIT license in `content/LICENSE-Uhhhhhh.txt`.
+- Added a RobuNexa `CHANGELOGS` file and updated the changelog link.
+- Removed the Pusher listener that executed arbitrary server-supplied Lua through `loadstring`.
+- Added the R6 KeyframeSequence generator and guide under `Animations/R6/`.
 
-- Existing entry point: `Reanim.txt` (preserved unchanged on this branch).
-- R6 animation starter: `Animations/R6/GenerateR6Keyframes.lua`.
-- R6 export instructions: `Animations/R6/README.md`.
-- New content root for RobuNexa-hosted static files: `https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/`.
+## Important remaining limitations
 
-## Why the old content URLs cannot be mechanically replaced
+This is a partial migration, not a verified end-to-end executor release. The legacy store still refers to `STEVE-916-create/Uhhhhhh-Store`; its store manifest and assets have not yet been copied. The startup UI also requests assets from RobuNexa's `uiassets/` folder, but the original image/music assets have not been mirrored there. Those features may be unavailable until their files are migrated.
 
-The current script requests UHHH-specific paths such as `content/`, `uiassets/`, `CHANGELOGS`, and the UHHH-Store `list.txt`. Those paths and the file manifest have not been verified to exist in RobuNexa. Replacing only the hostname would produce broken paths and potentially execute unexpected files.
+The script still uses executor-specific APIs such as `request`, `readfile`, `writefile`, `loadstring`, and `getcustomasset`. This is not a Roblox Studio LocalScript and cannot run unchanged in Studio. The built-in modules are downloaded as Lua source and compiled locally; review them before use. Do not reintroduce the removed Pusher remote-code handler.
 
-## Critical security finding
+## Testing still required
 
-The old entry point subscribes to Pusher channels and calls `loadstring(data.content)` on a received `jumpscare` event, then invokes the resulting function. The function environment is also populated with NAM functions. This is remote code execution by design. Do not carry this handler into a RobuNexa build. This branch deliberately does not reproduce it.
+- Test syntax and startup in the target executor; no live executor runtime was available for this edit.
+- Verify the limb-map/hat-map modules and animation playback with a classic R6 avatar.
+- Mirror and verify all referenced store/UI assets before claiming full dependency independence.
+- Export generated KeyframeSequences from Studio and confirm they play before publishing asset IDs.
 
-Other dynamic execution sites load local module files and modules downloaded from remote manifests. A safe migration should either:
-1. use reviewed, versioned local modules; or
-2. download passive data/assets only, validate response status, content type, size and hashes, and never compile downloaded text as code.
+## R6 animation files
 
-A URL rename or a cache hash alone is not a signature or trust boundary.
-
-## Migration checklist
-
-- [ ] Inventory the files RobuNexa actually hosts; don't assume UHHH's directory structure.
-- [ ] Replace each UHHH content/asset/changelog/store path with a verified RobuNexa path.
-- [ ] Remove the Pusher `jumpscare` code-execution handler and unused subscriptions.
-- [ ] Audit every remaining `loadstring`, `getfenv`, `setfenv`, `request`, `HttpGet`, `readfile`, and `writefile` use.
-- [ ] Test only in a Roblox Studio place and on a classic R6 rig you control.
-- [ ] Export and inspect the generated R6 KeyframeSequences before publishing.
-
-## Branch scope
-
-This is a preparation/documentation branch. It does not replace `Reanim.txt`, publish animation asset IDs, or claim that the legacy executor script is compatible with Studio.
+The generator creates starter KeyframeSequence instances in Studio. It does not contain already-published Roblox animation asset IDs or guarantee production-ready animation timing.
