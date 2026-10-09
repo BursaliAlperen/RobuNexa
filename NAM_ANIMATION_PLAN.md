@@ -7,4 +7,4 @@
 - Supported notification: R6 + Torso detected -> `Supported game detect`
 - Unsupported notification: otherwise -> `Unsupported game !!! >:D`
 
-The Gojo Awake module expects `content/GojoAwake.anim`. Ensure that the uploaded binary animation is committed at that exact path for the entry to play.
+The Gojo Awake module downloads and plays the uploaded binary animation at `content/GojoAwaken.anim` (copied from the root upload). The former placeholder animation has been removed.
