@@ -6857,7 +6857,7 @@ end)
 local InitLogsText = UI.CreateText(InitLogsPage, "Loading...", 12, Enum.TextXAlignment.Left)
 local function _contentgetgithubraw(path)
 InitLogsText.Text ..= "\n[LOG] [GitGET] GET api./" .. path
-local s, resp = pcall(request, {Method = "GET", Url = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/?ref=robunexa-nam-adaptation" .. path, Headers = {Accept = "application/vnd.github.VERSION.raw"}})
+local s, resp = pcall(request, {Method = "GET", Url = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/" .. path .. "?ref=robunexa-nam-adaptation", Headers = {Accept = "application/vnd.github.VERSION.raw"}})
 if s and resp and resp.StatusCode == 200 then return resp.Body end
 if s and resp then InitLogsText.Text ..= "\n[WARN] [GitGET] GET api./" .. path .. " " .. resp.StatusCode
 elseif s then InitLogsText.Text ..= "\n[WARN] [GitGET] GET api./" .. path .. " NIL"
