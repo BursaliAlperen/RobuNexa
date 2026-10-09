@@ -1,0 +1,115 @@
+{
+  "format": "robunexa.anim.v1",
+  "name": "Anime Dash Lean",
+  "rig": "R6",
+  "fps": 12,
+  "looped": false,
+  "description": "Original forward-lean dash pose. Does not move the character root.",
+  "frames": [
+    {
+      "t": 0,
+      "joints": {
+        "RootJoint": {
+          "x": -8,
+          "y": 0,
+          "z": 0
+        },
+        "Right Shoulder": {
+          "x": -30,
+          "y": 0,
+          "z": 20
+        },
+        "Left Shoulder": {
+          "x": -30,
+          "y": 0,
+          "z": -20
+        },
+        "Right Hip": {
+          "x": 20,
+          "y": 0,
+          "z": 0
+        },
+        "Left Hip": {
+          "x": -20,
+          "y": 0,
+          "z": 0
+        },
+        "Neck": {
+          "x": 8,
+          "y": 0,
+          "z": 0
+        }
+      }
+    },
+    {
+      "t": 0.25,
+      "joints": {
+        "RootJoint": {
+          "x": -22,
+          "y": 0,
+          "z": 0
+        },
+        "Right Shoulder": {
+          "x": -55,
+          "y": 0,
+          "z": 18
+        },
+        "Left Shoulder": {
+          "x": -55,
+          "y": 0,
+          "z": -18
+        },
+        "Right Hip": {
+          "x": 30,
+          "y": 0,
+          "z": 0
+        },
+        "Left Hip": {
+          "x": -30,
+          "y": 0,
+          "z": 0
+        },
+        "Neck": {
+          "x": 18,
+          "y": 0,
+          "z": 0
+        }
+      }
+    },
+    {
+      "t": 0.55,
+      "joints": {
+        "RootJoint": {
+          "x": -8,
+          "y": 0,
+          "z": 0
+        },
+        "Right Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Left Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Right Hip": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Left Hip": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Neck": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      }
+    }
+  ]
+}
