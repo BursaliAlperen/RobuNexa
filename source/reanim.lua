@@ -7,8 +7,8 @@ $$      $$$$$$"""$$$ $$$"""$$$ $$$"""$$$ $$$"""$$$ $$$"""$$$ $$$"""$$$
  "YmmMMMM""MMM    YMMMMM    YMMMMM    YMMMMM    YMMMMM    YMMMMM    YMM
        "DREAMS WILL NEVER COME TRUE UNTIL YOU ACTUALLY MAKE IT."       
 
-       Code:    STEVETHEREALONE
-       GFX:     STEVETHEREALONE
+       Code:    MAMALALANAM
+       GFX:     MAMALALANAM
                 AALib
                 some random generators
        Music:   Dubmood
@@ -1227,7 +1227,7 @@ do -- homepage
 	text0.Position = UDim2.new(0.5, 0, 1, -17)
 	text0.ZIndex = 3
 	text0.Parent = CracktroFrame
-	local text1 = Util.MakeText("Made by STEVETHEREALONE :" .. (math.random() < 0.333 and "3" or (math.random() < 0.5 and "D" or "P")))
+	local text1 = Util.MakeText("Made by MAMALALANAM :" .. (math.random() < 0.333 and "3" or (math.random() < 0.5 and "D" or "P")))
 	text1.AnchorPoint = Vector2.new(0.5, 1)
 	text1.Position = UDim2.new(0.5, 0, 1, -17)
 	text1.ZIndex = 3
@@ -7045,7 +7045,7 @@ MovesetsPage.ZIndex = 1
 MovesetsPage.Position = UDim2.new(0.5, 360, 0.5, 0)
 MovesetsPage.Interactable = false
 MovesetsPage.Visible = false
-UI.CreateButton(MainPage, "Cursed Car Anim &gt;", 20).Activated:Connect(function()
+UI.CreateButton(MainPage, "Cursed car anim &gt;", 20).Activated:Connect(function()
 	MovesetsPage.Interactable = false
 	MovesetsPage.Visible = true
 	MainPage.Interactable = false
@@ -7075,7 +7075,7 @@ DancesPage.ZIndex = 1
 DancesPage.Position = UDim2.new(0.5, 360, 0.5, 0)
 DancesPage.Interactable = false
 DancesPage.Visible = false
-UI.CreateButton(MainPage, "Animations &gt;", 20).Activated:Connect(function()
+UI.CreateButton(MainPage, "ANIMATIONS &gt;", 20).Activated:Connect(function()
 	DancesPage.Interactable = false
 	DancesPage.Visible = true
 	MainPage.Interactable = false
@@ -7100,7 +7100,7 @@ DancesPage.Back.Activated:Connect(function()
 		DancesPage.Visible = false
 	end)
 end)
-UI.CreateButton(MainPage, "Settings &gt;", 20).Activated:Connect(function()
+UI.CreateButton(MainPage, "SETTINGS &gt;", 20).Activated:Connect(function()
 	SettingsPage.Position = UDim2.new(0.5, 360, 0.5, 0)
 	SettingsPage.Visible = true
 	SettingsPage.Interactable = false
@@ -7873,7 +7873,7 @@ UI.CreateText(CreditsPage, "so thats how netless really works", 12, Enum.TextXAl
 UI.CreateText(CreditsPage, "math.max is THE solution here!!", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "also, hey, pwease unban me from Hax Updates >m<", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "<b>Krystal Dance V3 mod by Theo</b>", 14, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "nice dance animations. MINE NOW!! >:D", 12, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "nice dance animations. MAMALALANAM!! >:D", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "<b>Delta Executor</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "primary env target", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "thanks for disabling the key system temporarily when its down", 12, Enum.TextXAlignment.Center)
