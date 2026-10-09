@@ -90,7 +90,7 @@ AddModule(function()
 	m.Update = function(dt: number, figure: Model)
 		if not animator then return end
 		local elapsed = os.clock() - startedAt
-		if elapsed >= awakeningTrack.Time then
+		if elapsed >= (animator.track and animator.track.Time or awakeningTrack.Time) then
 			animator = nil
 			resetPose(figure)
 			return
