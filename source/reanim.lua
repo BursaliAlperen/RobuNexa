@@ -918,6 +918,8 @@ end)
 do
 	UIMainWindow = Util.Instance("Frame", UIMainFrame)
 	UIMainWindow.Active = true
+	UIMainWindow.ZIndex = 1000
+	pcall(function() UIMainWindow.Interactable = true end)
 	UIMainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
 	UIMainWindow.Position = UDim2.new(0.5, 0, 0.5, 0)
 	local NAMScreenSize = Util.GetScreenSize()
@@ -1030,8 +1032,9 @@ do
 	NAMTabBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	NAMTabBar.BackgroundTransparency = 0.94
 	NAMTabBar.BorderSizePixel = 0
-	NAMTabBar.Active = false
-	NAMTabBar.ZIndex = 50
+	NAMTabBar.Active = true
+	pcall(function() NAMTabBar.Interactable = true end)
+	NAMTabBar.ZIndex = 10000
 	local navCorner = Instance.new("UICorner")
 	navCorner.CornerRadius = UDim.new(0, 9)
 	navCorner.Parent = NAMTabBar
@@ -1060,7 +1063,7 @@ do
 		tab.Active = true
 		tab.Interactable = true
 		tab.Selectable = true
-		tab.ZIndex = 52
+		tab.ZIndex = 10001
 		local tabCorner = Instance.new("UICorner")
 		tabCorner.CornerRadius = UDim.new(0, 6)
 		tabCorner.Parent = tab
@@ -1072,7 +1075,7 @@ do
 	AWindowContent.Size = UDim2.new(1, 0, 1, -75)
 	AWindowContent.BackgroundTransparency = 1
 	AWindowContent.ClipsDescendants = true
-	AWindowContent.ZIndex = 0
+	AWindowContent.ZIndex = 1
 	
 	ReanimPage = Util.Instance("Frame", AWindowContent)
 	ReanimPage.AnchorPoint = Vector2.new(0, 0)
@@ -1118,7 +1121,7 @@ do
 	WindowContent.Size = UDim2.new(1, -120, 1, 0)
 	WindowContent.BackgroundTransparency = 1
 	WindowContent.ClipsDescendants = true
-	WindowContent.ZIndex = 0
+	WindowContent.ZIndex = 2
 	
 	local MainWindowClosed = false
 	local MainWindowTweening = false
@@ -8328,13 +8331,16 @@ NAMSelectTab = function(tabName)
 		button.TextColor3 = active and Color3.fromRGB(17, 19, 14) or Color3.fromRGB(235, 237, 240)
 		button.Active = true
 		pcall(function() button.Interactable = true end)
-		button.ZIndex = 52
+		button.ZIndex = 10001
+		button.Active = true
+		pcall(function() button.Interactable = true end)
 	end
 end
 
--- Buttons handle keyboard/controller activation normally.
+-- Bind both standard activation and direct mouse/touch click events.
 for tabName, button in NAMTabButtons do
 	button.Activated:Connect(function() NAMSelectTab(tabName) end)
+	button.MouseButton1Click:Connect(function() NAMSelectTab(tabName) end)
 end
 
 -- Reliable fallback: manually hit-test taps/clicks against the visible tab rectangles.
