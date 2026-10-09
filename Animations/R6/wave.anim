@@ -1,0 +1,110 @@
+{
+  "format": "robunexa.anim.v1",
+  "name": "R6 Wave",
+  "rig": "R6",
+  "fps": 12,
+  "looped": false,
+  "description": "Original greeting wave.",
+  "frames": [
+    {
+      "t": 0,
+      "joints": {
+        "Right Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Right Hip": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Left Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      }
+    },
+    {
+      "t": 0.25,
+      "joints": {
+        "Right Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": 150
+        },
+        "Right Hip": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Neck": {
+          "x": -5,
+          "y": 0,
+          "z": 0
+        }
+      }
+    },
+    {
+      "t": 0.5,
+      "joints": {
+        "Right Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": 130
+        },
+        "Right Hip": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Neck": {
+          "x": 5,
+          "y": 0,
+          "z": 0
+        }
+      }
+    },
+    {
+      "t": 0.75,
+      "joints": {
+        "Right Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": 150
+        },
+        "Right Hip": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Neck": {
+          "x": -5,
+          "y": 0,
+          "z": 0
+        }
+      }
+    },
+    {
+      "t": 1,
+      "joints": {
+        "Right Shoulder": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Right Hip": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Neck": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      }
+    }
+  ]
+}
