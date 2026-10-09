@@ -1177,7 +1177,7 @@ end
 do
 	Util.Notify = function(text)
 		StarterGui:SetCore("SendNotification", {
-			Title = "Uhhhhhh",
+			Title = "NAM",
 			Text = text,
 			Duration = 5
 		})
@@ -1256,7 +1256,7 @@ do -- homepage
 	text0.Position = UDim2.new(0.5, 0, 1, -17)
 	text0.ZIndex = 3
 	text0.Parent = CracktroFrame
-	local text1 = Util.MakeText("Made by MAMALALANAM :" .. (math.random() < 0.333 and "3" or (math.random() < 0.5 and "D" or "P")))
+	local text1 = Util.MakeText("Made by MAMALALANAM >:D")
 	text1.AnchorPoint = Vector2.new(0.5, 1)
 	text1.Position = UDim2.new(0.5, 0, 1, -17)
 	text1.ZIndex = 3
@@ -1276,7 +1276,7 @@ do -- homepage
 		"A great " .. os.date("%A") .. " today, eh?",
 		"Hello, " .. Player.Name .. ".",
 		"What makes you play at " .. os.date("%I %p") .. "?",
-		"You are going to love Uhhhhhh, I just know it.",
+		"You are going to love NAM, I just know it.",
 		"This script is very \"verbose\".",
 		"Written mostly on a mobile phone.",
 		"I am pretty new in this community! :D",
@@ -2357,7 +2357,7 @@ UI.CreateDropdown(SettingsPage, "UI Theme", {
 	"RGB/Default",
 	"ALONE",
 	"Oxide",
-	"Patchma Hub",
+	"Cursed car anim",
 	"Genesis V4",
 	"Crimson",
 	"r/masterhacker",
@@ -4266,13 +4266,13 @@ function HatReanimator.Config(parent)
 	UI.CreateText(parent, "if ur hats get voided when u try to hat collide\nvvv try changing this vvv", 10, Enum.TextXAlignment.Center)
 	UI.CreateDropdown(parent, "Torso Offset", {
 		"1 - ShownApe's method (???)",
-		"2 - STEVE's method V1 (specific)",
+		"2 - MAMALALANAM's method V1 (specific)",
 		"3 - 2 but for back accessories",
 		"4 - 2 but for shoulder accessories",
 		"5 - 2 but for waist accessories",
-		"6 - STEVE's method V2 (kinda stable)",
+		"6 - MAMALALANAM's method V2 (kinda stable)",
 		"7 - 6 but further from void (gl getting hatdrop)",
-		"8 - STEVE's method V3 (most stable)",
+		"8 - MAMALALANAM's method V3 (most stable)",
 		"9 - experimental do not use",
 	}, HatReanimator.HatCollideMethod + 1).Changed:Connect(function(val)
 		HatReanimator.HatCollideMethod = val - 1
@@ -8274,15 +8274,6 @@ clearcontenthash.Activated:Connect(function()
 	end
 end)
 
-local function NAMSetPageVisible(page, visible)
-	if page then
-		page.Visible = visible
-		page.Interactable = visible
-		if visible then
-			page.Position = UDim2.new(0.5, 0, 0.5, 0)
-		end
-	end
-end
 NAMSelectTab = function(tabName)
 	local selectedPage = ({
 		NAM = MainPage,
@@ -8291,11 +8282,9 @@ NAMSelectTab = function(tabName)
 		ABOUT = CreditsPage,
 	})[tabName]
 	for _, child in WindowContent:GetChildren() do
-		if child:IsA("GuiObject") then
+		if child:IsA("ScrollingFrame") then
 			child.Visible = child == selectedPage
-			if child:IsA("ScrollingFrame") then
-				child.Interactable = child == selectedPage
-			end
+			child.Interactable = child == selectedPage
 		end
 	end
 	local isReanim = tabName == "REANIM"
