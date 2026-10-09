@@ -1,10 +1,13 @@
-name: Convert Gojo animation for NAM
+name: Convert Gojo and Purple animations for NAM
 
 on:
   push:
     branches: [main]
     paths:
       - "content/GojoAwaken.anim"
+      - "GojoAwaken.anim"
+      - "HollowPurple1.anim"
+      - "MahoragaDestroyPurple.anim"
       - "tools/convert_gojo_animation.py"
       - ".github/workflows/convert-gojo-track.yml"
 
@@ -12,7 +15,7 @@ permissions:
   contents: write
 
 jobs:
-  convert-gojo-track:
+  convert-animation-tracks:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main
@@ -29,16 +32,19 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install zstandard
           python -m pip install git+https://github.com/Ghosteined/rbxm_parser.git
-      - name: Convert uploaded KeyframeSequence
-        run: python tools/convert_gojo_animation.py content/GojoAwaken.anim content/GojoAwakeTrack.anim
-      - name: Commit converted AnimLib track
+      - name: Convert uploaded KeyframeSequences
+        run: |
+          python tools/convert_gojo_animation.py content/GojoAwaken.anim content/GojoAwakeTrack.anim
+          python tools/convert_gojo_animation.py HollowPurple1.anim content/HollowPurple1Track.anim
+          python tools/convert_gojo_animation.py MahoragaDestroyPurple.anim content/MahoragaDestroyPurpleTrack.anim
+      - name: Commit converted AnimLib tracks
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add content/GojoAwakeTrack.anim
+          git add content/GojoAwakeTrack.anim content/HollowPurple1Track.anim content/MahoragaDestroyPurpleTrack.anim
           if git diff --cached --quiet; then
-            echo "Track is already converted; no commit needed."
+            echo "Tracks are already converted; no commit needed."
             exit 0
           fi
-          git commit -m "Convert Gojo Awake to AnimLib track format"
+          git commit -m "Convert Gojo and Purple animations to AnimLib tracks"
           git push origin HEAD:main
