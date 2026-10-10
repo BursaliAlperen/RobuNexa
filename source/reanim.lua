@@ -2701,22 +2701,22 @@ do
 				if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.RightShift then
 					Reanimate.Shiftlocked = Reanimate.ShiftlockEnabled and not Reanimate.Shiftlocked
 				end
-				if input.KeyCode == Enum.KeyCode.ButtonL3 then
-					if self.VRMode then
-						self.Zoom = self.Zoom < 7 and 7 or 0.5
-					else
-						self.Zoom = self.Zoom <= 0.5 and 20 or (self.Zoom <= 10 and 0.5 or (self.Zoom <= 20 and 10 or 20))
-					end
-				end
-				if input.KeyCode == Enum.KeyCode.ButtonR3 and self.VRMode then
-					pcall(function() VRService:RecenterUserHeadCFrame() end)
-				end
 				if input.KeyCode == Enum.KeyCode.Left then
 					self.Inputs.KB.Left = true
 				end
 				if input.KeyCode == Enum.KeyCode.Right then
 					self.Inputs.KB.Right = true
 				end
+			end
+			if input.KeyCode == Enum.KeyCode.ButtonL3 then
+				if self.VRMode then
+					self.Zoom = self.Zoom < 7 and 7 or 0.5
+				else
+					self.Zoom = self.Zoom <= 0.5 and 20 or (self.Zoom <= 10 and 0.5 or (self.Zoom <= 20 and 10 or 20))
+				end
+			end
+			if input.KeyCode == Enum.KeyCode.ButtonR3 and self.VRMode then
+				pcall(function() VRService:RecenterUserHeadCFrame() end)
 			end
 			if input.UserInputType == Enum.UserInputType.MouseButton2 then
 				if gpe then return end
