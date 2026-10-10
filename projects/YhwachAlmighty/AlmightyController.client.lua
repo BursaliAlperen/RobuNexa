@@ -2,7 +2,33 @@
 -- Prefer native KeyframeSequence playback through AnimLib; published Roblox animation IDs are the fallback.
 local Players = game:GetService("Players")
 local SoundService = game:GetService("SoundService")
-local HttpService = game:GetService("HttpService")
+local BASE64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+local BASE64_LOOKUP = {}
+for index = 1, #BASE64_ALPHABET do
+	BASE64_LOOKUP[BASE64_ALPHABET:sub(index, index)] = index - 1
+end
+
+local function decodeBase64(encoded)
+	local output = {}
+	encoded = encoded:gsub("%s", "")
+	assert(#encoded % 4 == 0, "Invalid Base64 length")
+	for index = 1, #encoded, 4 do
+		local a = BASE64_LOOKUP[encoded:sub(index, index)]
+		local b = BASE64_LOOKUP[encoded:sub(index + 1, index + 1)]
+		local charC, charD = encoded:sub(index + 2, index + 2), encoded:sub(index + 3, index + 3)
+		local c = charC == "=" and nil or BASE64_LOOKUP[charC]
+		local d = charD == "=" and nil or BASE64_LOOKUP[charD]
+		assert(a ~= nil and b ~= nil, "Invalid Base64 character")
+		assert(charC == "=" or c ~= nil, "Invalid Base64 character")
+		assert(charD == "=" or d ~= nil, "Invalid Base64 character")
+		assert(charC ~= "=" or charD == "=", "Invalid Base64 padding")
+		local value = a * 262144 + b * 4096 + (c or 0) * 64 + (d or 0)
+		table.insert(output, string.char(math.floor(value / 65536) % 256))
+		if charC ~= "=" then table.insert(output, string.char(math.floor(value / 256) % 256)) end
+		if charD ~= "=" then table.insert(output, string.char(value % 256)) end
+	end
+	return table.concat(output)
+end
 
 local player = Players.LocalPlayer
 local Config = require(script.Parent:WaitForChild("AccessoryConfig"))
@@ -94,7 +120,7 @@ local function playAnimation(key, looped, keepOtherTracks)
 		local ok, data = pcall(require, binaryModule)
 		if ok then
 			if type(data) == "table" and type(data.Base64) == "string" then
-				local decodedOk, decoded = pcall(function() return HttpService:Base64Decode(data.Base64) end)
+				local decodedOk, decoded = pcall(decodeBase64, data.Base64)
 				if decodedOk then data = decoded else data = nil end
 			end
 			if type(data) == "string" then
