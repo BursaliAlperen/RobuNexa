@@ -102,6 +102,25 @@ close.BorderSizePixel = 0
 close.Parent = root
 Instance.new("UICorner", close).CornerRadius = UDim.new(0, 10)
 
+-- Touch-friendly restore control stays available when the main panel is minimized.
+local reopen = Instance.new("TextButton")
+reopen.Name = "ReopenYhwach"
+reopen.Size = UDim2.fromOffset(100, 34)
+reopen.Position = UDim2.new(0, 16, 1, -50)
+reopen.Text = "YHWACH  /  OPEN"
+reopen.Font = Enum.Font.GothamBold
+reopen.TextSize = 10
+reopen.TextColor3 = Color3.fromRGB(244, 242, 255)
+reopen.BackgroundColor3 = Color3.fromRGB(65, 46, 112)
+reopen.BorderSizePixel = 0
+reopen.Visible = false
+reopen.Parent = gui
+Instance.new("UICorner", reopen).CornerRadius = UDim.new(0, 10)
+reopen.Activated:Connect(function()
+	root.Visible = true
+	reopen.Visible = false
+end)
+
 local divider = Instance.new("Frame")
 divider.Name = "Divider"
 divider.Position = UDim2.fromOffset(20, 73)
@@ -221,13 +240,15 @@ reset.Activated:Connect(function()
 end)
 
 close.Activated:Connect(function()
-	gui.Enabled = false
+	root.Visible = false
+	reopen.Visible = true
 end)
 
 -- Reopen with RightControl on keyboard; touch users can rerun the UI from their own menu.
 UserInputService.InputBegan:Connect(function(input, processed)
 	if not processed and input.KeyCode == Enum.KeyCode.RightControl then
-		gui.Enabled = not gui.Enabled
+		root.Visible = not root.Visible
+		reopen.Visible = not root.Visible
 	end
 end)
 
