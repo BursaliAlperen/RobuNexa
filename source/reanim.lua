@@ -7881,7 +7881,7 @@ do
 	local quotes = {
 		"why are you here",
 	}
-	for _=1, 15 do
+	for _=1, math.min(15, #quotes) do
 		local idx = math.random(1, #quotes)
 		UI.CreateText(CreditsPage, table.remove(quotes, idx), 12, Enum.TextXAlignment.Center)
 	end
