@@ -84,9 +84,9 @@ local function easedAlpha(alpha, style, direction)
 		return alpha < 0.5 and 0 or 1
 	end
 	if style == "CubicV2" then style = "Cubic" end
-	local es = Enum.EasingStyle:FindFirstChild(style or "Linear")
-	local ed = Enum.EasingDirection:FindFirstChild(direction or "InOut")
-	if not es or not ed then return alpha end
+	local okStyle, es = pcall(function() return Enum.EasingStyle[style or "Linear"] end)
+	local okDirection, ed = pcall(function() return Enum.EasingDirection[direction or "InOut"] end)
+	if not okStyle or not okDirection or not es or not ed then return alpha end
 	local ok, value = pcall(function() return TweenService:GetValue(alpha, es, ed) end)
 	return ok and value or alpha
 end
