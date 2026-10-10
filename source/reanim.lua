@@ -989,43 +989,12 @@ do
 	end
 	
 
-	-- NAM custom navigation bar; independent of the legacy GUI.
-	local NAMNavBar = Util.Instance("Frame", UIMainWindow)
-	NAMNavBar.Name = "NAMNavigation"
-	NAMNavBar.Position = UDim2.new(0, 0, 0, 30)
-	NAMNavBar.Size = UDim2.new(1, 0, 0, 30)
-	NAMNavBar.BackgroundColor3 = Color3.fromRGB(23, 26, 32)
-	NAMNavBar.BackgroundTransparency = 0
-	NAMNavBar.BorderSizePixel = 0
-	NAMNavBar.ZIndex = 20
-	local NAMNavNames = {"REANIMATE", "ANIMS", "LIMBS", "HITBOX", "SETTINGS"}
-	NAMNavButtons = {}
-	for index, tabName in ipairs(NAMNavNames) do
-		local button = Instance.new("TextButton")
-		button.Name = tabName .. "Tab"
-		button.Parent = NAMNavBar
-		button.Position = UDim2.new((index - 1) / #NAMNavNames, 3, 0, 3)
-		button.Size = UDim2.new(1 / #NAMNavNames, -6, 1, -6)
-		button.BackgroundColor3 = Color3.fromRGB(37, 41, 49)
-		button.BackgroundTransparency = 0
-		button.BorderSizePixel = 0
-		button.AutoButtonColor = true
-		button.Font = Enum.Font.GothamSemibold
-		button.Text = tabName
-		button.TextColor3 = Color3.fromRGB(224, 228, 235)
-		button.TextSize = 10
-		button.TextScaled = false
-		button.TextWrapped = true
-		button.ZIndex = 21
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 5)
-		corner.Parent = button
-		NAMNavButtons[tabName] = button
-	end
+	-- Top tab row removed; feature pages are opened from the main page buttons.
+	NAMNavButtons = nil
 
 	AWindowContent = Util.Instance("Frame", UIMainWindow)
-	AWindowContent.Position = UDim2.new(0, 0, 0, 60)
-	AWindowContent.Size = UDim2.new(1, 0, 1, -60)
+	AWindowContent.Position = UDim2.new(0, 0, 0, 30)
+	AWindowContent.Size = UDim2.new(1, 0, 1, -30)
 	AWindowContent.BackgroundTransparency = 1
 	AWindowContent.ClipsDescendants = true
 	AWindowContent.ZIndex = 0
@@ -7909,62 +7878,11 @@ clearcontenthash.Activated:Connect(function()
 end)
 
 
--- Wire NAM navigation after all feature pages exist.
-do
-	local pages = {MainPage, DancesPage, MovesetsPage, KeybindsPage, CreditsPage, ChangelogsPage, InitLogsPage}
-	local function hidePages()
-		for _, page in ipairs(pages) do
-			if page then
-				page.Visible = false
-				page.Interactable = false
-			end
-		end
-	end
-	local function scrollToText(needle)
-		MainPage.Visible = true
-		MainPage.Interactable = true
-		task.defer(function()
-			for _, object in ipairs(MainPage:GetDescendants()) do
-				if object:IsA("TextLabel") and object.Text:upper():find(needle, 1, true) then
-					MainPage.CanvasPosition = Vector2.new(0, math.max(0, object.AbsolutePosition.Y - MainPage.AbsolutePosition.Y - 8))
-					return
-				end
-			end
-		end)
-	end
-	local function selectNAMTab(tabName)
-		hidePages()
-		local selectedPage = MainPage
-		if tabName == "ANIMS" then
-			selectedPage = DancesPage or MainPage
-		end
-		if selectedPage then
-			selectedPage.Position = UDim2.new(0.5, 0, 0.5, 0)
-			selectedPage.Size = UDim2.new(1, -10, 1, -10)
-			selectedPage.Visible = true
-			selectedPage.Interactable = true
-		end
-		for name, button in pairs(NAMNavButtons) do
-			local active = name == tabName
-			button.BackgroundColor3 = active and Color3.fromRGB(164, 255, 74) or Color3.fromRGB(37, 41, 49)
-			button.TextColor3 = active and Color3.fromRGB(18, 22, 16) or Color3.fromRGB(224, 228, 235)
-		end
-		if tabName == "LIMBS" then
-			scrollToText("REANIMATOR CONFIG")
-		elseif tabName == "SETTINGS" then
-			scrollToText("SETTINGS")
-		elseif tabName == "HITBOX" then
-			if Reanimate.Character then pcall(ReanimateShowHitboxes) end
-			MainPage.CanvasPosition = Vector2.new(0, 0)
-		elseif tabName == "REANIMATE" then
-			MainPage.CanvasPosition = Vector2.new(0, 0)
-		end
-	end
-	for name, button in pairs(NAMNavButtons) do
-		button.Activated:Connect(function() selectNAMTab(name) end)
-	end
-	selectNAMTab("REANIMATE")
-end
+-- Keep the main page and its native Movesets / Dances / settings buttons active.
+MainPage.Visible = true
+MainPage.Interactable = true
+MainPage.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainPage.Size = UDim2.new(1, -10, 1, -10)
 
 
 ForceModuleReload(false)
