@@ -8,7 +8,12 @@ local Config = require(script.Parent:WaitForChild("AccessoryConfig"))
 local HatAnimation = require(script.Parent:WaitForChild("HatAnimation"))
 local uiScript = script.Parent:WaitForChild("YhwachUI.client")
 local actionEvent = uiScript:WaitForChild("ActionRequested")
+local statusEvent = uiScript:WaitForChild("StatusChanged")
 local hatAnimator = HatAnimation.new()
+
+local function reportStatus(message, color)
+	statusEvent:Fire(message, color or Color3.fromRGB(157, 148, 190))
+end
 
 local activeSounds = {}
 local activeTracks = {}
@@ -77,14 +82,19 @@ end
 local function playAnimation(key, looped, keepOtherTracks)
 	local id = Config.AnimationIds[key]
 	if not id or id == "" then
+		local message = "Animation ID missing: " .. key
 		warn("[Yhwach] Publish the matching .anim file and set AnimationIds." .. key)
+		reportStatus(message, Color3.fromRGB(255, 196, 94))
 		return nil
 	end
 	if not keepOtherTracks then stopAnimations() end
 
 	local character = getCharacter()
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
-	if not humanoid then return nil end
+	if not humanoid then
+		reportStatus("Humanoid not found on character.", Color3.fromRGB(255, 120, 120))
+		return nil
+	end
 	local animator = humanoid:FindFirstChildOfClass("Animator")
 	if not animator then
 		animator = Instance.new("Animator")
@@ -97,6 +107,7 @@ local function playAnimation(key, looped, keepOtherTracks)
 	animation:Destroy()
 	if not ok then
 		warn("[Yhwach] Could not load " .. key .. ":", trackOrError)
+		reportStatus("Load failed: " .. key .. " (check ID / permissions)", Color3.fromRGB(255, 120, 120))
 		return nil
 	end
 
@@ -105,6 +116,7 @@ local function playAnimation(key, looped, keepOtherTracks)
 	track.Priority = Enum.AnimationPriority.Action
 	activeTracks[key] = track
 	track:Play(0.15)
+	reportStatus("Playing: " .. key, Color3.fromRGB(213, 188, 255))
 	track.Stopped:Once(function()
 		if activeTracks[key] == track then activeTracks[key] = nil end
 	end)
@@ -137,6 +149,7 @@ end
 actionEvent.Event:Connect(function(action, payload)
 	if action == "SetForm" then
 		setForm(payload == "Almighty" and "Almighty" or "Base")
+		reportStatus(payload == "Almighty" and "Almighty form selected" or "Base form selected", Color3.fromRGB(213, 188, 255))
 	elseif action == "SetAura" then
 		auraOn = payload == true
 		if auraOn then
@@ -164,12 +177,14 @@ actionEvent.Event:Connect(function(action, payload)
 		formToken += 1
 		stopSounds()
 		stopAnimations()
+		reportStatus("Animations and sounds stopped", Color3.fromRGB(180, 220, 255))
 	elseif action == "ResetVisuals" then
 		formToken += 1
 		auraOn = false
 		currentForm = "Base"
 		stopSounds()
 		stopAnimations()
+		reportStatus("Visual state reset", Color3.fromRGB(180, 220, 255))
 	end
 end)
 
