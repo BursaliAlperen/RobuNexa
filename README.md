@@ -17,7 +17,6 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNe
 - `source/reanim.lua` — NAM arayüzü ve reanimasyon istemcisi
 - `content/` — `.anim` animasyonları, ses dosyaları ve moveset’ler
 - `uiassets/` — arayüz sesleri ve görseller
-- `images/` — önizlemeler
 
 İçerik yükleyicileri bu depodaki `main` branch’inden veri alır. Eski sürümün kullanıcı ayarları ve yerel modülleri ilk çalıştırmada yeni `NAMReanim` klasörüne aktarılır.
 
