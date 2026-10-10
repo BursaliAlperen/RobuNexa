@@ -971,11 +971,11 @@ do
 	TopBarText.TextColor3 = Color3.new(1, 1, 1)
 	TopBarText.TextSize = 20
 	TopBarText.TextXAlignment = Enum.TextXAlignment.Left
-	TopBarText.Text = "    Genesis FE | v" .. UhhhhhhVersion
+	TopBarText.Text = "    NAM | v" .. UhhhhhhVersion
 	TopBarText.RichText = true
 	RegisterTextLabel(TopBarText)
 	Util.ForceTextSize(TopBarText)
-	CracktroFrameText = "(c) Genesis FE. All rights reserved."
+	CracktroFrameText = "(c) NAM. All rights reserved."
 	
 	local TopBarClose = Util.Instance("TextButton", TopBarFrame)
 	TopBarClose.AnchorPoint = Vector2.new(1, 0)
@@ -1075,7 +1075,7 @@ do
 		MainWindowClosed = not MainWindowClosed
 		if MainWindowClosed then
 			MainWindowPosOpen = UIMainWindow.Position
-			TopBarText.Text = "Genesis"
+			TopBarText.Text = "NAM"
 			TweenService:Create(UIMainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Position = MainWindowPosClose,
 				Size = UDim2.fromOffset(112, 30)
@@ -1091,7 +1091,7 @@ do
 				MainWindowTweening = false
 			end)
 		else
-			TopBarText.Text = "    Genesis FE | v" .. UhhhhhhVersion
+			TopBarText.Text = "    NAM | v" .. UhhhhhhVersion
 			WindowContent.Visible = true
 			MainWindowPosClose = UIMainWindow.Position
 			SaveData.WindowClosedPosition = {MainWindowPosClose.X.Scale, MainWindowPosClose.X.Offset, MainWindowPosClose.Y.Scale, MainWindowPosClose.Y.Offset}
