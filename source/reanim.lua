@@ -21,94 +21,6 @@ Thou shalth not steal. Point at this source if you used a snippet here.
 local _RobuNexaEnv = (getgenv and getgenv()) or shared or _G
 if _G.UhhhhhhLoaded or _G.NAMLoaded or _RobuNexaEnv.RobuNexaGelatekRunning then return end
 
--- Optional reanimation selector. Choose exactly one system at startup.
--- Gelatek runs instead of NAM; the two systems are never intentionally started together.
-do
-    local env = (getgenv and getgenv()) or shared or _G
-    if not (_G.UhhhhhhLoaded or _G.NAMLoaded or env.RobuNexaGelatekRunning) then
-        local selected
-        local parent
-        pcall(function()
-            parent = (gethui and gethui()) or (get_hidden_gui and get_hidden_gui()) or game:GetService("CoreGui")
-        end)
-        if parent then
-            local gui = Instance.new("ScreenGui")
-            gui.Name = "RobuNexaReanimateSelector"
-            gui.ResetOnSpawn = false
-            gui.DisplayOrder = 999999
-            gui.Parent = parent
-
-            local frame = Instance.new("Frame")
-            frame.Name = "Panel"
-            frame.AnchorPoint = Vector2.new(0.5, 0.5)
-            frame.Position = UDim2.fromScale(0.5, 0.5)
-            frame.Size = UDim2.fromOffset(320, 190)
-            frame.BackgroundColor3 = Color3.fromRGB(24, 26, 32)
-            frame.BorderSizePixel = 0
-            frame.Parent = gui
-            Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
-
-            local title = Instance.new("TextLabel")
-            title.BackgroundTransparency = 1
-            title.Position = UDim2.fromOffset(16, 12)
-            title.Size = UDim2.new(1, -32, 0, 30)
-            title.Font = Enum.Font.GothamBold
-            title.Text = "ROBUNEXA  /  REANIMATE"
-            title.TextColor3 = Color3.fromRGB(245, 247, 255)
-            title.TextSize = 16
-            title.Parent = frame
-
-            local subtitle = Instance.new("TextLabel")
-            subtitle.BackgroundTransparency = 1
-            subtitle.Position = UDim2.fromOffset(16, 42)
-            subtitle.Size = UDim2.new(1, -32, 0, 22)
-            subtitle.Font = Enum.Font.Gotham
-            subtitle.Text = "Bir sistem seç — aynı anda çalışmazlar."
-            subtitle.TextColor3 = Color3.fromRGB(170, 176, 190)
-            subtitle.TextSize = 11
-            subtitle.Parent = frame
-
-            local function addChoice(label, y, value, color)
-                local button = Instance.new("TextButton")
-                button.Position = UDim2.fromOffset(16, y)
-                button.Size = UDim2.new(1, -32, 0, 42)
-                button.BackgroundColor3 = color
-                button.BorderSizePixel = 0
-                button.AutoButtonColor = true
-                button.Font = Enum.Font.GothamSemibold
-                button.Text = label
-                button.TextColor3 = Color3.new(1, 1, 1)
-                button.TextSize = 13
-                button.Parent = frame
-                Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
-                button.Activated:Connect(function()
-                    if selected then return end
-                    selected = value
-                    gui:Destroy()
-                end)
-            end
-
-            addChoice("NAM Reanimate  ·  mevcut", 76, "NAM", Color3.fromRGB(63, 91, 155))
-            addChoice("Gelatek Reanimate  ·  alternatif", 126, "GELATEK", Color3.fromRGB(92, 66, 150))
-
-            repeat task.wait() until selected
-            if selected == "GELATEK" then
-                local ok, err = pcall(function()
-                    local loader = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/source/gelatek-reanimate.lua")
-                    local runLoader = loadstring(loader)
-                    assert(type(runLoader) == "function", "Gelatek loader could not be compiled")
-                    runLoader()
-                end)
-                if not ok then warn("[RobuNexa] Gelatek could not start: " .. tostring(err)) end
-                return
-            end
-        else
-            env.RobuNexaReanimateChoiceShown = nil
-            warn("[RobuNexa] Selector UI unavailable; starting NAM as usual.")
-        end
-    end
-end
-
 if _G.UhhhhhhLoaded then return end
 _G.UhhhhhhLoaded = true
 
@@ -6099,7 +6011,7 @@ end
 
 do
 	SaveData.SelectedReanimator = SaveData.SelectedReanimator or 1
-	local ReanimateMethodSelect, ReanimatorTypeLabel = UI.CreateDropdown(MainPage, "Reanimate Type", {"Limb Reanimator", "Hats Reanimator"}, SaveData.SelectedReanimator)
+	local ReanimateMethodSelect, ReanimatorTypeLabel = UI.CreateDropdown(MainPage, "Reanimate Type", {"Limb Reanimator", "Hats Reanimator", "Gelatek Reanimate"}, SaveData.SelectedReanimator)
 	ReanimatorTypeLabel.Parent.LayoutOrder = -100
 	local ReanimatorConfigTitle = UI.CreateText(MainPage, "LIMB REANIMATOR CONFIG", 15, Enum.TextXAlignment.Center)
 	ReanimatorConfigTitle.Parent.LayoutOrder = -95
@@ -6119,11 +6031,22 @@ do
 		if value == 2 then
 			SelectedReanimator = HatReanimator
 			ReanimatorConfigTitle.Text = "HATS REANIMATOR CONFIG"
+		elseif value == 3 then
+			SelectedReanimator = nil
+			ReanimatorConfigTitle.Text = "GELATEK REANIMATE"
 		end
 		Util.ClearAllChildrenGui(ReanimatorConfigCanvas)
-		SelectedReanimator.Config(ReanimatorConfigCanvas)
+		if SelectedReanimator then
+			SelectedReanimator.Config(ReanimatorConfigCanvas)
+		else
+			UI.CreateText(ReanimatorConfigCanvas, "Gelatek starts from the Reanimate button.", 12, Enum.TextXAlignment.Center)
+		end
 	end)
-	SelectedReanimator.Config(ReanimatorConfigCanvas)
+	if SelectedReanimator then
+		SelectedReanimator.Config(ReanimatorConfigCanvas)
+	else
+		UI.CreateText(ReanimatorConfigCanvas, "Gelatek starts from the Reanimate button.", 12, Enum.TextXAlignment.Center)
+	end
 	-- Classic EskiAnim-style single-panel controls. Keep the current reanimation logic untouched.
 	local ReanimateText = UI.CreateText(MainPage, "Running: NONE", 15, Enum.TextXAlignment.Center)
 	ReanimateText.Parent.LayoutOrder = -99
@@ -6131,6 +6054,7 @@ do
 	ReanimateStartButton.Parent.LayoutOrder = -98
 	ReanimateStartButton.Activated:Connect(function()
 		ReanimateStartButton.Interactable = false
+		local env = (getgenv and getgenv()) or shared or _G
 		if Reanimate.Current then
 			ReanimateStartButtonText.Text = "Stopping..."
 			Reanimate.Stopping = true
@@ -6141,7 +6065,36 @@ do
 			ReanimateText.Text = "Running: NONE"
 			task.wait(1)
 			ReanimateStartButtonText.Text = "Reanimate"
+		elseif SaveData.SelectedReanimator == 3 then
+			if env.RobuNexaGelatekRunning then
+				ReanimateText.Text = "Running: GELATEK REANIMATE"
+				ReanimateStartButtonText.Text = "Gelatek Running"
+			else
+				ReanimateStartButtonText.Text = "Starting Gelatek..."
+				env.RobuNexaAllowGelatekFromNAM = true
+				local ok, err = pcall(function()
+					local loader = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/source/gelatek-reanimate.lua")
+					local runLoader = loadstring(loader)
+					assert(type(runLoader) == "function", "Gelatek loader could not be compiled")
+					runLoader()
+				end)
+				env.RobuNexaAllowGelatekFromNAM = nil
+				if not ok then
+					ReanimateText.Text = "Gelatek failed to start"
+					ReanimateStartButtonText.Text = "Reanimate"
+					warn("[RobuNexa] Gelatek failed: " .. tostring(err))
+				else
+					ReanimateText.Text = "Running: GELATEK REANIMATE"
+					ReanimateStartButtonText.Text = "Gelatek Running"
+				end
+			end
 		else
+			if env.RobuNexaGelatekRunning then
+				ReanimateText.Text = "Stop Gelatek and respawn before switching."
+				ReanimateStartButtonText.Text = "Reanimate"
+				ReanimateStartButton.Interactable = true
+				return
+			end
 			ReanimateStartButtonText.Text = "Starting..."
 			Reanimate.Starting = true
 			Reanimate.Current = SelectedReanimator
