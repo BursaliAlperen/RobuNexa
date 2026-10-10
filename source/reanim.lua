@@ -920,7 +920,7 @@ do
 	UIMainWindow.Active = true
 	UIMainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
 	UIMainWindow.Position = UDim2.new(0.5, 0, 0.5, 0)
-	UIMainWindow.Size = UDim2.new(0, 480, 0, 310)
+	UIMainWindow.Size = UDim2.new(0, 360, 0, 280)
 	UIMainWindow.BackgroundTransparency = 0
 	UIMainWindow.BackgroundColor3 = Color3.new(1, 1, 1)
 	UIMainWindow.BorderSizePixel = 0
@@ -954,17 +954,17 @@ do
 	
 	TopBarFrame = Util.Instance("Frame", UIMainWindow)
 	TopBarFrame.Position = UDim2.new(0, 0, 0, 0)
-	TopBarFrame.Size = UDim2.new(1, 0, 0, 58)
-	TopBarFrame.BackgroundTransparency = 1
+	TopBarFrame.Size = UDim2.new(1, 0, 0, 30)
+	TopBarFrame.BackgroundTransparency = 0
 	TopBarFrame.BackgroundColor3 = Color3.new(1, 1, 1)
 	TopBarFrame.BorderSizePixel = 0
-	TopBarFrame.ClipsDescendants = false
+	TopBarFrame.ClipsDescendants = true
 	TopBarFrame.ZIndex = 1
-	--Stylize(TopBarFrame)
+	Stylize(TopBarFrame)
 	
 	local TopBarText = Util.Instance("TextLabel", TopBarFrame)
 	TopBarText.AnchorPoint = Vector2.new(0, 0.5)
-	TopBarText.Position = UDim2.new(0, 8, 0, 15)
+	TopBarText.Position = UDim2.new(0, 8, 0.5, 0)
 	TopBarText.Size = UDim2.new(1, -35, 1, 0)
 	TopBarText.BackgroundTransparency = 1
 	TopBarText.ClipsDescendants = true
@@ -1010,8 +1010,8 @@ do
 	end
 	
 	AWindowContent = Util.Instance("Frame", UIMainWindow)
-	AWindowContent.Position = UDim2.new(0, 0, 0, 60)
-	AWindowContent.Size = UDim2.new(1, 0, 1, -65)
+	AWindowContent.Position = UDim2.new(0, 0, 0, 30)
+	AWindowContent.Size = UDim2.new(1, 0, 1, -35)
 	AWindowContent.BackgroundTransparency = 1
 	AWindowContent.ClipsDescendants = true
 	AWindowContent.ZIndex = 0
@@ -1024,7 +1024,7 @@ do
 	ReanimPage.BackgroundColor3 = Color3.new(0, 0, 0)
 	ReanimPage.BorderSizePixel = 1
 	ReanimPage.BorderColor3 = Color3.new(1, 1, 1)
-	ReanimPage.Visible = true
+	ReanimPage.Visible = false
 	ReanimPage.ZIndex = 0
 	ReanimPage.ClipsDescendants = true
 	AddToRenderStep(function(t)
@@ -1057,8 +1057,8 @@ do
 	Stylize(impala)
 	
 	WindowContent = Util.Instance("Frame", AWindowContent)
-	WindowContent.Position = UDim2.new(0, 120, 0, 0)
-	WindowContent.Size = UDim2.new(1, -120, 1, 0)
+	WindowContent.Position = UDim2.new(0, 0, 0, 0)
+	WindowContent.Size = UDim2.new(1, 0, 1, 0)
 	WindowContent.BackgroundTransparency = 1
 	WindowContent.ClipsDescendants = true
 	WindowContent.ZIndex = 0
@@ -1098,7 +1098,7 @@ do
 			SaveData.WindowClosedPosition = {MainWindowPosClose.X.Scale, MainWindowPosClose.X.Offset, MainWindowPosClose.Y.Scale, MainWindowPosClose.Y.Offset}
 			TweenService:Create(UIMainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Position = MainWindowPosOpen,
-				Size = UDim2.fromOffset(480, 310)
+				Size = UDim2.fromOffset(360, 280)
 			}):Play()
 			TweenService:Create(TopBarClose.A, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Rotation = 0
@@ -1167,6 +1167,7 @@ CracktroFrame.BackgroundColor3 = Color3.new(0, 0, 0)
 CracktroFrame.BorderSizePixel = 1
 CracktroFrame.BorderColor3 = Color3.new(1, 1, 1)
 CracktroFrame.ZIndex = 10
+CracktroFrame.Visible = false -- Open the main controls immediately; skip the blocking intro.
 CracktroFrame.ClipsDescendants = true
 AddToRenderStep(function(t)
 	CracktroFrame.BorderColor3 = GetUIColor(t)
@@ -1255,7 +1256,6 @@ do -- homepage
 		"I am pretty new in this community! :D",
 		"\"Dreams come true!\"",
 		"Idea originated from a dream.",
-		"If you love this program, join my Discord!",
 	}
 	local text3 = nil
 	local function changequote()
@@ -2268,7 +2268,7 @@ function UI.CreateItemListItem(parent)
 end
 
 local MainPage = UI.CreatePage()
-MainPage.Interactable = false
+MainPage.Interactable = true
 CracktroFrame.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		if _totalrendertime < 1 or not IsUhhhhhhFullyLoaded then return end
@@ -6567,19 +6567,22 @@ end
 
 do
 	SaveData.SelectedReanimator = SaveData.SelectedReanimator or 1
-	local ReanimateMethodSelect = UI.CreateDropdown(MainPage, "Reanimator", {"Limb Reanimator", "Hats Reanimator"}, SaveData.SelectedReanimator)
-	local ReanimatorConfigTitle = UI.CreateText(MainPage, "-=+ Limb Reanimator Config +=-", 15, Enum.TextXAlignment.Center)
+	local ReanimateMethodSelect, ReanimatorTypeLabel = UI.CreateDropdown(MainPage, "Reanimate Type", {"Limb Reanimator", "Hats Reanimator"}, SaveData.SelectedReanimator)
+	ReanimatorTypeLabel.Parent.LayoutOrder = -100
+	local ReanimatorConfigTitle = UI.CreateText(MainPage, "REANIMATOR CONFIG", 15, Enum.TextXAlignment.Center)
+	ReanimatorConfigTitle.Parent.LayoutOrder = -99
 	local SelectedReanimator = LimbReanimator
 	if SaveData.SelectedReanimator == 2 then
 		SelectedReanimator = HatReanimator
-		ReanimatorConfigTitle.Text = "-=+ Hats Reanimator Config +=-"
+		ReanimatorConfigTitle.Text = "HATS REANIMATOR CONFIG"
 	end
 	local ReanimatorConfigCanvas = UI.CreateCanvas(MainPage)
+	ReanimatorConfigCanvas.Parent.LayoutOrder = -98
 	ReanimateMethodSelect.Changed:Connect(function(value)
 		SaveData.SelectedReanimator = value
 		if value == 1 then
 			SelectedReanimator = LimbReanimator
-			ReanimatorConfigTitle.Text = "-=+ Limb Reanimator Config +=-"
+			ReanimatorConfigTitle.Text = "LIMB REANIMATOR CONFIG"
 		end
 		if value == 2 then
 			SelectedReanimator = HatReanimator
@@ -6589,13 +6592,15 @@ do
 		SelectedReanimator.Config(ReanimatorConfigCanvas)
 	end)
 	SelectedReanimator.Config(ReanimatorConfigCanvas)
-	UI.CreateText(ReanimPage, "Enjoy my really awful UI design! It's awful, but hey atleast clicking Reanimate is faster!", 8, Enum.TextXAlignment.Center)
-	local ReanimateText = UI.CreateText(ReanimPage, "Running: NONE", 15, Enum.TextXAlignment.Center)
-	local ReanimateStartButton, ReanimateStartButtonText = UI.CreateButton(ReanimPage, "Reanimate", 20)
+	-- Classic EskiAnim-style single-panel controls. Keep the current reanimation logic untouched.
+	local ReanimateText = UI.CreateText(MainPage, "Running: NONE", 15, Enum.TextXAlignment.Center)
+	ReanimateText.Parent.LayoutOrder = -97
+	local ReanimateStartButton, ReanimateStartButtonText = UI.CreateButton(MainPage, "Reanimate", 20)
+	ReanimateStartButton.Parent.LayoutOrder = -96
 	ReanimateStartButton.Activated:Connect(function()
 		ReanimateStartButton.Interactable = false
 		if Reanimate.Current then
-			ReanimateStartButtonText.Text = "Stopping"
+			ReanimateStartButtonText.Text = "Stopping..."
 			Reanimate.Stopping = true
 			repeat task.wait() until not Reanimate.Stopping
 			Reanimate.Current.Running = nil
@@ -6605,7 +6610,7 @@ do
 			task.wait(1)
 			ReanimateStartButtonText.Text = "Reanimate"
 		else
-			ReanimateStartButtonText.Text = "Starting"
+			ReanimateStartButtonText.Text = "Starting..."
 			Reanimate.Starting = true
 			Reanimate.Current = SelectedReanimator
 			HumanoidLASetHookState(Reanimate.UseLoadAnimationHook)
@@ -6618,15 +6623,18 @@ do
 		end
 		ReanimateStartButton.Interactable = true
 	end)
-	UI.CreateButton(ReanimPage, "Hitboxes", 15).Activated:Connect(function()
+	local ReanimateHitboxesButton = UI.CreateButton(MainPage, "Hitboxes", 15)
+	ReanimateHitboxesButton.Parent.LayoutOrder = -95
+	ReanimateHitboxesButton.Activated:Connect(function()
 		if not Reanimate.Character then return end
 		ReanimateShowHitboxes()
 	end)
-	UI.CreateButton(ReanimPage, "Refresh", 10).Activated:Connect(function()
+	local ReanimateRefreshButton = UI.CreateButton(MainPage, "Refresh", 10)
+	ReanimateRefreshButton.Parent.LayoutOrder = -94
+	ReanimateRefreshButton.Activated:Connect(function()
 		if not Reanimate.Character then return end
 		Reanimate.CreateCharacter()
-	end)
-end
+	end)end
 UI.CreateSeparator(MainPage)
 
 do
@@ -8507,83 +8515,5 @@ clearcontenthash.Activated:Connect(function()
 	end
 end)
 
-
--- NAM compact top navigation; keep the restored reanimation implementation intact.
-do
-	local tabBar = Util.Instance("Frame", TopBarFrame)
-	tabBar.Name = "NAMTabBar"
-	tabBar.Position = UDim2.new(0, 6, 0, 31)
-	tabBar.Size = UDim2.new(1, -12, 0, 25)
-	tabBar.BackgroundTransparency = 1
-	tabBar.BorderSizePixel = 0
-	tabBar.ZIndex = 10000
-	local tabs = {"ANIMS", "TYPE", "LIMBS", "HITBOXES", "SETTINGS"}
-	local buttons = {}
-	local selected = nil
-	local function selectTab(name)
-		selected = name
-		local page = nil
-		if name == "ANIMS" then
-			page = DancesPage
-		elseif name == "TYPE" or name == "SETTINGS" then
-			page = MainPage
-		end
-		for _, child in WindowContent:GetChildren() do
-			if child:IsA("GuiObject") then
-				child.Visible = false
-				child.Active = false
-				pcall(function() child.Interactable = false end)
-			end
-		end
-		if page then
-			WindowContent.Visible = true
-			page.Position = UDim2.new(0, 0, 0, 0)
-			page.Size = UDim2.new(1, 0, 1, 0)
-			page.Visible = true
-			page.Active = true
-			pcall(function() page.Interactable = true end)
-			ReanimPage.Visible = false
-		else
-			WindowContent.Visible = false
-			ReanimPage.Visible = true
-			ReanimPage.Position = UDim2.new(0, 0, 0, 0)
-			ReanimPage.Size = UDim2.new(0, 120, 1, 0)
-			local layout = ReanimPage:FindFirstChildOfClass("UIListLayout")
-			if layout then layout.VerticalAlignment = Enum.VerticalAlignment.Top end
-		end
-		for tabName, button in buttons do
-			local active = tabName == name
-			button.BackgroundTransparency = active and 0.08 or 0.65
-			button.BackgroundColor3 = active and Color3.fromRGB(153, 255, 58) or Color3.fromRGB(35, 37, 43)
-			button.TextColor3 = active and Color3.fromRGB(17, 19, 14) or Color3.fromRGB(235, 237, 240)
-		end
-	end
-	for index, name in ipairs(tabs) do
-		local button = Util.Instance("TextButton", tabBar)
-		button.Name = name .. "Tab"
-		button.Position = UDim2.new((index - 1) / #tabs, 2, 0, 1)
-		button.Size = UDim2.new(1 / #tabs, -4, 1, -2)
-		button.BackgroundColor3 = Color3.fromRGB(35, 37, 43)
-		button.BackgroundTransparency = 0.65
-		button.BorderSizePixel = 0
-		button.Font = Enum.Font.GothamSemibold
-		button.Text = name
-		button.TextColor3 = Color3.fromRGB(235, 237, 240)
-		button.TextSize = 10
-		button.TextScaled = false
-		button.TextWrapped = true
-		button.AutoButtonColor = true
-		button.Active = true
-		pcall(function() button.Interactable = true end)
-		button.ZIndex = 10001
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 5)
-		corner.Parent = button
-		buttons[name] = button
-		button.Activated:Connect(function() selectTab(name) end)
-	end
-	-- Both LIMBS and HITBOXES expose the existing reanimation panel and its working controls.
-	selectTab("LIMBS")
-end
 
 ForceModuleReload(false)
