@@ -70,6 +70,8 @@ local function addAnimationModule(config)
 		local startedAt = 0
 		local duration = 0
 		local lastLift = 0
+		local lastForward = 0
+		local flightDirection = Vector3.zAxis
 		local rootPart
 
 		local function resetPose(figure: Model?)
@@ -131,6 +133,12 @@ local function addAnimationModule(config)
 			animator.track = track
 			rootPart = figure:FindFirstChild("HumanoidRootPart")
 			lastLift = 0
+			lastForward = 0
+			if rootPart then
+				local look = rootPart.CFrame.LookVector
+				local horizontal = Vector3.new(look.X, 0, look.Z)
+				flightDirection = horizontal.Magnitude > 0.001 and horizontal.Unit or Vector3.zAxis
+			end
 			startedAt = os.clock()
 		end
 
@@ -152,26 +160,33 @@ local function addAnimationModule(config)
 				return
 			end
 
-			-- Smooth lift during the configured central action window.
-			if rootPart and rootPart.Parent and config.lift > 0 then
+			-- Gojo's airborne attack: ease upward, travel forward, then land smoothly.
+			if rootPart and rootPart.Parent and (config.lift > 0 or config.forward > 0) then
 				local progress = math.clamp(elapsed / duration, 0, 1)
 				local windowStart, windowEnd = config.liftStart, config.liftEnd
-				local ramp = math.min(0.12, (windowEnd - windowStart) * 0.25)
+				local windowAlpha = math.clamp((progress - windowStart) / math.max(windowEnd - windowStart, 0.001), 0, 1)
+				local smooth = windowAlpha * windowAlpha * (3 - 2 * windowAlpha)
+				local forward = progress < windowStart and 0 or (config.forward or 0) * smooth
+				if progress >= windowEnd then forward = config.forward or 0 end
+
 				local lift = 0
 				if progress >= windowStart and progress <= windowEnd then
-					if progress < windowStart + ramp then
-						local alpha = math.clamp((progress - windowStart) / ramp, 0, 1)
-						local eased = alpha * alpha * (3 - 2 * alpha)
-						lift = config.lift * eased
-					elseif progress > windowEnd - ramp then
-						local alpha = math.clamp((windowEnd - progress) / ramp, 0, 1)
-						local eased = alpha * alpha * (3 - 2 * alpha)
-						lift = config.lift * eased
-					else
-						lift = config.lift
+					local risePortion, landPortion = 0.18, 0.20
+					local liftAlpha = 1
+					if windowAlpha < risePortion then
+						liftAlpha = windowAlpha / risePortion
+					elseif windowAlpha > 1 - landPortion then
+						liftAlpha = (1 - windowAlpha) / landPortion
 					end
+					liftAlpha = math.clamp(liftAlpha, 0, 1)
+					liftAlpha = liftAlpha * liftAlpha * (3 - 2 * liftAlpha)
+					lift = (config.lift or 0) * liftAlpha
 				end
-				rootPart.CFrame = rootPart.CFrame + Vector3.new(0, lift - lastLift, 0)
+
+				rootPart.CFrame = rootPart.CFrame
+					+ flightDirection * (forward - lastForward)
+					+ Vector3.new(0, lift - lastLift, 0)
+				lastForward = forward
 				lastLift = lift
 			end
 		end
@@ -187,11 +202,12 @@ end
 
 addAnimationModule({
 	name = "Gojo Awakening",
-	description = "Gojo awakening animation adapted for R6, with a smooth timed lift.",
+	description = "Gojo R6 awakening with a smooth airborne lift and forward attack movement.",
 	asset = "GojoAwakeningTrack.anim",
-	lift = 18,
-	liftStart = 0.18,
-	liftEnd = 0.72,
+	lift = 20,
+	forward = 12,
+	liftStart = 0.12,
+	liftEnd = 0.88,
 })
 
 addAnimationModule({
