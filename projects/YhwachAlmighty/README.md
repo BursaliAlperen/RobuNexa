@@ -1,31 +1,29 @@
 # Yhwach — The Almighty
 
-A unified **in-experience** client starter for a Roblox experience you own. The client moveset UI, keybinds, animation playback, and awakening cinematic are included as source files; original .anim assets remain separate source assets.
+The original Yhwach animation system has been restored from Git history, alongside the current cinematic helper and client starter. These are Roblox Studio scripts for a Roblox experience you own, not a Delta/executor loader.
 
-## Files
+## Restored system files
 
-- YhwachClient.client.lua — LocalScript with on-screen move buttons, keyboard bindings, animation playback, cooldown guard, respawn cleanup, and awakening integration.
-- YhwachCutscenes.lua — cinematic letterbox, subtitles, camera shots, blur, color grading, and skip button.
-- Assets/Animations/ — source animation files: AlmightyAura, AlmightyAwake, AlmightySlash, Auswählen, Blut Vene Anhaben, and Sklaverei.
-- Assets/Audio/, Assets/Effects/, Assets/Accessories/ — asset folders/placeholders for project assets.
+- `AlmightyController.client.lua` — client visual/animation controller.
+- `YhwachUI.client.lua` — moveset UI shell.
+- `YhwachMoveset.lua` — single-file moveset/animation UI option.
+- `AnimLib.lua` — Studio-safe `.anim` keyframe reader/player helpers.
+- `HatAnimation.lua` — poses an accessory already equipped on the character.
+- `AccessoryConfig.lua` — accessory asset manifest/configuration.
+- `YhwachClient.client.lua` — newer unified moveset + keyboard/touch buttons + awakening integration starter.
+- `YhwachCutscenes.lua` — awakening camera, letterbox, subtitles, blur, and color grading.
+- `Assets/Animations/` — original `.anim` source assets.
 
-## Roblox Studio setup
+## Setup notes
 
-1. In a place you own, add YhwachClient.client.lua as a LocalScript and YhwachCutscenes.lua as a ModuleScript beside it under StarterPlayer > StarterPlayerScripts. Preserve the ModuleScript name exactly.
-2. Upload each animation through Roblox animation tools for the correct rig and experience/owner. A source .anim file is not automatically a published asset ID.
-3. Replace the 0 values in CONFIG.Animations with the published numeric animation IDs.
-4. Test in Studio with an R6 or R15 character matching the animation rig. Check Output for missing IDs or permissions.
+These scripts are alternatives/parts from different iterations, not all meant to be dropped into the same place simultaneously. Start with `YhwachClient.client.lua` plus `YhwachCutscenes.lua` for the simple unified setup, or use the restored controller/UI/AnimLib set if you want the fuller modular version. Do not run two separate UI/controllers at once. Check each script's header for the expected Roblox Studio location and ModuleScript dependencies.
 
-## Controls
+The `.anim` files must be published/imported through Roblox's animation tools for the correct rig and owner; source files do not automatically provide published asset IDs. Fill in IDs/configuration where requested and verify Output errors in Studio. The accessory IDs in the manifest are references only; the script does not guarantee catalog items can be equipped or that the IDs are usable by your experience.
 
-- Z — Almighty Slash
-- X — Auswählen
-- C — Blut Vene
-- V — Sklaverei
-- G — Awakening + cinematic
+## Immersive VR integration
 
-The on-screen buttons also work on touch devices. These are animation triggers and cinematic scaffolding, not server-authoritative combat: damage, hitboxes, server-validated cooldowns, and effects that other players must see should be implemented and validated by the server in your own game.
+No Immersive VR source file/module was found in this repository tree, so it has not been fabricated or replaced with a dummy script. Provide the exact file, repo path, or source link to integrate the real module safely.
 
-## Scope and limitations
+## Scope
 
-This is a Roblox Studio in-experience setup, not a Delta/executor loader. It does not inject into third-party games, fetch executable code at runtime, or provide hat/limb reanimation in someone else's experience. No animation IDs or audio IDs are fabricated; configure assets you own or have permission to use.
+This repository version is for an experience you own. It does not include executor injection or a loader for third-party games. HatAnimation is an accessory-pose helper, not a full reanimation exploit. Server-authoritative combat, hitboxes, damage, and replication to other players must be implemented separately for a real multiplayer moveset.
