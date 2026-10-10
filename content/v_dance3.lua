@@ -107,11 +107,13 @@ local function addAnimationModule(config)
 				return AnimLib.Track.fromfile(AssetGetPathFromFilename(config.asset))
 			end)
 			if not ok or not track then
+				if config.sound then pcall(function() SetOverrideDanceMusic(nil) end) end
 				notifyUser("NAM: " .. config.asset .. " could not be read. Wait for the animation conversion workflow to finish.")
 				return
 			end
 			track = makeR6Compatible(track)
 			if not track or #track.Keyframes == 0 then
+				if config.sound then pcall(function() SetOverrideDanceMusic(nil) end) end
 				notifyUser("NAM: " .. config.asset .. " has no usable keyframes.")
 				return
 			end
@@ -122,6 +124,7 @@ local function addAnimationModule(config)
 				end
 			end
 			if actualDuration <= 0 then
+				if config.sound then pcall(function() SetOverrideDanceMusic(nil) end) end
 				notifyUser("NAM: " .. config.asset .. " has an invalid duration.")
 				return
 			end
@@ -159,6 +162,7 @@ local function addAnimationModule(config)
 				animator = nil
 				releaseLift()
 				resetPose(figure)
+				if config.sound then pcall(function() SetOverrideDanceMusic(nil) end) end
 				notifyUser("NAM: " .. config.name .. " stopped safely; this rig/animation format is incompatible.")
 				return
 			end
