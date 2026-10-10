@@ -6879,6 +6879,40 @@ local function AssetGetPathFromFilename(filename)
 	end
 	return "UhhhhhhReanim/Content/" .. filetype .. filename
 end
+local function IsAssetContentUsable(data, filename)
+	if type(data) ~= "string" or #data == 0 then
+		return false
+	end
+
+	-- Converted NAM tracks are JSON. Reject empty or malformed JSON tracks
+	-- instead of treating a zero-byte cached file as a successful download.
+	if filename:sub(-5) == ".anim" and data:match("^%s*{") then
+		local decodedOK, decoded = pcall(HttpService.JSONDecode, HttpService, data)
+		if not decodedOK or type(decoded) ~= "table"
+			or type(decoded.Keyframes) ~= "table" or #decoded.Keyframes == 0
+			or (tonumber(decoded.Time) or 0) <= 0 then
+			return false
+		end
+
+		local poseCount = 0
+		for _, keyframe in ipairs(decoded.Keyframes) do
+			if type(keyframe) == "table" and type(keyframe.Poses) == "table" then
+				poseCount += #keyframe.Poses
+			end
+		end
+		if poseCount == 0 then return false end
+	end
+
+	-- Non-JSON .anim files are legacy binary AnimLib/KeyframeSequence assets;
+	-- they must be non-empty but must not be JSON-decoded.
+	return true
+end
+
+local function IsAssetFileUsable(path, filename)
+	local readOK, data = pcall(readfile, path)
+	return readOK and IsAssetContentUsable(data, filename)
+end
+
 local _Assetdownloading = {}
 local function AssetDownload(filename)
 	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. filename
@@ -6888,7 +6922,11 @@ local function AssetDownload(filename)
 		source = table.concat(split, "@")
 	end
 	local path = AssetGetPathFromFilename(filename)
-	if isfile(path) then return true end
+	if isfile(path) then
+		if IsAssetFileUsable(path, filename) then return true end
+		-- A stale/partial local file must never block a fresh download.
+		pcall(delfile, path)
+	end
 	if _Assetdownloading[filename] then return false end
 	_Assetdownloading[filename] = true
 	task.spawn(function()
@@ -6905,12 +6943,13 @@ local function AssetDownload(filename)
 			if getOK and type(result) == "string" and #result > 0 then body = result end
 		end
 		local wrote = false
-		if body then
+		if body and IsAssetContentUsable(body, filename) then
 			local writeOK = pcall(writefile, path, body)
-			wrote = writeOK and isfile(path)
+			wrote = writeOK and isfile(path) and IsAssetFileUsable(path, filename)
 		end
 		if not wrote then
-			Util.Notify("Failed to download " .. filename .. "!")
+			pcall(delfile, path)
+			Util.Notify("Failed to download a valid " .. filename .. "!")
 		end
 		task.wait(2)
 		_Assetdownloading[filename] = nil
@@ -7601,7 +7640,18 @@ task.spawn(function()
 							if AssetEnsure(_CurrentDance.Assets) then
 								ReanimCharacter:SetAttribute("IsDancing", true)
 								ReanimCharacter:SetAttribute("DanceInternalName", _CurrentDance.InternalName)
-								_CurrentDance.Init(ReanimCharacter)
+								local initOK, initResult = pcall(_CurrentDance.Init, ReanimCharacter)
+								if not initOK or initResult == false then
+									ReanimCharacter:SetAttribute("IsDancing", nil)
+									ReanimCharacter:SetAttribute("DanceInternalName", nil)
+									SetOverrideDanceMusic(nil)
+									if not initOK then
+										warn("NAM: Dance initialization failed: " .. tostring(initResult))
+									end
+									-- Do not leave the failed dance stuck in an initialized state.
+									CurrentDance = nil
+									_CurrentDance = nil
+								end
 							else
 								SetOverrideDanceMusic(nil)
 							end
