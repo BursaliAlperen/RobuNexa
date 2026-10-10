@@ -18,24 +18,7 @@ $$      $$$$$$"""$$$ $$$"""$$$ $$$"""$$$ $$$"""$$$ $$$"""$$$ $$$"""$$$
 Thou shalth not steal. Point at this source if you used a snippet here.
 ]]
 
--- Permit a clean UI refresh when rerunning the updated source.
-if _G.UhhhhhhLoaded then
-	local function removePreviousNAMGui(root)
-		if not root then return end
-		for _, node in root:GetDescendants() do
-			if node:IsA("TextLabel") and string.lower(tostring(node.Text)):find("reanimate", 1, true) then
-				local screen = node:FindFirstAncestorWhichIsA("ScreenGui")
-				if screen then screen:Destroy() end
-			end
-		end
-	end
-	pcall(function() removePreviousNAMGui(game:GetService("CoreGui")) end)
-	pcall(function()
-		local getter = gethui or get_hidden_gui
-		if getter then removePreviousNAMGui(getter()) end
-	end)
-	_G.UhhhhhhLoaded = nil
-end
+if _G.UhhhhhhLoaded then return end
 _G.UhhhhhhLoaded = true
 
 local UhhhhhhVersion = "1.0.9 BETA"
