@@ -1009,8 +1009,8 @@ do
 	end
 	
 	AWindowContent = Util.Instance("Frame", UIMainWindow)
-	AWindowContent.Position = UDim2.new(0, 0, 0, 30)
-	AWindowContent.Size = UDim2.new(1, 0, 1, -35)
+	AWindowContent.Position = UDim2.new(0, 0, 0, 60)
+	AWindowContent.Size = UDim2.new(1, 0, 1, -65)
 	AWindowContent.BackgroundTransparency = 1
 	AWindowContent.ClipsDescendants = true
 	AWindowContent.ZIndex = 0
@@ -1046,6 +1046,7 @@ do
 	impala.BorderSizePixel = 1
 	impala.BorderColor3 = Color3.new(1, 1, 1)
 	impala.Image = Util.GetCDNAsset("glowingpala.graphic.png")
+	impala.Visible = false -- Remove the old triangle/logo from the refreshed NAM UI.
 	impala.ImageColor3 = Color3.new(0, 0, 1)
 	impala.ZIndex = 5
 	AddToRenderStep(function(t)
@@ -8542,5 +8543,84 @@ clearcontenthash.Activated:Connect(function()
 		clearcontenthashtext.Text = "Cleared, now rejoin to apply"
 	end
 end)
+
+
+-- NAM compact top navigation; keep the restored reanimation implementation intact.
+do
+	local tabBar = Util.Instance("Frame", UIMainWindow)
+	tabBar.Name = "NAMTabBar"
+	tabBar.Position = UDim2.new(0, 6, 0, 31)
+	tabBar.Size = UDim2.new(1, -12, 0, 25)
+	tabBar.BackgroundTransparency = 1
+	tabBar.BorderSizePixel = 0
+	tabBar.ZIndex = 10000
+	local tabs = {"ANIMS", "LIMBS", "HITBOXES", "SETTINGS"}
+	local buttons = {}
+	local selected = nil
+	local function selectTab(name)
+		selected = name
+		local page = nil
+		if name == "ANIMS" then
+			page = DancesPage
+		elseif name == "SETTINGS" then
+			page = MainPage
+		end
+		for _, child in WindowContent:GetChildren() do
+			if child:IsA("GuiObject") then
+				child.Visible = false
+				child.Active = false
+				pcall(function() child.Interactable = false end)
+			end
+		end
+		if page then
+			WindowContent.Visible = true
+			page.Position = UDim2.new(0, 0, 0, 0)
+			page.Size = UDim2.new(1, 0, 1, 0)
+			page.Visible = true
+			page.Active = true
+			pcall(function() page.Interactable = true end)
+			ReanimPage.Visible = false
+		else
+			WindowContent.Visible = false
+			ReanimPage.Visible = true
+			ReanimPage.Position = UDim2.new(0, 0, 0, 0)
+			ReanimPage.Size = UDim2.new(1, 0, 1, 0)
+			local layout = ReanimPage:FindFirstChildOfClass("UIListLayout")
+			if layout then layout.VerticalAlignment = Enum.VerticalAlignment.Top end
+		end
+		for tabName, button in buttons do
+			local active = tabName == name
+			button.BackgroundTransparency = active and 0.08 or 0.65
+			button.BackgroundColor3 = active and Color3.fromRGB(153, 255, 58) or Color3.fromRGB(35, 37, 43)
+			button.TextColor3 = active and Color3.fromRGB(17, 19, 14) or Color3.fromRGB(235, 237, 240)
+		end
+	end
+	for index, name in ipairs(tabs) do
+		local button = Util.Instance("TextButton", tabBar)
+		button.Name = name .. "Tab"
+		button.Position = UDim2.new((index - 1) / #tabs, 2, 0, 1)
+		button.Size = UDim2.new(1 / #tabs, -4, 1, -2)
+		button.BackgroundColor3 = Color3.fromRGB(35, 37, 43)
+		button.BackgroundTransparency = 0.65
+		button.BorderSizePixel = 0
+		button.Font = Enum.Font.GothamSemibold
+		button.Text = name
+		button.TextColor3 = Color3.fromRGB(235, 237, 240)
+		button.TextSize = 10
+		button.TextScaled = false
+		button.TextWrapped = true
+		button.AutoButtonColor = true
+		button.Active = true
+		pcall(function() button.Interactable = true end)
+		button.ZIndex = 10001
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 5)
+		corner.Parent = button
+		buttons[name] = button
+		button.Activated:Connect(function() selectTab(name) end)
+	end
+	-- Both LIMBS and HITBOXES expose the existing reanimation panel and its working controls.
+	selectTab("LIMBS")
+end
 
 ForceModuleReload(false)
