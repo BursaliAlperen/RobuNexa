@@ -1,0 +1,11 @@
+YHWACH AUDIO DROP FOLDER
+
+Put your source audio files here:
+- Awakening.mp3
+- AlmightyLoop.mp3
+- AuraOn.mp3
+- AuraOff.mp3
+- FormReturn.mp3
+
+IMPORTANT:
+Raw MP3 files in this repository cannot be played directly by Roblox Sound. Upload audio through Roblox's permitted asset workflow, then add each rbxassetid:// ID to AccessoryConfig.lua under SoundIds. Use audio you own or have permission to use.
