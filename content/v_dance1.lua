@@ -513,37 +513,6 @@ end)
 AddModule(function()
 	local m = {}
 	m.ModuleType = "DANCE"
-	m.Name = "California Girls"
-	m.Description = "this was everywhere back in my day (2021)\nanimation sourced from gmod"
-	m.Assets = {"CaliforniaGirls.anim", "CaliforniaGirls.mp3"}
-
-	m.Config = function(parent: GuiBase2d)
-	end
-
-	local animator = nil
-	local start = 0
-	m.Init = function(figure: Model)
-		SetOverrideDanceMusic(AssetGetContentId("CaliforniaGirls.mp3"), "Katy Perry - California Girls", 1)
-		start = os.clock()
-		animator = AnimLib.Animator.new()
-		animator.rig = figure
-		animator.looped = true
-		animator.speed = 1.010493
-		animator.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("CaliforniaGirls.anim"))
-	end
-	m.Update = function(dt: number, figure: Model)
-		local t = os.clock()
-		animator:Step(t - start)
-	end
-	m.Destroy = function(figure: Model?)
-		animator = nil
-	end
-	return m
-end)
-
-AddModule(function()
-	local m = {}
-	m.ModuleType = "DANCE"
 	m.Name = "科目三 (Subject Three)"
 	m.Description = "剑起江湖恩怨 拂袖罩明月\n西風葉落花謝 枕刀劍難眠\n汝为山河过客 却总长叹伤离别\n鬓如霜一杯浓烈"
 	m.InternalName = "KEMUSAN"
@@ -2443,6 +2412,48 @@ AddModule(function()
 	end
 	m.Update = function(dt: number, figure: Model)
 		animator:Step(GetOverrideDanceMusicTime())
+	end
+	m.Destroy = function(figure: Model?)
+		animator = nil
+	end
+	return m
+end)
+
+
+AddModule(function()
+	local m = {}
+	m.ModuleType = "DANCE"
+	m.Name = "Yhwach"
+	m.Description = "The Almighty — choose an Awake or Aura animation."
+	m.Assets = {"YhwachAwake.anim", "YhwachAura.anim", "yhwachawake.mp3", "yhwachAura.mp3"}
+	m.Variant = 1
+	m.Config = function(parent: GuiBase2d)
+		Util_CreateDropdown(parent, "Animation", {"Almighty Awake", "Almighty Aura"}, m.Variant).Changed:Connect(function(val)
+			m.Variant = val
+		end)
+	end
+	m.LoadConfig = function(save: any)
+		m.Variant = math.clamp(tonumber(save.Variant) or m.Variant, 1, 2)
+	end
+	m.SaveConfig = function()
+		return {Variant = m.Variant}
+	end
+	local animator = nil
+	m.Init = function(figure: Model)
+		local filename, sound, title
+		if m.Variant == 2 then
+			filename, sound, title = "YhwachAura.anim", "yhwachAura.mp3", "Yhwach — Almighty Aura"
+		else
+			filename, sound, title = "YhwachAwake.anim", "yhwachawake.mp3", "Yhwach — Almighty Awake"
+		end
+		SetOverrideDanceMusic(AssetGetContentId(sound), title, 1)
+		animator = AnimLib.Animator.new()
+		animator.rig = figure
+		animator.looped = true
+		animator.track = AnimLib.Track.fromfile(AssetGetPathFromFilename(filename))
+	end
+	m.Update = function(dt: number, figure: Model)
+		if animator then animator:Step(GetOverrideDanceMusicTime()) end
 	end
 	m.Destroy = function(figure: Model?)
 		animator = nil
