@@ -6505,10 +6505,36 @@ do
 	end
 	function Track.fromfile(path)
 		local s, data = pcall(readfile, path)
-		if s and data then
-			local buf = buffer.fromstring(data)
-			return Track.frombuffer(buf)
+		if not s or type(data) ~= "string" then return nil end
+
+		-- Converted NAM tracks are JSON; older bundled animations use AnimLib's binary format.
+		-- Detect JSON before passing the file into buffer.fromstring/Track.frombuffer.
+		if data:match("^%s*{") then
+			local decodedOK, anim = pcall(function()
+				return HttpService:JSONDecode(data)
+			end)
+			if decodedOK and type(anim) == "table" and type(anim.Keyframes) == "table" then
+				local unpackValues = table.unpack or unpack
+				for _, keyframe in ipairs(anim.Keyframes) do
+					if type(keyframe.Poses) == "table" then
+						for _, pose in ipairs(keyframe.Poses) do
+							if type(pose.CFrame) == "table" then
+								local values = pose.CFrame
+								if #values >= 12 then
+									pose.CFrame = CFrame.new(unpackValues(values, 1, 12))
+								end
+							end
+						end
+					end
+				end
+				return anim
+			end
+			warn("NAM: JSON animation track could not be decoded: " .. tostring(path))
+			return nil
 		end
+
+		local buf = buffer.fromstring(data)
+		return Track.frombuffer(buf)
 	end
 	function Track.frominstance(ks)
 		assert(ks and ks:IsA("KeyframeSequence"))
