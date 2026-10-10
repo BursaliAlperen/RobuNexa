@@ -28,12 +28,23 @@ YhwachAlmighty/
 
 ## Animation and sound IDs
 
-Roblox does not play repository `.anim` / `.mp3` files directly by filename. The runtime needs published Roblox asset IDs. Replace the empty values in `AnimationIds` and `SoundIds` in `AccessoryConfig.lua` with your own authorized `rbxassetid://...` IDs.
+Six source animations are present in `Assets/Animations`:
+
+| Source file | Config key | Intended action |
+|---|---|---|
+| `AlmightyAwake.anim` | `AlmightyAwakening` | Awakening sequence |
+| `AlmightyAura.anim` | `AlmightyAura` | Looping Almighty/aura pose |
+| `AlmightySlash.anim` | `AlmightySlash` | Move 1 |
+| `Auswählen.anim` | `Auswahlen` | Move 2 |
+| `Blut Vene Anhaben.anim` | `BlutVeneAnhaben` | Move 3 |
+| `Sklaverei .anim` | `Sklaverei` | Move 4 |
+
+Roblox does not play repository `.anim` / `.mp3` files directly by filename. Import and publish each animation through Roblox's supported workflow, then replace the empty values in `AnimationIds` and `SoundIds` in `AccessoryConfig.lua` with your authorized `rbxassetid://...` IDs. No audio source files are currently present in `Assets/Audio`; that folder only contains its placeholder note.
 
 ## Included modules
 
 - `YhwachUI.client.lua`: responsive mobile-friendly GUI and local action events.
-- `AlmightyController.client.lua`: listens for UI actions, starts/stops configured animations and sound hooks, and resets cleanly on respawn.
+- `AlmightyController.client.lua`: plays the awakening, looping aura pose and four move animations after valid published IDs are configured; stops tracks and sounds on reset/respawn.
 - `AccessoryConfig.lua`: user-supplied catalog IDs plus animation/audio ID placeholders.
 - `HatAnimation.lua`: smoothly tweens a weld/Motor6D for an accessory already equipped by a supported experience. It does not create executor-style reanimation or bypass network/security restrictions.
 
@@ -59,4 +70,4 @@ These IDs are references, not embedded asset files. Asset availability and permi
 
 ## Current status
 
-The GUI and controller hooks are scaffolded. Animation and audio playback will work after valid Roblox-published IDs are entered. Accessory auto-equipping and custom aura particles are not yet implemented; the supplied catalog list alone does not grant access or replicate changes to other players.
+The UI and local animation controller are wired to the six source-animation roles, with four move buttons. Playback still requires published Roblox animation IDs; sound playback requires uploaded audio IDs. Accessory auto-equipping and custom aura particles are not yet implemented; the supplied catalog list alone does not grant access or replicate changes to other players.
