@@ -13,7 +13,7 @@ if _G.NAMLoaded or _G["U" .. "hhhhhhLoaded"] then return end
 _G.NAMLoaded = true
 _G["U" .. "hhhhhhLoaded"] = true
 
-local NAMVersion = "1.0.14 BETA"
+local NAMVersion = "1.0.15 BETA"
 
 local Debris = cloneref(game:GetService("Debris"))
 local CoreGui = cloneref(game:GetService("CoreGui"))
@@ -6947,7 +6947,7 @@ local function AssetGetPathFromFilename(filename)
 end
 local _Assetdownloading = {}
 local function AssetDownload(filename)
-	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.14/content/" .. filename
+	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.15/content/" .. filename
 	local split = string.split(filename, "@")
 	if #split > 1 then
 		filename = table.remove(split, 1)
@@ -7055,18 +7055,18 @@ DancesPage.Position = UDim2.new(0.5, 360, 0.5, 0)
 DancesPage.Interactable = false
 DancesPage.Visible = false
 DancesPage:SetAttribute("NAMFavoritesOnly", false)
-DancesPage.Search.Position = UDim2.new(1, -72, 0, 0)
-DancesPage.Search.Size = UDim2.new(1, -107, 0, 25)
+DancesPage.Search.Position = UDim2.new(1, -92, 0, 0)
+DancesPage.Search.Size = UDim2.new(1, -127, 0, 25)
 local FavoritesFilterButton = Util.Instance("TextButton", DancesPage)
 FavoritesFilterButton.Name = "FavoritesFilter"
 FavoritesFilterButton.AnchorPoint = Vector2.new(1, 0)
 FavoritesFilterButton.Position = UDim2.new(1, 0, 0, 0)
-FavoritesFilterButton.Size = UDim2.new(0, 67, 0, 25)
+FavoritesFilterButton.Size = UDim2.new(0, 87, 0, 25)
 FavoritesFilterButton.BackgroundTransparency = 0
 FavoritesFilterButton.BorderSizePixel = 0
 FavoritesFilterButton.Font = Enum.Font.Code
-FavoritesFilterButton.TextSize = 14
-FavoritesFilterButton.Text = "☆ Favs"
+FavoritesFilterButton.TextSize = 12
+FavoritesFilterButton.Text = "FAVORITES"
 FavoritesFilterButton.AutoButtonColor = true
 Stylize(FavoritesFilterButton)
 RegisterTextLabel(FavoritesFilterButton)
@@ -7086,7 +7086,7 @@ end
 FavoritesFilterButton.Activated:Connect(function()
 	local favoritesOnly = not DancesPage:GetAttribute("NAMFavoritesOnly")
 	DancesPage:SetAttribute("NAMFavoritesOnly", favoritesOnly)
-	FavoritesFilterButton.Text = favoritesOnly and "★ Favs" or "☆ Favs"
+	FavoritesFilterButton.Text = favoritesOnly and "FAVORITES *" or "FAVORITES"
 	UpdateDanceListVisibility()
 end)
 DancesPage.Search.Box:GetPropertyChangedSignal("Text"):Connect(UpdateDanceListVisibility)
@@ -7553,20 +7553,22 @@ local function AddDance(m)
 		local item = UI.CreateItemListItem(DancesPage.List)
 		m._NAMFavoriteItem = item
 		item.Parent:SetAttribute("NAMFavoriteKey", m._NAMFavoriteKey)
-		item.Size = UDim2.new(1, -36, 0, 26)
+		item.Size = UDim2.new(1, -62, 0, 26)
 		local favoriteButton = Util.Instance("TextButton", item.Parent)
 		favoriteButton.Name = "Favorite"
 		favoriteButton.AnchorPoint = Vector2.new(1, 0.5)
-		favoriteButton.Position = UDim2.new(1, -5, 0.5, 0)
-		favoriteButton.Size = UDim2.new(0, 28, 0, 26)
-		favoriteButton.BackgroundTransparency = 1
+		favoriteButton.Position = UDim2.new(1, -3, 0.5, 0)
+		favoriteButton.Size = UDim2.new(0, 54, 0, 26)
+		favoriteButton.BackgroundTransparency = 0.1
+		favoriteButton.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+		favoriteButton.ZIndex = item.ZIndex + 1
 		favoriteButton.BorderSizePixel = 0
-		favoriteButton.Font = Enum.Font.SourceSansBold
-		favoriteButton.TextSize = 23
+		favoriteButton.Font = Enum.Font.Code
+		favoriteButton.TextSize = 13
 		favoriteButton.TextColor3 = Color3.fromRGB(255, 205, 75)
 		favoriteButton.AutoButtonColor = true
 		local function RefreshFavoriteButton()
-			favoriteButton.Text = SaveData.FavoriteDances[m._NAMFavoriteKey] and "★" or "☆"
+			favoriteButton.Text = SaveData.FavoriteDances[m._NAMFavoriteKey] and "* FAV" or "FAV"
 			favoriteButton.TextColor3 = SaveData.FavoriteDances[m._NAMFavoriteKey]
 				and Color3.fromRGB(255, 205, 75)
 				or Color3.fromRGB(190, 190, 190)
@@ -8019,7 +8021,7 @@ end)
 UI.CreateText(ReadmePage, "NAM README & loadstring", 24, Enum.TextXAlignment.Center)
 UI.CreateText(ReadmePage, "Usage and loadstring are in the NAM repository README.", 14, Enum.TextXAlignment.Center)
 UI.CreateButton(ReadmePage, "Copy loadstring", 20).Activated:Connect(function()
-	pcall(setclipboard, 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.14/source/reanim.lua"))()')
+	pcall(setclipboard, 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.15/source/reanim.lua"))()')
 	Util.Notify("Loadstring copied!")
 end)
 task.wait()
@@ -8075,7 +8077,7 @@ local function getgithubraw(path)
 	InitLogsText.Text ..= "\n[LOG] [GitGET] GET raw./" .. path
 	s, resp = pcall(request, {
 		Method = "GET",
-		Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.14/content/" .. path,
+		Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.15/content/" .. path,
 	})
 	if s and resp and resp.StatusCode == 200 then
 		return resp.Body
