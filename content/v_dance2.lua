@@ -37,6 +37,11 @@ AddModule(function()
 		animator.rig = figure
 		animator.looped = true
 		animator.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("GoingDown.anim"))
+		if not animator.track then
+			SetOverrideDanceMusic(nil)
+			warn("NAM: Failed to load animation track GoingDown.anim")
+			return false
+		end
 	end
 	m.Update = function(dt: number, figure: Model)
 		animator:Step(GetOverrideDanceMusicTime())
@@ -64,6 +69,11 @@ AddModule(function()
 		animator.rig = figure
 		animator.looped = false
 		animator.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("Results.anim"))
+		if not animator.track then
+			SetOverrideDanceMusic(nil)
+			warn("NAM: Failed to load animation track Results.anim")
+			return false
+		end
 	end
 	m.Update = function(dt: number, figure: Model)
 		animator:Step(GetOverrideDanceMusicTime())
@@ -107,6 +117,11 @@ AddModule(function()
 		animator.rig = figure
 		animator.looped = false
 		animator.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("Birdbrain.anim"))
+		if not animator.track then
+			SetOverrideDanceMusic(nil)
+			warn("NAM: Failed to load animation track Birdbrain.anim")
+			return false
+		end
 	end
 	m.Update = function(dt: number, figure: Model)
 		if m.Lag then
@@ -153,10 +168,20 @@ AddModule(function()
 		animator1.rig = figure
 		animator1.looped = true
 		animator1.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("BusetA.anim"))
+		if not animator1.track then
+			SetOverrideDanceMusic(nil)
+			warn("NAM: Failed to load animation track BusetA.anim")
+			return false
+		end
 		animator2 = AnimLib.Animator.new()
 		animator2.rig = figure
 		animator2.looped = false
 		animator2.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("BusetB.anim"))
+		if not animator2.track then
+			SetOverrideDanceMusic(nil)
+			warn("NAM: Failed to load animation track BusetB.anim")
+			return false
+		end
 	end
 	m.Update = function(dt: number, figure: Model)
 		local t = GetOverrideDanceMusicTime()
@@ -207,6 +232,11 @@ AddModule(function()
 		animator.looped = true
 		animator.speed = 1
 		animator.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("Thriller.anim"))
+		if not animator.track then
+			SetOverrideDanceMusic(nil)
+			warn("NAM: Failed to load animation track Thriller.anim")
+			return false
+		end
 	end
 	m.Update = function(dt: number, figure: Model)
 		local t = os.clock()
@@ -238,6 +268,11 @@ AddModule(function()
 		animator.looped = true
 		animator.speed = 1
 		animator.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("RetroMonsterMash.anim"))
+		if not animator.track then
+			SetOverrideDanceMusic(nil)
+			warn("NAM: Failed to load animation track RetroMonsterMash.anim")
+			return false
+		end
 	end
 	m.Update = function(dt: number, figure: Model)
 		local t = os.clock()
@@ -269,6 +304,11 @@ AddModule(function()
 		animator.looped = true
 		animator.speed = 1
 		animator.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("RetroSoRetro.anim"))
+		if not animator.track then
+			SetOverrideDanceMusic(nil)
+			warn("NAM: Failed to load animation track RetroSoRetro.anim")
+			return false
+		end
 	end
 	m.Update = function(dt: number, figure: Model)
 		local t = os.clock()
@@ -298,6 +338,11 @@ AddModule(function()
 		animator.looped = false
 		animator.map = {{0, 5.88}, {0, 5.69999}}
 		animator.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("imissthequiet.anim"))
+		if not animator.track then
+			SetOverrideDanceMusic(nil)
+			warn("NAM: Failed to load animation track imissthequiet.anim")
+			return false
+		end
 	end
 	m.Update = function(dt: number, figure: Model)
 		animator:Step(GetOverrideDanceMusicTime())
@@ -350,6 +395,11 @@ AddModule(function()
 		animator.looped = true
 		animator.speed = 1
 		animator.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("Jitterbug.anim"))
+		if not animator.track then
+			SetOverrideDanceMusic(nil)
+			warn("NAM: Failed to load animation track Jitterbug.anim")
+			return false
+		end
 	end
 	m.Update = function(dt: number, figure: Model)
 		local t = os.clock()
@@ -385,6 +435,11 @@ AddModule(function()
 		animator.looped = false
 		animator.map = {{0, 5.88}, {0, 5.69999}}
 		animator.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("imissthequiet.anim"))
+		if not animator.track then
+			SetOverrideDanceMusic(nil)
+			warn("NAM: Failed to load animation track imissthequiet.anim")
+			return false
+		end
 	end
 	m.Update = function(dt: number, figure: Model)
 		animator:Step(GetOverrideDanceMusicTime())
