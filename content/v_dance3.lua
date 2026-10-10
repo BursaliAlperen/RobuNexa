@@ -146,10 +146,20 @@ local function addAnimationModule(config)
 			if rootPart and rootPart.Parent and config.lift > 0 then
 				local progress = math.clamp(elapsed / duration, 0, 1)
 				local windowStart, windowEnd = config.liftStart, config.liftEnd
+				local ramp = math.min(0.12, (windowEnd - windowStart) * 0.25)
 				local lift = 0
-				if progress > windowStart and progress < windowEnd then
-					local alpha = (progress - windowStart) / (windowEnd - windowStart)
-					lift = config.lift * math.sin(math.pi * alpha)
+				if progress >= windowStart and progress <= windowEnd then
+					if progress < windowStart + ramp then
+						local alpha = math.clamp((progress - windowStart) / ramp, 0, 1)
+						local eased = alpha * alpha * (3 - 2 * alpha)
+						lift = config.lift * eased
+					elseif progress > windowEnd - ramp then
+						local alpha = math.clamp((windowEnd - progress) / ramp, 0, 1)
+						local eased = alpha * alpha * (3 - 2 * alpha)
+						lift = config.lift * eased
+					else
+						lift = config.lift
+					end
 				end
 				rootPart.CFrame = rootPart.CFrame + Vector3.new(0, lift - lastLift, 0)
 				lastLift = lift
@@ -175,7 +185,7 @@ addAnimationModule({
 })
 
 addAnimationModule({
-	name = "Gojo 200% Hollow Purple",
+	name = "Imaginary Purple",
 	description = "Hollow Purple attack animation adapted for R6.",
 	asset = "HollowPurple1Track.anim",
 	lift = 0,
@@ -183,14 +193,7 @@ addAnimationModule({
 	liftEnd = 0,
 })
 
-addAnimationModule({
-	name = "Mahoraga Destroy Purple",
-	description = "Mahoraga Purple destruction animation adapted for R6, with a smooth timed lift.",
-	asset = "MahoragaDestroyPurpleTrack.anim",
-	lift = 34,
-	liftStart = 0.16,
-	liftEnd = 0.82,
-})
+
 
 addAnimationModule({
 	name = "Cid Overdrive",
