@@ -165,8 +165,7 @@ function AnimLib:Play(fadeTime)
 				self._elapsed = t
 			else
 				t = track.Length
-				self._playing = false
-				if self._connection then self._connection:Disconnect(); self._connection = nil end
+				self:Stop()
 			end
 		end
 		self:_poseAt(t)
