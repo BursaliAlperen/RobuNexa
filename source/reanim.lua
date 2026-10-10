@@ -6011,6 +6011,7 @@ end
 
 do
 	SaveData.SelectedReanimator = SaveData.SelectedReanimator or 1
+	local SyntaxFlingButton, SyntaxFlingButtonText
 	local ReanimateMethodSelect, ReanimatorTypeLabel = UI.CreateDropdown(MainPage, "Reanimate Type", {"Limb Reanimator", "Hats Reanimator", "Krypton Reanimate", "Syntax Reanimate"}, SaveData.SelectedReanimator)
 	ReanimatorTypeLabel.Parent.LayoutOrder = -100
 	local ReanimatorConfigTitle = UI.CreateText(MainPage, "LIMB REANIMATOR CONFIG", 15, Enum.TextXAlignment.Center)
@@ -6030,6 +6031,7 @@ do
 	ReanimatorConfigCanvas.Parent.LayoutOrder = -94
 	ReanimateMethodSelect.Changed:Connect(function(value)
 		SaveData.SelectedReanimator = value
+		if SyntaxFlingButton then SyntaxFlingButton.Visible = value == 4 end
 		if value == 1 then
 			SelectedReanimator = LimbReanimator
 			ReanimatorConfigTitle.Text = "LIMB REANIMATOR CONFIG"
@@ -6069,6 +6071,18 @@ do
 	ReanimateText.Parent.LayoutOrder = -99
 	local ReanimateStartButton, ReanimateStartButtonText = UI.CreateButton(MainPage, "Reanimate", 20)
 	ReanimateStartButton.Parent.LayoutOrder = -98
+	SyntaxFlingButton, SyntaxFlingButtonText = UI.CreateButton(MainPage, "Syntax Fling: OFF", 16)
+	SyntaxFlingButton.Parent.LayoutOrder = -97
+	SyntaxFlingButton.Visible = SaveData.SelectedReanimator == 4
+	SyntaxFlingButton.Activated:Connect(function()
+		local env = (getgenv and getgenv()) or shared or _G
+		if not env.RobuNexaSyntaxRunning then
+			warn("[RobuNexa] Start Syntax Reanimate before toggling fling.")
+			return
+		end
+		env.bulletattacking = not env.bulletattacking
+		SyntaxFlingButtonText.Text = env.bulletattacking and "Syntax Fling: ON" or "Syntax Fling: OFF"
+	end)
 	ReanimateStartButton.Activated:Connect(function()
 		ReanimateStartButton.Interactable = false
 		local env = (getgenv and getgenv()) or shared or _G
