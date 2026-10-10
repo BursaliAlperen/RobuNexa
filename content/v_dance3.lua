@@ -63,7 +63,7 @@ local function addAnimationModule(config)
 		m.ModuleType = "DANCE"
 		m.Name = config.name
 		m.Description = config.description
-		m.Assets = {config.asset}
+		m.Assets = config.sound and {config.asset, config.sound} or {config.asset}
 		m.Config = function(parent: GuiBase2d) end
 
 		local animator
@@ -91,6 +91,16 @@ local function addAnimationModule(config)
 			animator = nil
 			releaseLift()
 			resetPose(figure)
+			if config.sound then
+				local soundOk, soundId = pcall(function()
+					return AssetGetContentId(config.sound)
+				end)
+				if soundOk and soundId then
+					pcall(function()
+						SetOverrideDanceMusic(soundId, config.name, 1)
+					end)
+				end
+			end
 			local ok, track = pcall(function()
 				return AnimLib.Track.fromfile(AssetGetPathFromFilename(config.asset))
 			end)
@@ -188,6 +198,7 @@ addAnimationModule({
 	name = "Imaginary Purple",
 	description = "Hollow Purple attack animation adapted for R6.",
 	asset = "HollowPurple1Track.anim",
+	sound = "imaginary-hollow-purple_QmAgdbC.mp3",
 	lift = 0,
 	liftStart = 0,
 	liftEnd = 0,
