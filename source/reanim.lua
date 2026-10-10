@@ -7,8 +7,8 @@ $$      $$$$$$"""$$$ $$$"""$$$ $$$"""$$$ $$$"""$$$ $$$"""$$$ $$$"""$$$
  "YmmMMMM""MMM    YMMMMM    YMMMMM    YMMMMM    YMMMMM    YMMMMM    YMM
        "DREAMS WILL NEVER COME TRUE UNTIL YOU ACTUALLY MAKE IT."       
 
-       Code:    MAMALALANAM
-       GFX:     MAMALALANAM
+       Code:    STEVETHEREALONE
+       GFX:     STEVETHEREALONE
                 AALib
                 some random generators
        Music:   Dubmood
@@ -58,7 +58,7 @@ Util.DeepcopyTable = function(t)
 end
 Util.Notify = function(text)
 	StarterGui:SetCore("SendNotification", {
-		Title = "NAM",
+		Title = "Uhhhhhh",
 		Text = text,
 		Duration = 5
 	})
@@ -154,7 +154,7 @@ if not game:IsLoaded() then
 	end, function()
 		notLoaded.Parent = workspace
 	end)
-	notLoaded.Text = "NAM is loading..."
+	notLoaded.Text = "Uhhhhhh is waiting for the game to load"
 	game.Loaded:Wait()
 	for i=1, 60 do
 		while task.wait() > 1 / 10 do end
@@ -424,7 +424,7 @@ do
 			Size = UDim2.new(1, 0, 0, 32)
 		}):Play()
 		task.wait(0.5)
-		local s, assetsof = pcall(game.HttpGet, game, "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/uiassets/")
+		local s, assetsof = pcall(game.HttpGet, game, "https://api.github.com/repos/STEVE-916-create/Uhhhhhh/contents/uiassets/")
 		if s and assetsof then
 			s, assetsof = pcall(HttpService.JSONDecode, HttpService, assetsof)
 			if s and assetsof then
@@ -883,13 +883,11 @@ local function SetUITheme(index)
 		UISound.Click.SoundId = theme[4]
 	end
 end
--- NAM theme is intentionally locked to Sakura.
-SaveData.UITheme = 15
-SetUITheme(15)
+SaveData.UITheme = SaveData.UITheme or 1
+SetUITheme(SaveData.UITheme)
 
 local ReanimPage
-local NAMTabButtons
-local CracktroFrameText = "NAM | by mamalalanam | v" .. UhhhhhhVersion
+local CracktroFrameText = "Uhhhhhh Reanimate V" .. UhhhhhhVersion
 local UIMainWindow, AWindowContent, WindowContent
 
 local _funcrefreshes = {}
@@ -919,30 +917,15 @@ end)
 do
 	UIMainWindow = Util.Instance("Frame", UIMainFrame)
 	UIMainWindow.Active = true
-	UIMainWindow.ZIndex = 1000
-	pcall(function() UIMainWindow.Interactable = true end)
 	UIMainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
 	UIMainWindow.Position = UDim2.new(0.5, 0, 0.5, 0)
-	local NAMScreenSize = Util.GetScreenSize()
-	local NAMWindowWidth = math.min(680, math.max(300, NAMScreenSize.X - 24))
-	local NAMWindowHeight = math.min(460, math.max(250, NAMScreenSize.Y - 48))
-	UIMainWindow.Size = UDim2.fromOffset(NAMWindowWidth, NAMWindowHeight)
-	UIMainWindow.BackgroundTransparency = 0.04
-	UIMainWindow.BackgroundColor3 = Color3.fromRGB(15, 16, 19)
+	UIMainWindow.Size = UDim2.new(0, 480, 0, 280)
+	UIMainWindow.BackgroundTransparency = 0
+	UIMainWindow.BackgroundColor3 = Color3.new(1, 1, 1)
 	UIMainWindow.BorderSizePixel = 0
 	Stylize(UIMainWindow, {
 		Glow = true
 	})
-	UIMainWindow.BackgroundTransparency = 0.12
-	UIMainWindow.BackgroundColor3 = Color3.fromRGB(15, 18, 30)
-	local glassCorner = Instance.new("UICorner")
-	glassCorner.CornerRadius = UDim.new(0, 14)
-	glassCorner.Parent = UIMainWindow
-	local glassStroke = Instance.new("UIStroke")
-	glassStroke.Color = Color3.fromRGB(153, 255, 58)
-	glassStroke.Transparency = 0.42
-	glassStroke.Thickness = 1
-	glassStroke.Parent = UIMainWindow
 	local _clicksndclicked = false
 	UserInputService.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -984,15 +967,15 @@ do
 	TopBarText.Size = UDim2.new(1, -35, 1, 0)
 	TopBarText.BackgroundTransparency = 1
 	TopBarText.ClipsDescendants = true
-	TopBarText.Font = Enum.Font.GothamSemibold
-	TopBarText.TextColor3 = Color3.fromRGB(240, 242, 245)
-	TopBarText.TextSize = 18
+	TopBarText.Font = Enum.Font.Code
+	TopBarText.TextColor3 = Color3.new(1, 1, 1)
+	TopBarText.TextSize = 20
 	TopBarText.TextXAlignment = Enum.TextXAlignment.Left
-	TopBarText.Text = "    NAM Animation | v" .. UhhhhhhVersion
+	TopBarText.Text = "    Genesis FE | v" .. UhhhhhhVersion
 	TopBarText.RichText = true
 	RegisterTextLabel(TopBarText)
 	Util.ForceTextSize(TopBarText)
-	CracktroFrameText = "NAM Animation"
+	CracktroFrameText = "(c) Genesis FE. All rights reserved."
 	
 	local TopBarClose = Util.Instance("TextButton", TopBarFrame)
 	TopBarClose.AnchorPoint = Vector2.new(1, 0)
@@ -1025,58 +1008,12 @@ do
 		end)
 	end
 	
-	-- Glass navigation rebuilt with an explicit hit-test fallback for touch/executor GUIs.
-	local NAMTabBar = Util.Instance("Frame", UIMainWindow)
-	NAMTabBar.Name = "NAMGlassNavigation"
-	NAMTabBar.Position = UDim2.new(0, 10, 0, 36)
-	NAMTabBar.Size = UDim2.new(1, -20, 0, 38)
-	NAMTabBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	NAMTabBar.BackgroundTransparency = 0.94
-	NAMTabBar.BorderSizePixel = 0
-	NAMTabBar.Active = true
-	pcall(function() NAMTabBar.Interactable = true end)
-	NAMTabBar.ZIndex = 10000
-	local navCorner = Instance.new("UICorner")
-	navCorner.CornerRadius = UDim.new(0, 9)
-	navCorner.Parent = NAMTabBar
-	local navStroke = Instance.new("UIStroke")
-	navStroke.Color = Color3.fromRGB(153, 255, 58)
-	navStroke.Transparency = 0.78
-	navStroke.Thickness = 1
-	navStroke.Parent = NAMTabBar
-	NAMTabButtons = {}
-	local tabNames = {"NAM", "ANIMATIONS", "REANIM", "SETTINGS", "ABOUT"}
-	for index, tabName in ipairs(tabNames) do
-		local tab = Util.Instance("TextButton", NAMTabBar)
-		tab.Name = tabName .. "Tab"
-		tab.Position = UDim2.new((index - 1) / #tabNames, 4, 0, 4)
-		tab.Size = UDim2.new(1 / #tabNames, -8, 1, -8)
-		tab.BackgroundColor3 = Color3.fromRGB(153, 255, 58)
-		tab.BackgroundTransparency = 1
-		tab.BorderSizePixel = 0
-		tab.Font = Enum.Font.GothamSemibold
-		tab.Text = ({NAM = "HOME", ANIMATIONS = "ANIMS", REANIM = "LIMBS", SETTINGS = "SETTINGS", ABOUT = "ABOUT"})[tabName]
-		tab.TextColor3 = Color3.fromRGB(235, 237, 240)
-		tab.TextSize = 10
-		tab.TextScaled = false
-		tab.TextWrapped = true
-		tab.AutoButtonColor = false
-		tab.Active = true
-		tab.Interactable = true
-		tab.Selectable = true
-		tab.ZIndex = 10001
-		local tabCorner = Instance.new("UICorner")
-		tabCorner.CornerRadius = UDim.new(0, 6)
-		tabCorner.Parent = tab
-		NAMTabButtons[tabName] = tab
-	end
-
 	AWindowContent = Util.Instance("Frame", UIMainWindow)
-	AWindowContent.Position = UDim2.new(0, 0, 0, 70)
-	AWindowContent.Size = UDim2.new(1, 0, 1, -75)
+	AWindowContent.Position = UDim2.new(0, 0, 0, 30)
+	AWindowContent.Size = UDim2.new(1, 0, 1, -35)
 	AWindowContent.BackgroundTransparency = 1
 	AWindowContent.ClipsDescendants = true
-	AWindowContent.ZIndex = 1
+	AWindowContent.ZIndex = 0
 	
 	ReanimPage = Util.Instance("Frame", AWindowContent)
 	ReanimPage.AnchorPoint = Vector2.new(0, 0)
@@ -1122,7 +1059,7 @@ do
 	WindowContent.Size = UDim2.new(1, -120, 1, 0)
 	WindowContent.BackgroundTransparency = 1
 	WindowContent.ClipsDescendants = true
-	WindowContent.ZIndex = 2
+	WindowContent.ZIndex = 0
 	
 	local MainWindowClosed = false
 	local MainWindowTweening = false
@@ -1137,7 +1074,7 @@ do
 		MainWindowClosed = not MainWindowClosed
 		if MainWindowClosed then
 			MainWindowPosOpen = UIMainWindow.Position
-			TopBarText.Text = "NAM"
+			TopBarText.Text = "Genesis"
 			TweenService:Create(UIMainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Position = MainWindowPosClose,
 				Size = UDim2.fromOffset(112, 30)
@@ -1153,13 +1090,13 @@ do
 				MainWindowTweening = false
 			end)
 		else
-			TopBarText.Text = "    NAM | by mamalalanam | v" .. UhhhhhhVersion
+			TopBarText.Text = "    Genesis FE | v" .. UhhhhhhVersion
 			WindowContent.Visible = true
 			MainWindowPosClose = UIMainWindow.Position
 			SaveData.WindowClosedPosition = {MainWindowPosClose.X.Scale, MainWindowPosClose.X.Offset, MainWindowPosClose.Y.Scale, MainWindowPosClose.Y.Offset}
 			TweenService:Create(UIMainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Position = MainWindowPosOpen,
-				Size = UDim2.fromOffset(NAMWindowWidth, NAMWindowHeight)
+				Size = UDim2.fromOffset(480, 280)
 			}):Play()
 			TweenService:Create(TopBarClose.A, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Rotation = 0
@@ -1211,7 +1148,7 @@ end
 do
 	Util.Notify = function(text)
 		StarterGui:SetCore("SendNotification", {
-			Title = "NAM",
+			Title = "Uhhhhhh",
 			Text = text,
 			Duration = 5
 		})
@@ -1285,12 +1222,12 @@ do -- homepage
 	text.Position = UDim2.new(0.5, 0, 1, -25)
 	text.ZIndex = 3
 	text.Parent = CracktroFrame
-	local text0 = Util.MakeText("ROBUNEXA | READY")
+	local text0 = Util.MakeText("Discord: discord.gg/NASNUKRBVM")
 	text0.AnchorPoint = Vector2.new(0.5, 1)
 	text0.Position = UDim2.new(0.5, 0, 1, -17)
 	text0.ZIndex = 3
 	text0.Parent = CracktroFrame
-	local text1 = Util.MakeText("Made by MAMALALANAM >:D")
+	local text1 = Util.MakeText("Made by STEVETHEREALONE :" .. (math.random() < 0.333 and "3" or (math.random() < 0.5 and "D" or "P")))
 	text1.AnchorPoint = Vector2.new(0.5, 1)
 	text1.Position = UDim2.new(0.5, 0, 1, -17)
 	text1.ZIndex = 3
@@ -1310,13 +1247,13 @@ do -- homepage
 		"A great " .. os.date("%A") .. " today, eh?",
 		"Hello, " .. Player.Name .. ".",
 		"What makes you play at " .. os.date("%I %p") .. "?",
-		"You are going to love NAM, I just know it.",
+		"You are going to love Uhhhhhh, I just know it.",
 		"This script is very \"verbose\".",
 		"Written mostly on a mobile phone.",
 		"I am pretty new in this community! :D",
 		"\"Dreams come true!\"",
 		"Idea originated from a dream.",
-		"Thanks for using RobuNexa!",
+		"If you love this program, join my Discord!",
 	}
 	local text3 = nil
 	local function changequote()
@@ -2328,21 +2265,8 @@ function UI.CreateItemListItem(parent)
 	return ListBox
 end
 
-local NAMSelectTab
 local MainPage = UI.CreatePage()
 MainPage.Interactable = false
-
-local SettingsPage = UI.CreatePage()
-SettingsPage.Name = "NAMSettings"
-SettingsPage.ZIndex = 1
-SettingsPage.Position = UDim2.new(0.5, 360, 0.5, 0)
-SettingsPage.Interactable = false
-SettingsPage.Visible = false
-UI.CreateText(SettingsPage, "<b>SETTINGS</b>\\nAdvanced controls. Most users can leave these unchanged.", 17, Enum.TextXAlignment.Center)
-UI.CreateButton(SettingsPage, "&lt; Back to NAM", 18).Activated:Connect(function()
-	if NAMSelectTab then NAMSelectTab("NAM") end
-end)
-
 CracktroFrame.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		if _totalrendertime < 1 or not IsUhhhhhhFullyLoaded then return end
@@ -2359,22 +2283,365 @@ CracktroFrame.InputEnded:Connect(function(input)
 		end)
 	end
 end)
-UI.CreateText(MainPage, "<b>NAM</b>", 28, Enum.TextXAlignment.Center)
-UI.CreateText(MainPage, "by mamalalanam", 13, Enum.TextXAlignment.Center)
-UI.CreateText(MainPage, "Anime animations • simple controls", 12, Enum.TextXAlignment.Center)
-UI.CreateText(SettingsPage, `NAM | by mamalalanam | v{UhhhhhhVersion}`, 15, Enum.TextXAlignment.Right)
-UI.CreateSeparator(SettingsPage)
-UI.CreateButton(SettingsPage, "&lt; Back to NAM", 18).Activated:Connect(function()
-	if NAMSelectTab then NAMSelectTab("NAM") end
+local AsciiText = UI.CreateText(MainPage, "", 12, Enum.TextXAlignment.Center)
+Util.ForceTextSize(AsciiText)
+task.spawn(function()
+	local AsciiTextarts = {
+		{
+			"  ____ ___.__    .__    .__    .__    .__    .__      ",
+			" |    |   \\  |__ |  |__ |  |__ |  |__ |  |__ |  |__   ",
+			" |    |   /  |  \\|  |  \\|  |  \\|  |  \\|  |  \\|  |  \\  ",
+			" |    |  /|   Y  \\   Y  \\   Y  \\   Y  \\   Y  \\   Y  \\ ",
+			" |______/ |___|  /___|  /___|  /___|  /___|  /___|  / ",
+			"               \\/     \\/     \\/     \\/     \\/     \\/  ",
+		},
+		{
+			"  _   _ _     _     _     _     _     _      ",
+			" | | | | |   | |   | |   | |   | |   | |     ",
+			" | | | | |__ | |__ | |__ | |__ | |__ | |__   ",
+			" | | | | '_ \\| '_ \\| '_ \\| '_ \\| '_ \\| '_ \\  ",
+			" | |_| | | | | | | | | | | | | | | | | | | | ",
+			"  \\___/|_| |_|_| |_|_| |_|_| |_|_| |_|_| |_| ",
+		},
+		{
+			"     (   ( /(  ( /(  ( /(  ( /(  ( /(  ( /(  ",
+			"     )\\  )\\()) )\\()) )\\()) )\\()) )\\()) )\\()) ",
+			"  _ ((_)((_)\\ ((_)\\ ((_)\\ ((_)\\ ((_)\\ ((_)\\  ",
+			" | | | || |(_)| |(_)| |(_)| |(_)| |(_)| |(_) ",
+			" | |_| || ' \\ | ' \\ | ' \\ | ' \\ | ' \\ | ' \\  ",
+			"  \\___/ |_||_||_||_||_||_||_||_||_||_||_||_| ",
+		},
+		{
+			" db    db db      db      db      db      db      db      ",
+			" 88    88 88      88      88      88      88      88      ",
+			" 88    88 888888. 888888. 888888. 888888. 888888. 888888. ",
+			" 88    88 88   88 88   88 88   88 88   88 88   88 88   88 ",
+			" 88.  .88 88   88 88   88 88   88 88   88 88   88 88   88 ",
+			"  Y8888P  YP   YP YP   YP YP   YP YP   YP YP   YP YP   YP ",
+		},
+		{
+			" Un    iv er      sa      lH      ie      ra      rc      ",
+			" hi    ca l6      Re      an      im      at      eB      ",
+			" yS    TE VETHERE ALONEUn iversal Hierarc hical6R eanimat ",
+			" eB    yS TE   VE TH   ER EA   LO NE   Un iv   er sa   lH ",
+			" ier  arc ic   al 6R   ea ni   ma te   By ST   EV ET   HE ",
+			"  REALON  EU   ni ve   rs al   Hi er   ar ch   ic al   6R ",
+		},
+		{
+			"animatio'   .jQQQ|;;;;;;;;;;;;;|QQWp,   'tionanim",
+			"ationan'   .JTTVV|;;;;;;;;;;;;;|VVVVm>   'nimatio",
+			"nanima'   _mQc;~~|.............|~~+jQmc   'ionani",
+			"matio'   _QQQQg, |             |  jQQQQc.  'imati",
+			"onan'   <QQQQQQm;|   Uhhhhhh   |.wQQQQWQa,  'onan",
+			"ima'   jWQQQQQQQQ|             |mQQQQQQQQg,  'mat",
+		},
+		{
+			"fore! It is really great! Good product! Feel alive, NO",
+			"st part^ '' '  \"\"*E! (excluding taxes and the bills) N",
+			"r seu- . Uhhhhhh .-|u ihis! It has become something ne",
+			"rse! We ,... . ,.-rs of yellow-orange shiny triangles.",
+			"ns at a really stable framerate, so optimised it handl",
+			"ow, BUY OUR PRODUCT FOR FREE! We know you like it! We ",
+		},
+		{
+			"....... gmWWWQQQQQQPg ..............................",
+			":;:;:; qm#WWNWQQWQWWmp ;:;:;:.                  .;:;",
+			"!!?!!?.WX##: W#W :###W.?!!?:.  hi im steve!      .:!",
+			"lilili:ZSXS: XSX :X##Z:ilil!. welcome to Uhhhhhh .!i",
+			"EEEEEE:YLkk2S2SXSXSXZP:EEEEEi:                  :iEE",
+			"%%%%%%%;vnvkkkk2S2vnv;%%%%%%%%%oooooooooooooooo%%%%%",
+		},
+		{
+			"  Get Uhhhhhh today! Feel the difference!       ",
+			"           (-_-)         EPIC!    (^~^)   .vv=E ",
+			"       ()-(:::::)-()         .()-(:::::)-()'    ",
+			"LAME!  || |.....| ||      3=^^'  /...../        ",
+			"       YP |     | YP            (     )   COOL! ",
+			"      Without Uhhhhhh   vs.   With Uhhhhhh      ",
+		},
+		{
+			"55 68 68 68 68 68 68 55 68 68 68 68 68 68",
+			"68 68 68 68 68 68 55 68 68 68 68 68 68 55",
+			"68 68 68 68 68 55 68 68 68 68 68 68 55 68",
+			"68 68 68 68 Uhhhhhh  68 68 68 68 55 68 68",
+			"68 68 68 55 68 68 68 68 68 68 55 68 68 68",
+			"68 68 55 68 68 68 68 68 68 55 68 68 68 68",
+		},
+		{
+			"  Uhhhhhh          ",
+			"  01010101         ",
+			"   01101000        ",
+			"    01101000       ",
+			"     01101000      ",
+			"      01101000     ",
+			"       01101000    ",
+			"        01101000   ",
+			"         Uhhhhhh   ",
+		},
+		{
+			"+-[ Uhhhhhh Reanimate ]-----------------[#]-+",
+			"|    ___                                    |",
+			"|   / o \\   Hello, world! Programmed to     |",
+			"|   \\ l /   work and not to feel.           |",
+			"|    \"\"\"                                    |",
+			"+-------------------------------------------+",
+		},
+		{
+			"       cIyyyyyyF0\\ `TFyyyyyyq8_                 ",
+			"           i+`}0v       V!'xD~                  ",
+			"           &x~[.        W|11   --Uhhhhhh--      ",
+			"          ~W,          }D                       ",
+			"        <d$-         tg3`                       ",
+			"   \".''   ......             '.      \"`   ;     ",
+			"   2]~<J  ;!ci2q' rrrr^   <1_q'   -inr   `0;    ",
+			"   F` '2    F<;            [&I- _+r%)    `@<}!  ",
+			"    ~1}`  `}\\    ;*111*; ^[; .^    +\\    `x     ",
+		},
+		{
+			"  local oldsec = 0          .-+=* Uhhhhhh *=+-. ",
+			"  while i < #keyframes do     (code-ception!)   ",
+			"      local k = keyframes[i]                    ",
+			"      local sec = k.Time // self._optimiser     ",
+			"      while oldsec < sec do                     ",
+			"          local j = math.max(1, i - 1)          ",
+		},
+		{
+			"er failed to process http://assetgame.roblox.com/as",
+			"er failed to process http://assetgame.roblox.com/as",
+			"--------------------------------------------       ",
+			"so, Uhhhhhh...                                     ",
+			"--------------------------------------------       ",
+			"er failed to process http://assetgame.roblox.com/as",
+			"er failed to process http://assetgame.roblox.com/as",
+			"er failed to process http://assetgame.roblox.com/as",
+		},
+		{
+			"usage: clone this repo and change the token and the",
+			"(unless you like chaos) also make sure you have all",
+			"the dev portal cuz Uhhhhhh.                        ",
+			"                                                   ",
+			"\"it's not fast it's shit\"                          ",
+			"Believe me friend, its fuckingly fast, you don't ev",
+		},
+		{
+			"Uhhhhhh  https://discord.gg/NASNUKRBVM  Uhhhhhh",
+			"Uhhhhhh Uhhhhhh Uhhhhhh Uhhhhhh STEVETHEREALONE",
+			"Uhhhhhh Uhhhhhh Uhhhhhh STEVETHEREALONE Uhhhhhh",
+			"Uhhhhhh Uhhhhhh STEVETHEREALONE Uhhhhhh Uhhhhhh",
+			"Uhhhhhh STEVETHEREALONE Uhhhhhh Uhhhhhh Uhhhhhh",
+			"STEVETHEREALONE Uhhhhhh Uhhhhhh Uhhhhhh Uhhhhhh",
+		},
+	}
+	AsciiText.Text = table.concat(AsciiTextarts[math.random(1, #AsciiTextarts)], "\n")
+	local AsciiTextartsw = false
+	local AsciiTextarttr = {}
+	do -- generate transitions
+		-- wipe to right
+		local a = {}
+		for i=0, 59 do
+			local t = i / 60
+			t *= 5
+			t = (t - 1) / 3
+			t *= 5
+			local map = {}
+			for y=0, 64 do
+				local layer = {}
+				for x=0, 64 do
+					local prog = x / 64
+					prog *= 5
+					table.insert(layer, math.round(math.clamp(t - prog + math.random() * 0.2, 0, 1) * 3))
+				end
+				table.insert(map, layer)
+			end
+			table.insert(a, map)
+			task.wait()
+		end
+		table.insert(AsciiTextarttr, a)
+		table.insert(AsciiTextarttr, a)
+		table.insert(AsciiTextarttr, a)
+		table.insert(AsciiTextarttr, a)
+		-- noisy fade
+		a = {}
+		for i=0, 59 do
+			local t = i / 60
+			local map = {}
+			for y=0, 64 do
+				local layer = {}
+				for x=0, 64 do
+					table.insert(layer, math.round(math.clamp(t * 2 - 1 + math.random() * 0.8, 0, 1) * 3))
+				end
+				table.insert(map, layer)
+			end
+			table.insert(a, map)
+			task.wait()
+		end
+		table.insert(AsciiTextarttr, a)
+		-- circle outward
+		a = {}
+		for i=0, 59 do
+			local t = i / 60
+			t *= 5
+			local map = {}
+			for y=0, 64 do
+				local layer = {}
+				for x=0, 64 do
+					local dist = math.sqrt(math.pow(x - 32, 2) + math.pow(y - 32, 2)) / 64
+					dist *= 5
+					table.insert(layer, math.round(math.clamp(t - dist + math.random() * 0.2, 0, 1) * 3))
+				end
+				table.insert(map, layer)
+			end
+			table.insert(a, map)
+			task.wait()
+		end
+		table.insert(AsciiTextarttr, a)
+		-- circle inward
+		a = {}
+		for i=0, 59 do
+			local t = 1 - i / 60
+			t *= 5
+			t -= 1
+			local map = {}
+			for y=0, 64 do
+				local layer = {}
+				for x=0, 64 do
+					local dist = math.sqrt(math.pow(x - 32, 2) + math.pow(y - 32, 2)) / 64
+					dist *= 5
+					table.insert(layer, math.round(math.clamp(dist - t + math.random() * 0.2, 0, 1) * 3))
+				end
+				table.insert(map, layer)
+			end
+			table.insert(a, map)
+			task.wait()
+		end
+		table.insert(AsciiTextarttr, a)
+	end
+	local function switchart()
+		if AsciiTextartsw then return end
+		AsciiTextartsw = true
+		local function animation(art, inv)
+			local transmap = AsciiTextarttr[math.random(1, #AsciiTextarttr)]
+			local rot = math.random(0, 3)
+			local st = os.clock()
+			repeat
+				local t = os.clock() - st
+				local i = math.clamp(math.floor(t * 60) + 1, 1, 60)
+				local render = {}
+				for iy=1, #art do
+					local y = (iy - 1) / #art
+					local conc = ""
+					local txt = art[iy]
+					for ix=1, #txt do
+						local x = (ix - 1) / #txt
+						local ch = string.sub(txt, ix, ix)
+						local b = 0
+						if rot == 0 then
+							b = transmap[i][math.floor(y * 64) + 1][math.floor(x * 64) + 1]
+						elseif rot == 1 then
+							b = transmap[i][math.floor(x * 64) + 1][64 - math.floor(y * 64)]
+						elseif rot == 2 then
+							b = transmap[i][64 - math.floor(y * 64)][64 - math.floor(x * 64)]
+						elseif rot == 3 then
+							b = transmap[i][64 - math.floor(x * 64)][math.floor(y * 64) + 1]
+						end
+						if inv then b = 3 - b end
+						if b == 1 then
+							if (ch == ch:upper() and ch ~= ch:lower()) or ch == "8" or ch == "0" then
+								ch = "?"
+							elseif ch == ":" or ch == ";" or ch == "_" then
+								ch = "."
+							elseif ch == "." or ch == "," or ch == " " then
+								ch = " "
+							else
+								ch = ":"
+							end
+						elseif b == 2 then
+							if (ch == ch:upper() and ch ~= ch:lower()) or ch == "8" or ch == "0" then
+								ch = ":"
+							elseif ch == ":" or ch == ";" or ch == "_" or ch == "." or ch == "," or ch == " " then
+								ch = " "
+							else
+								ch = "."
+							end
+						elseif b == 3 then
+							ch = " "
+						end
+						conc ..= ch
+					end
+					table.insert(render, conc)
+				end
+				AsciiText.Text = table.concat(render, "\n")
+				task.wait()
+			until os.clock() > st + 1
+		end
+		local source = string.split(AsciiText.Text, "\n")
+		local target = source
+		while table.concat(source, "\n") == table.concat(target, "\n") do
+			task.wait()
+			target = AsciiTextarts[math.random(1, #AsciiTextarts)]
+		end
+		animation(source, false)
+		animation(target, true)
+		AsciiText.Text = table.concat(target, "\n")
+		AsciiTextartsw = false
+	end
+	local AsciiTextartin = nil
+	AsciiText.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			AsciiTextartin = input
+		end
+	end)
+	AsciiText.InputEnded:Connect(function(input)
+		if AsciiTextartin == input then
+			AsciiTextartin = nil
+			switchart()
+		end
+	end)
+	switchart()
 end)
-UI.CreateSwitch(SettingsPage, "Skip Intro", SaveData.SkipIntro).Changed:Connect(function(value)
+UI.CreateText(MainPage, `Reanimate V{UhhhhhhVersion}, By STEVE :D`, 15, Enum.TextXAlignment.Right)
+UI.CreateSeparator(MainPage)
+UI.CreateButton(MainPage, " &lt; Back to cool scene", 20).Activated:Connect(function()
+	CracktroFrame.Interactable = false
+	CracktroFrame.Visible = true
+	MainPage.Interactable = false
+	local tween = TweenService:Create(CracktroFrame, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+	})
+	tween:Play()
+	tween.Completed:Connect(function()
+		CracktroFrame.Interactable = true
+	end)
+end)
+UI.CreateSwitch(MainPage, "Skip Intro", SaveData.SkipIntro).Changed:Connect(function(value)
 	SaveData.SkipIntro = value
 end)
-UI.CreateText(SettingsPage, "UI Theme: Sakura (locked)", 16, Enum.TextXAlignment.Left)
-UI.CreateSeparator(SettingsPage)
+UI.CreateDropdown(MainPage, "UI Theme", {
+	"RGB/Default",
+	"ALONE",
+	"Oxide",
+	"Patchma Hub",
+	"Genesis V4",
+	"Crimson",
+	"r/masterhacker",
+	"Homer Simpson",
+	"Immortality Lord",
+	"LIGHT RGB",
+	"LIGHT ALONE",
+	"Roserika",
+	"FastTracker II Blue",
+	"Cherry Blossom",
+	"Sakura",
+	"Tommorow Night 80s", -- my personal IDE theme
+	"User Defined (see README)",
+}, SaveData.UITheme).Changed:Connect(function(val)
+	SaveData.UITheme = val
+	SetUITheme(SaveData.UITheme)
+end)
+UI.CreateSeparator(MainPage)
 
-local MusicName = UI.CreateText(SettingsPage, "", 15, Enum.TextXAlignment.Center)
-UI.CreateButton(SettingsPage, "Random UI Music", 20).Activated:Connect(function()
+local MusicName = UI.CreateText(MainPage, "", 15, Enum.TextXAlignment.Center)
+UI.CreateButton(MainPage, "Random UI Music", 20).Activated:Connect(function()
 	MusicPlayer.PlayMusic()
 end)
 local _musicnames = {"-- Choose --"}
@@ -2382,20 +2649,20 @@ for i=1, #MusicPlayer.Database do
 	local hi = MusicPlayer.Database[i]
 	table.insert(_musicnames, hi[2])
 end
-local MusicSelect = UI.CreateDropdown(SettingsPage, "UI Music", _musicnames, 1)
+local MusicSelect = UI.CreateDropdown(MainPage, "UI Music", _musicnames, 1)
 MusicSelect.Changed:Connect(function(val)
 	if val > 1 then
 		MusicSelect.Value = 1
 		MusicPlayer.PlayMusic(val - 1)
 	end
 end)
-UI.CreateSwitch(SettingsPage, "Mute UI Music", SaveData.MuteUIMusic).Changed:Connect(function(value)
+UI.CreateSwitch(MainPage, "Mute UI Music", SaveData.MuteUIMusic).Changed:Connect(function(value)
 	SaveData.MuteUIMusic = value
 end)
-UI.CreateSwitch(SettingsPage, "Mute Reanim Music", SaveData.MuteReanimMusic).Changed:Connect(function(value)
+UI.CreateSwitch(MainPage, "Mute Reanim Music", SaveData.MuteReanimMusic).Changed:Connect(function(value)
 	SaveData.MuteReanimMusic = value
 end)
-UI.CreateSwitch(SettingsPage, "Mute Sounds", SaveData.MuteUISound).Changed:Connect(function(value)
+UI.CreateSwitch(MainPage, "Mute Sounds", SaveData.MuteUISound).Changed:Connect(function(value)
 	SaveData.MuteUISound = value
 	if value then
 		UISound.Click.Volume = 0
@@ -2403,7 +2670,7 @@ UI.CreateSwitch(SettingsPage, "Mute Sounds", SaveData.MuteUISound).Changed:Conne
 		UISound.Click.Volume = 1
 	end
 end)
-UI.CreateSeparator(SettingsPage)
+UI.CreateSeparator(MainPage)
 
 UISound.MovesetMusic = Util.Instance("Sound", UIMainFrame)
 UISound.MovesetMusic.Looped = true
@@ -2525,10 +2792,10 @@ end)
 
 local function CreateHumanoidCharacter()
 	local char = Util.Instance("Model")
-	char.Name = "(C) NAM V" .. UhhhhhhVersion
+	char.Name = "(C) Uhhhhhh V" .. UhhhhhhVersion
 
 	local god = Util.Instance("ForceField", char)
-	god.Name = "NAM >:D"
+	god.Name = "heyy!! :33"
 	god.Visible = false
 
 	local hum = Util.Instance("Humanoid", char)
@@ -3274,7 +3541,7 @@ Reanimate.CreateCharacter = function(InitCFrame)
 	local RCHumanoid, RCRootPart = RC.Humanoid, RC.HumanoidRootPart
 	local RCHead, RCTorso, RCRootJoint, RCNeck = RC.Head, RC.Torso, RCRootPart.RootJoint, RC.Torso.Neck
 	--[[local Anchor = Instance.new("Part", RCRootPart)
-	Anchor.Name = "NAM >:D"
+	Anchor.Name = "i can take explosions >:3"
 	Anchor.Transparency = 1
 	Anchor.Anchored = false
 	Anchor.CanCollide = false
@@ -3296,7 +3563,7 @@ Reanimate.CreateCharacter = function(InitCFrame)
 				SeatWeld = SeatWeld:Destroy()
 			end
 			SeatWeld = Instance.new("Weld")
-			SeatWeld.Name = "NAM >:D"
+			SeatWeld.Name = "hell yeah!! :3"
 			SeatWeld.Parent = RCRootPart
 			SeatWeld.Part0 = part
 			SeatWeld.Part1 = RCRootPart
@@ -4262,13 +4529,13 @@ function HatReanimator.Config(parent)
 	UI.CreateText(parent, "if ur hats get voided when u try to hat collide\nvvv try changing this vvv", 10, Enum.TextXAlignment.Center)
 	UI.CreateDropdown(parent, "Torso Offset", {
 		"1 - ShownApe's method (???)",
-		"2 - MAMALALANAM's method V1 (specific)",
+		"2 - STEVE's method V1 (specific)",
 		"3 - 2 but for back accessories",
 		"4 - 2 but for shoulder accessories",
 		"5 - 2 but for waist accessories",
-		"6 - MAMALALANAM's method V2 (kinda stable)",
+		"6 - STEVE's method V2 (kinda stable)",
 		"7 - 6 but further from void (gl getting hatdrop)",
-		"8 - MAMALALANAM's method V3 (most stable)",
+		"8 - STEVE's method V3 (most stable)",
 		"9 - experimental do not use",
 	}, HatReanimator.HatCollideMethod + 1).Changed:Connect(function(val)
 		HatReanimator.HatCollideMethod = val - 1
@@ -4548,7 +4815,7 @@ function HatReanimator.Start()
 			p.CanTouch = false
 			p.CanQuery = false
 			p.Transparency = 0.75
-			p.Name = "(C) NAM V" .. UhhhhhhVersion .. " :: HAT PLACEHOLDER"
+			p.Name = "(C) Uhhhhhh V" .. UhhhhhhVersion .. " :: HAT PLACEHOLDER"
 			for _,v in p:GetDescendants() do
 				if v:IsA("LuaSourceContainer") then
 					v:Destroy()
@@ -6297,46 +6564,33 @@ _G_Uhhhhhh.Fling = function(part)
 end
 
 do
-	-- NAM keeps Limb Reanimator as the only selectable reanimation mode.
-	SaveData.SelectedReanimator = 1
+	SaveData.SelectedReanimator = SaveData.SelectedReanimator or 1
+	local ReanimateMethodSelect = UI.CreateDropdown(MainPage, "Reanimator", {"Limb Reanimator", "Hats Reanimator"}, SaveData.SelectedReanimator)
+	local ReanimatorConfigTitle = UI.CreateText(MainPage, "-=+ Limb Reanimator Config +=-", 15, Enum.TextXAlignment.Center)
 	local SelectedReanimator = LimbReanimator
-	UI.CreateText(SettingsPage, "-=+ Limb Reanimator Config +=-", 15, Enum.TextXAlignment.Center)
-	local ReanimatorConfigCanvas = UI.CreateCanvas(SettingsPage)
+	if SaveData.SelectedReanimator == 2 then
+		SelectedReanimator = HatReanimator
+		ReanimatorConfigTitle.Text = "-=+ Hats Reanimator Config +=-"
+	end
+	local ReanimatorConfigCanvas = UI.CreateCanvas(MainPage)
+	ReanimateMethodSelect.Changed:Connect(function(value)
+		SaveData.SelectedReanimator = value
+		if value == 1 then
+			SelectedReanimator = LimbReanimator
+			ReanimatorConfigTitle.Text = "-=+ Limb Reanimator Config +=-"
+		end
+		if value == 2 then
+			SelectedReanimator = HatReanimator
+			ReanimatorConfigTitle.Text = "-=+ Hats Reanimator Config +=-"
+		end
+		Util.ClearAllChildrenGui(ReanimatorConfigCanvas)
+		SelectedReanimator.Config(ReanimatorConfigCanvas)
+	end)
 	SelectedReanimator.Config(ReanimatorConfigCanvas)
-	UI.CreateText(ReanimPage, "NAM Limb Reanimator", 10, Enum.TextXAlignment.Center)
+	UI.CreateText(ReanimPage, "Enjoy my really awful UI design! It's awful, but hey atleast clicking Reanimate is faster!", 8, Enum.TextXAlignment.Center)
 	local ReanimateText = UI.CreateText(ReanimPage, "Running: NONE", 15, Enum.TextXAlignment.Center)
-	local function NAMCheckLimbSupport()
-	local character = Player.Character
-	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	if not character or not humanoid then return false end
-	local root = character:FindFirstChild("HumanoidRootPart")
-	local torso = character:FindFirstChild("Torso")
-	local supported = humanoid.RigType == Enum.HumanoidRigType.R6 and root ~= nil and torso ~= nil
-	if supported then
-		for _, name in {"Head", "Left Arm", "Right Arm", "Left Leg", "Right Leg"} do
-			if not character:FindFirstChild(name) then supported = false break end
-		end
-	end
-	if supported then
-		for _, name in {"Neck", "Right Shoulder", "Left Shoulder", "Right Hip", "Left Hip"} do
-			if not torso:FindFirstChild(name) then supported = false break end
-		end
-		if not root:FindFirstChild("RootJoint") then supported = false end
-	end
-	Util.Notify(supported and "SUPPORTED GAME DETECTED" or "UNSUPPORTED GAME !!! >:D")
-	return supported
-end
-
-if Player.Character then
-	task.delay(1, NAMCheckLimbSupport)
-end
-Player.CharacterAdded:Connect(function()
-	task.delay(1, NAMCheckLimbSupport)
-end)
-
-local ReanimateStartButton, ReanimateStartButtonText = UI.CreateButton(ReanimPage, "Start", 20)
+	local ReanimateStartButton, ReanimateStartButtonText = UI.CreateButton(ReanimPage, "Reanimate", 20)
 	ReanimateStartButton.Activated:Connect(function()
-		if not Reanimate.Current and not NAMCheckLimbSupport() then return end
 		ReanimateStartButton.Interactable = false
 		if Reanimate.Current then
 			ReanimateStartButtonText.Text = "Stopping"
@@ -6347,7 +6601,7 @@ local ReanimateStartButton, ReanimateStartButtonText = UI.CreateButton(ReanimPag
 			HumanoidLASetHookState(false)
 			ReanimateText.Text = "Running: NONE"
 			task.wait(1)
-			ReanimateStartButtonText.Text = "Start"
+			ReanimateStartButtonText.Text = "Reanimate"
 		else
 			ReanimateStartButtonText.Text = "Starting"
 			Reanimate.Starting = true
@@ -6358,52 +6612,56 @@ local ReanimateStartButton, ReanimateStartButtonText = UI.CreateButton(ReanimPag
 			repeat task.wait() until not Reanimate.Starting
 			Reanimate.Current.Running = true
 			task.wait(1)
-			ReanimateStartButtonText.Text = "Stop"
+			ReanimateStartButtonText.Text = "Deanimate"
 		end
 		ReanimateStartButton.Interactable = true
+	end)
+	UI.CreateButton(ReanimPage, "Hitboxes", 15).Activated:Connect(function()
+		if not Reanimate.Character then return end
+		ReanimateShowHitboxes()
 	end)
 	UI.CreateButton(ReanimPage, "Refresh", 10).Activated:Connect(function()
 		if not Reanimate.Character then return end
 		Reanimate.CreateCharacter()
 	end)
 end
-UI.CreateSeparator(SettingsPage)
+UI.CreateSeparator(MainPage)
 
 do
-	UI.CreateText(SettingsPage, "Reanimate Character Settings", 15, Enum.TextXAlignment.Center)
-	UI.CreateSwitch(SettingsPage, "Infinite Jump", Reanimate.InfiniteJump).Changed:Connect(function(val)
+	UI.CreateText(MainPage, "Reanimate Character Settings", 15, Enum.TextXAlignment.Center)
+	UI.CreateSwitch(MainPage, "Infinite Jump", Reanimate.InfiniteJump).Changed:Connect(function(val)
 		Reanimate.InfiniteJump = val
 		SaveData.NoInfiniteJump = not val
 	end)
-	UI.CreateSwitch(SettingsPage, "Noclip", Reanimate.Noclip).Changed:Connect(function(val)
+	UI.CreateSwitch(MainPage, "Noclip", Reanimate.Noclip).Changed:Connect(function(val)
 		Reanimate.Noclip = val
 		SaveData.NoclipEnabled = val
 	end)
-	UI.CreateSwitch(SettingsPage, "Smooth Camera", Reanimate.SmoothCam).Changed:Connect(function(val)
+	UI.CreateSwitch(MainPage, "Smooth Camera", Reanimate.SmoothCam).Changed:Connect(function(val)
 		Reanimate.SmoothCam = val
 		SaveData.NoSmoothCam = not val
 	end)
-	UI.CreateSwitch(SettingsPage, "Allow Shiftlock", Reanimate.ShiftlockEnabled).Changed:Connect(function(val)
+	UI.CreateSwitch(MainPage, "Allow Shiftlock", Reanimate.ShiftlockEnabled).Changed:Connect(function(val)
 		Reanimate.ShiftlockEnabled = val
 		SaveData.ShiftlockDisabled = not val
 	end)
-	UI.CreateSwitch(SettingsPage, "Can Sit on Seats", Reanimate.SeatSit).Changed:Connect(function(val)
+	UI.CreateSwitch(MainPage, "Can Sit on Seats", Reanimate.SeatSit).Changed:Connect(function(val)
 		Reanimate.SeatSit = val
 		SaveData.NoSeatSitEnabled = not val
 	end)
-	UI.CreateSwitch(SettingsPage, "Can Pickup Tools", Reanimate.ToolGrab).Changed:Connect(function(val)
+	UI.CreateSwitch(MainPage, "Can Pickup Tools", Reanimate.ToolGrab).Changed:Connect(function(val)
 		Reanimate.ToolGrab = val
 		SaveData.ToolGrabEnabled = val
 	end)
-	UI.CreateSwitch(SettingsPage, "Apply Scale to Gravity", Reanimate.ScaleGravity).Changed:Connect(function(val)
+	UI.CreateSwitch(MainPage, "Apply Scale to Gravity", Reanimate.ScaleGravity).Changed:Connect(function(val)
 		Reanimate.ScaleGravity = val
 		SaveData.ScaleGravityEnabled = val
 	end)
-	UI.CreateSwitch(SettingsPage, "Void Float", Reanimate.PatchmaVoidFloat).Changed:Connect(function(val)
+	UI.CreateSwitch(MainPage, "Void Float", Reanimate.PatchmaVoidFloat).Changed:Connect(function(val)
 		Reanimate.PatchmaVoidFloat = val
 		SaveData.PatchmaVoidFloat = val
 	end)
-	UI.CreateButton(SettingsPage, "Force Sit (2x to remove gyro)", 20).Activated:Connect(function()
+	UI.CreateButton(MainPage, "Force Sit (2x to remove gyro)", 20).Activated:Connect(function()
 		local ch = Reanimate.Character or Player.Character
 		if ch then
 			local h = ch:FindFirstChildOfClass("Humanoid")
@@ -6425,21 +6683,21 @@ do
 			end
 		end
 	end)
-	local CharacterScaleSlider = UI.CreateSlider(SettingsPage, "Character Scale", Reanimate.CharacterScale, 0.5, 5, 0.5)
+	local CharacterScaleSlider = UI.CreateSlider(MainPage, "Character Scale", Reanimate.CharacterScale, 0.5, 5, 0.5)
 	CharacterScaleSlider.Changed:Connect(function(val)
 		val = math.clamp(val, 0.001, 20)
 		CharacterScaleSlider.Value = val
 		Reanimate.CharacterScale = val
 		SaveData.CharacterScale = val
 	end)
-	local PlaceholderTransparencySlider = UI.CreateSlider(SettingsPage, "Placeholders", Reanimate.PlaceholderTransparency, 0, 1, 0.05)
+	local PlaceholderTransparencySlider = UI.CreateSlider(MainPage, "Placeholders", Reanimate.PlaceholderTransparency, 0, 1, 0.05)
 	PlaceholderTransparencySlider.Changed:Connect(function(val)
 		val = math.clamp(val, 0, 1)
 		PlaceholderTransparencySlider.Value = val
 		Reanimate.PlaceholderTransparency = val
 		SaveData.PlaceholderTransparency = val
 	end)
-	UI.CreateSeparator(SettingsPage)
+	UI.CreateSeparator(MainPage)
 	local function ReanimCharacterTeleport(pos)
 		local ch = Reanimate.Character or Player.Character
 		if ch then
@@ -6452,11 +6710,11 @@ do
 			end
 		end
 	end
-	UI.CreateSwitch(SettingsPage, "Click Fling", Reanimate.ClickFling).Changed:Connect(function(val)
+	UI.CreateSwitch(MainPage, "Click Fling", Reanimate.ClickFling).Changed:Connect(function(val)
 		Reanimate.ClickFling = val
 		SaveData.ClickFlingEnabled = val
 	end)
-	UI.CreateSwitch(SettingsPage, "Key+Click Teleport", Reanimate.CtrlClick).Changed:Connect(function(val)
+	UI.CreateSwitch(MainPage, "Key+Click Teleport", Reanimate.CtrlClick).Changed:Connect(function(val)
 		Reanimate.CtrlClick = val
 		SaveData.CtrlClickEnabled = val
 	end)
@@ -6487,7 +6745,7 @@ do
 		end
 	end
 	updatekey()
-	UI.CreateDropdown(SettingsPage, "TP Key", {
+	UI.CreateDropdown(MainPage, "TP Key", {
 		"Left Ctrl (default)", "inno's pick (']')", "Tab (idk)",
 		"Z", "X (i like this one on pc)", "F", "T",
 	}, SaveData.CtrlClickKey).Changed:Connect(function(val)
@@ -6495,7 +6753,7 @@ do
 		updatekey()
 	end)
 	local Maus = Player:GetMouse()
-	local HoldingCtrl = UI.CreateSwitch(SettingsPage, "TP Key Held", false)
+	local HoldingCtrl = UI.CreateSwitch(MainPage, "TP Key Held", false)
 	local _lastclick = nil
 	local _lastclickgpe = false
 	local _lastclicktick = 0
@@ -6541,7 +6799,7 @@ do
 			end
 		end
 	end)
-	UI.CreateButton(SettingsPage, "Teleport to 0, highest, 0", 20).Activated:Connect(function()
+	UI.CreateButton(MainPage, "Teleport to 0, highest, 0", 20).Activated:Connect(function()
 		local hit = workspace:Raycast(Vector3.new(0, 4500, 0), Vector3.new(0, -4500 + FallenPartsDestroyHeight, 0))
 		if hit and hit.Position == hit.Position then
 			ReanimCharacterTeleport(hit.Position + Vector3.new(0, 5, 0))
@@ -6549,11 +6807,11 @@ do
 			ReanimCharacterTeleport(Vector3.new(0, 0, 0))
 		end
 	end)
-	UI.CreateButton(SettingsPage, "Teleport to 'LastSafe'", 20).Activated:Connect(function()
+	UI.CreateButton(MainPage, "Teleport to 'LastSafe'", 20).Activated:Connect(function()
 		ReanimCharacterTeleport(Vector3.new(0, FallenPartsDestroyHeight - 5000, 0))
 	end)
-	local TeleportToPlayerSel = UI.CreateText(SettingsPage, "<font color=\"#AAAAAA\">(enter a player name)</font>", 15, Enum.TextXAlignment.Center)
-	local TeleportToPlayer = UI.CreateTextbox(SettingsPage, "", "Teleport To Player", 20)
+	local TeleportToPlayerSel = UI.CreateText(MainPage, "<font color=\"#AAAAAA\">(enter a player name)</font>", 15, Enum.TextXAlignment.Center)
+	local TeleportToPlayer = UI.CreateTextbox(MainPage, "", "Teleport To Player", 20)
 	TeleportToPlayer:GetPropertyChangedSignal("Text"):Connect(function()
 		local sel = Util.QueryPlayerSelector(TeleportToPlayer.Text)
 		if sel then
@@ -6579,35 +6837,35 @@ do
 		end
 	end)
 end
-UI.CreateSeparator(SettingsPage)
+UI.CreateSeparator(MainPage)
 do
-	UI.CreateText(SettingsPage, "Internals Settings", 15, Enum.TextXAlignment.Center)
-	UI.CreateSwitch(SettingsPage, "Hook LoadAnimation", Reanimate.UseLoadAnimationHook).Changed:Connect(function(val)
+	UI.CreateText(MainPage, "Internals Settings", 15, Enum.TextXAlignment.Center)
+	UI.CreateSwitch(MainPage, "Hook LoadAnimation", Reanimate.UseLoadAnimationHook).Changed:Connect(function(val)
 		Reanimate.UseLoadAnimationHook = val
 		SaveData.NoLoadAnimationHook = not val
 	end)
-	UI.CreateSwitch(SettingsPage, "Use Physics Glue", Reanimate.UsePhysicsRepRootPart).Changed:Connect(function(val)
+	UI.CreateSwitch(MainPage, "Use Physics Glue", Reanimate.UsePhysicsRepRootPart).Changed:Connect(function(val)
 		Reanimate.UsePhysicsRepRootPart = val
 		SaveData.NoPhysicsRepRootPart = not val
 	end)
-	UI.CreateText(SettingsPage, "internals for physics based reanimation\n(like hat reanimator)", 10, Enum.TextXAlignment.Center)
-	UI.CreateSwitch(SettingsPage, "Patchma-like Netless", Reanimate.UsePatchmaLikeNetless).Changed:Connect(function(val)
+	UI.CreateText(MainPage, "internals for physics based reanimation\n(like hat reanimator)", 10, Enum.TextXAlignment.Center)
+	UI.CreateSwitch(MainPage, "Patchma-like Netless", Reanimate.UsePatchmaLikeNetless).Changed:Connect(function(val)
 		Reanimate.UsePatchmaLikeNetless = val
 		SaveData.UsePatchmaLikeNetless = val
 	end)
-	local NetVelSlider = UI.CreateSlider(SettingsPage, "Netless Velocity", Reanimate.NetlessVelocity, 25.01, 30, 0.1)
+	local NetVelSlider = UI.CreateSlider(MainPage, "Netless Velocity", Reanimate.NetlessVelocity, 25.01, 30, 0.1)
 	NetVelSlider.Changed:Connect(function(val)
 		val = math.clamp(val, 25.01, 30)
 		NetVelSlider.Value = val
 		Reanimate.NetlessVelocity = val
 		SaveData.NetlessVelocity = val
 	end)
-	UI.CreateSwitch(SettingsPage, "Apply RotVelocity", Reanimate.UseAngularVelocity).Changed:Connect(function(val)
+	UI.CreateSwitch(MainPage, "Apply RotVelocity", Reanimate.UseAngularVelocity).Changed:Connect(function(val)
 		Reanimate.UseAngularVelocity = val
 		SaveData.UseAngularVelocity = val
 	end)
 end
-UI.CreateSeparator(SettingsPage)
+UI.CreateSeparator(MainPage)
 
 local AnimLib = {}
 do
@@ -6687,21 +6945,6 @@ do
 	function Track.fromfile(path)
 		local s, data = pcall(readfile, path)
 		if s and data then
-			if data:sub(1, 1) == "{" then
-				local decodedOk, decoded = pcall(function()
-					return HttpService:JSONDecode(data)
-				end)
-				if decodedOk and type(decoded) == "table" and type(decoded.Keyframes) == "table" then
-					for _, keyframe in decoded.Keyframes do
-						for _, pose in keyframe.Poses or {} do
-							if type(pose.CFrame) == "table" then
-								pose.CFrame = CFrame.new(table.unpack(pose.CFrame))
-							end
-						end
-					end
-					return decoded
-				end
-			end
 			local buf = buffer.fromstring(data)
 			return Track.frombuffer(buf)
 		end
@@ -7013,7 +7256,7 @@ local function AssetGetPathFromFilename(filename)
 end
 local _Assetdownloading = {}
 local function AssetDownload(filename)
-	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. filename
+	local source = "https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh/main/content/" .. filename
 	local split = string.split(filename, "@")
 	if #split > 1 then
 		filename = table.remove(split, 1)
@@ -7090,7 +7333,7 @@ MovesetsPage.ZIndex = 1
 MovesetsPage.Position = UDim2.new(0.5, 360, 0.5, 0)
 MovesetsPage.Interactable = false
 MovesetsPage.Visible = false
-UI.CreateButton(MainPage, "Cursed car anim &gt;", 20).Activated:Connect(function()
+UI.CreateButton(MainPage, "Movesets &gt;", 20).Activated:Connect(function()
 	MovesetsPage.Interactable = false
 	MovesetsPage.Visible = true
 	MainPage.Interactable = false
@@ -7120,21 +7363,40 @@ DancesPage.ZIndex = 1
 DancesPage.Position = UDim2.new(0.5, 360, 0.5, 0)
 DancesPage.Interactable = false
 DancesPage.Visible = false
-UI.CreateButton(MainPage, "ANIMATIONS &gt;", 20).Activated:Connect(function()
-	if NAMSelectTab then NAMSelectTab("ANIMATIONS") end
+UI.CreateButton(MainPage, "Dances &gt;", 20).Activated:Connect(function()
+	DancesPage.Interactable = false
+	DancesPage.Visible = true
+	MainPage.Interactable = false
+	local tween = TweenService:Create(DancesPage, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+	})
+	tween:Play()
+	tween.Completed:Connect(function()
+		DancesPage.Interactable = true
+	end)
 end)
-UI.CreateButton(MainPage, "SETTINGS &gt;", 20).Activated:Connect(function()
-	if NAMSelectTab then NAMSelectTab("SETTINGS") end
+DancesPage.Back.Activated:Connect(function()
+	DancesPage.Interactable = false
+	DancesPage.Visible = true
+	MainPage.Interactable = false
+	local tween = TweenService:Create(DancesPage, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, 360, 0.5, 0),
+	})
+	tween:Play()
+	tween.Completed:Connect(function()
+		MainPage.Interactable = true
+		DancesPage.Visible = false
+	end)
 end)
 local KeybindsPage = UI.CreateItemListPage()
 KeybindsPage.ZIndex = 1
 KeybindsPage.Position = UDim2.new(0.5, 360, 0.5, 0)
 KeybindsPage.Interactable = false
 KeybindsPage.Visible = false
-UI.CreateButton(SettingsPage, "Animation Shortcuts &gt;", 20).Activated:Connect(function()
+UI.CreateButton(MainPage, "Dance Keybinds &gt;", 20).Activated:Connect(function()
 	KeybindsPage.Interactable = false
 	KeybindsPage.Visible = true
-	SettingsPage.Interactable = false
+	MainPage.Interactable = false
 	local tween = TweenService:Create(KeybindsPage, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 	})
@@ -7146,19 +7408,19 @@ end)
 KeybindsPage.Back.Activated:Connect(function()
 	KeybindsPage.Interactable = false
 	KeybindsPage.Visible = true
-	SettingsPage.Interactable = false
+	MainPage.Interactable = false
 	local tween = TweenService:Create(KeybindsPage, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 		Position = UDim2.new(0.5, 360, 0.5, 0),
 	})
 	tween:Play()
 	tween.Completed:Connect(function()
-		SettingsPage.Interactable = true
+		MainPage.Interactable = true
 		KeybindsPage.Visible = false
 	end)
 end)
 
 SaveData.KeybindsEnabled = not not SaveData.KeybindsEnabled
-UI.CreateSwitch(SettingsPage, "Dance Keybinds Enabled", SaveData.KeybindsEnabled).Changed:Connect(function(val)
+UI.CreateSwitch(MainPage, "Dance Keybinds Enabled", SaveData.KeybindsEnabled).Changed:Connect(function(val)
 	SaveData.KeybindsEnabled = val
 end)
 local Keybinds = {}
@@ -7224,7 +7486,7 @@ do
 	local actions, actionsmap = ContextActions._Actions, ContextActions._ActionsMap
 	function ContextActions:RunBinding(caac, input)
 		local s, result = xpcall(caac.Callback, function(m)
-			warn(debug.traceback("NAM :: Custom ContextActions Error - " .. m))
+			warn(debug.traceback("Uhhhhhh :: Custom ContextActions Error - " .. m))
 		end, caac.Name, input.UserInputState, input)
 		if s then
 			if result == Enum.ContextActionResult.Sink then
@@ -7468,7 +7730,6 @@ local function GetModuleHash(m)
 end
 local function AddMoveset(m)
 	if type(m) == "table" then
-		if m.Name ~= "Cursed car anim" and not m.NAMShow then return end
 		if not m.Name then return end
 		if not m.Description then return end
 		if not m.Config then return end
@@ -7534,7 +7795,6 @@ local function AddMoveset(m)
 end
 local function AddDance(m)
 	if type(m) == "table" then
-		if m.Name ~= "Hakari's Dance" and m.Name ~= "Gojo Awake" and not m.NAMShow then return end
 		if not m.Name then return end
 		if not m.Description then return end
 		if not m.Assets then return end
@@ -7764,10 +8024,10 @@ CreditsPage.ZIndex = 1
 CreditsPage.Position = UDim2.new(0.5, 360, 0.5, 0)
 CreditsPage.Interactable = false
 CreditsPage.Visible = false
-UI.CreateButton(SettingsPage, "Credits", 15).Activated:Connect(function()
+UI.CreateButton(MainPage, "Credits", 15).Activated:Connect(function()
 	CreditsPage.Interactable = false
 	CreditsPage.Visible = true
-	SettingsPage.Interactable = false
+	MainPage.Interactable = false
 	local tween = TweenService:Create(CreditsPage, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 	})
@@ -7778,31 +8038,31 @@ UI.CreateButton(SettingsPage, "Credits", 15).Activated:Connect(function()
 end)
 UI.CreateButton(CreditsPage, "&lt; Hurry back", 20).Activated:Connect(function()
 	CreditsPage.Interactable = false
-	SettingsPage.Interactable = false
+	MainPage.Interactable = false
 	local tween = TweenService:Create(CreditsPage, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 		Position = UDim2.new(0.5, 360, 0.5, 0),
 	})
 	tween:Play()
 	tween.Completed:Connect(function()
-		SettingsPage.Interactable = true
+		MainPage.Interactable = true
 		CreditsPage.Visible = false
 	end)
 end)
 local UhhhhhhFire = UI.CreateText(CreditsPage, "", 12, Enum.TextXAlignment.Center)
 Util.ForceTextSize(UhhhhhhFire)
-UI.CreateText(CreditsPage, "NAM | by mamalalanam", 15, Enum.TextXAlignment.Right)
+UI.CreateText(CreditsPage, "Reanimate by STEVE :D", 15, Enum.TextXAlignment.Right)
 local UhhhhhhFiret = UI.CreateSlider(CreditsPage, "Transparency", 0.25, 0, 1, 0)
 local UhhhhhhFirep = {}
 for i=1, 64 do
 	table.insert(UhhhhhhFirep, {i / 64, 0.98 + math.random() * 0.04, math.random(), math.random() - 0.5})
 end
 local UhhhhhhFirea = {
-	"NN   NN    AAAA    MM    MM",
-	"NNN  NN   AA  AA   MMM  MMM",
-	"NN N NN   AA  AA   MM MM MM",
-	"NN  NNN   AAAAAA   MM    MM",
-	"NN   NN   AA  AA   MM    MM",
-	"NN   NN   AA  AA   MM    MM",
+	"XX    XX XX      XX      XX      XX      XX      XX     ",
+	"XX    XX XX      XX      XX      XX      XX      XX     ",
+	"XX    XX XXXXXX  XXXXXX  XXXXXX  XXXXXX  XXXXXX  XXXXXX ",
+	"XX    XX XX   XX XX   XX XX   XX XX   XX XX   XX XX   XX",
+	"XXX  XXX XX   XX XX   XX XX   XX XX   XX XX   XX XX   XX",
+	" XXXXXX  XX   XX XX   XX XX   XX XX   XX XX   XX XX   XX",
 }
 local UhhhhhhFirex = #UhhhhhhFirea[1]
 local UhhhhhhFirey = #UhhhhhhFirea
@@ -7886,7 +8146,7 @@ UI.CreateText(CreditsPage, "so thats how netless really works", 12, Enum.TextXAl
 UI.CreateText(CreditsPage, "math.max is THE solution here!!", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "also, hey, pwease unban me from Hax Updates >m<", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "<b>Krystal Dance V3 mod by Theo</b>", 14, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "nice dance animations. MAMALALANAM!! >:D", 12, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "nice dance animations. MINE NOW!! >:D", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "<b>Delta Executor</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "primary env target", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "thanks for disabling the key system temporarily when its down", 12, Enum.TextXAlignment.Center)
@@ -7899,7 +8159,7 @@ UI.CreateText(CreditsPage, "pls dont kick dubmood's ass lol", 12, Enum.TextXAlig
 UI.CreateText(CreditsPage, "<b>pouet.net</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "other than rez' and anat's demos theres lots of good demos there", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "tho im considered a LAMER with no scene ID loool", 12, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "NAM", 12, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "so uhhhhhh....", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "...greetings to lamers and fuckings to elites?", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "<b>github.com</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "YES!! KEEP SAVING ME FROM MY DATA CORRUPTION!!!", 12, Enum.TextXAlignment.Center)
@@ -7922,10 +8182,28 @@ UI.CreateText(CreditsPage, "thats a good lua code snippet trade :)", 12, Enum.Te
 UI.CreateText(CreditsPage, "<b>Roblox</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "this program's primary target", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "expose more backend functions for me like a good boy", 12, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "<b>NAM | MAMALALANAM</b>", 14, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "<b>rqz's Genesis FE</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "ill be taking ALL your convertions >:D", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "actually, im just taking the names, search it up on script sources, read the source, convert it and stuff then done", 12, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "<b>Empyrean Reanimate</b>", 12, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "<font color=\"#4444FF\"><b>Empyrean Reanimate (click for Discord)</b></font>", 12, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		Util.Notify("Link copied!")
+		pcall(setclipboard, "https://discord.gg/UJ7YtqadPJ")
+		pcall(request, {
+			Url = "http://127.0.0.1:6463/rpc?v=1",
+			Method = "POST",
+			Headers = {
+				["Content-Type"] = 'application/json',
+				["Origin"] = "https://discord.com",
+			},
+			Body = HttpService:JSONEncode({
+				cmd = "INVITE_BROWSER",
+				nonce = HttpService:GenerateGUID(false),
+				args = {code = "UJ7YtqadPJ"},
+			}),
+		})
+	end
+end)
 UI.CreateText(CreditsPage, "your tool fling is great reference!", 12, Enum.TextXAlignment.Center)
 UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "<b>* Greetings to *</b>", 15, Enum.TextXAlignment.Center)
@@ -7941,8 +8219,7 @@ do
 	local quotes = {
 		"why are you here",
 	}
-	-- Only draw as many unique quotes as are available.
-	for _ = 1, math.min(15, #quotes) do
+	for _=1, 15 do
 		local idx = math.random(1, #quotes)
 		UI.CreateText(CreditsPage, table.remove(quotes, idx), 12, Enum.TextXAlignment.Center)
 	end
@@ -7951,25 +8228,43 @@ UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "DISCLAIMER: Some random quotes made here are jokes (e.g.: 'this script mogs genesis') and should not be taken seriously. This also includes all the self-glazing quotes. It's your choice to agree with them or not, and if you do or don't, don't come harass/mock any individuals from it. In the end, a joke quote is a joke quote.", 15, Enum.TextXAlignment.Center)
 UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "This \"software\" is FREE, meaning YOU SHOULD NOT REDISTRIBUTE WITH RENUMERATIVE INTENT!!", 15, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "If you want to add content to NAM, like animations or movesets, go to <font color=\"#4444FF\">this thing</font>.", 15, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
+UI.CreateText(CreditsPage, "If you want to add content to Uhhhhhh, like Dances or Movesets, go to <font color=\"#4444FF\">this thing</font>.", 15, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		Util.Notify("Link copied!")
-		pcall(setclipboard, "https://github.com/BursaliAlperen/RobuNexa/")
+		pcall(setclipboard, "https://github.com/STEVE-916-create/Uhhhhhh/")
 	end
 end)
 UI.CreateSeparator(CreditsPage)
-UI.CreateText(CreditsPage, "<b>NAM | by mamalalanam</b>", 14, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "<b>(C) 2026 STEVETHEREALONE</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "all rights reserved", 14, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "RobuNexa community links removed", 15, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "<font color=\"#4444FF\">[ Discord invite ]</font>", 15, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		Util.Notify("Link copied!")
+		pcall(setclipboard, "https://discord.gg/NASNUKRBVM")
+		pcall(request, {
+			Url = "http://127.0.0.1:6463/rpc?v=1",
+			Method = "POST",
+			Headers = {
+				["Content-Type"] = 'application/json',
+				["Origin"] = "https://discord.com",
+			},
+			Body = HttpService:JSONEncode({
+				cmd = "INVITE_BROWSER",
+				nonce = HttpService:GenerateGUID(false),
+				args = {code = "NASNUKRBVM"},
+			}),
+		})
+	end
+end)
 local ChangelogsPage = UI.CreatePage()
 ChangelogsPage.ZIndex = 1
 ChangelogsPage.Position = UDim2.new(0.5, 360, 0.5, 0)
 ChangelogsPage.Interactable = false
 ChangelogsPage.Visible = false
-UI.CreateButton(SettingsPage, "Changelogs", 15).Activated:Connect(function()
+UI.CreateButton(MainPage, "Changelogs", 15).Activated:Connect(function()
 	ChangelogsPage.Interactable = false
 	ChangelogsPage.Visible = true
-	SettingsPage.Interactable = false
+	MainPage.Interactable = false
 	local tween = TweenService:Create(ChangelogsPage, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 	})
@@ -7980,13 +8275,13 @@ UI.CreateButton(SettingsPage, "Changelogs", 15).Activated:Connect(function()
 end)
 UI.CreateButton(ChangelogsPage, "&lt; Hurry back", 20).Activated:Connect(function()
 	ChangelogsPage.Interactable = false
-	SettingsPage.Interactable = false
+	MainPage.Interactable = false
 	local tween = TweenService:Create(ChangelogsPage, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 		Position = UDim2.new(0.5, 360, 0.5, 0),
 	})
 	tween:Play()
 	tween.Completed:Connect(function()
-		SettingsPage.Interactable = true
+		MainPage.Interactable = true
 		ChangelogsPage.Visible = false
 	end)
 end)
@@ -7994,7 +8289,7 @@ task.spawn(function()
 	UI.CreateText(ChangelogsPage, "Changelogs", 30, Enum.TextXAlignment.Center)
 	local content = UI.CreateText(ChangelogsPage, "Loading...", 12, Enum.TextXAlignment.Left)
 	xpcall(function()
-		local logs = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/CHANGELOGS")
+		local logs = game:HttpGet("https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh/main/CHANGELOGS")
 		content.Text = "Rendering error."
 		for _,v in string.split(logs, "\n") do
 			if v:sub(1, 2) == "# " then
@@ -8014,10 +8309,10 @@ InitLogsPage.ZIndex = 1
 InitLogsPage.Position = UDim2.new(0.5, 360, 0.5, 0)
 InitLogsPage.Interactable = false
 InitLogsPage.Visible = false
-UI.CreateButton(SettingsPage, "Init Logs", 15).Activated:Connect(function()
+UI.CreateButton(MainPage, "Init Logs", 15).Activated:Connect(function()
 	InitLogsPage.Interactable = false
 	InitLogsPage.Visible = true
-	SettingsPage.Interactable = false
+	MainPage.Interactable = false
 	local tween = TweenService:Create(InitLogsPage, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 	})
@@ -8028,13 +8323,13 @@ UI.CreateButton(SettingsPage, "Init Logs", 15).Activated:Connect(function()
 end)
 UI.CreateButton(InitLogsPage, "&lt; Hurry back", 20).Activated:Connect(function()
 	InitLogsPage.Interactable = false
-	SettingsPage.Interactable = false
+	MainPage.Interactable = false
 	local tween = TweenService:Create(InitLogsPage, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 		Position = UDim2.new(0.5, 360, 0.5, 0),
 	})
 	tween:Play()
 	tween.Completed:Connect(function()
-		SettingsPage.Interactable = true
+		MainPage.Interactable = true
 		InitLogsPage.Visible = false
 	end)
 end)
@@ -8043,7 +8338,7 @@ local function getgithubraw(path)
 	InitLogsText.Text ..= "\n[LOG] [GitGET] GET api./" .. path
 	local s, resp = pcall(request, {
 		Method = "GET",
-		Url = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/" .. path,
+		Url = "https://api.github.com/repos/STEVE-916-create/Uhhhhhh/contents/content/" .. path,
 		Headers = {
 			Accept = "application/vnd.github.VERSION.raw"
 		}
@@ -8061,7 +8356,7 @@ local function getgithubraw(path)
 	InitLogsText.Text ..= "\n[LOG] [GitGET] GET raw./" .. path
 	s, resp = pcall(request, {
 		Method = "GET",
-		Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. path,
+		Url = "https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh/main/content/" .. path,
 	})
 	if s and resp and resp.StatusCode == 200 then
 		return resp.Body
@@ -8081,14 +8376,14 @@ local function ForceModuleReload(force)
 	ClearModules()
 	Util.Notify("Loading...")
 	InitLogsText.Text ..= "\n[LOG] Checking SHA1 hashes..."
-	local filesofbuiltins = {"v_moveset3.lua", "v_dance1.lua", "v_dance3.lua", "d_limbmap.lua"}
-	local filesofbuiltins_m = {"v_moveset3.lua", "v_dance1.lua", "v_dance3.lua"}
-	local filesofbuiltins_d = {"d_limbmap.lua"}
+	local filesofbuiltins = {"v_moveset1.lua", "v_moveset2.lua", "v_moveset3.lua", "v_dance1.lua", "v_dance2.lua", "d_limbmap.lua", "d_hatsmap.lua"}
+	local filesofbuiltins_m = {"v_moveset1.lua", "v_moveset2.lua", "v_moveset3.lua", "v_dance1.lua", "v_dance2.lua"}
+	local filesofbuiltins_d = {"d_limbmap.lua", "d_hatsmap.lua"}
 	SaveData.ContentHash = SaveData.ContentHash or {}
 	xpcall(function()
 		local s, resp = pcall(request, {
 			Method = "GET",
-			Url = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/",
+			Url = "https://api.github.com/repos/STEVE-916-create/Uhhhhhh/contents/content/",
 		})
 		if s and resp and resp.StatusCode == 200 then
 			s, resp = pcall(HttpService.JSONDecode, HttpService, resp.Body)
@@ -8171,7 +8466,7 @@ local function ForceModuleReload(force)
 		task.wait()
 		InitLogsText.Text ..= "\n[LOG] Loadstringing VANILLA " .. x .. "..."
 		xpcall(function()
-			local func, comperr = loadstring(data, "NAM :: MODULE " .. x)
+			local func, comperr = loadstring(data, "Uhhhhhh :: VANILLA " .. x)
 			if func then
 				AddModules(func())
 			elseif comperr then
@@ -8190,7 +8485,7 @@ local function ForceModuleReload(force)
 				InitLogsText.Text ..= "\n[LOG] Reading local USER " .. x .. "..."
 				local data = readfile(path)
 				InitLogsText.Text ..= "\n[LOG] Loadstringing USER " .. x .. "..."
-				local func, comperr = loadstring(data, "NAM :: " .. x)
+				local func, comperr = loadstring(data, "Uhhhhhh :: " .. x)
 				if func then
 					AddModules(func())
 				elseif comperr then
@@ -8209,20 +8504,10 @@ local function ForceModuleReload(force)
 	IsUhhhhhhFullyLoaded = true
 	if not Reanimate.Character then return end
 	Reanimate.CreateCharacter()
-	task.delay(2, function()
-		local character = Players.LocalPlayer.Character
-		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-		local supported = humanoid and humanoid.RigType == Enum.HumanoidRigType.R6 and character:FindFirstChild("Torso") ~= nil
-		if supported then
-			Util.Notify("Supported game detect")
-		else
-			Util.Notify("Unsupported game !!! >:D")
-		end
-	end)
 end
-UI.CreateSeparator(SettingsPage)
-UI.CreateText(SettingsPage, "<b>NAM MODULES</b>", 15, Enum.TextXAlignment.Center)
-UI.CreateButton(SettingsPage, "Reload Modules", 20).Activated:Connect(function()
+UI.CreateSeparator(MainPage)
+UI.CreateText(MainPage, "<b>MODULES MANAGEMENT</b>", 15, Enum.TextXAlignment.Center)
+UI.CreateButton(MainPage, "Reload Modules", 20).Activated:Connect(function()
 	CracktroFrame.Interactable = false
 	CracktroFrame.Visible = true
 	MainPage.Interactable = false
@@ -8235,8 +8520,8 @@ UI.CreateButton(SettingsPage, "Reload Modules", 20).Activated:Connect(function()
 	end)
 	ForceModuleReload(true)
 end)
-UI.CreateText(SettingsPage, "\n\n\n<b>ADVANCED</b>", 15, Enum.TextXAlignment.Center)
-local clearcontenthash, clearcontenthashtext = UI.CreateButton(SettingsPage, "CLEAR ALL DOWNLOADED CONTENT", 15)
+UI.CreateText(MainPage, "\n\n\n<b>DANGER ZONE</b>", 15, Enum.TextXAlignment.Center)
+local clearcontenthash, clearcontenthashtext = UI.CreateButton(MainPage, "CLEAR ALL DOWNLOADED CONTENT", 15)
 local clearcontenthashclicks = 0
 clearcontenthash.Activated:Connect(function()
 	clearcontenthashclicks += 1
@@ -8257,88 +8542,5 @@ clearcontenthash.Activated:Connect(function()
 		clearcontenthashtext.Text = "Cleared, now rejoin to apply"
 	end
 end)
-
-local NAMCurrentTab = nil
-NAMSelectTab = function(tabName)
-	if NAMCurrentTab == tabName then return end
-	local pages = {
-		NAM = MainPage,
-		ANIMATIONS = DancesPage,
-		SETTINGS = SettingsPage,
-		ABOUT = CreditsPage,
-	}
-	local selectedPage = pages[tabName]
-	local isReanim = tabName == "REANIM"
-	if not isReanim and not selectedPage then return end
-	NAMCurrentTab = tabName
-
-	-- Never allow an invisible page to sit over the selected page and eat input.
-	for _, child in WindowContent:GetChildren() do
-		if child:IsA("GuiObject") then
-			child.Visible = false
-			pcall(function() child.Interactable = false end)
-			child.Active = false
-		end
-	end
-	WindowContent.Visible = not isReanim
-	pcall(function() WindowContent.Interactable = not isReanim end)
-	WindowContent.Position = UDim2.new(0, 0, 0, 0)
-	WindowContent.Size = UDim2.new(1, 0, 1, 0)
-
-	if selectedPage then
-		selectedPage.AnchorPoint = Vector2.new(0, 0)
-		selectedPage.Position = UDim2.new(0, 4, 0, 4)
-		selectedPage.Size = UDim2.new(1, -8, 1, -8)
-		selectedPage.Visible = true
-		selectedPage.Active = false
-		pcall(function() selectedPage.Interactable = true end)
-	end
-
-	ReanimPage.Visible = isReanim
-	pcall(function() ReanimPage.Interactable = isReanim end)
-	ReanimPage.Position = UDim2.new(0, 0, 0, 0)
-	ReanimPage.Size = UDim2.new(1, 0, 1, 0)
-	for _, child in AWindowContent:GetChildren() do
-		if child:IsA("ImageLabel") then child.Visible = false end
-	end
-	local reanimLayout = ReanimPage:FindFirstChildOfClass("UIListLayout")
-	if reanimLayout then
-		reanimLayout.VerticalAlignment = isReanim and Enum.VerticalAlignment.Top or Enum.VerticalAlignment.Bottom
-	end
-	for name, button in NAMTabButtons do
-		local active = name == tabName
-		button.BackgroundTransparency = active and 0.12 or 1
-		button.BackgroundColor3 = active and Color3.fromRGB(153, 255, 58) or Color3.fromRGB(255, 255, 255)
-		button.TextColor3 = active and Color3.fromRGB(17, 19, 14) or Color3.fromRGB(235, 237, 240)
-		button.Active = true
-		pcall(function() button.Interactable = true end)
-		button.ZIndex = 10001
-		button.Active = true
-		pcall(function() button.Interactable = true end)
-	end
-end
-
--- Bind both standard activation and direct mouse/touch click events.
-for tabName, button in NAMTabButtons do
-	button.Activated:Connect(function() NAMSelectTab(tabName) end)
-	button.MouseButton1Click:Connect(function() NAMSelectTab(tabName) end)
-end
-
--- Reliable fallback: manually hit-test taps/clicks against the visible tab rectangles.
--- This bypasses other injected GUI layers that can swallow Roblox button events.
-UserInputService.InputBegan:Connect(function(input)
-	if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then return end
-	local point = Vector2.new(input.Position.X, input.Position.Y)
-	for tabName, button in NAMTabButtons do
-		if button.Visible and button.Active then
-			local pos, size = button.AbsolutePosition, button.AbsoluteSize
-			if point.X >= pos.X and point.X <= pos.X + size.X and point.Y >= pos.Y and point.Y <= pos.Y + size.Y then
-				NAMSelectTab(tabName)
-				return
-			end
-		end
-	end
-end)
-NAMSelectTab("NAM")
 
 ForceModuleReload(false)

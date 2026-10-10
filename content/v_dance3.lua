@@ -223,6 +223,25 @@ addAnimationModule({
 
 
 addAnimationModule({
+	name = "Sukuna Awakening",
+	description = "Sukuna awakening animation, separate from Gojo Awakening.",
+	asset = "SukunaAwakeningTrack.anim",
+	sound = "SukunaAwakening.mp3",
+	lift = 0,
+	liftStart = 0,
+	liftEnd = 0,
+})
+
+addAnimationModule({
+	name = "Sokamona",
+	description = "Sokamona animation.",
+	asset = "SokamonaTrack.anim",
+	lift = 0,
+	liftStart = 0,
+	liftEnd = 0,
+})
+
+addAnimationModule({
 	name = "Cid Overdrive",
 	description = "Cid Overdrive animation adapted for R6.",
 	asset = "CidOverdriveTrack.anim",

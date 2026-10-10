@@ -1,4 +1,4 @@
-name: Convert Maximum Hollow Purple and Cid animations for NAM
+name: Convert NAM animation tracks
 
 on:
   push:
@@ -7,6 +7,8 @@ on:
       - "MaximumHollowPurple.anim"
       - "content/GojoAwakening.anim"
       - "CidOverdrive.anim"
+      - "sukunaAwaken.anim"
+      - "Sokamona.anim"
       - "tools/convert_gojo_animation.py"
       - ".github/workflows/convert-gojo-track.yml"
 
@@ -36,15 +38,17 @@ jobs:
           python tools/convert_gojo_animation.py content/GojoAwakening.anim content/GojoAwakeningTrack.anim
           python tools/convert_gojo_animation.py MaximumHollowPurple.anim content/MaximumHollowPurpleTrack.anim
           python tools/convert_gojo_animation.py CidOverdrive.anim content/CidOverdriveTrack.anim
+          python tools/convert_gojo_animation.py sukunaAwaken.anim content/SukunaAwakeningTrack.anim
+          python tools/convert_gojo_animation.py Sokamona.anim content/SokamonaTrack.anim
       - name: Commit converted AnimLib tracks
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add content/GojoAwakeningTrack.anim content/MaximumHollowPurpleTrack.anim content/CidOverdriveTrack.anim
+          git add content/GojoAwakeningTrack.anim content/MaximumHollowPurpleTrack.anim content/CidOverdriveTrack.anim content/SukunaAwakeningTrack.anim content/SokamonaTrack.anim
           if git diff --cached --quiet; then
             echo "Tracks are already converted; no commit needed."
             exit 0
           fi
-          git commit -m "Convert Gojo Awakening, Maximum Hollow Purple and Cid animations to AnimLib tracks"
+          git commit -m "Convert NAM animation tracks"
           git pull --rebase origin main
           git push origin HEAD:main
