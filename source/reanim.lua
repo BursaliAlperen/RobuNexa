@@ -887,6 +887,7 @@ SaveData.UITheme = SaveData.UITheme or 1
 SetUITheme(SaveData.UITheme)
 
 local ReanimPage
+local DancesPage
 local CracktroFrameText = "Uhhhhhh Reanimate V" .. UhhhhhhVersion
 local UIMainWindow, AWindowContent, WindowContent
 
@@ -953,11 +954,11 @@ do
 	
 	local TopBarFrame = Util.Instance("Frame", UIMainWindow)
 	TopBarFrame.Position = UDim2.new(0, 0, 0, 0)
-	TopBarFrame.Size = UDim2.new(1, 0, 0, 30)
+	TopBarFrame.Size = UDim2.new(1, 0, 0, 58)
 	TopBarFrame.BackgroundTransparency = 1
 	TopBarFrame.BackgroundColor3 = Color3.new(1, 1, 1)
 	TopBarFrame.BorderSizePixel = 0
-	TopBarFrame.ClipsDescendants = true
+	TopBarFrame.ClipsDescendants = false
 	TopBarFrame.ZIndex = 1
 	--Stylize(TopBarFrame)
 	
@@ -980,7 +981,7 @@ do
 	local TopBarClose = Util.Instance("TextButton", TopBarFrame)
 	TopBarClose.AnchorPoint = Vector2.new(1, 0)
 	TopBarClose.Position = UDim2.new(1, 0, 0, 0)
-	TopBarClose.Size = UDim2.new(0, 30, 1, 0)
+	TopBarClose.Size = UDim2.new(0, 30, 0, 30)
 	TopBarClose.BackgroundTransparency = 1
 	TopBarClose.Text = ""
 	do
@@ -1097,7 +1098,7 @@ do
 			SaveData.WindowClosedPosition = {MainWindowPosClose.X.Scale, MainWindowPosClose.X.Offset, MainWindowPosClose.Y.Scale, MainWindowPosClose.Y.Offset}
 			TweenService:Create(UIMainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Position = MainWindowPosOpen,
-				Size = UDim2.fromOffset(480, 280)
+				Size = UDim2.fromOffset(480, 310)
 			}):Play()
 			TweenService:Create(TopBarClose.A, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Rotation = 0
@@ -7359,7 +7360,7 @@ MovesetsPage.Back.Activated:Connect(function()
 		MovesetsPage.Visible = false
 	end)
 end)
-local DancesPage = UI.CreateItemListPage()
+DancesPage = UI.CreateItemListPage()
 DancesPage.ZIndex = 1
 DancesPage.Position = UDim2.new(0.5, 360, 0.5, 0)
 DancesPage.Interactable = false
@@ -8547,7 +8548,7 @@ end)
 
 -- NAM compact top navigation; keep the restored reanimation implementation intact.
 do
-	local tabBar = Util.Instance("Frame", UIMainWindow)
+	local tabBar = Util.Instance("Frame", TopBarFrame)
 	tabBar.Name = "NAMTabBar"
 	tabBar.Position = UDim2.new(0, 6, 0, 31)
 	tabBar.Size = UDim2.new(1, -12, 0, 25)
