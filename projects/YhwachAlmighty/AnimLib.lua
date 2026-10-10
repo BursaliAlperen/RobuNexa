@@ -84,6 +84,7 @@ function AnimLib.new()
 		_looped = false,
 		_playing = false,
 		_weight = 1,
+		_originalTransforms = {},
 		_destroyed = false,
 	}, AnimLib)
 end
@@ -103,6 +104,8 @@ function AnimLib:LoadSequence(sequence, rig)
 	end
 	self._track = { Frames = frames, Length = math.max(frames[#frames].Time, 0.001), Rig = rig, Sequence = sequence }
 	self._joints = joints
+	self._originalTransforms = {}
+	for name, joint in pairs(joints) do self._originalTransforms[name] = joint.Transform end
 	self._elapsed = 0
 	self._looped = sequence.Loop
 	return self
@@ -151,8 +154,6 @@ function AnimLib:Play(fadeTime)
 	self._playing = true
 	local track = self._track
 	local startTime = os.clock()
-	self._connection = RunService:BindToRenderStep
-		and nil or nil
 	-- RenderStepped is available to LocalScripts and works without executor APIs.
 	self._connection = RunService.RenderStepped:Connect(function(dt)
 		if not self._playing or not self._track or self._track ~= track then return end
@@ -177,6 +178,10 @@ end
 function AnimLib:Stop()
 	self._playing = false
 	if self._connection then self._connection:Disconnect(); self._connection = nil end
+	for name, joint in pairs(self._joints) do
+		local original = self._originalTransforms[name]
+		if joint.Parent and original then joint.Transform = original end
+	end
 	return self
 end
 
@@ -198,6 +203,7 @@ function AnimLib:Destroy()
 	self:Stop()
 	self._track = nil
 	table.clear(self._joints)
+	table.clear(self._originalTransforms)
 	self._destroyed = true
 end
 
