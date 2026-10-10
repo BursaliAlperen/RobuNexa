@@ -650,27 +650,8 @@ UISound.Music.Ended:Connect(function()
 	MusicPlayer.PlayMusic()
 end)
 
--- fake obfuscation lag
-do local s = os.clock() + 0.5 + math.random() while os.clock() < s do end end
-task.wait(0.2)
-
 SaveData.SkipIntro = not not SaveData.SkipIntro
-do
-	local genesis = Instance.new("ImageLabel", UIMainFrame)
-	genesis.AnchorPoint = Vector2.new(0.5, 0.5)
-	genesis.Position = UDim2.fromScale(0.5, 0.5)
-	genesis.Size = UDim2.fromOffset(100, 100)
-	genesis.Rotation = 15
-	genesis.BackgroundTransparency = 1
-	genesis.Image = Util.GetCDNAsset("wearegenesis.graphic.png")
-	genesis.ImageColor3 = Color3.new(0, 0, 1)
-	genesis.ImageTransparency = 1
-	genesis.ZIndex = 99999
-	TweenService:Create(genesis, TweenInfo.new(0.75, Enum.EasingStyle.Linear, Enum.EasingDirection.In, -1, true), {ImageTransparency = 0}):Play()
-	local dur = 2 + math.random() * 3
-	Debris:AddItem(genesis, dur + math.random() * 2)
-	task.wait(dur)
-end
+
 
 MusicPlayer.PlayMusic()
 
@@ -888,8 +869,8 @@ SetUITheme(SaveData.UITheme)
 
 local ReanimPage
 local DancesPage
-local CracktroFrameText = "NAM REANIMATE"
-local UIMainWindow, AWindowContent, WindowContent, TopBarFrame
+local NAMBrandText = "NAM REANIMATE"
+local UIMainWindow, AWindowContent, WindowContent, TopBarFrame, NAMNavButtons
 
 local _funcrefreshes = {}
 local function AddToRenderStep(func, linkto)
@@ -976,7 +957,7 @@ do
 	TopBarText.RichText = true
 	RegisterTextLabel(TopBarText)
 	Util.ForceTextSize(TopBarText)
-	CracktroFrameText = "(c) NAM. All rights reserved."
+	NAMBrandText = "NAM REANIMATE"
 	
 	local TopBarClose = Util.Instance("TextButton", TopBarFrame)
 	TopBarClose.AnchorPoint = Vector2.new(1, 0)
@@ -1020,7 +1001,7 @@ do
 	NAMNavBar.BorderSizePixel = 0
 	NAMNavBar.ZIndex = 20
 	local NAMNavNames = {"REANIMATE", "ANIMS", "LIMBS", "HITBOX", "SETTINGS"}
-	local NAMNavButtons = {}
+	NAMNavButtons = {}
 	for index, tabName in ipairs(NAMNavNames) do
 		local button = Instance.new("TextButton")
 		button.Name = tabName .. "Tab"
@@ -1192,273 +1173,6 @@ do
 	end
 end
 
-local CracktroFrame = Util.Instance("Frame", WindowContent)
-CracktroFrame.Active = true
-CracktroFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-CracktroFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-CracktroFrame.Size = UDim2.new(0, 360, 0, 245)
-CracktroFrame.BackgroundTransparency = 0
-CracktroFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-CracktroFrame.BorderSizePixel = 1
-CracktroFrame.BorderColor3 = Color3.new(1, 1, 1)
-CracktroFrame.ZIndex = 10
-CracktroFrame.Visible = false -- Legacy intro remains hidden; NAM opens directly to its controls.
-CracktroFrame.ClipsDescendants = true
-AddToRenderStep(function(t)
-	CracktroFrame.BorderColor3 = GetUIColor(t)
-	CracktroFrame.BackgroundColor3 = GetUIBGColor(t)
-end, CracktroFrame)
-
-do -- homepage
-	local TriforceClip = Util.Instance("CanvasGroup", CracktroFrame)
-	TriforceClip.Position = UDim2.new(0, 0, 0, 0)
-	TriforceClip.Size = UDim2.new(1, 0, 1, 0)
-	TriforceClip.BackgroundTransparency = 1
-	TriforceClip.ZIndex = 0
-
-	local Glowy = Util.Instance("ImageLabel", CracktroFrame)
-	Glowy.AnchorPoint = Vector2.new(0.5, 0.5)
-	Glowy.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Glowy.Size = UDim2.new(0, 260, 0, 260)
-	Glowy.BackgroundTransparency = 1
-	Glowy.Image = Util.GetCDNAsset("lightinursoul.graphic.png")
-	Glowy.ImageColor3 = UITextColor.Value
-	Glowy.ImageTransparency = 0.7
-	Glowy.ZIndex = -2
-
-	local Triforce = Util.MakeTriforce(3, Color3.new(1, 0.7, 0), 0)
-	Triforce.AnchorPoint = Vector2.new(0.5, 0.5)
-	Triforce.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Triforce.Size = UDim2.new(0, 160, 0, 160)
-	Triforce.Parent = TriforceClip
-
-	local particles = {}
-	local ps = 128
-	local psc = Color3.new(1, 0.9, 0)
-	for i=1, ps do
-		local r = (i / ps) * 2 * math.pi
-		local p = Util.Instance("Frame", CracktroFrame)
-		p.AnchorPoint = Vector2.new(0.5, 0.5)
-		p.Size = UDim2.fromOffset(2, 2)
-		p.BackgroundColor3 = psc
-		p.BackgroundTransparency = 0
-		p.BorderSizePixel = 0
-		p.ZIndex = -1
-		p.Visible = false
-		table.insert(particles, {
-			p, Vector2.new(math.sin(r), math.cos(r)) * 8,
-			Vector2.new(math.random(-128, 128), math.random(-128, 128)),
-			math.random() * 2 - 1, false, -1
-		})
-	end
-
-	local trivel = 360
-	local oldpbl = 0
-
-	local text = Util.MakeText(CracktroFrameText)
-	text.AnchorPoint = Vector2.new(0.5, 1)
-	text.Position = UDim2.new(0.5, 0, 1, -25)
-	text.ZIndex = 3
-	text.Parent = CracktroFrame
-	local text0 = Util.MakeText("")
-	text0.AnchorPoint = Vector2.new(0.5, 1)
-	text0.Position = UDim2.new(0.5, 0, 1, -17)
-	text0.ZIndex = 3
-	text0.Parent = CracktroFrame
-	local text1 = Util.MakeText("Made by STEVETHEREALONE :" .. (math.random() < 0.333 and "3" or (math.random() < 0.5 and "D" or "P")))
-	text1.AnchorPoint = Vector2.new(0.5, 1)
-	text1.Position = UDim2.new(0.5, 0, 1, -17)
-	text1.ZIndex = 3
-	text1.Parent = CracktroFrame
-	local text2 = Util.MakeText("Click me to start!")
-	text2.AnchorPoint = Vector2.new(0.5, 1)
-	text2.Position = UDim2.new(0.5, 0, 1, -17)
-	text2.ZIndex = 3
-	text2.Parent = CracktroFrame
-	Util.SetTextColor(text, UITextColor.Value, 0)
-	Util.SetTextColor(text0, UITextColor.Value, 0)
-	Util.SetTextColor(text1, UITextColor.Value, 0)
-	Util.SetTextColor(text2, UITextColor.Value, 0)
-	local quotes = {
-		"\"EVERY CLIENT ORBITS A SERVER...\"",
-		Player.Name .. ", how is your " .. os.date("%A") .. "?",
-		"A great " .. os.date("%A") .. " today, eh?",
-		"Hello, " .. Player.Name .. ".",
-		"What makes you play at " .. os.date("%I %p") .. "?",
-		"You are going to love Uhhhhhh, I just know it.",
-		"This script is very \"verbose\".",
-		"Written mostly on a mobile phone.",
-		"I am pretty new in this community! :D",
-		"\"Dreams come true!\"",
-		"Idea originated from a dream.",
-	}
-	local text3 = nil
-	local function changequote()
-		if text3 then text3:Destroy() end
-		text3 = Util.MakeText(quotes[math.random(1, #quotes)])
-		text3.AnchorPoint = Vector2.new(0.5, 1)
-		text3.Position = UDim2.new(0.5, 0, 1, -17)
-		text3.ZIndex = 3
-		text3.Parent = CracktroFrame
-		Util.SetTextColor(text3, UITextColor.Value, 0)
-		task.delay(12, changequote)
-	end
-	changequote()
-	UITextColor.Changed:Connect(function(val)
-		Util.SetTextColor(text, val, 0)
-		Util.SetTextColor(text0, val, 0)
-		Util.SetTextColor(text1, val, 0)
-		Util.SetTextColor(text2, val, 0)
-		Util.SetTextColor(text3, val, 0)
-	end)
-
-	local PositionProcessor = {
-		function(i, v, dt, pbl, spike)
-			local inst, pos, vel, zind, lvis, lzind = unpack(v)
-			local d = pos.Magnitude
-			if d > 0 then
-				local r = math.atan2(pos.X / d, pos.Y / d)
-				local a = math.pi * 0.375
-				local out = Vector2.new(math.sin(r + a), math.cos(r + a))
-				local tp = out * (40 + pbl / 12)
-				local tv = (tp - pos) * 2
-				vel = tv:Lerp(vel, math.exp(-2 * dt))
-				if math.random() < 0.01 then
-					vel += Vector2.new(math.random(-64, 64), math.random(-64, 64))
-				end
-				if spike > 64 then
-					vel += out * 64 * math.random()
-				end
-				pos += vel * dt
-			else
-				pos += Vector2.new(0, 10)
-			end
-			v[2], v[3] = pos, vel
-			return Vector3.new(zind * pos.Magnitude / 6, pos.Y, pos.X)
-		end,
-		function(i, v, dt, pbl, spike)
-			local inst, pos, vel, zind, lvis, lzind = unpack(v)
-			local a = i / ps
-			local s = (a * 6) % 1
-			local r = (a + s / 8) * 2 * math.pi + os.clock() * 2 + zind * math.pi * 0.125 * (pbl / 200) * (1 - s)
-			pos = Vector2.new(math.sin(r), math.cos(r)) * s * (100 + pbl / 15)
-			v[2], v[3] = pos, Vector2.zero
-			return Vector3.new(0, pos.Y, pos.X)
-		end,
-		function(i, v, dt, pbl, spike)
-			local inst, pos, vel, zind, lvis, lzind = unpack(v)
-			local a = i / ps
-			local b = 1 / 3
-			local c = math.sqrt(3) / 2
-			local d = {
-				{Vector2.new(0, b + c), Vector2.new(-0.5, b)},
-				{Vector2.new(-0.5, b), Vector2.new(-1, b - c)},
-				{Vector2.new(-1, b - c), Vector2.new(0, b - c)},
-				{Vector2.new(0, b - c), Vector2.new(1, b - c)},
-				{Vector2.new(1, b - c), Vector2.new(0.5, b)},
-				{Vector2.new(0.5, b), Vector2.new(0, b - c)},
-				{Vector2.new(0, b - c), Vector2.new(-0.5, b)},
-				{Vector2.new(-0.5, b), Vector2.new(0.5, b)},
-				{Vector2.new(0.5, b), Vector2.new(0, b + c)},
-			}
-			local t = a * #d
-			local i = math.floor(t) + 1
-			local u = t % 1
-			if i > #d then
-				i = #d
-				u = 1
-			end
-			pos = d[i][1]:Lerp(d[i][2], u) * 150
-			local r = os.clock() * 2
-			pos = Vector2.new(
-				pos.X * math.cos(r) - pos.Y * math.sin(r),
-				pos.X * math.sin(r) + pos.Y * math.cos(r)
-			)
-			v[2], v[3] = pos, Vector2.zero
-			return Vector3.new(0, pos.Y, pos.X)
-		end,
-	}
-	local currentprocessor = 1
-
-	AddToRenderStep(function(t, dt)
-		if Util.IsGuiVisible(CracktroFrame) then
-			local pp = PositionProcessor[currentprocessor]
-			local CracktroFrameAbsoluteSize = CracktroFrame.AbsoluteSize
-			Glowy.ImageColor3 = UITextColor.Value
-			Glowy.ImageTransparency = 0.75 + math.sin(((os.clock() / 10) % 2) * math.pi) * 0.05
-			local pbl = UISound.Music.PlaybackLoudness
-			local spike = math.max(0, (pbl - oldpbl) - 16)
-			oldpbl = pbl
-			local trivelt = pbl * 2 * dt
-			trivel = trivelt + (trivel - trivelt) * math.exp(-8 * dt)
-			Triforce.Rotation = (Triforce.Rotation + trivel) % 360
-			local ring = CFrame.Angles(
-				0,
-				math.cos(((t / 5) % 2) * math.pi) * math.pi * 0.5,
-				(1 - math.cos(((t / 7) % 2) * math.pi)) * math.pi * 0.5
-			)
-			local fov = 220
-			for i,v in particles do
-				local inst, pos, vel, zind, lvis, lzind = unpack(v)
-				local sp = ring:VectorToWorldSpace(pp(i, v, dt, pbl, spike))
-				local z = sp.Z
-				local sc = fov / (z + fov)
-				sp = Vector2.new(sp.X, sp.Y) * sc
-				local nvis, nzind = lvis, lzind
-				if z > 1 - fov then
-					inst.Position = Util.Vector2ToUDim2Offset(sp + CracktroFrameAbsoluteSize / 2)
-					inst.Size = UDim2.fromOffset(sc * 2.5, sc * 2.5)
-					--inst.BackgroundColor3 = psc:Lerp(Color3.new(0, 0, 0), math.clamp(z / (fov * 2), 0, 1))
-					nvis = true
-					if z > 0 then
-						nzind = -1
-					else
-						nzind = 1
-					end
-				else
-					nvis = false
-				end
-				if lvis ~= nvis then
-					inst.Visible = nvis
-					v[5] = nvis
-				end
-				if lzind ~= nzind then
-					inst.ZIndex = nzind
-					v[6] = nzind
-				end
-			end
-			local textsel = t % 9
-			if IsUhhhhhhFullyLoaded then
-				textsel = t % 12
-			end
-			textsel //= 3
-			if textsel == 0 then
-				text0.Visible = true
-				text1.Visible = false
-				text2.Visible = false
-				text3.Visible = false
-			elseif textsel == 1 then
-				text0.Visible = false
-				text1.Visible = true
-				text2.Visible = false
-				text3.Visible = false
-			elseif textsel == 2 then
-				text0.Visible = false
-				text1.Visible = false
-				text2.Visible = false
-				text3.Visible = true
-			else
-				text0.Visible = false
-				text1.Visible = false
-				text2.Visible = true
-				text3.Visible = false
-			end
-		else
-			currentprocessor = math.random(1, #PositionProcessor)
-		end
-	end, CracktroFrame)
-end
-task.wait()
 
 local UI = {}
 function UI.CreatePage()
@@ -8171,16 +7885,6 @@ end
 UI.CreateSeparator(MainPage)
 UI.CreateText(MainPage, "<b>MODULES MANAGEMENT</b>", 15, Enum.TextXAlignment.Center)
 UI.CreateButton(MainPage, "Reload Modules", 20).Activated:Connect(function()
-	CracktroFrame.Interactable = false
-	CracktroFrame.Visible = false
-	MainPage.Interactable = false
-	local tween = TweenService:Create(CracktroFrame, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
-		Position = UDim2.new(0.5, 0, 0.5, 0),
-	})
-	tween:Play()
-	tween.Completed:Connect(function()
-		CracktroFrame.Interactable = true
-	end)
 	ForceModuleReload(true)
 end)
 UI.CreateText(MainPage, "\n\n\n<b>DANGER ZONE</b>", 15, Enum.TextXAlignment.Center)
