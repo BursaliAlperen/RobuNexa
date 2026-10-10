@@ -13,7 +13,7 @@ if _G.NAMLoaded or _G["U" .. "hhhhhhLoaded"] then return end
 _G.NAMLoaded = true
 _G["U" .. "hhhhhhLoaded"] = true
 
-local NAMVersion = "1.0.13 BETA"
+local NAMVersion = "1.0.14 BETA"
 
 local Debris = cloneref(game:GetService("Debris"))
 local CoreGui = cloneref(game:GetService("CoreGui"))
@@ -6947,7 +6947,7 @@ local function AssetGetPathFromFilename(filename)
 end
 local _Assetdownloading = {}
 local function AssetDownload(filename)
-	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.13/content/" .. filename
+	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.14/content/" .. filename
 	local split = string.split(filename, "@")
 	if #split > 1 then
 		filename = table.remove(split, 1)
@@ -7054,6 +7054,42 @@ DancesPage.ZIndex = 1
 DancesPage.Position = UDim2.new(0.5, 360, 0.5, 0)
 DancesPage.Interactable = false
 DancesPage.Visible = false
+DancesPage:SetAttribute("NAMFavoritesOnly", false)
+DancesPage.Search.Position = UDim2.new(1, -72, 0, 0)
+DancesPage.Search.Size = UDim2.new(1, -107, 0, 25)
+local FavoritesFilterButton = Util.Instance("TextButton", DancesPage)
+FavoritesFilterButton.Name = "FavoritesFilter"
+FavoritesFilterButton.AnchorPoint = Vector2.new(1, 0)
+FavoritesFilterButton.Position = UDim2.new(1, 0, 0, 0)
+FavoritesFilterButton.Size = UDim2.new(0, 67, 0, 25)
+FavoritesFilterButton.BackgroundTransparency = 0
+FavoritesFilterButton.BorderSizePixel = 0
+FavoritesFilterButton.Font = Enum.Font.Code
+FavoritesFilterButton.TextSize = 14
+FavoritesFilterButton.Text = "☆ Favs"
+FavoritesFilterButton.AutoButtonColor = true
+Stylize(FavoritesFilterButton)
+RegisterTextLabel(FavoritesFilterButton)
+local function UpdateDanceListVisibility()
+	local favoritesOnly = DancesPage:GetAttribute("NAMFavoritesOnly")
+	local favorites = type(SaveData.FavoriteDances) == "table" and SaveData.FavoriteDances or {}
+	local searchText = DancesPage.Search.Box.Text:lower()
+	for _,row in DancesPage.List:GetChildren() do
+		if row:IsA("GuiObject") then
+			local matchesSearch = searchText == "" or row.Name:lower():find(searchText, 1, true) ~= nil
+			local favoriteKey = row:GetAttribute("NAMFavoriteKey")
+			local matchesFavorites = not favoritesOnly or (favoriteKey and favorites[favoriteKey])
+			row.Visible = matchesSearch and not not matchesFavorites
+		end
+	end
+end
+FavoritesFilterButton.Activated:Connect(function()
+	local favoritesOnly = not DancesPage:GetAttribute("NAMFavoritesOnly")
+	DancesPage:SetAttribute("NAMFavoritesOnly", favoritesOnly)
+	FavoritesFilterButton.Text = favoritesOnly and "★ Favs" or "☆ Favs"
+	UpdateDanceListVisibility()
+end)
+DancesPage.Search.Box:GetPropertyChangedSignal("Text"):Connect(UpdateDanceListVisibility)
 UI.CreateButton(MainPage, "Dances &gt;", 20).Activated:Connect(function()
 	DancesPage.Interactable = false
 	DancesPage.Visible = true
@@ -7516,6 +7552,7 @@ local function AddDance(m)
 		m._NAMFavoriteKey = m.InternalName or m.Name
 		local item = UI.CreateItemListItem(DancesPage.List)
 		m._NAMFavoriteItem = item
+		item.Parent:SetAttribute("NAMFavoriteKey", m._NAMFavoriteKey)
 		item.Size = UDim2.new(1, -36, 0, 26)
 		local favoriteButton = Util.Instance("TextButton", item.Parent)
 		favoriteButton.Name = "Favorite"
@@ -7539,6 +7576,7 @@ local function AddDance(m)
 			SaveData.FavoriteDances[m._NAMFavoriteKey] = not SaveData.FavoriteDances[m._NAMFavoriteKey]
 			RefreshFavoriteButton()
 			UpdateDanceListOrder()
+			UpdateDanceListVisibility()
 		end))
 		UpdateDanceListOrder()
 		local msname = UI.CreateText(item, m.Name .. " &gt;", 20, Enum.TextXAlignment.Left)
@@ -7546,6 +7584,7 @@ local function AddDance(m)
 		msname.Name = "LabelName"
 		msdesc.Name = "LabelDesc"
 		item.Parent.Name = m.Name .. " " .. m.Description
+		UpdateDanceListVisibility()
 		Util.LinkDestroyI2C(item, item.Activated:Connect(function()
 			local page = UI.CreatePage()
 			page.ZIndex = 2
@@ -7980,7 +8019,7 @@ end)
 UI.CreateText(ReadmePage, "NAM README & loadstring", 24, Enum.TextXAlignment.Center)
 UI.CreateText(ReadmePage, "Usage and loadstring are in the NAM repository README.", 14, Enum.TextXAlignment.Center)
 UI.CreateButton(ReadmePage, "Copy loadstring", 20).Activated:Connect(function()
-	pcall(setclipboard, 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.13/source/reanim.lua"))()')
+	pcall(setclipboard, 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.14/source/reanim.lua"))()')
 	Util.Notify("Loadstring copied!")
 end)
 task.wait()
@@ -8036,7 +8075,7 @@ local function getgithubraw(path)
 	InitLogsText.Text ..= "\n[LOG] [GitGET] GET raw./" .. path
 	s, resp = pcall(request, {
 		Method = "GET",
-		Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.13/content/" .. path,
+		Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.14/content/" .. path,
 	})
 	if s and resp and resp.StatusCode == 200 then
 		return resp.Body
