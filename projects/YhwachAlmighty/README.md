@@ -42,7 +42,7 @@ To generate the ModuleScript source files automatically on a PC with Python 3, r
 python tools/anim_to_base64_modules.py projects/YhwachAlmighty/Assets/Animations --out YhwachAnimData
 ```
 
-The script creates one `.lua` file per source animation. In Roblox Studio, create a Folder named `YhwachAnimData` beside the controller scripts and import each generated file as a **ModuleScript** using the matching name. The generated modules return `{ Base64 = "..." }`; they preserve the original bytes as Base64 rather than pasting binary data as text. The controller decodes the bytes and passes them to `AnimLib.Track.frombuffer()`, which reads the same field order used by Uhhhhhh: animation name, keyframe count, timestamp, pose count, pose name, weight, easing style/direction, and twelve CFrame floats.
+The script creates one `.lua` file per source animation. In Roblox Studio, create a Folder named `YhwachAnimData` beside the controller scripts. For each generated file, create a **ModuleScript** with the same filename (without `.lua`) and paste that file's entire source into it. The generated modules return `{ Base64 = "..." }`; they preserve the original bytes as Base64 rather than pasting binary data as text. The controller decodes the bytes and passes them to `AnimLib.Track.frombuffer()`, which reads the same field order used by Uhhhhhh: animation name, keyframe count, timestamp, pose count, pose name, weight, easing style/direction, and twelve CFrame floats.
 
 The controller checks binary ModuleScripts first, then native KeyframeSequences in `YhwachSequences`, then published AnimationIds as a fallback. Use one data source per move to avoid confusing duplicates.
 
