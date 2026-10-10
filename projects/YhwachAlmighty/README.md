@@ -1,64 +1,63 @@
 # Yhwach — The Almighty
 
-A mobile-first, dark-glass UI concept and asset manifest for an authorized Roblox experience. The user will provide .anim and .mp3 files later; keep animation/audio integration pending until those files arrive.
+Mobile-first, dark-glass Yhwach UI and asset manifest for an authorized Roblox experience. Animation and sound integration is pending the user's .anim and .mp3 files.
 
-## UI layout
+## UI
 
-- Compact dark-glass panel designed for 9:16 mobile screens and touch.
-- Header: **YHWACH** with a state indicator.
-- Primary action: **ALMIGHTY** — toggles Base and Almighty forms.
-- Secondary actions: **Base Set**, **Aura**, **Stop Effects**, and **Reset Visuals**.
-- Status line shows active form and any asset load failures.
-- Use responsive constraints, large touch targets, safe-area padding, and a single GUI instance.
-- Do not permanently change the user's actual character transparency; preserve and restore any visual properties changed by an authorized implementation.
+- 9:16 mobile-first, responsive panel with touch-friendly controls.
+- Header: YHWACH and current form status.
+- Primary toggle: ALMIGHTY — switches between Base and Almighty states.
+- Secondary controls: Base Form, Aura, Stop Effects, Reset Visuals.
+- Avoid duplicate GUIs, runaway loops, and permanent character transparency changes.
+- Current UI file: [YhwachUI.client.lua](./YhwachUI.client.lua). It is a UI shell only; the avatar/effect handler is not wired yet.
 
-## Base set — supplied IDs
+## Base set — exact IDs supplied by user
 
-The five IDs were also found grouped together as the “Lay rig” hat set in a community script listing. The first four catalog records are neck accessories; that does not mean they are anatomically mapped to arms/legs. Their exact role as rig pieces must be confirmed from accessory attachment geometry.
+A community script listing groups these five IDs as the **“Lay rig”** accessory set. This confirms they are intended to be used together as a rig-style set, but does not make them native Roblox limbs. Four individual catalog records identify neck accessories.
 
-| Asset ID | Catalog name/type | Link |
+| Asset ID | Verified catalog title/type | Evidence |
 |---|---|---|
-| 87291559615126 | Literal Hammer Head [White] — Neck Accessory | https://www.rolimons.com/item/87291559615126 |
-| 128893482026011 | Thin Hammer Head [White] — Neck Accessory | https://www.rolimons.com/item/128893482026011 |
-| 120111604252410 | Thin Hammer Head [Black] — Neck Accessory | https://www.rolimons.com/item/120111604252410 |
-| 90788603154080 | Hammer Head — Neck Accessory | https://www.rolimons.com/item/90788603154080 |
-| 88886554182275 | Included in the community “Lay rig” list; exact catalog metadata not independently verified | https://www.roblox.com/catalog/88886554182275 |
+| 87291559615126 | Literal Hammer Head [White] — Neck Accessory | [Rolimon's](https://www.rolimons.com/item/87291559615126) |
+| 128893482026011 | Thin Hammer Head [White] — Neck Accessory | [Rolimon's](https://www.rolimons.com/item/128893482026011) |
+| 120111604252410 | Thin Hammer Head [Black] — Neck Accessory | [Rolimon's](https://www.rolimons.com/item/120111604252410) |
+| 90788603154080 | Hammer Head — Neck Accessory | [Rolimon's](https://www.rolimons.com/item/90788603154080) |
+| 88886554182275 | Included in the community “Lay rig” list; exact catalog title/type not independently verified | [Community listing](https://scriptblox.com/script/UP-Just-a-baseplate.-Just-a-baseplate-Rigs-u-have-to-copy-them-in-scriptblox-114053) |
 
-## Almighty form — supplied IDs
+## Almighty form — exact IDs supplied by user
 
-| Asset ID | Verified name/type | Link |
+| Asset ID | Verified catalog title/type | Evidence |
 |---|---|---|
-| 108684178086287 | Yhwach Reishi Sword — Back Accessory | https://www.rolimons.com/item/108684178086287 |
-| 75672773594451 | Yhwach Bleach TYBW Almighty King Hair — Hair Accessory | https://www.rolimons.com/item/75672773594451 |
-| 83293970715566 | Linked from the Yhwach Almighty King Hair creator description; exact standalone title not independently verified | https://www.roblox.com/catalog/83293970715566 |
-| 83293970715566 | Duplicate intentionally retained because the user supplied it twice; duplicate-wear support is unverified | https://www.roblox.com/catalog/83293970715566 |
-| 122497534796344 | Linked from the Yhwach Almighty King Hair creator description; exact standalone title not independently verified | https://www.roblox.com/catalog/122497534796344 |
-| 104304509923191 | Linked from the Yhwach Almighty King Hair creator description; exact standalone title not independently verified | https://www.roblox.com/catalog/104304509923191 |
-| 87969060185631 | Soul king almighty aura — Back Accessory | https://www.rolimons.com/item/87969060185631 |
-| 100693570818976 | User-designated Aura B; exact catalog metadata not independently verified | https://www.roblox.com/catalog/100693570818976 |
+| 108684178086287 | Yhwach Reishi Sword — Back Accessory | [Rolimon's](https://www.rolimons.com/item/108684178086287) |
+| 75672773594451 | Yhwach Bleach TYBW Almighty King Hair — Hair Accessory | [Rolimon's](https://www.rolimons.com/item/75672773594451) |
+| 83293970715566 | Linked in the description of the Yhwach Almighty King Hair item; exact standalone title/type not independently verified | [Hair item page](https://www.rolimons.com/item/75672773594451) |
+| 83293970715566 | Duplicate preserved because it was supplied twice; whether Roblox permits wearing both copies is unverified | [Hair item page](https://www.rolimons.com/item/75672773594451) |
+| 122497534796344 | Linked in the description of the Yhwach Almighty King Hair item; exact standalone title/type not independently verified | [Hair item page](https://www.rolimons.com/item/75672773594451) |
+| 104304509923191 | Linked in the description of the Yhwach Almighty King Hair item; exact standalone title/type not independently verified | [Hair item page](https://www.rolimons.com/item/75672773594451) |
+| 87969060185631 | Soul king almighty aura — Back Accessory | [Rolimon's](https://www.rolimons.com/item/87969060185631) |
+| 100693570818976 | User-designated Aura B; exact catalog title/type could not be independently verified in indexed results | [Roblox catalog lookup](https://www.roblox.com/catalog/100693570818976) |
 
-The three accessory IDs 83293970715566, 122497534796344 and 104304509923191 are linked in the description of the Almighty King Hair item, so they appear to belong to the same Yhwach set. Do not infer exact attachment locations from this alone.
+### Verified set relationships
 
-## Intended behavior
+The creator description for item 75672773594451 explicitly links 92221423556955, 122497534796344, 104304509923191, and 83293970715566 as part of the Yhwach Almighty King set. Item 92221423556955 was not in the user's supplied list, so it is not added to the equip manifest automatically.
 
-1. Initialize the UI once and show Base state.
-2. In an authorized experience, equip the Base set through supported avatar APIs when the assets are available and permitted.
-3. Pressing **ALMIGHTY** requests a transition: switch to the Almighty set, enable the sword and both aura assets, and update the UI.
-4. Pressing **ALMIGHTY** again returns to Base.
-5. **Stop Effects** stops effects created by this system. **Reset Visuals** restores the original appearance and removes only objects created by this system.
-6. Add the user's .anim and .mp3 files after they are uploaded. Do not invent animation IDs or substitute unrelated audio.
+The description for 87969060185631 lists a Soul King Almighty set and references separate torso, left shoulder, right shoulder, waist, and outer aura accessories. The supplied ID 87969060185631 is specifically the outer/back aura, not the torso or arms.
 
-## Implementation boundaries
+## Intended form flow
 
-This repository document is a plan, not a working executor script. Client-only accessory or CFrame changes do not automatically replicate to other players. For an experience the user owns or is authorized to modify, use supported avatar APIs and server-approved state changes. Do not bypass network ownership, character deletion protections, or another experience's restrictions.
+1. Start in Base state and initialize one UI instance.
+2. In an authorized experience, equip the five Base assets if available and permitted.
+3. ALMIGHTY switches to the second form, replaces the Base set with the supplied Almighty set, and enables both aura IDs and the sword.
+4. ALMIGHTY again or Base Form returns to Base.
+5. Stop Effects removes effects created by the system; Reset Visuals restores the initial appearance and clears only objects created by this system.
+6. Integrate the user's .anim and .mp3 files after upload. Do not invent asset IDs or substitute unrelated audio.
 
-## Research notes
+## Technical boundaries
 
-- Roblox catalog item IDs identify different kinds of assets; use catalog metadata rather than assuming every numeric ID is a hat or limb.
-- Roblox's own documentation distinguishes Marketplace avatar assets from Creator Store assets such as models and audio: https://create.roblox.com/docs/projects/assets/api
-- The asset list is preserved exactly as supplied, including the repeated ID 83293970715566.
+This is not an executor script. Client-only GUI, accessory, and CFrame changes do not automatically replicate to other players. For an experience the user owns or is authorized to modify, use supported avatar APIs and server-approved state changes. Do not bypass network ownership, character deletion protections, or another experience's restrictions.
 
+## Research links
 
-## Current repository files
-
-- `YhwachUI.client.lua` — mobile-first UI shell with Base/Almighty toggle, Aura toggle, Stop Effects, Reset Visuals, and local action events. The actual avatar/effect handler is intentionally not included yet; animation and audio integration is pending the user's .anim and .mp3 files.
+- [Roblox asset API documentation](https://create.roblox.com/docs/projects/assets/api)
+- [Community “Lay rig” grouping](https://scriptblox.com/script/UP-Just-a-baseplate.-Just-a-baseplate-Rigs-u-have-to-copy-them-in-scriptblox-114053)
+- [Yhwach Almighty King Hair and linked set pieces](https://www.rolimons.com/item/75672773594451)
+- [Soul King Almighty aura and set description](https://www.rolimons.com/item/87969060185631)
