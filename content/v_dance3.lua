@@ -161,7 +161,7 @@ local function addAnimationModule(config)
 			end
 
 			-- Gojo's airborne attack: ease upward, travel forward, then land smoothly.
-			if rootPart and rootPart.Parent and (config.lift > 0 or config.forward > 0) then
+			if rootPart and rootPart.Parent and ((config.lift or 0) > 0 or (config.forward or 0) > 0) then
 				local progress = math.clamp(elapsed / duration, 0, 1)
 				local windowStart, windowEnd = config.liftStart, config.liftEnd
 				local windowAlpha = math.clamp((progress - windowStart) / math.max(windowEnd - windowStart, 0.001), 0, 1)
