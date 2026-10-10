@@ -5080,7 +5080,14 @@ local Character = Player.Character
 local ReanimCharacter = Reanimate.Character
 if Character and Character:IsDescendantOf(workspace) then
 if CurrentCharacter == Character then
-if #CharHats > 0 then ReanimOkay = true end
+-- Keep the fallback body visible if hat reanimation is only partially available.
+			local usableHatCount = 0
+			for _, hat in CharHats do
+				if hat and hat.Parent and hat:FindFirstChild("Handle") then
+					usableHatCount += 1
+				end
+			end
+			if usableHatCount >= 6 then ReanimOkay = true end
 if HatReanimator.HasPermadeath and not IsRespawning and HatReanimator.IWantAllHats then
 if NumHats > #CharHats then
 HatReanimator.Status.Permadeath = "Some hats died. Respawning!"
