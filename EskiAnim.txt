@@ -16,24 +16,7 @@ Music:   Dubmood
 MASTER BOOT RECORD
 Thou shalth not steal. Point at this source if you used a snippet here.
 ]]
--- Permit a clean update when the script is rerun: remove only the previous NAM GUI.
-if _G.NAMLoaded then
-	local function removePreviousNAMGui(root)
-		if not root then return end
-		for _, node in root:GetDescendants() do
-			if node:IsA("TextLabel") and string.lower(tostring(node.Text)):find("nam reanimate", 1, true) then
-				local screen = node:FindFirstAncestorWhichIsA("ScreenGui")
-				if screen then screen:Destroy() end
-			end
-		end
-	end
-	pcall(function() removePreviousNAMGui(game:GetService("CoreGui")) end)
-	pcall(function()
-		local getter = gethui or get_hidden_gui
-		if getter then removePreviousNAMGui(getter()) end
-	end)
-	_G.NAMLoaded = nil
-end
+if _G.NAMLoaded then return end
 _G.NAMLoaded = true
 local NAMVersion = "1.1.0 BETA"
 local Debris = cloneref(game:GetService("Debris"))
