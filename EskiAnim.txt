@@ -3924,6 +3924,10 @@ for _,map in LimbMapping do map.Reference = nil end
 character.DescendantAdded:Connect(CharOnDesc)
 for _,v in character:GetDescendants() do task.spawn(CharOnDesc, v) end
 local humanoid = character:WaitForChild("Humanoid", 5)
+if not humanoid or not humanoid:IsA("Humanoid") then
+warn("[RobuNexa] Character spawned without a Humanoid; skipping character setup.")
+return
+end
 local stupid = humanoid:FindFirstChildWhichIsA("Animator")
 if stupid then stupid:Destroy() end
 if not Reanimate.UseLoadAnimationHook then
