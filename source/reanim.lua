@@ -6,14 +6,14 @@
 |_| \/_/_/   \_\_|  |_|
 
 NAM — maintained and rebranded by mamalalanam.
-Original-source and third-party credits are preserved in LICENSE and THIRD_PARTY.
+Original-source and third-party notices are preserved in the README.
 ]]
 
 if _G.NAMLoaded or _G["U" .. "hhhhhhLoaded"] then return end
 _G.NAMLoaded = true
 _G["U" .. "hhhhhhLoaded"] = true
 
-local NAMVersion = "1.0.9 BETA"
+local NAMVersion = "1.0.10 BETA"
 
 local Debris = cloneref(game:GetService("Debris"))
 local CoreGui = cloneref(game:GetService("CoreGui"))
@@ -27,9 +27,13 @@ local TweenService = cloneref(game:GetService("TweenService"))
 local TextChatService = cloneref(game:GetService("TextChatService"))
 local UserInputService = cloneref(game:GetService("UserInputService"))
 local ContextActionService = cloneref(game:GetService("ContextActionService"))
-
 local Util = {}
-
+Util.RandomIndex = function(list)
+	if type(list) ~= "table" then return nil end
+	local count = #list
+	if count < 1 then return nil end
+	return math.random(1, count)
+end
 Util.RandomString = function(length)
 	length = length or math.random(32, 256)
 	local str = ""
@@ -635,14 +639,20 @@ MusicPlayer.PlayMusic = function(i)
 	MusicPlayer.Switching = true
 	local last = MusicPlayer.LastMusic
 	if not i then
-		i = last
-		while i == last do
-			i = math.random(1, #MusicPlayer.Database)
-			task.wait()
+		local database = MusicPlayer.Database
+		i = Util.RandomIndex(database)
+		if not i then
+			MusicPlayer.Switching = false
+			return
 		end
+		if #database > 1 and i == last then i = i % #database + 1 end
 	end
 	MusicPlayer.LastMusic = i
 	local hi = MusicPlayer.Database[i]
+	if not hi then
+		MusicPlayer.Switching = false
+		return
+	end
 	local soundid, soundname = hi[1], hi[2]
 	UISound.Music.SoundId = Util.GetCDNAsset(soundid)
 	UISound.Music.Name = soundname
@@ -1268,7 +1278,8 @@ do -- homepage
 	local text3 = nil
 	local function changequote()
 		if text3 then text3:Destroy() end
-		text3 = Util.MakeText(quotes[math.random(1, #quotes)])
+		local quoteIndex = Util.RandomIndex(quotes)
+		text3 = Util.MakeText(quoteIndex and quotes[quoteIndex] or "Welcome to NAM.")
 		text3.AnchorPoint = Vector2.new(0.5, 1)
 		text3.Position = UDim2.new(0.5, 0, 1, -17)
 		text3.ZIndex = 3
@@ -1427,7 +1438,7 @@ do -- homepage
 				text3.Visible = false
 			end
 		else
-			currentprocessor = math.random(1, #PositionProcessor)
+			currentprocessor = Util.RandomIndex(PositionProcessor) or currentprocessor
 		end
 	end, CracktroFrame)
 end
@@ -7881,10 +7892,8 @@ do
 	local quotes = {
 		"why are you here",
 	}
-	for _=1, math.min(15, #quotes) do
-		local idx = math.random(1, #quotes)
-		UI.CreateText(CreditsPage, table.remove(quotes, idx), 12, Enum.TextXAlignment.Center)
-	end
+	local quoteIndex = Util.RandomIndex(quotes)
+	if quoteIndex then UI.CreateText(CreditsPage, quotes[quoteIndex], 12, Enum.TextXAlignment.Center) end
 end
 UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "DISCLAIMER: Some random quotes made here are jokes (e.g.: 'this script mogs genesis') and should not be taken seriously. This also includes all the self-glazing quotes. It's your choice to agree with them or not, and if you do or don't, don't come harass/mock any individuals from it. In the end, a joke quote is a joke quote.", 15, Enum.TextXAlignment.Center)
@@ -7931,7 +7940,7 @@ end)
 UI.CreateText(ReadmePage, "NAM README & loadstring", 24, Enum.TextXAlignment.Center)
 UI.CreateText(ReadmePage, "Usage and loadstring are in the NAM repository README.", 14, Enum.TextXAlignment.Center)
 UI.CreateButton(ReadmePage, "Copy loadstring", 20).Activated:Connect(function()
-	pcall(setclipboard, 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/source/reanim.lua"))()')
+	pcall(setclipboard, 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/source/reanim.lua?v=1.0.10"))()')
 	Util.Notify("Loadstring copied!")
 end)
 task.wait()

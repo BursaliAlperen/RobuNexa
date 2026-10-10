@@ -7,7 +7,7 @@
 Uyumlu Roblox istemci ortamında çalıştırılacak komut:
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/source/reanim.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/source/reanim.lua?v=1.0.10"))()
 ```
 
 > Script, dosya sistemi ve ağ erişimi sağlayan uyumlu bir istemci ortamı gerektirir. Yalnızca güvendiğiniz kodları çalıştırın.
