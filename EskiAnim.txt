@@ -6110,17 +6110,26 @@ _Assetdownloading[filename] = true
 task.spawn(function()
 _Assetdownloadingcount += 1
 _UpdateDownloadStatus()
+local body
 local s, resp = pcall(request, {Method = "GET", Url = source})
-if s and resp and resp.StatusCode == 200 then
+if s and resp and resp.StatusCode == 200 and type(resp.Body) == "string" then
+body = resp.Body
+end
+-- Fallback for executors whose request() response shape differs.
+if not body then
+local ok, result = pcall(function() return game:HttpGet(source) end)
+if ok and type(result) == "string" and #result > 0 then body = result end
+end
+local wrote = false
+if body then
+local ok = pcall(writefile, path, body)
+wrote = ok and isfile(path)
+end
 _Assetdownloadingcount -= 1
+if not wrote then _Assetdownloadingfail += 1 end
 _UpdateDownloadStatus()
-pcall(writefile, path, resp.Body)
-task.wait(10)
-else
-_Assetdownloadingcount -= 1
-_Assetdownloadingfail += 1
-_UpdateDownloadStatus()
-task.wait(10)
+task.wait(2)
+if not wrote then
 _Assetdownloadingfail -= 1
 _UpdateDownloadStatus()
 end
