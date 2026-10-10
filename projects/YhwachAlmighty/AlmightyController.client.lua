@@ -149,7 +149,6 @@ end
 actionEvent.Event:Connect(function(action, payload)
 	if action == "SetForm" then
 		setForm(payload == "Almighty" and "Almighty" or "Base")
-		reportStatus(payload == "Almighty" and "Almighty form selected" or "Base form selected", Color3.fromRGB(213, 188, 255))
 	elseif action == "SetAura" then
 		auraOn = payload == true
 		if auraOn then
