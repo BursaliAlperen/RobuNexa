@@ -5559,7 +5559,15 @@ function HatReanimator.Start()
 		local ReanimCharacter = Reanimate.Character
 		if Character and Character:IsDescendantOf(workspace) then
 			if CurrentCharacter == Character then
-				if #CharHats > 0 then
+				-- Do not hide the fallback body when only a few hats are available.
+				-- Partial hat ownership/mapping can otherwise make the whole avatar appear invisible.
+				local usableHatCount = 0
+				for _, hat in CharHats do
+					if hat and hat.Parent and hat:FindFirstChild("Handle") then
+						usableHatCount += 1
+					end
+				end
+				if usableHatCount >= 6 then
 					ReanimOkay = true
 				end
 				if HatReanimator.HasPermadeath and not IsRespawning and HatReanimator.IWantAllHats then
