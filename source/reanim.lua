@@ -919,7 +919,7 @@ do
 	UIMainWindow.Active = true
 	UIMainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
 	UIMainWindow.Position = UDim2.new(0.5, 0, 0.5, 0)
-	UIMainWindow.Size = UDim2.new(0, 480, 0, 280)
+	UIMainWindow.Size = UDim2.new(0, 480, 0, 310)
 	UIMainWindow.BackgroundTransparency = 0
 	UIMainWindow.BackgroundColor3 = Color3.new(1, 1, 1)
 	UIMainWindow.BorderSizePixel = 0
@@ -8584,7 +8584,7 @@ do
 			WindowContent.Visible = false
 			ReanimPage.Visible = true
 			ReanimPage.Position = UDim2.new(0, 0, 0, 0)
-			ReanimPage.Size = UDim2.new(1, 0, 1, 0)
+			ReanimPage.Size = UDim2.new(0, 120, 1, 0)
 			local layout = ReanimPage:FindFirstChildOfClass("UIListLayout")
 			if layout then layout.VerticalAlignment = Enum.VerticalAlignment.Top end
 		end
