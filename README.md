@@ -11,7 +11,7 @@ A compact animation hub with a curated catalog.
 ## Animation catalog
 Each animation appears once in the catalog. Source KeyframeSequence files and generated runtime tracks are separate technical files, not separate catalog entries.
 
-- **Gojo Awakening / Flight Lift** — `content/GojoAwakening.anim` → `content/GojoAwakeningTrack.anim`
+- **Gojo Awakening / Flight Attack** — `content/GojoAwakening.anim` → `content/GojoAwakeningTrack.anim`; smooth lift and forward movement during the action window
 - **Imaginary Purple** — `ImaginaryPurple.anim` → `content/ImaginaryPurpleTrack.anim`; sound: `content/ImaginaryPurple.mp3`
 - **Mahoraga Purple Destruction** — `MahoragaPurpleDestruction.anim` → `content/MahoragaPurpleDestructionTrack.anim`
 - **Cid Overdrive** — `CidOverdrive.anim` → `content/CidOverdriveTrack.anim`
@@ -23,4 +23,4 @@ Each animation appears once in the catalog. Source KeyframeSequence files and ge
 - Keep source animations required by the conversion workflow and the generated runtime tracks.
 - Audio filenames use clear, stable names; scripts must reference the exact filenames.
 - Keep `README.md` and the animation conversion workflow.
-- Immersive VR remains a separate feature and must be tested in a real VR session before being marked complete.
+- Existing camera code detects `VRService.VREnabled` and adapts the camera to headset orientation. This is baseline VR handling, not a claim that the full UI has been tested; validate controls, comfort, and animation playback in a real VR session before marking immersive VR complete.
