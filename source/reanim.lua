@@ -6825,16 +6825,26 @@ local function AssetDownload(filename)
 	_Assetdownloading[filename] = true
 	task.spawn(function()
 		Util.Notify("Downloading " .. filename .. "...")
-		local s, resp = pcall(request, {
-			Method = "GET",
-			Url = source,
-		})
-		if s and resp and resp.StatusCode == 200 then
-			pcall(writefile, path, resp.Body)
-		else
+		local body
+		local requestOK, response = pcall(request, {Method = "GET", Url = source})
+		if requestOK and response and response.StatusCode == 200 and type(response.Body) == "string" then
+			body = response.Body
+		end
+		-- Executor request APIs differ; use HttpGet as a fallback rather than
+		-- permanently failing an animation when request() is unavailable.
+		if not body then
+			local getOK, result = pcall(function() return game:HttpGet(source) end)
+			if getOK and type(result) == "string" and #result > 0 then body = result end
+		end
+		local wrote = false
+		if body then
+			local writeOK = pcall(writefile, path, body)
+			wrote = writeOK and isfile(path)
+		end
+		if not wrote then
 			Util.Notify("Failed to download " .. filename .. "!")
 		end
-		task.wait(10)
+		task.wait(2)
 		_Assetdownloading[filename] = nil
 	end)
 	return false
