@@ -1,52 +1,59 @@
 # Yhwach — The Almighty
 
-A mobile-first, dark glass UI concept and asset manifest for an authorized Roblox experience.
+A mobile-first, dark-glass UI concept and asset manifest for an authorized Roblox experience. The user will provide .anim and .mp3 files later; keep animation/audio integration pending until those files arrive.
 
 ## UI layout
 
-- Compact draggable panel, optimized for phone screens and touch.
-- Header: **YHWACH** with a small status indicator.
-- Main toggle: **ALMIGHTY** — switches between Base and Almighty visual states.
-- Secondary controls: **Equip Base Set**, **Equip Almighty Set**, **Aura**, **Stop Effects**, and **Reset Visuals**.
-- Status line reports the current state and any accessory that could not be loaded.
-- Avoid duplicate GUIs, runaway loops, and changes to the player's real character transparency.
-- Use safe-area padding and scalable UI constraints; keep buttons large enough for touch.
+- Compact dark-glass panel designed for 9:16 mobile screens and touch.
+- Header: **YHWACH** with a state indicator.
+- Primary action: **ALMIGHTY** — toggles Base and Almighty forms.
+- Secondary actions: **Base Set**, **Aura**, **Stop Effects**, and **Reset Visuals**.
+- Status line shows active form and any asset load failures.
+- Use responsive constraints, large touch targets, safe-area padding, and a single GUI instance.
+- Do not permanently change the user's actual character transparency; preserve and restore any visual properties changed by an authorized implementation.
 
-## Base set — supplied catalog IDs
+## Base set — supplied IDs
 
-| Asset ID | Catalog lookup |
-|---|---|
-| 87291559615126 | https://www.roblox.com/catalog/87291559615126 |
-| 128893482026011 | https://www.roblox.com/catalog/128893482026011 |
-| 120111604252410 | https://www.roblox.com/catalog/120111604252410 |
-| 90788603154080 | https://www.roblox.com/catalog/90788603154080 |
-| 88886554182275 | https://www.roblox.com/catalog/88886554182275 |
+The five IDs were also found grouped together as the “Lay rig” hat set in a community script listing. The first four catalog records are neck accessories; that does not mean they are anatomically mapped to arms/legs. Their exact role as rig pieces must be confirmed from accessory attachment geometry.
 
-The first four IDs were found as Hammer Head / Thin Hammer Head UGC neck accessories. Confirm the fifth item's name and type in the Roblox catalog before wiring it into a rig.
+| Asset ID | Catalog name/type | Link |
+|---|---|---|
+| 87291559615126 | Literal Hammer Head [White] — Neck Accessory | https://www.rolimons.com/item/87291559615126 |
+| 128893482026011 | Thin Hammer Head [White] — Neck Accessory | https://www.rolimons.com/item/128893482026011 |
+| 120111604252410 | Thin Hammer Head [Black] — Neck Accessory | https://www.rolimons.com/item/120111604252410 |
+| 90788603154080 | Hammer Head — Neck Accessory | https://www.rolimons.com/item/90788603154080 |
+| 88886554182275 | Included in the community “Lay rig” list; exact catalog metadata not independently verified | https://www.roblox.com/catalog/88886554182275 |
 
-## Almighty state — supplied catalog IDs
+## Almighty form — supplied IDs
 
-| Purpose | Asset ID |
-|---|---|
-| Yhwach Reishi Sword | 108684178086287 |
-| Hair / Almighty set | 75672773594451 |
-| Almighty accessory | 83293970715566 |
-| Almighty accessory | 83293970715566 |
-| Almighty accessory | 122497534796344 |
-| Almighty accessory | 104304509923191 |
-| Aura A | 87969060185631 |
-| Aura B | 100693570818976 |
+| Asset ID | Verified name/type | Link |
+|---|---|---|
+| 108684178086287 | Yhwach Reishi Sword — Back Accessory | https://www.rolimons.com/item/108684178086287 |
+| 75672773594451 | Yhwach Bleach TYBW Almighty King Hair — Hair Accessory | https://www.rolimons.com/item/75672773594451 |
+| 83293970715566 | Linked from the Yhwach Almighty King Hair creator description; exact standalone title not independently verified | https://www.roblox.com/catalog/83293970715566 |
+| 83293970715566 | Duplicate intentionally retained because the user supplied it twice; duplicate-wear support is unverified | https://www.roblox.com/catalog/83293970715566 |
+| 122497534796344 | Linked from the Yhwach Almighty King Hair creator description; exact standalone title not independently verified | https://www.roblox.com/catalog/122497534796344 |
+| 104304509923191 | Linked from the Yhwach Almighty King Hair creator description; exact standalone title not independently verified | https://www.roblox.com/catalog/104304509923191 |
+| 87969060185631 | Soul king almighty aura — Back Accessory | https://www.rolimons.com/item/87969060185631 |
+| 100693570818976 | User-designated Aura B; exact catalog metadata not independently verified | https://www.roblox.com/catalog/100693570818976 |
 
-The repeated 83293970715566 ID is preserved as supplied. Confirm whether the experience permits duplicate instances of that accessory. The exact item identity of 100693570818976 also needs catalog verification.
+The three accessory IDs 83293970715566, 122497534796344 and 104304509923191 are linked in the description of the Almighty King Hair item, so they appear to belong to the same Yhwach set. Do not infer exact attachment locations from this alone.
 
-## Behavior
+## Intended behavior
 
-1. On start, initialize the UI once and show the Base state.
-2. The authorized avatar system equips the Base set when those assets are available to the experience.
-3. Pressing **ALMIGHTY** requests a state transition: replace the Base accessories with the Almighty set, enable the sword and aura effects, and update the UI state.
+1. Initialize the UI once and show Base state.
+2. In an authorized experience, equip the Base set through supported avatar APIs when the assets are available and permitted.
+3. Pressing **ALMIGHTY** requests a transition: switch to the Almighty set, enable the sword and both aura assets, and update the UI.
 4. Pressing **ALMIGHTY** again returns to Base.
-5. **Stop Effects** removes only effects created by this system; **Reset Visuals** restores the previous appearance.
+5. **Stop Effects** stops effects created by this system. **Reset Visuals** restores the original appearance and removes only objects created by this system.
+6. Add the user's .anim and .mp3 files after they are uploaded. Do not invent animation IDs or substitute unrelated audio.
 
-## Technical boundaries
+## Implementation boundaries
 
-This document is an implementation plan, not an executor script. A client-only GUI or local CFrame change does not make changes replicate to other players. In an experience you own or are authorized to modify, use supported avatar APIs and server-approved state changes for replication. It does not attempt to bypass Roblox network ownership, character deletion protections, or another experience's restrictions.
+This repository document is a plan, not a working executor script. Client-only accessory or CFrame changes do not automatically replicate to other players. For an experience the user owns or is authorized to modify, use supported avatar APIs and server-approved state changes. Do not bypass network ownership, character deletion protections, or another experience's restrictions.
+
+## Research notes
+
+- Roblox catalog item IDs identify different kinds of assets; use catalog metadata rather than assuming every numeric ID is a hat or limb.
+- Roblox's own documentation distinguishes Marketplace avatar assets from Creator Store assets such as models and audio: https://create.roblox.com/docs/projects/assets/api
+- The asset list is preserved exactly as supplied, including the repeated ID 83293970715566.
