@@ -889,7 +889,7 @@ SetUITheme(SaveData.UITheme)
 local ReanimPage
 local DancesPage
 local CracktroFrameText = "Uhhhhhh Reanimate V" .. UhhhhhhVersion
-local UIMainWindow, AWindowContent, WindowContent
+local UIMainWindow, AWindowContent, WindowContent, TopBarFrame
 
 local _funcrefreshes = {}
 local function AddToRenderStep(func, linkto)
@@ -952,7 +952,7 @@ do
 		end
 	end)
 	
-	local TopBarFrame = Util.Instance("Frame", UIMainWindow)
+	TopBarFrame = Util.Instance("Frame", UIMainWindow)
 	TopBarFrame.Position = UDim2.new(0, 0, 0, 0)
 	TopBarFrame.Size = UDim2.new(1, 0, 0, 58)
 	TopBarFrame.BackgroundTransparency = 1
@@ -964,7 +964,7 @@ do
 	
 	local TopBarText = Util.Instance("TextLabel", TopBarFrame)
 	TopBarText.AnchorPoint = Vector2.new(0, 0.5)
-	TopBarText.Position = UDim2.new(0, 8, 0.5, 0)
+	TopBarText.Position = UDim2.new(0, 8, 0, 15)
 	TopBarText.Size = UDim2.new(1, -35, 1, 0)
 	TopBarText.BackgroundTransparency = 1
 	TopBarText.ClipsDescendants = true
