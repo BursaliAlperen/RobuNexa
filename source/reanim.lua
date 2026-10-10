@@ -58,7 +58,7 @@ Util.DeepcopyTable = function(t)
 end
 Util.Notify = function(text)
 	StarterGui:SetCore("SendNotification", {
-		Title = "Uhhhhhh",
+		Title = "NAM Reanimate",
 		Text = text,
 		Duration = 5
 	})
@@ -888,7 +888,7 @@ SetUITheme(SaveData.UITheme)
 
 local ReanimPage
 local DancesPage
-local CracktroFrameText = "Uhhhhhh Reanimate V" .. UhhhhhhVersion
+local CracktroFrameText = "NAM REANIMATE"
 local UIMainWindow, AWindowContent, WindowContent, TopBarFrame
 
 local _funcrefreshes = {}
@@ -920,7 +920,7 @@ do
 	UIMainWindow.Active = true
 	UIMainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
 	UIMainWindow.Position = UDim2.new(0.5, 0, 0.5, 0)
-	UIMainWindow.Size = UDim2.new(0, 360, 0, 280)
+	UIMainWindow.Size = UDim2.new(0, 360, 0, 450)
 	UIMainWindow.BackgroundTransparency = 0
 	UIMainWindow.BackgroundColor3 = Color3.new(1, 1, 1)
 	UIMainWindow.BorderSizePixel = 0
@@ -972,7 +972,7 @@ do
 	TopBarText.TextColor3 = Color3.new(1, 1, 1)
 	TopBarText.TextSize = 20
 	TopBarText.TextXAlignment = Enum.TextXAlignment.Left
-	TopBarText.Text = "NAM Reanimate | v" .. UhhhhhhVersion
+	TopBarText.Text = "NAM REANIMATE"
 	TopBarText.RichText = true
 	RegisterTextLabel(TopBarText)
 	Util.ForceTextSize(TopBarText)
@@ -1009,9 +1009,44 @@ do
 		end)
 	end
 	
+
+	-- NAM custom navigation bar; independent of the legacy GUI.
+	local NAMNavBar = Util.Instance("Frame", UIMainWindow)
+	NAMNavBar.Name = "NAMNavigation"
+	NAMNavBar.Position = UDim2.new(0, 0, 0, 30)
+	NAMNavBar.Size = UDim2.new(1, 0, 0, 30)
+	NAMNavBar.BackgroundColor3 = Color3.fromRGB(23, 26, 32)
+	NAMNavBar.BackgroundTransparency = 0
+	NAMNavBar.BorderSizePixel = 0
+	NAMNavBar.ZIndex = 20
+	local NAMNavNames = {"REANIMATE", "ANIMS", "LIMBS", "HITBOX", "SETTINGS"}
+	local NAMNavButtons = {}
+	for index, tabName in ipairs(NAMNavNames) do
+		local button = Instance.new("TextButton")
+		button.Name = tabName .. "Tab"
+		button.Parent = NAMNavBar
+		button.Position = UDim2.new((index - 1) / #NAMNavNames, 3, 0, 3)
+		button.Size = UDim2.new(1 / #NAMNavNames, -6, 1, -6)
+		button.BackgroundColor3 = Color3.fromRGB(37, 41, 49)
+		button.BackgroundTransparency = 0
+		button.BorderSizePixel = 0
+		button.AutoButtonColor = true
+		button.Font = Enum.Font.GothamSemibold
+		button.Text = tabName
+		button.TextColor3 = Color3.fromRGB(224, 228, 235)
+		button.TextSize = 10
+		button.TextScaled = false
+		button.TextWrapped = true
+		button.ZIndex = 21
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 5)
+		corner.Parent = button
+		NAMNavButtons[tabName] = button
+	end
+
 	AWindowContent = Util.Instance("Frame", UIMainWindow)
-	AWindowContent.Position = UDim2.new(0, 0, 0, 30)
-	AWindowContent.Size = UDim2.new(1, 0, 1, -35)
+	AWindowContent.Position = UDim2.new(0, 0, 0, 60)
+	AWindowContent.Size = UDim2.new(1, 0, 1, -60)
 	AWindowContent.BackgroundTransparency = 1
 	AWindowContent.ClipsDescendants = true
 	AWindowContent.ZIndex = 0
@@ -1092,13 +1127,13 @@ do
 				MainWindowTweening = false
 			end)
 		else
-			TopBarText.Text = "    NAM | v" .. UhhhhhhVersion
+			TopBarText.Text = "NAM REANIMATE"
 			WindowContent.Visible = true
 			MainWindowPosClose = UIMainWindow.Position
 			SaveData.WindowClosedPosition = {MainWindowPosClose.X.Scale, MainWindowPosClose.X.Offset, MainWindowPosClose.Y.Scale, MainWindowPosClose.Y.Offset}
 			TweenService:Create(UIMainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Position = MainWindowPosOpen,
-				Size = UDim2.fromOffset(360, 280)
+				Size = UDim2.fromOffset(360, 450)
 			}):Play()
 			TweenService:Create(TopBarClose.A, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Rotation = 0
@@ -1150,7 +1185,7 @@ end
 do
 	Util.Notify = function(text)
 		StarterGui:SetCore("SendNotification", {
-			Title = "Uhhhhhh",
+			Title = "NAM Reanimate",
 			Text = text,
 			Duration = 5
 		})
@@ -1167,7 +1202,7 @@ CracktroFrame.BackgroundColor3 = Color3.new(0, 0, 0)
 CracktroFrame.BorderSizePixel = 1
 CracktroFrame.BorderColor3 = Color3.new(1, 1, 1)
 CracktroFrame.ZIndex = 10
-CracktroFrame.Visible = false -- Open the main controls immediately; skip the blocking intro.
+CracktroFrame.Visible = false -- Legacy intro remains hidden; NAM opens directly to its controls.
 CracktroFrame.ClipsDescendants = true
 AddToRenderStep(function(t)
 	CracktroFrame.BorderColor3 = GetUIColor(t)
@@ -1430,7 +1465,7 @@ function UI.CreatePage()
 	local Frame = Util.Instance("ScrollingFrame", WindowContent)
 	Frame.AnchorPoint = Vector2.new(0.5, 0.5)
 	Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Frame.Size = UDim2.new(0, 360, 0, 245)
+	Frame.Size = UDim2.new(1, -10, 1, -10)
 	Frame.BackgroundTransparency = 0
 	Frame.BackgroundColor3 = Color3.new(0, 0, 0)
 	Frame.BorderSizePixel = 1
@@ -1441,8 +1476,8 @@ function UI.CreatePage()
 	Frame.CanvasSize = UDim2.new(0, 0, 0, 0)
 	Frame.ClipsDescendants = true
 	AddToRenderStep(function(t)
-		Frame.BorderColor3 = GetUIColor(t)
-		Frame.BackgroundColor3 = GetUIBGColor(t)
+		Frame.BorderColor3 = Color3.fromRGB(48, 54, 64)
+		Frame.BackgroundColor3 = Color3.fromRGB(18, 20, 26)
 	end, Frame)
 	Frame.ScrollingDirection = Enum.ScrollingDirection.Y
 	Frame.ScrollBarThickness = 3
@@ -2109,7 +2144,7 @@ function UI.CreateItemListPage()
 	local Frame = Util.Instance("Frame", WindowContent)
 	Frame.AnchorPoint = Vector2.new(0.5, 0.5)
 	Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Frame.Size = UDim2.new(0, 360, 0, 245)
+	Frame.Size = UDim2.new(1, -10, 1, -10)
 	Frame.BackgroundTransparency = 0
 	Frame.BackgroundColor3 = Color3.new(0, 0, 0)
 	Frame.BorderSizePixel = 1
@@ -2118,8 +2153,8 @@ function UI.CreateItemListPage()
 	Frame.ZIndex = 0
 	Frame.ClipsDescendants = true
 	AddToRenderStep(function(t)
-		Frame.BorderColor3 = GetUIColor(t)
-		Frame.BackgroundColor3 = GetUIBGColor(t)
+		Frame.BorderColor3 = Color3.fromRGB(48, 54, 64)
+		Frame.BackgroundColor3 = Color3.fromRGB(18, 20, 26)
 	end, Frame)
 	local Padding = Util.Instance("UIPadding", Frame)
 	Padding.PaddingTop = UDim.new(0, margin)
@@ -2269,355 +2304,10 @@ end
 
 local MainPage = UI.CreatePage()
 MainPage.Interactable = true
-CracktroFrame.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		if _totalrendertime < 1 or not IsUhhhhhhFullyLoaded then return end
-		CracktroFrame.Interactable = false
-		CracktroFrame.Visible = true
-		MainPage.Interactable = false
-		local tween = TweenService:Create(CracktroFrame, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
-			Position = UDim2.new(0.5, -362, 0.5, 0),
-		})
-		tween:Play()
-		tween.Completed:Connect(function()
-			CracktroFrame.Visible = false
-			MainPage.Interactable = true
-		end)
-	end
-end)
-local AsciiText = UI.CreateText(MainPage, "", 12, Enum.TextXAlignment.Center)
-Util.ForceTextSize(AsciiText)
-task.spawn(function()
-	local AsciiTextarts = {
-		{
-			"  ____ ___.__    .__    .__    .__    .__    .__      ",
-			" |    |   \\  |__ |  |__ |  |__ |  |__ |  |__ |  |__   ",
-			" |    |   /  |  \\|  |  \\|  |  \\|  |  \\|  |  \\|  |  \\  ",
-			" |    |  /|   Y  \\   Y  \\   Y  \\   Y  \\   Y  \\   Y  \\ ",
-			" |______/ |___|  /___|  /___|  /___|  /___|  /___|  / ",
-			"               \\/     \\/     \\/     \\/     \\/     \\/  ",
-		},
-		{
-			"  _   _ _     _     _     _     _     _      ",
-			" | | | | |   | |   | |   | |   | |   | |     ",
-			" | | | | |__ | |__ | |__ | |__ | |__ | |__   ",
-			" | | | | '_ \\| '_ \\| '_ \\| '_ \\| '_ \\| '_ \\  ",
-			" | |_| | | | | | | | | | | | | | | | | | | | ",
-			"  \\___/|_| |_|_| |_|_| |_|_| |_|_| |_|_| |_| ",
-		},
-		{
-			"     (   ( /(  ( /(  ( /(  ( /(  ( /(  ( /(  ",
-			"     )\\  )\\()) )\\()) )\\()) )\\()) )\\()) )\\()) ",
-			"  _ ((_)((_)\\ ((_)\\ ((_)\\ ((_)\\ ((_)\\ ((_)\\  ",
-			" | | | || |(_)| |(_)| |(_)| |(_)| |(_)| |(_) ",
-			" | |_| || ' \\ | ' \\ | ' \\ | ' \\ | ' \\ | ' \\  ",
-			"  \\___/ |_||_||_||_||_||_||_||_||_||_||_||_| ",
-		},
-		{
-			" db    db db      db      db      db      db      db      ",
-			" 88    88 88      88      88      88      88      88      ",
-			" 88    88 888888. 888888. 888888. 888888. 888888. 888888. ",
-			" 88    88 88   88 88   88 88   88 88   88 88   88 88   88 ",
-			" 88.  .88 88   88 88   88 88   88 88   88 88   88 88   88 ",
-			"  Y8888P  YP   YP YP   YP YP   YP YP   YP YP   YP YP   YP ",
-		},
-		{
-			" Un    iv er      sa      lH      ie      ra      rc      ",
-			" hi    ca l6      Re      an      im      at      eB      ",
-			" yS    TE VETHERE ALONEUn iversal Hierarc hical6R eanimat ",
-			" eB    yS TE   VE TH   ER EA   LO NE   Un iv   er sa   lH ",
-			" ier  arc ic   al 6R   ea ni   ma te   By ST   EV ET   HE ",
-			"  REALON  EU   ni ve   rs al   Hi er   ar ch   ic al   6R ",
-		},
-		{
-			"animatio'   .jQQQ|;;;;;;;;;;;;;|QQWp,   'tionanim",
-			"ationan'   .JTTVV|;;;;;;;;;;;;;|VVVVm>   'nimatio",
-			"nanima'   _mQc;~~|.............|~~+jQmc   'ionani",
-			"matio'   _QQQQg, |             |  jQQQQc.  'imati",
-			"onan'   <QQQQQQm;|   Uhhhhhh   |.wQQQQWQa,  'onan",
-			"ima'   jWQQQQQQQQ|             |mQQQQQQQQg,  'mat",
-		},
-		{
-			"fore! It is really great! Good product! Feel alive, NO",
-			"st part^ '' '  \"\"*E! (excluding taxes and the bills) N",
-			"r seu- . Uhhhhhh .-|u ihis! It has become something ne",
-			"rse! We ,... . ,.-rs of yellow-orange shiny triangles.",
-			"ns at a really stable framerate, so optimised it handl",
-			"ow, BUY OUR PRODUCT FOR FREE! We know you like it! We ",
-		},
-		{
-			"....... gmWWWQQQQQQPg ..............................",
-			":;:;:; qm#WWNWQQWQWWmp ;:;:;:.                  .;:;",
-			"!!?!!?.WX##: W#W :###W.?!!?:.  hi im steve!      .:!",
-			"lilili:ZSXS: XSX :X##Z:ilil!. welcome to Uhhhhhh .!i",
-			"EEEEEE:YLkk2S2SXSXSXZP:EEEEEi:                  :iEE",
-			"%%%%%%%;vnvkkkk2S2vnv;%%%%%%%%%oooooooooooooooo%%%%%",
-		},
-		{
-			"  Get Uhhhhhh today! Feel the difference!       ",
-			"           (-_-)         EPIC!    (^~^)   .vv=E ",
-			"       ()-(:::::)-()         .()-(:::::)-()'    ",
-			"LAME!  || |.....| ||      3=^^'  /...../        ",
-			"       YP |     | YP            (     )   COOL! ",
-			"      Without Uhhhhhh   vs.   With Uhhhhhh      ",
-		},
-		{
-			"55 68 68 68 68 68 68 55 68 68 68 68 68 68",
-			"68 68 68 68 68 68 55 68 68 68 68 68 68 55",
-			"68 68 68 68 68 55 68 68 68 68 68 68 55 68",
-			"68 68 68 68 Uhhhhhh  68 68 68 68 55 68 68",
-			"68 68 68 55 68 68 68 68 68 68 55 68 68 68",
-			"68 68 55 68 68 68 68 68 68 55 68 68 68 68",
-		},
-		{
-			"  Uhhhhhh          ",
-			"  01010101         ",
-			"   01101000        ",
-			"    01101000       ",
-			"     01101000      ",
-			"      01101000     ",
-			"       01101000    ",
-			"        01101000   ",
-			"         Uhhhhhh   ",
-		},
-		{
-			"+-[ NAM Reanimate ]----------------------[#]-+",
-			"|    ___                                    |",
-			"|   / o \\   Hello, world! Programmed to     |",
-			"|   \\ l /   work and not to feel.           |",
-			"|    \"\"\"                                    |",
-			"+-------------------------------------------+",
-		},
-		{
-			"       cIyyyyyyF0\\ `TFyyyyyyq8_                 ",
-			"           i+`}0v       V!'xD~                  ",
-			"           &x~[.        W|11   --Uhhhhhh--      ",
-			"          ~W,          }D                       ",
-			"        <d$-         tg3`                       ",
-			"   \".''   ......             '.      \"`   ;     ",
-			"   2]~<J  ;!ci2q' rrrr^   <1_q'   -inr   `0;    ",
-			"   F` '2    F<;            [&I- _+r%)    `@<}!  ",
-			"    ~1}`  `}\\    ;*111*; ^[; .^    +\\    `x     ",
-		},
-		{
-			"  local oldsec = 0          .-+=* Uhhhhhh *=+-. ",
-			"  while i < #keyframes do     (code-ception!)   ",
-			"      local k = keyframes[i]                    ",
-			"      local sec = k.Time // self._optimiser     ",
-			"      while oldsec < sec do                     ",
-			"          local j = math.max(1, i - 1)          ",
-		},
-		{
-			"er failed to process http://assetgame.roblox.com/as",
-			"er failed to process http://assetgame.roblox.com/as",
-			"--------------------------------------------       ",
-			"so, Uhhhhhh...                                     ",
-			"--------------------------------------------       ",
-			"er failed to process http://assetgame.roblox.com/as",
-			"er failed to process http://assetgame.roblox.com/as",
-			"er failed to process http://assetgame.roblox.com/as",
-		},
-		{
-			"usage: clone this repo and change the token and the",
-			"(unless you like chaos) also make sure you have all",
-			"the dev portal cuz Uhhhhhh.                        ",
-			"                                                   ",
-			"\"it's not fast it's shit\"                          ",
-			"Believe me friend, its fuckingly fast, you don't ev",
-		},
-		{
-			"Uhhhhhh                 NAM                  Uhhhhhh",
-			"Uhhhhhh Uhhhhhh Uhhhhhh Uhhhhhh STEVETHEREALONE",
-			"Uhhhhhh Uhhhhhh Uhhhhhh STEVETHEREALONE Uhhhhhh",
-			"Uhhhhhh Uhhhhhh STEVETHEREALONE Uhhhhhh Uhhhhhh",
-			"Uhhhhhh STEVETHEREALONE Uhhhhhh Uhhhhhh Uhhhhhh",
-			"STEVETHEREALONE Uhhhhhh Uhhhhhh Uhhhhhh Uhhhhhh",
-		},
-	}
-	AsciiText.Text = table.concat(AsciiTextarts[math.random(1, #AsciiTextarts)], "\n")
-	local AsciiTextartsw = false
-	local AsciiTextarttr = {}
-	do -- generate transitions
-		-- wipe to right
-		local a = {}
-		for i=0, 59 do
-			local t = i / 60
-			t *= 5
-			t = (t - 1) / 3
-			t *= 5
-			local map = {}
-			for y=0, 64 do
-				local layer = {}
-				for x=0, 64 do
-					local prog = x / 64
-					prog *= 5
-					table.insert(layer, math.round(math.clamp(t - prog + math.random() * 0.2, 0, 1) * 3))
-				end
-				table.insert(map, layer)
-			end
-			table.insert(a, map)
-			task.wait()
-		end
-		table.insert(AsciiTextarttr, a)
-		table.insert(AsciiTextarttr, a)
-		table.insert(AsciiTextarttr, a)
-		table.insert(AsciiTextarttr, a)
-		-- noisy fade
-		a = {}
-		for i=0, 59 do
-			local t = i / 60
-			local map = {}
-			for y=0, 64 do
-				local layer = {}
-				for x=0, 64 do
-					table.insert(layer, math.round(math.clamp(t * 2 - 1 + math.random() * 0.8, 0, 1) * 3))
-				end
-				table.insert(map, layer)
-			end
-			table.insert(a, map)
-			task.wait()
-		end
-		table.insert(AsciiTextarttr, a)
-		-- circle outward
-		a = {}
-		for i=0, 59 do
-			local t = i / 60
-			t *= 5
-			local map = {}
-			for y=0, 64 do
-				local layer = {}
-				for x=0, 64 do
-					local dist = math.sqrt(math.pow(x - 32, 2) + math.pow(y - 32, 2)) / 64
-					dist *= 5
-					table.insert(layer, math.round(math.clamp(t - dist + math.random() * 0.2, 0, 1) * 3))
-				end
-				table.insert(map, layer)
-			end
-			table.insert(a, map)
-			task.wait()
-		end
-		table.insert(AsciiTextarttr, a)
-		-- circle inward
-		a = {}
-		for i=0, 59 do
-			local t = 1 - i / 60
-			t *= 5
-			t -= 1
-			local map = {}
-			for y=0, 64 do
-				local layer = {}
-				for x=0, 64 do
-					local dist = math.sqrt(math.pow(x - 32, 2) + math.pow(y - 32, 2)) / 64
-					dist *= 5
-					table.insert(layer, math.round(math.clamp(dist - t + math.random() * 0.2, 0, 1) * 3))
-				end
-				table.insert(map, layer)
-			end
-			table.insert(a, map)
-			task.wait()
-		end
-		table.insert(AsciiTextarttr, a)
-	end
-	local function switchart()
-		if AsciiTextartsw then return end
-		AsciiTextartsw = true
-		local function animation(art, inv)
-			local transmap = AsciiTextarttr[math.random(1, #AsciiTextarttr)]
-			local rot = math.random(0, 3)
-			local st = os.clock()
-			repeat
-				local t = os.clock() - st
-				local i = math.clamp(math.floor(t * 60) + 1, 1, 60)
-				local render = {}
-				for iy=1, #art do
-					local y = (iy - 1) / #art
-					local conc = ""
-					local txt = art[iy]
-					for ix=1, #txt do
-						local x = (ix - 1) / #txt
-						local ch = string.sub(txt, ix, ix)
-						local b = 0
-						if rot == 0 then
-							b = transmap[i][math.floor(y * 64) + 1][math.floor(x * 64) + 1]
-						elseif rot == 1 then
-							b = transmap[i][math.floor(x * 64) + 1][64 - math.floor(y * 64)]
-						elseif rot == 2 then
-							b = transmap[i][64 - math.floor(y * 64)][64 - math.floor(x * 64)]
-						elseif rot == 3 then
-							b = transmap[i][64 - math.floor(x * 64)][math.floor(y * 64) + 1]
-						end
-						if inv then b = 3 - b end
-						if b == 1 then
-							if (ch == ch:upper() and ch ~= ch:lower()) or ch == "8" or ch == "0" then
-								ch = "?"
-							elseif ch == ":" or ch == ";" or ch == "_" then
-								ch = "."
-							elseif ch == "." or ch == "," or ch == " " then
-								ch = " "
-							else
-								ch = ":"
-							end
-						elseif b == 2 then
-							if (ch == ch:upper() and ch ~= ch:lower()) or ch == "8" or ch == "0" then
-								ch = ":"
-							elseif ch == ":" or ch == ";" or ch == "_" or ch == "." or ch == "," or ch == " " then
-								ch = " "
-							else
-								ch = "."
-							end
-						elseif b == 3 then
-							ch = " "
-						end
-						conc ..= ch
-					end
-					table.insert(render, conc)
-				end
-				AsciiText.Text = table.concat(render, "\n")
-				task.wait()
-			until os.clock() > st + 1
-		end
-		local source = string.split(AsciiText.Text, "\n")
-		local target = source
-		while table.concat(source, "\n") == table.concat(target, "\n") do
-			task.wait()
-			target = AsciiTextarts[math.random(1, #AsciiTextarts)]
-		end
-		animation(source, false)
-		animation(target, true)
-		AsciiText.Text = table.concat(target, "\n")
-		AsciiTextartsw = false
-	end
-	local AsciiTextartin = nil
-	AsciiText.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			AsciiTextartin = input
-		end
-	end)
-	AsciiText.InputEnded:Connect(function(input)
-		if AsciiTextartin == input then
-			AsciiTextartin = nil
-			switchart()
-		end
-	end)
-	switchart()
-end)
-UI.CreateText(MainPage, `Reanimate V{UhhhhhhVersion}, By STEVE :D`, 15, Enum.TextXAlignment.Right)
-UI.CreateSeparator(MainPage)
-UI.CreateButton(MainPage, " &lt; Back to cool scene", 20).Activated:Connect(function()
-	CracktroFrame.Interactable = false
-	CracktroFrame.Visible = true
-	MainPage.Interactable = false
-	local tween = TweenService:Create(CracktroFrame, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
-		Position = UDim2.new(0.5, 0, 0.5, 0),
-	})
-	tween:Play()
-	tween.Completed:Connect(function()
-		CracktroFrame.Interactable = true
-	end)
-end)
-UI.CreateSwitch(MainPage, "Skip Intro", SaveData.SkipIntro).Changed:Connect(function(value)
-	SaveData.SkipIntro = value
-end)
+
+
+
+
 UI.CreateDropdown(MainPage, "UI Theme", {
 	"RGB/Default",
 	"ALONE",
@@ -6639,7 +6329,7 @@ end
 UI.CreateSeparator(MainPage)
 
 do
-	UI.CreateText(MainPage, "Reanimate Character Settings", 15, Enum.TextXAlignment.Center)
+	UI.CreateText(MainPage, "SETTINGS", 15, Enum.TextXAlignment.Center)
 	UI.CreateSwitch(MainPage, "Infinite Jump", Reanimate.InfiniteJump).Changed:Connect(function(val)
 		Reanimate.InfiniteJump = val
 		SaveData.NoInfiniteJump = not val
@@ -6850,7 +6540,7 @@ do
 end
 UI.CreateSeparator(MainPage)
 do
-	UI.CreateText(MainPage, "Internals Settings", 15, Enum.TextXAlignment.Center)
+	UI.CreateText(MainPage, "ADVANCED SETTINGS", 15, Enum.TextXAlignment.Center)
 	UI.CreateSwitch(MainPage, "Hook LoadAnimation", Reanimate.UseLoadAnimationHook).Changed:Connect(function(val)
 		Reanimate.UseLoadAnimationHook = val
 		SaveData.NoLoadAnimationHook = not val
@@ -8170,7 +7860,7 @@ UI.CreateText(CreditsPage, "pls dont kick dubmood's ass lol", 12, Enum.TextXAlig
 UI.CreateText(CreditsPage, "<b>pouet.net</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "other than rez' and anat's demos theres lots of good demos there", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "tho im considered a LAMER with no scene ID loool", 12, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "so uhhhhhh....", 12, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "NAM Reanimate", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "...greetings to lamers and fuckings to elites?", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "<b>github.com</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "YES!! KEEP SAVING ME FROM MY DATA CORRUPTION!!!", 12, Enum.TextXAlignment.Center)
@@ -8217,7 +7907,7 @@ do
 	end
 end
 UI.CreateSeparator(CreditsPage)
-UI.CreateText(CreditsPage, "DISCLAIMER: Some random quotes made here are jokes (e.g.: 'this script mogs genesis') and should not be taken seriously. This also includes all the self-glazing quotes. It's your choice to agree with them or not, and if you do or don't, don't come harass/mock any individuals from it. In the end, a joke quote is a joke quote.", 15, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "DISCLAIMER: Some quotes in this project are jokes and should not be taken seriously. Please do not use them to harass or mock anyone.", 15, Enum.TextXAlignment.Center)
 UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "This \"software\" is FREE, meaning YOU SHOULD NOT REDISTRIBUTE WITH RENUMERATIVE INTENT!!", 15, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "If you want to add content to Uhhhhhh, like Dances or Movesets, go to <font color=\"#4444FF\">this thing</font>.", 15, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
@@ -8482,7 +8172,7 @@ UI.CreateSeparator(MainPage)
 UI.CreateText(MainPage, "<b>MODULES MANAGEMENT</b>", 15, Enum.TextXAlignment.Center)
 UI.CreateButton(MainPage, "Reload Modules", 20).Activated:Connect(function()
 	CracktroFrame.Interactable = false
-	CracktroFrame.Visible = true
+	CracktroFrame.Visible = false
 	MainPage.Interactable = false
 	local tween = TweenService:Create(CracktroFrame, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
 		Position = UDim2.new(0.5, 0, 0.5, 0),
@@ -8515,6 +8205,64 @@ clearcontenthash.Activated:Connect(function()
 		clearcontenthashtext.Text = "Cleared, now rejoin to apply"
 	end
 end)
+
+
+-- Wire NAM navigation after all feature pages exist.
+do
+	local pages = {MainPage, DancesPage, MovesetsPage, KeybindsPage, CreditsPage, ChangelogsPage, InitLogsPage}
+	local function hidePages()
+		for _, page in ipairs(pages) do
+			if page then
+				page.Visible = false
+				page.Interactable = false
+			end
+		end
+	end
+	local function scrollToText(needle)
+		MainPage.Visible = true
+		MainPage.Interactable = true
+		task.defer(function()
+			for _, object in ipairs(MainPage:GetDescendants()) do
+				if object:IsA("TextLabel") and object.Text:upper():find(needle, 1, true) then
+					MainPage.CanvasPosition = Vector2.new(0, math.max(0, object.AbsolutePosition.Y - MainPage.AbsolutePosition.Y - 8))
+					return
+				end
+			end
+		end)
+	end
+	local function selectNAMTab(tabName)
+		hidePages()
+		local selectedPage = MainPage
+		if tabName == "ANIMS" then
+			selectedPage = DancesPage or MainPage
+		end
+		if selectedPage then
+			selectedPage.Position = UDim2.new(0.5, 0, 0.5, 0)
+			selectedPage.Size = UDim2.new(1, -10, 1, -10)
+			selectedPage.Visible = true
+			selectedPage.Interactable = true
+		end
+		for name, button in pairs(NAMNavButtons) do
+			local active = name == tabName
+			button.BackgroundColor3 = active and Color3.fromRGB(164, 255, 74) or Color3.fromRGB(37, 41, 49)
+			button.TextColor3 = active and Color3.fromRGB(18, 22, 16) or Color3.fromRGB(224, 228, 235)
+		end
+		if tabName == "LIMBS" then
+			scrollToText("REANIMATOR CONFIG")
+		elseif tabName == "SETTINGS" then
+			scrollToText("SETTINGS")
+		elseif tabName == "HITBOX" then
+			if Reanimate.Character then pcall(ReanimateShowHitboxes) end
+			MainPage.CanvasPosition = Vector2.new(0, 0)
+		elseif tabName == "REANIMATE" then
+			MainPage.CanvasPosition = Vector2.new(0, 0)
+		end
+	end
+	for name, button in pairs(NAMNavButtons) do
+		button.Activated:Connect(function() selectNAMTab(name) end)
+	end
+	selectNAMTab("REANIMATE")
+end
 
 
 ForceModuleReload(false)
