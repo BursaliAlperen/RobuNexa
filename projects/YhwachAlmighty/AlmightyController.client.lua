@@ -2,6 +2,7 @@
 -- Prefer native KeyframeSequence playback through AnimLib; published Roblox animation IDs are the fallback.
 local Players = game:GetService("Players")
 local SoundService = game:GetService("SoundService")
+local HttpService = game:GetService("HttpService")
 
 local player = Players.LocalPlayer
 local Config = require(script.Parent:WaitForChild("AccessoryConfig"))
@@ -13,6 +14,7 @@ local statusEvent = uiScript:WaitForChild("StatusChanged")
 local hatAnimator = HatAnimation.new()
 local sequencePlayer = AnimLib.new()
 local sequenceFolder = script.Parent:FindFirstChild("YhwachSequences")
+local binaryFolder = script.Parent:FindFirstChild("YhwachAnimData")
 
 local function reportStatus(message, color)
 	statusEvent:Fire(message, color or Color3.fromRGB(157, 148, 190))
@@ -86,6 +88,30 @@ end
 local function playAnimation(key, looped, keepOtherTracks)
 	if not keepOtherTracks then stopAnimations() end
 	local character = getCharacter()
+	local binaryName = Config.BinaryModuleNames and Config.BinaryModuleNames[key]
+	local binaryModule = binaryFolder and binaryName and binaryFolder:FindFirstChild(binaryName)
+	if binaryModule and binaryModule:IsA("ModuleScript") then
+		local ok, data = pcall(require, binaryModule)
+		if ok then
+			if type(data) == "table" and type(data.Base64) == "string" then
+				local decodedOk, decoded = pcall(function() return HttpService:Base64Decode(data.Base64) end)
+				if decodedOk then data = decoded else data = nil end
+			end
+			if type(data) == "string" then
+				local playOk, playError = pcall(function()
+					sequencePlayer:LoadBuffer(data, character):SetLooped(looped == true):Play()
+				end)
+				if playOk then
+					reportStatus("Playing custom .anim: " .. key, Color3.fromRGB(213, 188, 255))
+					return sequencePlayer
+				end
+				warn("[Yhwach] Custom .anim parse failed:", playError)
+				reportStatus("Invalid .anim data: " .. key, Color3.fromRGB(255, 120, 120))
+			end
+		else
+			warn("[Yhwach] Could not load binary module:", data)
+		end
+	end
 	local sequenceName = Config.SequenceNames and Config.SequenceNames[key]
 	local sequence = sequenceFolder and sequenceName and sequenceFolder:FindFirstChild(sequenceName)
 	if sequence and sequence:IsA("KeyframeSequence") then
