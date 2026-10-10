@@ -38,6 +38,7 @@ local TweenService = cloneref(game:GetService("TweenService"))
 local TextChatService = cloneref(game:GetService("TextChatService"))
 local UserInputService = cloneref(game:GetService("UserInputService"))
 local ContextActionService = cloneref(game:GetService("ContextActionService"))
+local VRService = cloneref(game:GetService("VRService"))
 
 local Util = {}
 
@@ -2420,6 +2421,7 @@ local Reanimate = {
 		CFrame = CFrame.identity,
 		Focus = CFrame.identity,
 		Scriptable = false,
+		VRMode = false,
 		Zoom = 16,
 		FieldOfView = 70,
 		Input = Vector3.zero,
@@ -2494,6 +2496,19 @@ local Reanimate = {
 		}
 	}
 }
+Reanimate.Camera.GetMovementCFrame = function(self)
+	local ccf = self.CFrame
+	if self.VRMode then
+		local ok, headCFrame = pcall(function()
+			return VRService:GetUserCFrame(Enum.UserCFrame.Head)
+		end)
+		if ok and headCFrame then
+			local _, yaw, _ = headCFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
+			ccf *= CFrame.Angles(0, yaw, 0)
+		end
+	end
+	return ccf
+end
 Reanimate.Camera.IsFirstPerson = function(self)
 	return self.Zoom < 0.75
 end
@@ -2686,6 +2701,16 @@ do
 				if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.RightShift then
 					Reanimate.Shiftlocked = Reanimate.ShiftlockEnabled and not Reanimate.Shiftlocked
 				end
+				if input.KeyCode == Enum.KeyCode.ButtonL3 then
+					if self.VRMode then
+						self.Zoom = self.Zoom < 7 and 7 or 0.5
+					else
+						self.Zoom = self.Zoom <= 0.5 and 20 or (self.Zoom <= 10 and 0.5 or (self.Zoom <= 20 and 10 or 20))
+					end
+				end
+				if input.KeyCode == Enum.KeyCode.ButtonR3 and self.VRMode then
+					pcall(function() VRService:RecenterUserHeadCFrame() end)
+				end
 				if input.KeyCode == Enum.KeyCode.Left then
 					self.Inputs.KB.Left = true
 				end
@@ -2819,6 +2844,7 @@ do
 			Reanimate.Shiftlocked = Reanimate.ShiftlockEnabled and not Reanimate.Shiftlocked
 		end)
 		RunService:BindToRenderStep("Uhhhhhh_Camera", Enum.RenderPriority.Camera.Value + 1, function(dt)
+			self.VRMode = VRService.VREnabled
 			if UserInputService:GetFocusedTextBox() then
 				resetInputDevices()
 			end
@@ -2830,6 +2856,7 @@ do
 			end
 			local input = self.Input * Vector3.new(1, GameSettings:GetCameraYInvertValue(), 1)
 			self.Input = Vector3.zero
+			if self.VRMode then input *= Vector3.new(1, 0, 1) end
 			local ltm = Reanimate.LocalTransparencyModifier
 			local tltm = 0
 			local sltm = dt * 3
@@ -2888,7 +2915,9 @@ do
 						Camera.FieldOfViewMode = "Vertical"
 						local newCameraCFrame, newCameraFocus = self.CFrame, self.Focus
 						local subjectPosition = RootPart.Position + RootPart.CFrame.UpVector * 1.5
-						subjectPosition += RootPart.CFrame.Rotation * Humanoid.CameraOffset
+						if not self.VRMode then
+							subjectPosition += RootPart.CFrame.Rotation * Humanoid.CameraOffset
+						end
 						local zoomDelta = input.Z
 						if math.abs(zoomDelta) > 0 then
 							if zoomDelta > 0 then
@@ -2907,6 +2936,14 @@ do
 						local startCFrame = CFrame.lookAt(Vector3.zero, currLookVector)
 						local newLookCFrame = CFrame.Angles(0, -constrainedRotateInput.X, 0) * startCFrame * CFrame.Angles(-constrainedRotateInput.Y, 0, 0)
 						local newLookVector = newLookCFrame.LookVector
+						if self.VRMode then
+							newLookVector = newLookVector * Vector3.new(1, 0, 1)
+							if newLookVector.Magnitude < 0.001 then
+								newLookVector = Vector3.zAxis
+							else
+								newLookVector = newLookVector.Unit
+							end
+						end
 						if self:IsMouseLocked() and not self:IsFirstPerson() then
 							local cameraRelativeOffset = newLookCFrame * Vector3.new(1.7, 0, 0)
 							if cameraRelativeOffset == cameraRelativeOffset then
@@ -2915,6 +2952,7 @@ do
 						end
 						newCameraFocus = CFrame.new(subjectPosition)
 						local cameraFocusP = newCameraFocus.Position
+						if self.VRMode then cameraFocusP += newLookVector * 0.5 end
 						newCameraCFrame = CFrame.lookAt(cameraFocusP - newLookVector * self._Zoom, cameraFocusP)
 						self.CFrame, self.Focus = newCameraCFrame, newCameraFocus
 					end
@@ -3044,7 +3082,7 @@ Reanimate.CreateCharacter = function(InitCFrame)
 	local CMove, CJump = Vector3.zero, false
 	Util.LinkDestroyI2C(RC, RunService.PreAnimation:Connect(function(dt)
 		CMove, CJump = Reanimate.Control.Move, Reanimate.Control.Jump
-		local CamCF = Reanimate.Camera.CFrame
+		local CamCF = Reanimate.Camera:GetMovementCFrame()
 		local _,x,_ = CamCF:ToEulerAngles(Enum.RotationOrder.YXZ)
 		local MoveCF = CFrame.Angles(0, x, 0)
 		pcall(sethiddenproperty, RCRootPart, "PhysicsRepRootPart", nil)
@@ -3134,7 +3172,7 @@ Reanimate.CreateCharacter = function(InitCFrame)
 			RCRootPart.Velocity *= Vector3.new(1, 0, 1)
 		end
 		if Reanimate:ShouldRotationType() then
-			local ax, ay, az = Reanimate.Camera.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
+			local ax, ay, az = Reanimate.Camera:GetMovementCFrame():ToEulerAngles(Enum.RotationOrder.YXZ)
 			local bx, by, bz = RCRootPart.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
 			tcf = CFrame.fromEulerAngles(bx, ay, bz, Enum.RotationOrder.YXZ)
 		end
