@@ -2380,7 +2380,7 @@ task.spawn(function()
 			"         Uhhhhhh   ",
 		},
 		{
-			"+-[ Uhhhhhh Reanimate ]-----------------[#]-+",
+			"+-[ NAM Reanimate ]----------------------[#]-+",
 			"|    ___                                    |",
 			"|   / o \\   Hello, world! Programmed to     |",
 			"|   \\ l /   work and not to feel.           |",
@@ -2622,7 +2622,7 @@ UI.CreateDropdown(MainPage, "UI Theme", {
 	"ALONE",
 	"Oxide",
 	"Patchma Hub",
-	"Genesis V4",
+	"NAM",
 	"Crimson",
 	"r/masterhacker",
 	"Homer Simpson",
@@ -8183,7 +8183,7 @@ UI.CreateText(CreditsPage, "thats a good lua code snippet trade :)", 12, Enum.Te
 UI.CreateText(CreditsPage, "<b>Roblox</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "this program's primary target", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "expose more backend functions for me like a good boy", 12, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "<b>rqz's Genesis FE</b>", 14, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "<b>NAM</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "ill be taking ALL your convertions >:D", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "actually, im just taking the names, search it up on script sources, read the source, convert it and stuff then done", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "<font color=\"#4444FF\"><b>Empyrean Reanimate (click for Discord)</b></font>", 12, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
