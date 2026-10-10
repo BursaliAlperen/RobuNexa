@@ -7582,9 +7582,16 @@ do
 	local quotes = {
 		"why are you here",
 	}
-	for _=1, 15 do
+	for _ = 1, 15 do
+		-- Quotes are consumed with table.remove; stop safely when the list is empty.
+		if #quotes == 0 then
+			break
+		end
 		local idx = math.random(1, #quotes)
-		UI.CreateText(CreditsPage, table.remove(quotes, idx), 12, Enum.TextXAlignment.Center)
+		local quote = table.remove(quotes, idx)
+		if quote then
+			UI.CreateText(CreditsPage, quote, 12, Enum.TextXAlignment.Center)
+		end
 	end
 end
 UI.CreateSeparator(CreditsPage)
