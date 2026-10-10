@@ -850,7 +850,7 @@ AddModule(function()
 
 	m.VeryOriginal = true
 	m.Config = function(parent: GuiBase2d)
-		Util_CreateSwitch(parent, "STEVE's Version", m.VeryOriginal).Changed:Connect(function(val)
+		Util_CreateSwitch(parent, "mamalalanam's Version", m.VeryOriginal).Changed:Connect(function(val)
 			m.VeryOriginal = val
 		end)
 	end
@@ -1738,7 +1738,7 @@ AddModule(function()
 	local m = {}
 	m.ModuleType = "DANCE"
 	m.Name = "Squidward Yell"
-	m.Description = "erm what the stick ma\nthis is the best animation library benchmarker\nthe second variant's original \"animation file\" was 10MB. it has been magically reduced to 1MB using C struct magic. (STEVE's KeyframeSequence file format)\nits also optimised down to 3714 keyframes\nthe third variant was reduced from 16MB to 2MB, and trimmed to 5742 keyframes.\nthe first, 9MB to 1MB, trimmed to 3216 keyframes."
+	m.Description = "erm what the stick ma\nthis is the best animation library benchmarker\nthe second variant's original \"animation file\" was 10MB. it has been magically reduced to 1MB using C struct magic. (mamalalanam's KeyframeSequence file format)\nits also optimised down to 3714 keyframes\nthe third variant was reduced from 16MB to 2MB, and trimmed to 5742 keyframes.\nthe first, 9MB to 1MB, trimmed to 3216 keyframes."
 	m.Assets = {"SquidwardYell1.anim", "SquidwardYell1.mp3", "SquidwardYell2.anim", "SquidwardYell2.mp3", "SquidwardYell3.anim", "SquidwardYell3.mp3"}
 
 	m.Variant = 1

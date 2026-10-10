@@ -1,4 +1,4 @@
-# credits to 2024 STEVE
+# credits to 2024 mamalalanam
 
 import io, os, struct, warnings, base64, re, math, struct
 import xml.etree.ElementTree as ET

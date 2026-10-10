@@ -932,13 +932,13 @@ AddModule(function()
 		animator.rig = figure
 		animator.track = track
 		dodgetick = 0
-		ContextActionService:BindAction("Uhhhhhh_SansDodge", function(actName, state, input)
+		ContextActionService:BindAction("NAM_SansDodge", function(actName, state, input)
 			if state == Enum.UserInputState.Begin then
 				dodgetick = os.clock()
 			end
 		end, true, Enum.KeyCode.Q)
-		ContextActionService:SetTitle("Uhhhhhh_SansDodge", "Dodge")
-		ContextActionService:SetPosition("Uhhhhhh_SansDodge", UDim2.new(1, -130, 1, -130))
+		ContextActionService:SetTitle("NAM_SansDodge", "Dodge")
+		ContextActionService:SetPosition("NAM_SansDodge", UDim2.new(1, -130, 1, -130))
 	end
 	m.Update = function(dt: number, figure: Model)
 		local t = os.clock()
@@ -962,7 +962,7 @@ AddModule(function()
 	end
 	m.Destroy = function(figure: Model?)
 		animator = nil
-		ContextActionService:UnbindAction("Uhhhhhh_SansDodge")
+		ContextActionService:UnbindAction("NAM_SansDodge")
 	end
 	return m
 end)
@@ -1071,21 +1071,21 @@ AddModule(function()
 		animationtime = 0
 		laststate = "none"
 		sprinting = false
-		ContextActionService:BindAction("Uhhhhhh_KDRV3Sprint", function(actName, state, input)
+		ContextActionService:BindAction("NAM_KDRV3Sprint", function(actName, state, input)
 			if state == Enum.UserInputState.Begin then
 				sprinting = not sprinting
 				if sprinting and not persistentloadnotif then
 					persistentloadnotif = true
 					StarterGui:SetCore("SendNotification", {
-						Title = "Uhhhhhh",
+						Title = "NAM",
 						Text = "Loaded: Sprint",
 						Duration = 5
 					})
 				end
 			end
 		end, true, Enum.KeyCode.LeftControl)
-		ContextActionService:SetTitle("Uhhhhhh_KDRV3Sprint", "Ctrl")
-		ContextActionService:SetPosition("Uhhhhhh_KDRV3Sprint", UDim2.new(1, -130, 1, -130))
+		ContextActionService:SetTitle("NAM_KDRV3Sprint", "Ctrl")
+		ContextActionService:SetPosition("NAM_KDRV3Sprint", UDim2.new(1, -130, 1, -130))
 	end
 	m.Update = function(dt: number, figure: Model)
 		local t = os.clock()
@@ -1157,7 +1157,7 @@ AddModule(function()
 		animatoridle = nil
 		animatorwalk = nil
 		animatorspri = nil
-		ContextActionService:UnbindAction("Uhhhhhh_KDRV3Sprint")
+		ContextActionService:UnbindAction("NAM_KDRV3Sprint")
 	end
 	return m
 end)

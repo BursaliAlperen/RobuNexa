@@ -7,7 +7,7 @@ local sourcecode = function()
 	-- Character = the fake char idk
 	-- OnStopEvent = fired when moveset is stopped
 	-- you better clean up all the mess u made
-	-- PlayerGui = hidden ui that Uhhhhhh uses
+	-- PlayerGui = hidden ui that NAM uses
 	
 	-- (your random code here)
 end

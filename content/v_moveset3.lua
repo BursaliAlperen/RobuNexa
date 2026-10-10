@@ -30,7 +30,7 @@ AddModule(function()
 	local m = {}
 	m.ModuleType = "MOVESET"
 	m.Name = "Patchma Hub"
-	m.Description = "A port of MyWorld's hub to Uhhhhhh\nsee the configurations to set ur anims"
+	m.Description = "A port of MyWorld's hub to NAM\nsee the configurations to set ur anims"
 	m.Assets = {}
 
 	local emptyfunction = function() end
@@ -1332,7 +1332,7 @@ AddModule(function()
 		btn("patchma hub lite")
 		lbl("real patchma hub by MyWorld")
 		lbl("their discord: discord.gg/QMy5f6DrbH")
-		lbl("ported to Uhhhhhh by STEVETHEREALONE")
+		lbl("ported to NAM by mamalalanam")
 		animsel("creepy crawler")
 		animsel("nameless animations V8")
 		lbl("^ my personal favorite right here ^")

@@ -1,4 +1,4 @@
-# credits to 2024 STEVE
+# credits to 2024 mamalalanam
 
 import io, os, struct, warnings, base64, re, math, struct
 import xml.etree.ElementTree as ET
@@ -1382,8 +1382,8 @@ def parsenconvert(path):
 
 import sys
 def main(args):
-	print("RBXM To STEVE's KeyframeSequence file format")
-	print("Hello! I convert RBXM files to STEVE's KeyframeSequence file format.")
+	print("RBXM To mamalalanam's KeyframeSequence file format")
+	print("Hello! I convert RBXM files to mamalalanam's KeyframeSequence file format.")
 	print("I also know about RBXMX, and I looooove C structs!")
 	if len(args) >= 2:
 		return parsenconvert(args[1])

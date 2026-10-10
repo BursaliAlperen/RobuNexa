@@ -156,7 +156,7 @@ AddModule(function()
 	local function Attack(position, radius)
 		if m.HitboxDebug then
 			local hitvis = Instance.new("Part")
-			hitvis.Name = RandomString() -- built into Uhhhhhh
+			hitvis.Name = RandomString() -- built into NAM
 			hitvis.CastShadow = false
 			hitvis.Material = Enum.Material.ForceField
 			hitvis.Anchored = true
@@ -276,7 +276,7 @@ AddModule(function()
 		flyg.P = 3000
 		flyg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
 		flyg.Parent = nil
-		ContextActionService:BindAction("Uhhhhhh_ILFlight", function(_, state, _)
+		ContextActionService:BindAction("NAM_ILFlight", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				flight = not flight
 				if math.random(15) == 1 then
@@ -318,9 +318,9 @@ AddModule(function()
 				end
 			end
 		end, true, Enum.KeyCode.F)
-		ContextActionService:SetTitle("Uhhhhhh_ILFlight", "F")
-		ContextActionService:SetPosition("Uhhhhhh_ILFlight", UDim2.new(1, -130, 1, -130))
-		ContextActionService:BindAction("Uhhhhhh_ILAttack", function(_, state, _)
+		ContextActionService:SetTitle("NAM_ILFlight", "F")
+		ContextActionService:SetPosition("NAM_ILFlight", UDim2.new(1, -130, 1, -130))
+		ContextActionService:BindAction("NAM_ILAttack", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				if not figure:GetAttribute("IsDancing") then
 					attackcount += 1
@@ -359,26 +359,26 @@ AddModule(function()
 				end
 			end
 		end, true, Enum.KeyCode.Z)
-		ContextActionService:SetTitle("Uhhhhhh_ILAttack", "Z")
-		ContextActionService:SetPosition("Uhhhhhh_ILAttack", UDim2.new(1, -180, 1, -130))
-		ContextActionService:BindAction("Uhhhhhh_ILTeleport", function(_, state, _)
+		ContextActionService:SetTitle("NAM_ILAttack", "Z")
+		ContextActionService:SetPosition("NAM_ILAttack", UDim2.new(1, -180, 1, -130))
+		ContextActionService:BindAction("NAM_ILTeleport", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				notify("i'd rather WALK.")
 			end
 		end, false, Enum.KeyCode.X)
-		ContextActionService:BindAction("Uhhhhhh_ILDestroy", function(_, state, _)
+		ContextActionService:BindAction("NAM_ILDestroy", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				notify("magic is BORING.")
 			end
 		end, false, Enum.KeyCode.C)
-		ContextActionService:BindAction("Uhhhhhh_ILMusic", function(_, state, _)
+		ContextActionService:BindAction("NAM_ILMusic", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				musictime = 0
 				changesong()
 			end
 		end, true, Enum.KeyCode.M)
-		ContextActionService:SetTitle("Uhhhhhh_ILMusic", "M")
-		ContextActionService:SetPosition("Uhhhhhh_ILMusic", UDim2.new(1, -130, 1, -180))
+		ContextActionService:SetTitle("NAM_ILMusic", "M")
+		ContextActionService:SetPosition("NAM_ILMusic", UDim2.new(1, -130, 1, -180))
 		task.delay(0, notify, "im BORED!!")
 		local lines = {
 			"theres NOTHING really FUN for me to do since 2022",
@@ -647,11 +647,11 @@ AddModule(function()
 		end
 	end
 	m.Destroy = function(figure: Model?)
-		ContextActionService:UnbindAction("Uhhhhhh_ILFlight")
-		ContextActionService:UnbindAction("Uhhhhhh_ILAttack")
-		ContextActionService:UnbindAction("Uhhhhhh_ILTeleport")
-		ContextActionService:UnbindAction("Uhhhhhh_ILDestroy")
-		ContextActionService:UnbindAction("Uhhhhhh_ILMusic")
+		ContextActionService:UnbindAction("NAM_ILFlight")
+		ContextActionService:UnbindAction("NAM_ILAttack")
+		ContextActionService:UnbindAction("NAM_ILTeleport")
+		ContextActionService:UnbindAction("NAM_ILDestroy")
+		ContextActionService:UnbindAction("NAM_ILMusic")
 		flyv:Destroy()
 		flyg:Destroy()
 		if chatconn then
@@ -2132,7 +2132,7 @@ AddModule(function()
 		hum = figure:FindFirstChild("Humanoid")
 		root = figure:FindFirstChild("HumanoidRootPart")
 		torso = figure:FindFirstChild("Torso")
-		ContextActionService:BindAction("Uhhhhhh_LCFlight", function(_, state, _)
+		ContextActionService:BindAction("NAM_LCFlight", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				flight = not flight
 				if math.random(4) == 1 then
@@ -2158,16 +2158,16 @@ AddModule(function()
 				end
 			end
 		end, true, Enum.KeyCode.F)
-		ContextActionService:SetTitle("Uhhhhhh_LCFlight", "F")
-		ContextActionService:SetPosition("Uhhhhhh_LCFlight", UDim2.new(1, -130, 1, -130))
-		ContextActionService:BindAction("Uhhhhhh_LCDash", function(_, state, _)
+		ContextActionService:SetTitle("NAM_LCFlight", "F")
+		ContextActionService:SetPosition("NAM_LCFlight", UDim2.new(1, -130, 1, -130))
+		ContextActionService:BindAction("NAM_LCDash", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				Dash()
 			end
 		end, true, Enum.KeyCode.Z)
-		ContextActionService:SetTitle("Uhhhhhh_LCDash", "Z")
-		ContextActionService:SetPosition("Uhhhhhh_LCDash", UDim2.new(1, -180, 1, -130))
-		ContextActionService:BindAction("Uhhhhhh_LCBigbeam", function(_, state, _)
+		ContextActionService:SetTitle("NAM_LCDash", "Z")
+		ContextActionService:SetPosition("NAM_LCDash", UDim2.new(1, -180, 1, -130))
+		ContextActionService:BindAction("NAM_LCBigbeam", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				if m.OmegaBlaster then
 					OmegaBlaster()
@@ -2176,30 +2176,30 @@ AddModule(function()
 				end
 			end
 		end, true, Enum.KeyCode.X)
-		ContextActionService:SetTitle("Uhhhhhh_LCBigbeam", "X")
-		ContextActionService:SetPosition("Uhhhhhh_LCBigbeam", UDim2.new(1, -230, 1, -130))
-		ContextActionService:BindAction("Uhhhhhh_LCRaining", function(_, state, _)
+		ContextActionService:SetTitle("NAM_LCBigbeam", "X")
+		ContextActionService:SetPosition("NAM_LCBigbeam", UDim2.new(1, -230, 1, -130))
+		ContextActionService:BindAction("NAM_LCRaining", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				LightningRain()
 			end
 		end, true, Enum.KeyCode.C)
-		ContextActionService:SetTitle("Uhhhhhh_LCRaining", "C")
-		ContextActionService:SetPosition("Uhhhhhh_LCRaining", UDim2.new(1, -280, 1, -130))
-		ContextActionService:BindAction("Uhhhhhh_LCGranada", function(_, state, _)
+		ContextActionService:SetTitle("NAM_LCRaining", "C")
+		ContextActionService:SetPosition("NAM_LCRaining", UDim2.new(1, -280, 1, -130))
+		ContextActionService:BindAction("NAM_LCGranada", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				Granada()
 			end
 		end, true, Enum.KeyCode.V)
-		ContextActionService:SetTitle("Uhhhhhh_LCGranada", "V")
-		ContextActionService:SetPosition("Uhhhhhh_LCGranada", UDim2.new(1, -180, 1, -180))
-		ContextActionService:BindAction("Uhhhhhh_LCKaboom", function(_, state, _)
+		ContextActionService:SetTitle("NAM_LCGranada", "V")
+		ContextActionService:SetPosition("NAM_LCGranada", UDim2.new(1, -180, 1, -180))
+		ContextActionService:BindAction("NAM_LCKaboom", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				KaBoom()
 			end
 		end, true, Enum.KeyCode.B)
-		ContextActionService:SetTitle("Uhhhhhh_LCKaboom", "B")
-		ContextActionService:SetPosition("Uhhhhhh_LCKaboom", UDim2.new(1, -230, 1, -180))
-		ContextActionService:BindAction("Uhhhhhh_LCMusic", function(_, state, _)
+		ContextActionService:SetTitle("NAM_LCKaboom", "B")
+		ContextActionService:SetPosition("NAM_LCKaboom", UDim2.new(1, -230, 1, -180))
+		ContextActionService:BindAction("NAM_LCMusic", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				currentmode = (currentmode + 1) % 3
 				if currentmode == 0 then
@@ -2220,8 +2220,8 @@ AddModule(function()
 				end
 			end
 		end, true, Enum.KeyCode.M)
-		ContextActionService:SetTitle("Uhhhhhh_LCMusic", "M")
-		ContextActionService:SetPosition("Uhhhhhh_LCMusic", UDim2.new(1, -130, 1, -180))
+		ContextActionService:SetTitle("NAM_LCMusic", "M")
+		ContextActionService:SetPosition("NAM_LCMusic", UDim2.new(1, -130, 1, -180))
 		if uisbegin then
 			uisbegin:Disconnect()
 		end
@@ -2253,7 +2253,7 @@ AddModule(function()
 		elseif math.random(2) == 1 then
 			task.delay(0, notify, "Lightning Cannon, by myworld")
 		else
-			task.delay(0, notify, "Lightning Cannon, by STEVE")
+			task.delay(0, notify, "Lightning Cannon, by mamalalanam")
 		end
 		task.delay(1, randomdialog, {
 			"Immortality Lord did not have to say that...",
@@ -2812,13 +2812,13 @@ AddModule(function()
 		end
 	end
 	m.Destroy = function(figure: Model?)
-		ContextActionService:UnbindAction("Uhhhhhh_LCFlight")
-		ContextActionService:UnbindAction("Uhhhhhh_LCDash")
-		ContextActionService:UnbindAction("Uhhhhhh_LCKaboom")
-		ContextActionService:UnbindAction("Uhhhhhh_LCGranada")
-		ContextActionService:UnbindAction("Uhhhhhh_LCRaining")
-		ContextActionService:UnbindAction("Uhhhhhh_LCBigbeam")
-		ContextActionService:UnbindAction("Uhhhhhh_LCMusic")
+		ContextActionService:UnbindAction("NAM_LCFlight")
+		ContextActionService:UnbindAction("NAM_LCDash")
+		ContextActionService:UnbindAction("NAM_LCKaboom")
+		ContextActionService:UnbindAction("NAM_LCGranada")
+		ContextActionService:UnbindAction("NAM_LCRaining")
+		ContextActionService:UnbindAction("NAM_LCBigbeam")
+		ContextActionService:UnbindAction("NAM_LCMusic")
 		flyv:Destroy()
 		flyg:Destroy()
 		walkingwheel:Destroy()
@@ -3110,15 +3110,15 @@ AddModule(function()
 				currentclick = input
 			end
 		end)
-		ContextActionService:BindAction("Uhhhhhh_MGShoot", function(_, state, input)
+		ContextActionService:BindAction("NAM_MGShoot", function(_, state, input)
 			if state == Enum.UserInputState.Begin then
 				mousedown = true
 				mouselock = true
 				currentclick = input
 			end
 		end, true)
-		ContextActionService:SetTitle("Uhhhhhh_MGShoot", "M1")
-		ContextActionService:SetPosition("Uhhhhhh_MGShoot", UDim2.new(1, -130, 1, -130))
+		ContextActionService:SetTitle("NAM_MGShoot", "M1")
+		ContextActionService:SetPosition("NAM_MGShoot", UDim2.new(1, -130, 1, -130))
 		uisend = UserInputService.InputEnded:Connect(function(input, gpe)
 			if input == currentclick then
 				mousedown = false
@@ -3453,7 +3453,7 @@ AddModule(function()
 		dancereact = isdancing
 	end
 	m.Destroy = function(figure: Model?)
-		ContextActionService:UnbindAction("Uhhhhhh_MGShoot")
+		ContextActionService:UnbindAction("NAM_MGShoot")
 		if uisbegin then
 			uisbegin:Disconnect()
 			uisbegin = nil
@@ -3476,7 +3476,7 @@ AddModule(function()
 	m.ModuleType = "MOVESET"
 	m.Name = "AK-47"
 	m.InternalName = "WHATCOMESBEFORE47"
-	m.Description = "\"what comes before 47?\"\n\"AK.\"\nrecreation of genesis' AK-47. lerps made by @scripterguy_1000, reiterations by STEVE\nM1 - Shoot"
+	m.Description = "\"what comes before 47?\"\n\"AK.\"\nrecreation of genesis' AK-47. lerps made by @scripterguy_1000, reiterations by mamalalanam\nM1 - Shoot"
 	m.Assets = {}
 
 	m.Sounds = true
@@ -3623,15 +3623,15 @@ AddModule(function()
 				currentclick = input
 			end
 		end)
-		ContextActionService:BindAction("Uhhhhhh_AKShoot", function(_, state, input)
+		ContextActionService:BindAction("NAM_AKShoot", function(_, state, input)
 			if state == Enum.UserInputState.Begin then
 				mousedown = true
 				mouselock = true
 				currentclick = input
 			end
 		end, true)
-		ContextActionService:SetTitle("Uhhhhhh_AKShoot", "M1")
-		ContextActionService:SetPosition("Uhhhhhh_AKShoot", UDim2.new(1, -130, 1, -130))
+		ContextActionService:SetTitle("NAM_AKShoot", "M1")
+		ContextActionService:SetPosition("NAM_AKShoot", UDim2.new(1, -130, 1, -130))
 		uisend = UserInputService.InputEnded:Connect(function(input, gpe)
 			if input == currentclick then
 				mousedown = false
@@ -3847,7 +3847,7 @@ AddModule(function()
 		gun.Disable = not not isdancing
 	end
 	m.Destroy = function(figure: Model?)
-		ContextActionService:UnbindAction("Uhhhhhh_AKShoot")
+		ContextActionService:UnbindAction("NAM_AKShoot")
 		if uisbegin then
 			uisbegin:Disconnect()
 			uisbegin = nil
@@ -3894,7 +3894,7 @@ AddModule(function()
 		Util_CreateSwitch(parent, "Skip Intro", m.SkipIntro).Changed:Connect(function(val)
 			m.SkipIntro = val
 		end)
-		Util_CreateText(parent, "make the intro lock in (impact frames drawn by STEVE ofc)", 12, Enum.TextXAlignment.Center)
+		Util_CreateText(parent, "make the intro lock in (impact frames drawn by mamalalanam ofc)", 12, Enum.TextXAlignment.Center)
 		Util_CreateSwitch(parent, "Alternate Intro", m.AltIntro).Changed:Connect(function(val)
 			m.AltIntro = val
 		end)
@@ -4499,7 +4499,7 @@ AddModule(function()
 		local rootu = root
 		attacking = true
 		barraging = true
-		notify("SUNLIGHTO YELLO OVERDRIVUHHHHHH")
+		notify("SUNLIGHTO YELLO OVERDRIVNAM")
 		local sound = Instance.new("Sound", root)
 		sound.SoundId = "rbxassetid://624164065"
 		sound.Volume = 3
@@ -4927,41 +4927,41 @@ AddModule(function()
 		joints.dh = CFrame.new(0, -16, 0)
 		joints.dl = CFrame.new(0, -16, 0)
 		joints.dr = CFrame.new(0, -16, 0)
-		ContextActionService:BindAction("Uhhhhhh_SDPunch", function(_, state, _)
+		ContextActionService:BindAction("NAM_SDPunch", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				AttackOne()
 			end
 		end, true, Enum.UserInputType.MouseButton1)
-		ContextActionService:SetTitle("Uhhhhhh_SDPunch", "M1")
-		ContextActionService:SetPosition("Uhhhhhh_SDPunch", UDim2.new(1, -130, 1, -130))
-		ContextActionService:BindAction("Uhhhhhh_SDMudad", function(_, state, _)
+		ContextActionService:SetTitle("NAM_SDPunch", "M1")
+		ContextActionService:SetPosition("NAM_SDPunch", UDim2.new(1, -130, 1, -130))
+		ContextActionService:BindAction("NAM_SDMudad", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				Mudada()
 			end
 		end, true, Enum.KeyCode.Z)
-		ContextActionService:SetTitle("Uhhhhhh_SDMudad", "Z")
-		ContextActionService:SetPosition("Uhhhhhh_SDMudad", UDim2.new(1, -180, 1, -130))
-		ContextActionService:BindAction("Uhhhhhh_SDSmash", function(_, state, _)
+		ContextActionService:SetTitle("NAM_SDMudad", "Z")
+		ContextActionService:SetPosition("NAM_SDMudad", UDim2.new(1, -180, 1, -130))
+		ContextActionService:BindAction("NAM_SDSmash", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				SmashDown()
 			end
 		end, true, Enum.KeyCode.X)
-		ContextActionService:SetTitle("Uhhhhhh_SDSmash", "X")
-		ContextActionService:SetPosition("Uhhhhhh_SDSmash", UDim2.new(1, -230, 1, -130))
-		ContextActionService:BindAction("Uhhhhhh_SDLazer", function(_, state, _)
+		ContextActionService:SetTitle("NAM_SDSmash", "X")
+		ContextActionService:SetPosition("NAM_SDSmash", UDim2.new(1, -230, 1, -130))
+		ContextActionService:BindAction("NAM_SDLazer", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				FirinLaser()
 			end
 		end, true, Enum.KeyCode.C)
-		ContextActionService:SetTitle("Uhhhhhh_SDLazer", "C")
-		ContextActionService:SetPosition("Uhhhhhh_SDLazer", UDim2.new(1, -130, 1, -180))
-		ContextActionService:BindAction("Uhhhhhh_SDRawrr", function(_, state, _)
+		ContextActionService:SetTitle("NAM_SDLazer", "C")
+		ContextActionService:SetPosition("NAM_SDLazer", UDim2.new(1, -130, 1, -180))
+		ContextActionService:BindAction("NAM_SDRawrr", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				RawrX3()
 			end
 		end, true, Enum.KeyCode.G)
-		ContextActionService:SetTitle("Uhhhhhh_SDRawrr", "G")
-		ContextActionService:SetPosition("Uhhhhhh_SDRawrr", UDim2.new(1, -180, 1, -180))
+		ContextActionService:SetTitle("NAM_SDRawrr", "G")
+		ContextActionService:SetPosition("NAM_SDRawrr", UDim2.new(1, -180, 1, -180))
 		if chatconn then
 			chatconn:Disconnect()
 		end
@@ -5585,11 +5585,11 @@ AddModule(function()
 		end
 	end
 	m.Destroy = function(figure: Model?)
-		ContextActionService:UnbindAction("Uhhhhhh_SDPunch")
-		ContextActionService:UnbindAction("Uhhhhhh_SDMudad")
-		ContextActionService:UnbindAction("Uhhhhhh_SDSmash")
-		ContextActionService:UnbindAction("Uhhhhhh_SDLazer")
-		ContextActionService:UnbindAction("Uhhhhhh_SDRawrr")
+		ContextActionService:UnbindAction("NAM_SDPunch")
+		ContextActionService:UnbindAction("NAM_SDMudad")
+		ContextActionService:UnbindAction("NAM_SDSmash")
+		ContextActionService:UnbindAction("NAM_SDLazer")
+		ContextActionService:UnbindAction("NAM_SDRawrr")
 		if chatconn then
 			chatconn:Disconnect()
 			chatconn = nil
