@@ -6586,7 +6586,7 @@ do
 		end
 		if value == 2 then
 			SelectedReanimator = HatReanimator
-			ReanimatorConfigTitle.Text = "-=+ Hats Reanimator Config +=-"
+			ReanimatorConfigTitle.Text = "HATS REANIMATOR CONFIG"
 		end
 		Util.ClearAllChildrenGui(ReanimatorConfigCanvas)
 		SelectedReanimator.Config(ReanimatorConfigCanvas)
@@ -6634,7 +6634,8 @@ do
 	ReanimateRefreshButton.Activated:Connect(function()
 		if not Reanimate.Character then return end
 		Reanimate.CreateCharacter()
-	end)end
+	end)
+end
 UI.CreateSeparator(MainPage)
 
 do
