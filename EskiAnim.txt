@@ -17,7 +17,7 @@ MASTER BOOT RECORD
 Thou shalth not steal. Point at this source if you used a snippet here.
 ]]
 local _RobuNexaEnv = (getgenv and getgenv()) or shared or _G
-if _G.UhhhhhhLoaded or _G.NAMLoaded or _RobuNexaEnv.RobuNexaKryptonRunning then return end
+if _G.UhhhhhhLoaded or _G.NAMLoaded or _RobuNexaEnv.RobuNexaKryptonRunning or _RobuNexaEnv.RobuNexaSyntaxRunning then return end
 
 if _G.NAMLoaded then return end
 _G.NAMLoaded = true
@@ -5519,7 +5519,7 @@ end
 end
 do
 SaveData.SelectedReanimator = SaveData.SelectedReanimator or 1
-local ReanimateMethodSelect = UI.CreateDropdown(MainPage, "Reanimator", {"Limb Reanimator", "Hats Reanimator", "Krypton Reanimate"}, SaveData.SelectedReanimator)
+local ReanimateMethodSelect = UI.CreateDropdown(MainPage, "Reanimator", {"Limb Reanimator", "Hats Reanimator", "Krypton Reanimate", "Syntax Reanimate"}, SaveData.SelectedReanimator)
 local ReanimatorConfigTitle = UI.CreateText(MainPage, "-=+ Limb Reanimator Config +=-", 15, Enum.TextXAlignment.Center)
 local SelectedReanimator = LimbReanimator
 if SaveData.SelectedReanimator == 2 then
@@ -5528,6 +5528,9 @@ ReanimatorConfigTitle.Text = "-=+ Hats Reanimator Config +=-"
 elseif SaveData.SelectedReanimator == 3 then
 SelectedReanimator = nil
 ReanimatorConfigTitle.Text = "Krypton Reanimate"
+elseif SaveData.SelectedReanimator == 4 then
+SelectedReanimator = nil
+ReanimatorConfigTitle.Text = "Syntax Reanimate"
 end
 local ReanimatorConfigCanvas = UI.CreateCanvas(MainPage)
 ReanimateMethodSelect.Changed:Connect(function(value)
@@ -5535,17 +5538,26 @@ SaveData.SelectedReanimator = value
 if value == 1 then SelectedReanimator = LimbReanimator ReanimatorConfigTitle.Text = "-=+ Limb Reanimator Config +=-" end
 if value == 2 then SelectedReanimator = HatReanimator ReanimatorConfigTitle.Text = "-=+ Hats Reanimator Config +=-" end
 if value == 3 then SelectedReanimator = nil ReanimatorConfigTitle.Text = "Krypton Reanimate" end
+if value == 4 then SelectedReanimator = nil ReanimatorConfigTitle.Text = "Syntax Reanimate" end
 Util.ClearAllChildrenGui(ReanimatorConfigCanvas)
 if SelectedReanimator then
 SelectedReanimator.Config(ReanimatorConfigCanvas)
 else
+if SaveData.SelectedReanimator == 4 then
+UI.CreateText(ReanimatorConfigCanvas, "Syntax starts from the Reanimate button. Fling code is retained.", 12, Enum.TextXAlignment.Center)
+else
 UI.CreateText(ReanimatorConfigCanvas, "Krypton starts from the Reanimate button.", 12, Enum.TextXAlignment.Center)
+end
 end
 end)
 if SelectedReanimator then
 SelectedReanimator.Config(ReanimatorConfigCanvas)
 else
+if SaveData.SelectedReanimator == 4 then
+UI.CreateText(ReanimatorConfigCanvas, "Syntax starts from the Reanimate button. Fling code is retained.", 12, Enum.TextXAlignment.Center)
+else
 UI.CreateText(ReanimatorConfigCanvas, "Krypton starts from the Reanimate button.", 12, Enum.TextXAlignment.Center)
+end
 end
 UI.CreateText(MainPage, " ", 5, Enum.TextXAlignment.Center)
 local ReanimateText = UI.CreateText(MainPage, "Running: NONE", 15, Enum.TextXAlignment.Center)
@@ -5586,9 +5598,32 @@ ReanimateText.Text = "Running: KRYPTON REANIMATE"
 ReanimateStartButtonText.Text = "Krypton Running"
 end
 end
+elseif SaveData.SelectedReanimator == 4 then
+if env.RobuNexaSyntaxRunning then
+ReanimateText.Text = "Running: SYNTAX REANIMATE"
+ReanimateStartButtonText.Text = "Syntax Running"
 else
-if env.RobuNexaKryptonRunning then
-ReanimateText.Text = "Stop Gelatek and respawn before switching."
+ReanimateStartButtonText.Text = "Starting Syntax..."
+env.RobuNexaAllowSyntaxFromNAM = true
+local ok, err = pcall(function()
+local loader = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/source/syntax-reanimate.lua")
+local runLoader = loadstring(loader)
+assert(type(runLoader) == "function", "Syntax loader could not be compiled")
+runLoader()
+end)
+env.RobuNexaAllowSyntaxFromNAM = nil
+if not ok then
+ReanimateText.Text = "Syntax failed to start"
+ReanimateStartButtonText.Text = "* Reanimate *"
+warn("[RobuNexa] Syntax failed: " .. tostring(err))
+else
+ReanimateText.Text = "Running: SYNTAX REANIMATE"
+ReanimateStartButtonText.Text = "Syntax Running"
+end
+end
+else
+if env.RobuNexaKryptonRunning or env.RobuNexaSyntaxRunning then
+ReanimateText.Text = "Stop active reanimation and respawn before switching."
 ReanimateStartButtonText.Text = "* Reanimate *"
 ReanimateStartButton.Interactable = true
 return
