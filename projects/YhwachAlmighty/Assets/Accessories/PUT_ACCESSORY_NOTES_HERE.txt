@@ -1,5 +1,0 @@
-ACCESSORY NOTES
-
-AccessoryConfig.lua contains the supplied catalog IDs and labels.
-This folder is for notes, thumbnails, or metadata only; Roblox catalog accessories are not automatically bundled into this repository.
-Only equip assets through supported APIs and permissions in an experience you own.
