@@ -1,0 +1,4 @@
+EFFECTS DROP FOLDER
+
+Store effect source notes, textures, and implementation references here.
+The current starter controller handles form animation and sound hooks only. Aura visual emitters/particles still need to be authored and connected after the assets and desired look are supplied.
