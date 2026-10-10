@@ -19,7 +19,7 @@ Thou shalth not steal. Point at this source if you used a snippet here.
 ]]
 
 local _RobuNexaEnv = (getgenv and getgenv()) or shared or _G
-if _G.UhhhhhhLoaded or _G.NAMLoaded or _RobuNexaEnv.RobuNexaGelatekRunning then return end
+if _G.UhhhhhhLoaded or _G.NAMLoaded or _RobuNexaEnv.RobuNexaKryptonRunning then return end
 
 if _G.UhhhhhhLoaded then return end
 _G.UhhhhhhLoaded = true
@@ -6011,7 +6011,7 @@ end
 
 do
 	SaveData.SelectedReanimator = SaveData.SelectedReanimator or 1
-	local ReanimateMethodSelect, ReanimatorTypeLabel = UI.CreateDropdown(MainPage, "Reanimate Type", {"Limb Reanimator", "Hats Reanimator", "Gelatek Reanimate"}, SaveData.SelectedReanimator)
+	local ReanimateMethodSelect, ReanimatorTypeLabel = UI.CreateDropdown(MainPage, "Reanimate Type", {"Limb Reanimator", "Hats Reanimator", "Krypton Reanimate"}, SaveData.SelectedReanimator)
 	ReanimatorTypeLabel.Parent.LayoutOrder = -100
 	local ReanimatorConfigTitle = UI.CreateText(MainPage, "LIMB REANIMATOR CONFIG", 15, Enum.TextXAlignment.Center)
 	ReanimatorConfigTitle.Parent.LayoutOrder = -95
@@ -6021,7 +6021,7 @@ do
 		ReanimatorConfigTitle.Text = "HATS REANIMATOR CONFIG"
 	elseif SaveData.SelectedReanimator == 3 then
 		SelectedReanimator = nil
-		ReanimatorConfigTitle.Text = "GELATEK REANIMATE"
+		ReanimatorConfigTitle.Text = "KRYPTON REANIMATE"
 	end
 	local ReanimatorConfigCanvas = UI.CreateCanvas(MainPage)
 	ReanimatorConfigCanvas.Parent.LayoutOrder = -94
@@ -6036,19 +6036,19 @@ do
 			ReanimatorConfigTitle.Text = "HATS REANIMATOR CONFIG"
 		elseif value == 3 then
 			SelectedReanimator = nil
-			ReanimatorConfigTitle.Text = "GELATEK REANIMATE"
+			ReanimatorConfigTitle.Text = "KRYPTON REANIMATE"
 		end
 		Util.ClearAllChildrenGui(ReanimatorConfigCanvas)
 		if SelectedReanimator then
 			SelectedReanimator.Config(ReanimatorConfigCanvas)
 		else
-			UI.CreateText(ReanimatorConfigCanvas, "Gelatek starts from the Reanimate button.", 12, Enum.TextXAlignment.Center)
+			UI.CreateText(ReanimatorConfigCanvas, "Krypton starts from the Reanimate button.", 12, Enum.TextXAlignment.Center)
 		end
 	end)
 	if SelectedReanimator then
 		SelectedReanimator.Config(ReanimatorConfigCanvas)
 	else
-		UI.CreateText(ReanimatorConfigCanvas, "Gelatek starts from the Reanimate button.", 12, Enum.TextXAlignment.Center)
+		UI.CreateText(ReanimatorConfigCanvas, "Krypton starts from the Reanimate button.", 12, Enum.TextXAlignment.Center)
 	end
 	-- Classic EskiAnim-style single-panel controls. Keep the current reanimation logic untouched.
 	local ReanimateText = UI.CreateText(MainPage, "Running: NONE", 15, Enum.TextXAlignment.Center)
@@ -6069,30 +6069,30 @@ do
 			task.wait(1)
 			ReanimateStartButtonText.Text = "Reanimate"
 		elseif SaveData.SelectedReanimator == 3 then
-			if env.RobuNexaGelatekRunning then
-				ReanimateText.Text = "Running: GELATEK REANIMATE"
-				ReanimateStartButtonText.Text = "Gelatek Running"
+			if env.RobuNexaKryptonRunning then
+				ReanimateText.Text = "Running: KRYPTON REANIMATE"
+				ReanimateStartButtonText.Text = "Krypton Running"
 			else
-				ReanimateStartButtonText.Text = "Starting Gelatek..."
-				env.RobuNexaAllowGelatekFromNAM = true
+				ReanimateStartButtonText.Text = "Starting Krypton..."
+				env.RobuNexaAllowKryptonFromNAM = true
 				local ok, err = pcall(function()
-					local loader = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/source/gelatek-reanimate.lua")
+					local loader = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/source/krypton-reanimate.lua")
 					local runLoader = loadstring(loader)
 					assert(type(runLoader) == "function", "Gelatek loader could not be compiled")
 					runLoader()
 				end)
-				env.RobuNexaAllowGelatekFromNAM = nil
+				env.RobuNexaAllowKryptonFromNAM = nil
 				if not ok then
-					ReanimateText.Text = "Gelatek failed to start"
+					ReanimateText.Text = "Krypton failed to start"
 					ReanimateStartButtonText.Text = "Reanimate"
-					warn("[RobuNexa] Gelatek failed: " .. tostring(err))
+					warn("[RobuNexa] Krypton failed: " .. tostring(err))
 				else
-					ReanimateText.Text = "Running: GELATEK REANIMATE"
-					ReanimateStartButtonText.Text = "Gelatek Running"
+					ReanimateText.Text = "Running: KRYPTON REANIMATE"
+					ReanimateStartButtonText.Text = "Krypton Running"
 				end
 			end
 		else
-			if env.RobuNexaGelatekRunning then
+			if env.RobuNexaKryptonRunning then
 				ReanimateText.Text = "Stop Gelatek and respawn before switching."
 				ReanimateStartButtonText.Text = "Reanimate"
 				ReanimateStartButton.Interactable = true
