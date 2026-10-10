@@ -1,5 +1,5 @@
 -- Local visual controller for an experience you own.
--- This intentionally uses published Roblox asset IDs; repository .anim/.mp3 files are not runtime assets.
+-- Prefer native KeyframeSequence playback through AnimLib; published Roblox animation IDs are the fallback.
 local Players = game:GetService("Players")
 local SoundService = game:GetService("SoundService")
 
