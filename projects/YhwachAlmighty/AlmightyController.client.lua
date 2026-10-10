@@ -1,22 +1,38 @@
--- Local cosmetic controller for an experience you own.
--- Place alongside YhwachUI.client.lua in StarterPlayerScripts.
+-- Local visual controller for an experience you own.
+-- This intentionally uses published Roblox asset IDs; repository .anim/.mp3 files are not runtime assets.
 local Players = game:GetService("Players")
 local SoundService = game:GetService("SoundService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
 local Config = require(script.Parent:WaitForChild("AccessoryConfig"))
 local HatAnimation = require(script.Parent:WaitForChild("HatAnimation"))
-
 local uiScript = script.Parent:WaitForChild("YhwachUI.client")
 local actionEvent = uiScript:WaitForChild("ActionRequested")
 local hatAnimator = HatAnimation.new()
+
 local activeSounds = {}
+local activeTracks = {}
 local currentForm = "Base"
 local auraOn = false
+local formToken = 0
+
+local allowedMoves = {
+	AlmightySlash = true,
+	Auswahlen = true,
+	BlutVeneAnhaben = true,
+	Sklaverei = true,
+}
 
 local function getCharacter()
 	return player.Character or player.CharacterAdded:Wait()
+end
+
+local function stopSound(key)
+	local sound = activeSounds[key]
+	if sound then
+		activeSounds[key] = nil
+		pcall(function() sound:Stop(); sound:Destroy() end)
+	end
 end
 
 local function playSound(key, looped)
@@ -25,74 +41,95 @@ local function playSound(key, looped)
 		warn("[Yhwach] SoundId not configured for: " .. key)
 		return
 	end
+	stopSound(key)
 	local sound = Instance.new("Sound")
 	sound.Name = "Yhwach_" .. key
 	sound.SoundId = id:match("^rbxassetid://") and id or ("rbxassetid://" .. id)
 	sound.Looped = looped == true
 	sound.Volume = 0.65
 	sound.Parent = SoundService
-	sound:Play()
 	activeSounds[key] = sound
+	sound:Play()
 	if not sound.Looped then
 		sound.Ended:Once(function()
-			if activeSounds[key] == sound then activeSounds[key] = nil end
-			sound:Destroy()
+			if activeSounds[key] == sound then
+				activeSounds[key] = nil
+				sound:Destroy()
+			end
 		end)
 	end
 end
 
 local function stopSounds()
-	for key, sound in pairs(activeSounds) do
-		if sound then sound:Stop(); sound:Destroy() end
-		activeSounds[key] = nil
-	end
+	local keys = {}
+	for key in pairs(activeSounds) do table.insert(keys, key) end
+	for _, key in ipairs(keys) do stopSound(key) end
 end
 
-local function playAnimation(key, looped)
-	local id = Config.AnimationIds[key]
-	if not id or id == "" then
-		warn("[Yhwach] AnimationId not configured for: " .. key)
-		return
-	end
-	local character = getCharacter()
-	local humanoid = character:FindFirstChildOfClass("Humanoid")
-	if not humanoid then return end
-	local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
-	local animation = Instance.new("Animation")
-	animation.AnimationId = id:match("^rbxassetid://") and id or ("rbxassetid://" .. id)
-	local ok, track = pcall(function() return animator:LoadAnimation(animation) end)
-	animation:Destroy()
-	if not ok then warn("[Yhwach] Could not load animation:", track); return end
-	track.Looped = looped == true
-	track.Priority = Enum.AnimationPriority.Action
-	track:Play(0.15)
-	return track
-end
-
-local activeTracks = {}
 local function stopAnimations()
-	for _, track in ipairs(activeTracks) do
+	for key, track in pairs(activeTracks) do
+		activeTracks[key] = nil
 		pcall(function() track:Stop(0.15); track:Destroy() end)
 	end
-	table.clear(activeTracks)
 	hatAnimator:Stop()
 end
 
+local function playAnimation(key, looped, keepOtherTracks)
+	local id = Config.AnimationIds[key]
+	if not id or id == "" then
+		warn("[Yhwach] Publish the matching .anim file and set AnimationIds." .. key)
+		return nil
+	end
+	if not keepOtherTracks then stopAnimations() end
+
+	local character = getCharacter()
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not humanoid then return nil end
+	local animator = humanoid:FindFirstChildOfClass("Animator")
+	if not animator then
+		animator = Instance.new("Animator")
+		animator.Parent = humanoid
+	end
+
+	local animation = Instance.new("Animation")
+	animation.AnimationId = id:match("^rbxassetid://") and id or ("rbxassetid://" .. id)
+	local ok, trackOrError = pcall(function() return animator:LoadAnimation(animation) end)
+	animation:Destroy()
+	if not ok then
+		warn("[Yhwach] Could not load " .. key .. ":", trackOrError)
+		return nil
+	end
+
+	local track = trackOrError
+	track.Looped = looped == true
+	track.Priority = Enum.AnimationPriority.Action
+	activeTracks[key] = track
+	track:Play(0.15)
+	track.Stopped:Once(function()
+		if activeTracks[key] == track then activeTracks[key] = nil end
+	end)
+	return track
+end
+
 local function setForm(form)
+	formToken += 1
+	local thisToken = formToken
 	currentForm = form
 	stopAnimations()
+
 	if form == "Almighty" then
-		local track = playAnimation("AlmightyAwakening", false)
-		if track then table.insert(activeTracks, track) end
-		task.delay(1.2, function()
-			if currentForm ~= "Almighty" then return end
-			local idle = playAnimation("AlmightyIdle", true)
-			if idle then table.insert(activeTracks, idle) end
-		end)
 		playSound("Awakening", false)
+		local awakening = playAnimation("AlmightyAwakening", false, true)
+		local delaySeconds = 1.2
+		if awakening and awakening.Length > 0 then
+			delaySeconds = math.min(awakening.Length, 3.5)
+		end
+		task.delay(delaySeconds, function()
+			if currentForm ~= "Almighty" or formToken ~= thisToken then return end
+			playAnimation("AlmightyAura", true, false)
+		end)
 	else
-		local track = playAnimation("FormReturn", false)
-		if track then table.insert(activeTracks, track) end
+		stopSound("AlmightyLoop")
 		playSound("FormReturn", false)
 	end
 end
@@ -105,15 +142,30 @@ actionEvent.Event:Connect(function(action, payload)
 		if auraOn then
 			playSound("AuraOn", false)
 			playSound("AlmightyLoop", true)
+			if currentForm == "Almighty" then
+				playAnimation("AlmightyAura", true, false)
+			end
 		else
-			local loop = activeSounds.AlmightyLoop
-			if loop then loop:Stop(); loop:Destroy(); activeSounds.AlmightyLoop = nil end
+			stopSound("AlmightyLoop")
 			playSound("AuraOff", false)
+			local auraTrack = activeTracks.AlmightyAura
+			if auraTrack then
+				activeTracks.AlmightyAura = nil
+				pcall(function() auraTrack:Stop(0.15); auraTrack:Destroy() end)
+			end
 		end
+	elseif action == "PlayMove" and allowedMoves[payload] then
+		if currentForm ~= "Almighty" then
+			warn("[Yhwach] Awaken Almighty before playing this move.")
+			return
+		end
+		playAnimation(payload, false, false)
 	elseif action == "StopEffects" then
+		formToken += 1
 		stopSounds()
 		stopAnimations()
 	elseif action == "ResetVisuals" then
+		formToken += 1
 		auraOn = false
 		currentForm = "Base"
 		stopSounds()
@@ -122,12 +174,11 @@ actionEvent.Event:Connect(function(action, payload)
 end)
 
 player.CharacterAdded:Connect(function()
+	formToken += 1
 	stopSounds()
 	stopAnimations()
 	currentForm = "Base"
 	auraOn = false
 end)
 
--- Keep the config reference visible to editors and avoid accidental unused-module confusion.
-if not ReplicatedStorage then return end
-print("[Yhwach] Controller ready. Add uploaded animation/audio IDs to AccessoryConfig.lua.")
+print("[Yhwach] Controller ready. Upload the six .anim sources to Roblox and fill AnimationIds.")

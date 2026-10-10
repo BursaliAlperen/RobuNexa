@@ -1,5 +1,5 @@
 -- Yhwach Almighty accessory manifest.
--- Intended for an experience you own. Catalog IDs are references; this file does not bypass asset permissions.
+-- Catalog IDs are references only; equip items only through supported experience APIs.
 local Config = {}
 
 Config.BaseAccessories = {
@@ -18,19 +18,20 @@ Config.AlmightyAccessories = {
 	{ name = "Related Set Item C", assetId = 104304509923191, slot = "Unverified" },
 	{ name = "Soul King Almighty Aura", assetId = 87969060185631, slot = "Back" },
 	{ name = "Aura B", assetId = 100693570818976, slot = "Unverified" },
-	-- 83293970715566 was supplied twice; kept once in the executable config to avoid double-equipping.
 }
 
--- Fill these with Roblox-published Animation asset IDs after importing each .anim file.
+-- Source files live in Assets/Animations. Roblox cannot play .anim files from GitHub:
+-- import/publish each one and replace the blank value with its published Animation ID.
 Config.AnimationIds = {
-	BaseIdle = "",
-	AlmightyAwakening = "",
-	AlmightyIdle = "",
-	HatPose = "",
-	FormReturn = "",
+	AlmightyAwakening = "", -- AlmightyAwake.anim
+	AlmightyAura = "",      -- AlmightyAura.anim; looping aura/form pose
+	AlmightySlash = "",     -- AlmightySlash.anim
+	Auswahlen = "",         -- Auswählen.anim
+	BlutVeneAnhaben = "",   -- Blut Vene Anhaben.anim
+	Sklaverei = "",         -- Sklaverei .anim
 }
 
--- Fill with uploaded Roblox audio asset IDs; raw MP3 files cannot be played directly by SoundId.
+-- MP3 source files likewise need to be uploaded to Roblox before playback.
 Config.SoundIds = {
 	Awakening = "",
 	AlmightyLoop = "",

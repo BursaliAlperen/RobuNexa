@@ -33,7 +33,7 @@ local root = Instance.new("Frame")
 root.Name = "Panel"
 root.AnchorPoint = Vector2.new(0.5, 0.5)
 root.Position = UDim2.fromScale(0.5, 0.55)
-root.Size = UDim2.fromOffset(320, 365)
+root.Size = UDim2.fromOffset(320, 545)
 root.BackgroundColor3 = Color3.fromRGB(13, 15, 23)
 root.BackgroundTransparency = 0.08
 root.BorderSizePixel = 0
@@ -144,9 +144,13 @@ end
 local almighty = makeButton("AlmightyButton", "AWAKEN  /  ALMIGHTY", 137, true)
 local base = makeButton("BaseButton", "RETURN TO BASE FORM", 197, false)
 local aura = makeButton("AuraButton", "AURA  •  TOGGLE", 244, false)
-local reset = makeButton("ResetButton", "STOP EFFECTS  /  RESET VISUALS", 291, false)
+local slash = makeButton("SlashButton", "MOVE 1  /  ALMIGHTY SLASH", 291, false)
+local auswahlen = makeButton("AuswahlenButton", "MOVE 2  /  AUSWÄHLEN", 335, false)
+local blut = makeButton("BlutVeneButton", "MOVE 3  /  BLUT VENE", 379, false)
+local sklaverei = makeButton("SklavereiButton", "MOVE 4  /  SKLAVEREI", 423, false)
+local reset = makeButton("ResetButton", "STOP EFFECTS  /  RESET VISUALS", 467, false)
 
-local footer = addText(root, "Footer", "READY  •  ASSETS PENDING", 8, UDim2.fromOffset(22, 337), Enum.Font.GothamMedium, Color3.fromRGB(125, 125, 150))
+local footer = addText(root, "Footer", "READY  •  ASSETS PENDING", 8, UDim2.fromOffset(22, 513), Enum.Font.GothamMedium, Color3.fromRGB(125, 125, 150))
 footer.Size = UDim2.new(1, -44, 0, 16)
 
 local mode = "Base"
@@ -187,6 +191,11 @@ aura.Activated:Connect(function()
 	aura.Text = auraEnabled and "AURA  •  ON" or "AURA  •  TOGGLE"
 	request("SetAura", auraEnabled)
 end)
+
+slash.Activated:Connect(function() request("PlayMove", "AlmightySlash") end)
+auswahlen.Activated:Connect(function() request("PlayMove", "Auswahlen") end)
+blut.Activated:Connect(function() request("PlayMove", "BlutVeneAnhaben") end)
+sklaverei.Activated:Connect(function() request("PlayMove", "Sklaverei") end)
 
 reset.Activated:Connect(function()
 	auraEnabled = false
