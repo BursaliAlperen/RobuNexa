@@ -13,7 +13,7 @@ if _G.NAMLoaded or _G["U" .. "hhhhhhLoaded"] then return end
 _G.NAMLoaded = true
 _G["U" .. "hhhhhhLoaded"] = true
 
-local NAMVersion = "1.0.12 BETA"
+local NAMVersion = "1.0.13 BETA"
 
 local Debris = cloneref(game:GetService("Debris"))
 local CoreGui = cloneref(game:GetService("CoreGui"))
@@ -6947,7 +6947,7 @@ local function AssetGetPathFromFilename(filename)
 end
 local _Assetdownloading = {}
 local function AssetDownload(filename)
-	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.12/content/" .. filename
+	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.13/content/" .. filename
 	local split = string.split(filename, "@")
 	if #split > 1 then
 		filename = table.remove(split, 1)
@@ -7484,6 +7484,18 @@ local function AddMoveset(m)
 		end))
 	end
 end
+if type(SaveData.FavoriteDances) ~= "table" then
+	SaveData.FavoriteDances = {}
+end
+local function UpdateDanceListOrder()
+	for _,dance in DanceableDances do
+		local item = dance._NAMFavoriteItem
+		if item and item.Parent then
+			local favorite = SaveData.FavoriteDances[dance._NAMFavoriteKey]
+			item.Parent.LayoutOrder = (favorite and 0 or 100000) + dance._NAMFavoriteIndex
+		end
+	end
+end
 local function AddDance(m)
 	if type(m) == "table" then
 		if not m.Name then return end
@@ -7500,7 +7512,35 @@ local function AddDance(m)
 			end
 		end
 		table.insert(DanceableDances, m)
+		m._NAMFavoriteIndex = #DanceableDances
+		m._NAMFavoriteKey = m.InternalName or m.Name
 		local item = UI.CreateItemListItem(DancesPage.List)
+		m._NAMFavoriteItem = item
+		item.Size = UDim2.new(1, -36, 0, 26)
+		local favoriteButton = Util.Instance("TextButton", item.Parent)
+		favoriteButton.Name = "Favorite"
+		favoriteButton.AnchorPoint = Vector2.new(1, 0.5)
+		favoriteButton.Position = UDim2.new(1, -5, 0.5, 0)
+		favoriteButton.Size = UDim2.new(0, 28, 0, 26)
+		favoriteButton.BackgroundTransparency = 1
+		favoriteButton.BorderSizePixel = 0
+		favoriteButton.Font = Enum.Font.SourceSansBold
+		favoriteButton.TextSize = 23
+		favoriteButton.TextColor3 = Color3.fromRGB(255, 205, 75)
+		favoriteButton.AutoButtonColor = true
+		local function RefreshFavoriteButton()
+			favoriteButton.Text = SaveData.FavoriteDances[m._NAMFavoriteKey] and "★" or "☆"
+			favoriteButton.TextColor3 = SaveData.FavoriteDances[m._NAMFavoriteKey]
+				and Color3.fromRGB(255, 205, 75)
+				or Color3.fromRGB(190, 190, 190)
+		end
+		RefreshFavoriteButton()
+		Util.LinkDestroyI2C(item, favoriteButton.Activated:Connect(function()
+			SaveData.FavoriteDances[m._NAMFavoriteKey] = not SaveData.FavoriteDances[m._NAMFavoriteKey]
+			RefreshFavoriteButton()
+			UpdateDanceListOrder()
+		end))
+		UpdateDanceListOrder()
 		local msname = UI.CreateText(item, m.Name .. " &gt;", 20, Enum.TextXAlignment.Left)
 		local msdesc = UI.CreateText(item, string.split(m.Description, "\n")[1], 12, Enum.TextXAlignment.Left)
 		msname.Name = "LabelName"
@@ -7940,7 +7980,7 @@ end)
 UI.CreateText(ReadmePage, "NAM README & loadstring", 24, Enum.TextXAlignment.Center)
 UI.CreateText(ReadmePage, "Usage and loadstring are in the NAM repository README.", 14, Enum.TextXAlignment.Center)
 UI.CreateButton(ReadmePage, "Copy loadstring", 20).Activated:Connect(function()
-	pcall(setclipboard, 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.12/source/reanim.lua"))()')
+	pcall(setclipboard, 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.13/source/reanim.lua"))()')
 	Util.Notify("Loadstring copied!")
 end)
 task.wait()
@@ -7996,7 +8036,7 @@ local function getgithubraw(path)
 	InitLogsText.Text ..= "\n[LOG] [GitGET] GET raw./" .. path
 	s, resp = pcall(request, {
 		Method = "GET",
-		Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.12/content/" .. path,
+		Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.13/content/" .. path,
 	})
 	if s and resp and resp.StatusCode == 200 then
 		return resp.Body
