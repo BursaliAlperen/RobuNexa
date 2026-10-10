@@ -69,6 +69,7 @@ local function addAnimationModule(config)
 		local animator
 		local startedAt = 0
 		local duration = 0
+		local useSoundClock = false
 		local lastLift = 0
 		local lastForward = 0
 		local flightDirection = Vector3.zAxis
@@ -93,14 +94,19 @@ local function addAnimationModule(config)
 			animator = nil
 			releaseLift()
 			resetPose(figure)
+			useSoundClock = false
 			if config.sound then
 				local soundOk, soundId = pcall(function()
 					return AssetGetContentId(config.sound)
 				end)
-				if soundOk and soundId then
-					pcall(function()
+				if soundOk and type(soundId) == "string" and soundId ~= "" then
+					local playOK = pcall(function()
 						SetOverrideDanceMusic(soundId, config.name, 1)
 					end)
+					useSoundClock = playOK
+				else
+					pcall(function() SetOverrideDanceMusic(nil) end)
+					notifyUser("NAM: " .. config.sound .. " is unavailable; animation will use its own timer.")
 				end
 			end
 			local ok, track = pcall(function()
@@ -108,14 +114,14 @@ local function addAnimationModule(config)
 			end)
 			if not ok or not track then
 				if config.sound then pcall(function() SetOverrideDanceMusic(nil) end) end
-				notifyUser("NAM: " .. config.asset .. " could not be read. Wait for the animation conversion workflow to finish.")
-				return
+				notifyUser("NAM: " .. config.asset .. " could not be read. The source track may be empty or conversion may have failed.")
+				return false
 			end
 			track = makeR6Compatible(track)
 			if not track or #track.Keyframes == 0 then
 				if config.sound then pcall(function() SetOverrideDanceMusic(nil) end) end
 				notifyUser("NAM: " .. config.asset .. " has no usable keyframes.")
-				return
+				return false
 			end
 			local actualDuration = tonumber(track.Time) or 0
 			if actualDuration <= 0 then
@@ -126,7 +132,7 @@ local function addAnimationModule(config)
 			if actualDuration <= 0 then
 				if config.sound then pcall(function() SetOverrideDanceMusic(nil) end) end
 				notifyUser("NAM: " .. config.asset .. " has an invalid duration.")
-				return
+				return false
 			end
 			duration = actualDuration
 			animator = AnimLib.Animator.new()
@@ -143,15 +149,26 @@ local function addAnimationModule(config)
 				flightDirection = horizontal.Magnitude > 0.001 and horizontal.Unit or Vector3.zAxis
 			end
 			startedAt = os.clock()
+			return true
 		end
 
 		m.Update = function(dt: number, figure: Model)
 			if not animator then return end
 			-- When a soundtrack exists, use its playback clock so the animation stays
 			-- aligned with the audio instead of drifting from a separate os.clock timer.
-			local elapsed = config.sound and GetOverrideDanceMusicTime() or (os.clock() - startedAt)
+			local elapsed = os.clock() - startedAt
+			if useSoundClock then
+				local musicTime = GetOverrideDanceMusicTime()
+				if musicTime > 0 then
+					elapsed = musicTime
+				elseif elapsed > 0.75 then
+					-- A blocked/unloaded soundtrack must not freeze the animation at frame 0.
+					useSoundClock = false
+				end
+			end
 			if elapsed >= duration then
 				animator = nil
+				useSoundClock = false
 				releaseLift()
 				resetPose(figure)
 				if config.sound then pcall(function() SetOverrideDanceMusic(nil) end) end
@@ -160,6 +177,7 @@ local function addAnimationModule(config)
 			local ok = pcall(function() animator:Step(elapsed) end)
 			if not ok then
 				animator = nil
+				useSoundClock = false
 				releaseLift()
 				resetPose(figure)
 				if config.sound then pcall(function() SetOverrideDanceMusic(nil) end) end
@@ -200,6 +218,7 @@ local function addAnimationModule(config)
 
 		m.Destroy = function(figure: Model?)
 			animator = nil
+			useSoundClock = false
 			releaseLift()
 			resetPose(figure)
 			if config.sound then pcall(function() SetOverrideDanceMusic(nil) end) end
