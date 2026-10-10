@@ -3650,6 +3650,10 @@ function LimbReanimator.Start()
 			task.spawn(CharOnDesc, v)
 		end
 		local humanoid = character:WaitForChild("Humanoid", 5)
+		if not humanoid or not humanoid:IsA("Humanoid") then
+			warn("[RobuNexa] Character spawned without a Humanoid; skipping character setup.")
+			return
+		end
 		local stupid = humanoid:FindFirstChildWhichIsA("Animator")
 		if stupid then
 			stupid:Destroy()
