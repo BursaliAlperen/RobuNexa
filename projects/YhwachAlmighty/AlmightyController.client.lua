@@ -34,6 +34,7 @@ local player = Players.LocalPlayer
 local Config = require(script.Parent:WaitForChild("AccessoryConfig"))
 local HatAnimation = require(script.Parent:WaitForChild("HatAnimation"))
 local AnimLib = require(script.Parent:WaitForChild("AnimLib"))
+local YhwachCutscenes = require(script.Parent:WaitForChild("YhwachCutscenes"))
 local uiScript = script.Parent:WaitForChild("YhwachUI.client")
 local actionEvent = uiScript:WaitForChild("ActionRequested")
 local statusEvent = uiScript:WaitForChild("StatusChanged")
@@ -198,6 +199,7 @@ local function setForm(form)
 	stopAnimations()
 
 	if form == "Almighty" then
+		YhwachCutscenes.PlayAwakening(getCharacter())
 		playSound("Awakening", false)
 		local awakening = playAnimation("AlmightyAwakening", false, true)
 		local delaySeconds = 1.2
@@ -209,6 +211,7 @@ local function setForm(form)
 			playAnimation("AlmightyAura", true, false)
 		end)
 	else
+		YhwachCutscenes.Stop()
 		stopSound("AlmightyLoop")
 		playSound("FormReturn", false)
 	end
@@ -241,11 +244,13 @@ actionEvent.Event:Connect(function(action, payload)
 		end
 		playAnimation(payload, false, false)
 	elseif action == "StopEffects" then
+		YhwachCutscenes.Stop()
 		formToken += 1
 		stopSounds()
 		stopAnimations()
 		reportStatus("Animations and sounds stopped", Color3.fromRGB(180, 220, 255))
 	elseif action == "ResetVisuals" then
+		YhwachCutscenes.Stop()
 		formToken += 1
 		auraOn = false
 		currentForm = "Base"
@@ -256,6 +261,7 @@ actionEvent.Event:Connect(function(action, payload)
 end)
 
 player.CharacterAdded:Connect(function()
+	YhwachCutscenes.Stop()
 	formToken += 1
 	stopSounds()
 	stopAnimations()
