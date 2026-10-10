@@ -7902,8 +7902,10 @@ local function ForceModuleReload(force)
 	ClearModules()
 	Util.Notify("Loading...")
 	InitLogsText.Text ..= "\n[LOG] Checking SHA1 hashes..."
-	local filesofbuiltins = {"v_moveset1.lua", "v_moveset2.lua", "v_moveset3.lua", "v_dance1.lua", "v_dance2.lua", "v_dance3.lua", "d_limbmap.lua", "d_hatsmap.lua"}
-	local filesofbuiltins_m = {"v_moveset1.lua", "v_moveset2.lua", "v_moveset3.lua", "v_dance1.lua", "v_dance2.lua", "v_dance3.lua"}
+	-- Only load curated modules that actually ship in content/. Missing legacy modules
+	-- must not be reported as failed downloads on every startup.
+	local filesofbuiltins = {"v_moveset3.lua", "v_dance1.lua", "v_dance2.lua", "v_dance3.lua", "d_limbmap.lua", "d_hatsmap.lua"}
+	local filesofbuiltins_m = {"v_moveset3.lua", "v_dance1.lua", "v_dance2.lua", "v_dance3.lua"}
 	local filesofbuiltins_d = {"d_limbmap.lua", "d_hatsmap.lua"}
 	SaveData.ContentHash = SaveData.ContentHash or {}
 	xpcall(function()
