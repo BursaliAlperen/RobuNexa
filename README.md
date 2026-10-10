@@ -11,14 +11,15 @@ A compact animation hub with a curated catalog.
 ## Animation catalog
 Each playable animation appears once. Source KeyframeSequence files and generated runtime tracks are technical assets, not separate catalog entries.
 
+- **Gojo Awakening** — `content/GojoAwakening.anim` → `content/GojoAwakeningTrack.anim`; separate Gojo animation with flight movement.
 - **Maximum Hollow Purple** — `MaximumHollowPurple.anim` → `content/MaximumHollowPurpleTrack.anim`; airborne attack with lift and forward movement.
-- **Imaginary Purple** — `ImaginaryPurple.anim` is retained as the source for the normal, non-flying Hollow Purple. Its generated Track and catalog entry are removed for now; add the replacement animation before re-enabling it.
+- **Imaginary Purple** — `ImaginaryPurple.anim` is the source for the normal, non-flying Hollow Purple. Its generated Track and playable catalog entry remain removed until the replacement/track is ready.
+- **Sukuna Awakening** — reserved as a separate animation slot; `content/SukunaAwakening.mp3` is only its sound for now. Add the animation when provided.
 - **Cid Overdrive** — `CidOverdrive.anim` → `content/CidOverdriveTrack.anim`.
 - **Hakari's Dance** — `content/Hakari.anim`; sound: `content/HakariDance.mp3`.
-- **Sukuna Awakening sound** — `content/SukunaAwakening.mp3`; audio only until the new Sukuna animation is provided.
 
 ## Asset hygiene
-- Removed the old Gojo Awakening source and generated Track; no Gojo Awakening entry remains.
+- Gojo Awakening and Sukuna Awakening are separate entries; never merge their animations or audio.
 - Keep one visible catalog entry per animation.
 - Audio filenames use clear, stable names; scripts must reference the exact filenames.
 - Keep `README.md` and the animation conversion workflow.

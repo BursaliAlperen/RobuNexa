@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "MaximumHollowPurple.anim"
+      - "content/GojoAwakening.anim"
       - "CidOverdrive.anim"
       - "tools/convert_gojo_animation.py"
       - ".github/workflows/convert-gojo-track.yml"
@@ -32,17 +33,18 @@ jobs:
           python -m pip install git+https://github.com/Ghosteined/rbxm_parser.git
       - name: Convert uploaded KeyframeSequences
         run: |
+          python tools/convert_gojo_animation.py content/GojoAwakening.anim content/GojoAwakeningTrack.anim
           python tools/convert_gojo_animation.py MaximumHollowPurple.anim content/MaximumHollowPurpleTrack.anim
           python tools/convert_gojo_animation.py CidOverdrive.anim content/CidOverdriveTrack.anim
       - name: Commit converted AnimLib tracks
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add content/MaximumHollowPurpleTrack.anim content/CidOverdriveTrack.anim
+          git add content/GojoAwakeningTrack.anim content/MaximumHollowPurpleTrack.anim content/CidOverdriveTrack.anim
           if git diff --cached --quiet; then
             echo "Tracks are already converted; no commit needed."
             exit 0
           fi
-          git commit -m "Convert Maximum Hollow Purple and Cid animations to AnimLib tracks"
+          git commit -m "Convert Gojo Awakening, Maximum Hollow Purple and Cid animations to AnimLib tracks"
           git pull --rebase origin main
           git push origin HEAD:main

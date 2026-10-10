@@ -201,6 +201,16 @@ local function addAnimationModule(config)
 end
 
 addAnimationModule({
+	name = "Gojo Awakening",
+	description = "Gojo R6 awakening with a smooth airborne lift and forward attack movement.",
+	asset = "GojoAwakeningTrack.anim",
+	lift = 20,
+	forward = 12,
+	liftStart = 0.12,
+	liftEnd = 0.88,
+})
+
+addAnimationModule({
 	name = "Maximum Hollow Purple",
 	description = "Gojo's airborne Maximum Hollow Purple attack with lift and forward movement.",
 	asset = "MaximumHollowPurpleTrack.anim",
