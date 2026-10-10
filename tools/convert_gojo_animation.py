@@ -82,7 +82,7 @@ def main() -> int:
 
     sequences = [item for item in all_instances if getattr(item, "class_name", "") == "KeyframeSequence"]
     if not sequences:
-        raise ValueError("No KeyframeSequence found inside GojoAwakening.anim (RBXM container).")
+        raise ValueError("No KeyframeSequence found inside the source animation (RBXM container).")
 
     candidates = []
     for sequence in sequences:
@@ -118,7 +118,7 @@ def main() -> int:
         raise ValueError(f"Converted animation is empty (duration={duration}, poses={pose_count}).")
 
     document = {
-        "Name": str(prop(sequence, "Name", "Gojo Awake")),
+        "Name": str(prop(sequence, "Name", output.stem.replace("Track", ""))),
         "Time": duration,
         "Keyframes": converted_frames,
     }
