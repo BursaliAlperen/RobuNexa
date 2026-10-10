@@ -144,11 +144,14 @@ local function addAnimationModule(config)
 
 		m.Update = function(dt: number, figure: Model)
 			if not animator then return end
-			local elapsed = os.clock() - startedAt
+			-- When a soundtrack exists, use its playback clock so the animation stays
+			-- aligned with the audio instead of drifting from a separate os.clock timer.
+			local elapsed = config.sound and GetOverrideDanceMusicTime() or (os.clock() - startedAt)
 			if elapsed >= duration then
 				animator = nil
 				releaseLift()
 				resetPose(figure)
+				if config.sound then pcall(function() SetOverrideDanceMusic(nil) end) end
 				return
 			end
 			local ok = pcall(function() animator:Step(elapsed) end)
@@ -195,6 +198,7 @@ local function addAnimationModule(config)
 			animator = nil
 			releaseLift()
 			resetPose(figure)
+			if config.sound then pcall(function() SetOverrideDanceMusic(nil) end) end
 		end
 		return m
 	end)
