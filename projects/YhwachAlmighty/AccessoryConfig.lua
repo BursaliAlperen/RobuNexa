@@ -20,8 +20,19 @@ Config.AlmightyAccessories = {
 	{ name = "Aura B", assetId = 100693570818976, slot = "Unverified" },
 }
 
--- Source files live in Assets/Animations. Roblox cannot play .anim files from GitHub:
--- import/publish each one and replace the blank value with its published Animation ID.
+-- Optional native KeyframeSequence objects can be placed in a Folder named YhwachSequences
+-- under this script's parent. If a matching sequence exists, AnimLib plays it locally
+-- without requiring a published AnimationId. Raw GitHub .anim files are NOT instances.
+Config.SequenceNames = {
+	AlmightyAwakening = "AlmightyAwake",
+	AlmightyAura = "AlmightyAura",
+	AlmightySlash = "AlmightySlash",
+	Auswahlen = "Auswahlen",
+	BlutVeneAnhaben = "BlutVeneAnhaben",
+	Sklaverei = "Sklaverei",
+}
+
+-- Fallback path: use published Roblox animation assets if no native sequence is installed.
 Config.AnimationIds = {
 	AlmightyAwakening = "", -- AlmightyAwake.anim
 	AlmightyAura = "",      -- AlmightyAura.anim; looping aura/form pose
