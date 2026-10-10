@@ -7,7 +7,7 @@ A mobile-friendly Yhwach-themed animation and visual-control starter for a Roblo
 - `YhwachUI.client.lua` — responsive GUI; emits local action requests and displays controller status.
 - `AlmightyController.client.lua` — loads published Roblox animations and optional sounds; stops tracks on reset/respawn.
 - `AccessoryConfig.lua` — ModuleScript containing sequence-name, animation-ID fallback, sound, and catalog-reference configuration.
-- `AnimLib.lua` — Studio-safe local KeyframeSequence player that interpolates poses and applies them to Motor6D.Transform.
+- `AnimLib.lua` — Studio-safe local player that parses Uhhhhhh-style binary .anim data or native KeyframeSequence instances, interpolates poses, and applies them to Motor6D.Transform.
 - `HatAnimation.lua` — ModuleScript for posing an accessory already equipped on the character.
 - `YhwachMoveset.lua` — standalone all-in-one alternative. **Do not install this together with the modular UI/controller**, or you will get duplicate interfaces.
 
@@ -24,6 +24,21 @@ In an experience you own, place these four scripts under `StarterPlayer > Starte
 | `HatAnimation.lua` | ModuleScript |
 
 Keep the instance names exact: `YhwachUI.client`, `AlmightyController.client`, `AccessoryConfig`, and `HatAnimation`. The controller listens to the UI's local `ActionRequested` event and reports playback/errors back through `StatusChanged`.
+
+## Playing the repository's original binary .anim files
+
+The controller now supports a `YhwachAnimData` Folder beside the LocalScripts. For each move, put a ModuleScript in that folder with the exact name below; have the ModuleScript return a table containing a Base64 string:
+
+- `AlmightyAwake`
+- `AlmightyAura`
+- `AlmightySlash`
+- `Auswahlen`
+- `BlutVeneAnhaben`
+- `Sklaverei`
+
+Example ModuleScript body: `return { Base64 = "PASTE_BASE64_HERE" }`. Encode the original binary `.anim` file as Base64 without changing its bytes. The controller decodes it and passes the raw bytes to `AnimLib.Track.frombuffer()`, which reads the same field order used by Uhhhhhh: animation name, keyframe count, timestamp, pose count, pose name, weight, easing style/direction, and twelve CFrame floats. The raw file itself must not be pasted as ordinary text.
+
+The controller checks binary ModuleScripts first, then native KeyframeSequences in `YhwachSequences`, then published AnimationIds as a fallback. Use one data source per move to avoid confusing duplicates.
 
 ## Native keyframe playback (AnimLib)
 
