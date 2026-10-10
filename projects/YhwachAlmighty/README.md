@@ -6,7 +6,8 @@ A mobile-friendly Yhwach-themed animation and visual-control starter for a Roblo
 
 - `YhwachUI.client.lua` — responsive GUI; emits local action requests and displays controller status.
 - `AlmightyController.client.lua` — loads published Roblox animations and optional sounds; stops tracks on reset/respawn.
-- `AccessoryConfig.lua` — ModuleScript containing animation, sound, and catalog-reference configuration.
+- `AccessoryConfig.lua` — ModuleScript containing sequence-name, animation-ID fallback, sound, and catalog-reference configuration.
+- `AnimLib.lua` — Studio-safe local KeyframeSequence player that interpolates poses and applies them to Motor6D.Transform.
 - `HatAnimation.lua` — ModuleScript for posing an accessory already equipped on the character.
 - `YhwachMoveset.lua` — standalone all-in-one alternative. **Do not install this together with the modular UI/controller**, or you will get duplicate interfaces.
 
@@ -19,9 +20,27 @@ In an experience you own, place these four scripts under `StarterPlayer > Starte
 | `YhwachUI.client.lua` | LocalScript |
 | `AlmightyController.client.lua` | LocalScript |
 | `AccessoryConfig.lua` | ModuleScript |
+| `AnimLib.lua` | ModuleScript |
 | `HatAnimation.lua` | ModuleScript |
 
 Keep the instance names exact: `YhwachUI.client`, `AlmightyController.client`, `AccessoryConfig`, and `HatAnimation`. The controller listens to the UI's local `ActionRequested` event and reports playback/errors back through `StatusChanged`.
+
+## Native keyframe playback (AnimLib)
+
+The controller checks for a Folder named `YhwachSequences` beside the scripts. Put Roblox `KeyframeSequence` instances inside it using the exact names below:
+
+- `AlmightyAwake`
+- `AlmightyAura`
+- `AlmightySlash`
+- `Auswahlen`
+- `BlutVeneAnhaben`
+- `Sklaverei`
+
+When a matching sequence exists, the controller plays it with `AnimLib.lua` locally and does not require a published AnimationId for that move. The player interpolates keyframe poses and applies them to matching `Motor6D` joints. Stopping playback restores the joint transforms captured when the sequence was loaded.
+
+**Important:** this player consumes actual Roblox `KeyframeSequence` instances. It does not yet decode Uhhhhhh's private/binary `.anim` format directly. Raw files in `Assets/Animations` are not automatically turned into instances by Roblox Studio. You must convert/import each source into a valid KeyframeSequence first, then add it to `YhwachSequences`. If no matching sequence is found, the controller falls back to `Config.AnimationIds`.
+
+This is a local visual animation player for a Studio experience you own. Local `Motor6D.Transform` edits are not guaranteed to replicate to other players. The custom player is intentionally not an executor or permission bypass.
 
 ## Animation setup
 
