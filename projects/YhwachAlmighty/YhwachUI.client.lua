@@ -22,6 +22,13 @@ if not actionEvent then
 	actionEvent.Parent = script
 end
 
+local statusEvent = script:FindFirstChild("StatusChanged")
+if not statusEvent then
+	statusEvent = Instance.new("BindableEvent")
+	statusEvent.Name = "StatusChanged"
+	statusEvent.Parent = script
+end
+
 local gui = Instance.new("ScreenGui")
 gui.Name = "YhwachAlmightyUI"
 gui.ResetOnSpawn = false
@@ -152,6 +159,13 @@ local reset = makeButton("ResetButton", "STOP EFFECTS  /  RESET VISUALS", 467, f
 
 local footer = addText(root, "Footer", "READY  •  ASSETS PENDING", 8, UDim2.fromOffset(22, 513), Enum.Font.GothamMedium, Color3.fromRGB(125, 125, 150))
 footer.Size = UDim2.new(1, -44, 0, 16)
+
+statusEvent.Event:Connect(function(message, color)
+	footer.Text = tostring(message):upper()
+	if typeof(color) == "Color3" then
+		footer.TextColor3 = color
+	end
+end)
 
 local mode = "Base"
 local auraEnabled = false
