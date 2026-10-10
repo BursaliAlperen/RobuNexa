@@ -57,3 +57,8 @@ This repository document is a plan, not a working executor script. Client-only a
 - Roblox catalog item IDs identify different kinds of assets; use catalog metadata rather than assuming every numeric ID is a hat or limb.
 - Roblox's own documentation distinguishes Marketplace avatar assets from Creator Store assets such as models and audio: https://create.roblox.com/docs/projects/assets/api
 - The asset list is preserved exactly as supplied, including the repeated ID 83293970715566.
+
+
+## Current repository files
+
+- `YhwachUI.client.lua` — mobile-first UI shell with Base/Almighty toggle, Aura toggle, Stop Effects, Reset Visuals, and local action events. The actual avatar/effect handler is intentionally not included yet; animation and audio integration is pending the user's .anim and .mp3 files.
