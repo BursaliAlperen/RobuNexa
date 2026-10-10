@@ -154,7 +154,7 @@ if not game:IsLoaded() then
 	end, function()
 		notLoaded.Parent = workspace
 	end)
-	notLoaded.Text = "Uhhhhhh is waiting for the game to load"
+	notLoaded.Text = "NAM Reanimate is waiting for the game to load"
 	game.Loaded:Wait()
 	for i=1, 60 do
 		while task.wait() > 1 / 10 do end
@@ -377,7 +377,6 @@ do
 		"fr_keygen31.ft2.mp3",
 		"lightinursoul.graphic.png",
 		"letriangul.graphic.png",
-		"wearegenesis.graphic.png",
 		"glowingpala.graphic.png",
 	}
 	local redownloadeverything = SaveData.CDNVersion ~= CDNVersion
@@ -790,8 +789,8 @@ local function SetUITheme(index)
 		{Fore = Color3.fromRGB(49, 203, 233), Back = Color3.fromRGB(38, 38, 38), Text = Color3.fromRGB(49, 203, 233)},
 		-- Patchma-like
 		{Fore = Color3.new(0.0941177, 0.317647, 0.878431), Text = Color3.new(0.560784, 0.560784, 0.560784)},
-		-- Genesis V4 - Neptunian V
-		{Fore = Color3.fromHex("7733FF"), Back = Color3.fromHex("161330"), SndClick = "rbxassetid://80526571264304"},
+		-- NAM custom charcoal and lime theme
+		{Fore = Color3.fromRGB(164, 255, 74), Back = Color3.fromRGB(18, 20, 26), Text = Color3.fromRGB(232, 236, 242)},
 		-- Crimson
 		{Fore = Color3.new(0.9, 0, 0), Back = Color3.new(0.05, 0, 0)},
 		-- r/masterhacker
@@ -7624,7 +7623,7 @@ UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "DISCLAIMER: Some quotes in this project are jokes and should not be taken seriously. Please do not use them to harass or mock anyone.", 15, Enum.TextXAlignment.Center)
 UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "This \"software\" is FREE, meaning YOU SHOULD NOT REDISTRIBUTE WITH RENUMERATIVE INTENT!!", 15, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "If you want to add content to Uhhhhhh, like Dances or Movesets, go to <font color=\"#4444FF\">this thing</font>.", 15, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
+UI.CreateText(CreditsPage, "To add content to NAM Reanimate, use the project repository.", 15, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		Util.Notify("Link copied!")
 		pcall(setclipboard, "https://github.com/STEVE-916-create/Uhhhhhh/")
