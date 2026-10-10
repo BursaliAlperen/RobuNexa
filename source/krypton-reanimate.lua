@@ -12,7 +12,7 @@ if (env.UhhhhhhLoaded or _G.UhhhhhhLoaded or env.NAMLoaded or _G.NAMLoaded)
     return
 end
 if not game:IsLoaded() then game.Loaded:Wait() end
-env.KryptonConfiguration = {
+local kryptonConfig = {
     WaitTime = 0.251,
     FakeRigScale = 1,
     DestroyHeightOffset = 50,
@@ -41,6 +41,9 @@ env.KryptonConfiguration = {
     PermanentDeath = false,
     Hats = {},
 }
+env.KryptonConfiguration = kryptonConfig
+KryptonConfiguration = kryptonConfig
+
 local url = "https://raw.githubusercontent.com/KadeTheExploiter/Krypton/46caefc79b80565df65bbaa987d5b89caaec5d29/Module.luau"
 local ok, source = pcall(function() return game:HttpGet(url) end)
 if not ok or type(source) ~= "string" or #source < 1000 then
