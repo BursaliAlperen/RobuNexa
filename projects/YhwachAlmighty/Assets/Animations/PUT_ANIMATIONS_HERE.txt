@@ -1,0 +1,12 @@
+YHWACH ANIMATION DROP FOLDER
+
+Put your source animation files here:
+- BaseIdle.anim
+- AlmightyAwakening.anim
+- AlmightyIdle.anim
+- HatPose.anim
+- FormReturn.anim
+
+IMPORTANT:
+Roblox runtime cannot load a raw .anim file directly by filename. Import/publish each animation using Roblox's animation workflow, then paste its rbxassetid:// ID into AccessoryConfig.lua under AnimationIds.
+Use animations you own or have permission to use, and make sure the rig type (R6/R15) matches.
