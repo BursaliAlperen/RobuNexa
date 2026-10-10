@@ -947,13 +947,14 @@ do
 	TopBarText.Size = UDim2.new(1, -35, 1, 0)
 	TopBarText.BackgroundTransparency = 1
 	TopBarText.ClipsDescendants = true
-	TopBarText.Font = Enum.Font.Code
+	TopBarText.Font = Enum.Font.GothamBold
 	TopBarText.TextColor3 = Color3.fromRGB(164, 255, 74)
 	TopBarText.TextSize = 15
 	TopBarText.TextXAlignment = Enum.TextXAlignment.Left
 	TopBarText.Text = "NAM REANIMATE"
 	TopBarText.RichText = true
 	RegisterTextLabel(TopBarText)
+	TopBarText.TextColor3 = Color3.fromRGB(164, 255, 74)
 	Util.ForceTextSize(TopBarText)
 	
 	local TopBarClose = Util.Instance("TextButton", TopBarFrame)
