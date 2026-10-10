@@ -6031,7 +6031,14 @@ do
 	ReanimatorConfigCanvas.Parent.LayoutOrder = -94
 	ReanimateMethodSelect.Changed:Connect(function(value)
 		SaveData.SelectedReanimator = value
-		if SyntaxFlingButton then SyntaxFlingButton.Visible = value == 4 end
+		if SyntaxFlingButton then
+			SyntaxFlingButton.Visible = value == 4
+			if value ~= 4 then
+				local env = (getgenv and getgenv()) or shared or _G
+				env.bulletattacking = false
+				SyntaxFlingButtonText.Text = "Syntax Fling: OFF"
+			end
+		end
 		if value == 1 then
 			SelectedReanimator = LimbReanimator
 			ReanimatorConfigTitle.Text = "LIMB REANIMATOR CONFIG"
@@ -6106,7 +6113,7 @@ do
 				local ok, err = pcall(function()
 					local loader = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/source/krypton-reanimate.lua")
 					local runLoader = loadstring(loader)
-					assert(type(runLoader) == "function", "Gelatek loader could not be compiled")
+					assert(type(runLoader) == "function", "Krypton loader could not be compiled")
 					runLoader()
 				end)
 				env.RobuNexaAllowKryptonFromNAM = nil
