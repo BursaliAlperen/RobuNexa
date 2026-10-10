@@ -6019,6 +6019,9 @@ do
 	if SaveData.SelectedReanimator == 2 then
 		SelectedReanimator = HatReanimator
 		ReanimatorConfigTitle.Text = "HATS REANIMATOR CONFIG"
+	elseif SaveData.SelectedReanimator == 3 then
+		SelectedReanimator = nil
+		ReanimatorConfigTitle.Text = "GELATEK REANIMATE"
 	end
 	local ReanimatorConfigCanvas = UI.CreateCanvas(MainPage)
 	ReanimatorConfigCanvas.Parent.LayoutOrder = -94
