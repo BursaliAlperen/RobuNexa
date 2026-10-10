@@ -13,7 +13,7 @@ if _G.NAMLoaded or _G["U" .. "hhhhhhLoaded"] then return end
 _G.NAMLoaded = true
 _G["U" .. "hhhhhhLoaded"] = true
 
-local NAMVersion = "1.0.10 BETA"
+local NAMVersion = "1.0.11 BETA"
 
 local Debris = cloneref(game:GetService("Debris"))
 local CoreGui = cloneref(game:GetService("CoreGui"))
@@ -6947,7 +6947,7 @@ local function AssetGetPathFromFilename(filename)
 end
 local _Assetdownloading = {}
 local function AssetDownload(filename)
-	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. filename
+	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.11/content/" .. filename
 	local split = string.split(filename, "@")
 	if #split > 1 then
 		filename = table.remove(split, 1)
@@ -7940,7 +7940,7 @@ end)
 UI.CreateText(ReadmePage, "NAM README & loadstring", 24, Enum.TextXAlignment.Center)
 UI.CreateText(ReadmePage, "Usage and loadstring are in the NAM repository README.", 14, Enum.TextXAlignment.Center)
 UI.CreateButton(ReadmePage, "Copy loadstring", 20).Activated:Connect(function()
-	pcall(setclipboard, 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.10/source/reanim.lua"))()')
+	pcall(setclipboard, 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.11/source/reanim.lua"))()')
 	Util.Notify("Loadstring copied!")
 end)
 task.wait()
@@ -7996,7 +7996,7 @@ local function getgithubraw(path)
 	InitLogsText.Text ..= "\n[LOG] [GitGET] GET raw./" .. path
 	s, resp = pcall(request, {
 		Method = "GET",
-		Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. path,
+		Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.11/content/" .. path,
 	})
 	if s and resp and resp.StatusCode == 200 then
 		return resp.Body
