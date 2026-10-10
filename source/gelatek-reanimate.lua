@@ -15,7 +15,7 @@ if Global.RobuNexaGelatekRunning then
     return
 end
 
-if Global.UhhhhhhLoaded or _G.UhhhhhhLoaded then
+if (Global.UhhhhhhLoaded or _G.UhhhhhhLoaded) and not Global.RobuNexaAllowGelatekFromNAM then
     warn("[RobuNexa] NAM Reanimate appears to be active. Stop it and respawn before switching.")
     return
 end
