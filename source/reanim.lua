@@ -1224,7 +1224,7 @@ do -- homepage
 	text.Position = UDim2.new(0.5, 0, 1, -25)
 	text.ZIndex = 3
 	text.Parent = CracktroFrame
-	local text0 = Util.MakeText("Discord: discord.gg/NASNUKRBVM")
+	local text0 = Util.MakeText("")
 	text0.AnchorPoint = Vector2.new(0.5, 1)
 	text0.Position = UDim2.new(0.5, 0, 1, -17)
 	text0.ZIndex = 3
@@ -2426,7 +2426,7 @@ task.spawn(function()
 			"Believe me friend, its fuckingly fast, you don't ev",
 		},
 		{
-			"Uhhhhhh  https://discord.gg/NASNUKRBVM  Uhhhhhh",
+			"Uhhhhhh                 NAM                  Uhhhhhh",
 			"Uhhhhhh Uhhhhhh Uhhhhhh Uhhhhhh STEVETHEREALONE",
 			"Uhhhhhh Uhhhhhh Uhhhhhh STEVETHEREALONE Uhhhhhh",
 			"Uhhhhhh Uhhhhhh STEVETHEREALONE Uhhhhhh Uhhhhhh",
@@ -8187,25 +8187,6 @@ UI.CreateText(CreditsPage, "expose more backend functions for me like a good boy
 UI.CreateText(CreditsPage, "<b>NAM</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "ill be taking ALL your convertions >:D", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "actually, im just taking the names, search it up on script sources, read the source, convert it and stuff then done", 12, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "<font color=\"#4444FF\"><b>Empyrean Reanimate (click for Discord)</b></font>", 12, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		Util.Notify("Link copied!")
-		pcall(setclipboard, "https://discord.gg/UJ7YtqadPJ")
-		pcall(request, {
-			Url = "http://127.0.0.1:6463/rpc?v=1",
-			Method = "POST",
-			Headers = {
-				["Content-Type"] = 'application/json',
-				["Origin"] = "https://discord.com",
-			},
-			Body = HttpService:JSONEncode({
-				cmd = "INVITE_BROWSER",
-				nonce = HttpService:GenerateGUID(false),
-				args = {code = "UJ7YtqadPJ"},
-			}),
-		})
-	end
-end)
 UI.CreateText(CreditsPage, "your tool fling is great reference!", 12, Enum.TextXAlignment.Center)
 UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "<b>* Greetings to *</b>", 15, Enum.TextXAlignment.Center)
@@ -8239,25 +8220,6 @@ end)
 UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "<b>(C) 2026 STEVETHEREALONE</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "all rights reserved", 14, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "<font color=\"#4444FF\">[ Discord invite ]</font>", 15, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		Util.Notify("Link copied!")
-		pcall(setclipboard, "https://discord.gg/NASNUKRBVM")
-		pcall(request, {
-			Url = "http://127.0.0.1:6463/rpc?v=1",
-			Method = "POST",
-			Headers = {
-				["Content-Type"] = 'application/json',
-				["Origin"] = "https://discord.com",
-			},
-			Body = HttpService:JSONEncode({
-				cmd = "INVITE_BROWSER",
-				nonce = HttpService:GenerateGUID(false),
-				args = {code = "NASNUKRBVM"},
-			}),
-		})
-	end
-end)
 local ChangelogsPage = UI.CreatePage()
 ChangelogsPage.ZIndex = 1
 ChangelogsPage.Position = UDim2.new(0.5, 360, 0.5, 0)
@@ -8555,7 +8517,7 @@ do
 	tabBar.BackgroundTransparency = 1
 	tabBar.BorderSizePixel = 0
 	tabBar.ZIndex = 10000
-	local tabs = {"ANIMS", "LIMBS", "HITBOXES", "SETTINGS"}
+	local tabs = {"ANIMS", "TYPE", "LIMBS", "HITBOXES", "SETTINGS"}
 	local buttons = {}
 	local selected = nil
 	local function selectTab(name)
@@ -8563,7 +8525,7 @@ do
 		local page = nil
 		if name == "ANIMS" then
 			page = DancesPage
-		elseif name == "SETTINGS" then
+		elseif name == "TYPE" or name == "SETTINGS" then
 			page = MainPage
 		end
 		for _, child in WindowContent:GetChildren() do
