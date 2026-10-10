@@ -186,9 +186,9 @@ local function addAnimationModule(config)
 end
 
 addAnimationModule({
-	name = "Gojo Awake",
+	name = "Gojo Awakening",
 	description = "Gojo awakening animation adapted for R6, with a smooth timed lift.",
-	asset = "GojoAwakeTrack.anim",
+	asset = "GojoAwakeningTrack.anim",
 	lift = 18,
 	liftStart = 0.18,
 	liftEnd = 0.72,
@@ -197,8 +197,8 @@ addAnimationModule({
 addAnimationModule({
 	name = "Imaginary Purple",
 	description = "Hollow Purple attack animation adapted for R6.",
-	asset = "HollowPurple1Track.anim",
-	sound = "imaginary-hollow-purple_QmAgdbC.mp3",
+	asset = "ImaginaryPurpleTrack.anim",
+	sound = "ImaginaryPurple.mp3",
 	lift = 0,
 	liftStart = 0,
 	liftEnd = 0,

@@ -82,7 +82,7 @@ def main() -> int:
 
     sequences = [item for item in all_instances if getattr(item, "class_name", "") == "KeyframeSequence"]
     if not sequences:
-        raise ValueError("No KeyframeSequence found inside GojoAwaken.anim (RBXM container).")
+        raise ValueError("No KeyframeSequence found inside GojoAwakening.anim (RBXM container).")
 
     candidates = []
     for sequence in sequences:

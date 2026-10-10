@@ -24,7 +24,7 @@ AddModule(function()
 	m.Name = "Hakari's Dance"
 	m.Description = "jujutsu shenanigans\nlets go gambling\naw dang it\naw dang it\naw dang it\naw dang it\naw dang it"
 	m.InternalName = "TUKATUKADONKDONK"
-	m.Assets = {"Hakari.anim", "Hakari.mp3"}
+	m.Assets = {"Hakari.anim", "HakariDance.mp3"}
 
 	m.Effects = false
 	m.Config = function(parent: GuiBase2d)
@@ -44,7 +44,7 @@ AddModule(function()
 	local animator = nil
 	local instances = {}
 	m.Init = function(figure: Model)
-		SetOverrideDanceMusic(AssetGetContentId("Hakari.mp3"), "TUCA DONKA", 1)
+		SetOverrideDanceMusic(AssetGetContentId("HakariDance.mp3"), "TUCA DONKA", 1)
 		animator = AnimLib.Animator.new()
 		animator.rig = figure
 		animator.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("Hakari.anim"))
