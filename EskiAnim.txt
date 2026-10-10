@@ -171,6 +171,65 @@ end, ...)
 end
 local b_getfenv = getfenv
 local Player = Players.LocalPlayer
+-- NAM compatibility diagnostics: reports evidence only; it never changes the character.
+local function RunCompatibilityCheck()
+	task.spawn(function()
+		local knownPlaces = {
+			[654732683] = {name = "Car Crushers 2", rig = "R6"},
+			[5683833663] = {name = "Ragdoll Engine", rig = "R6/R15"},
+			[112399477218954] = {name = "Circuit Board", rig = "R6/R15"},
+			[81239378558719] = {name = "Hide the body", rig = "R6/R15"},
+		}
+		local placeId = game.PlaceId
+		local known = knownPlaces[placeId]
+		local character = Player.Character or Player.CharacterAdded:Wait()
+		local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid", 10)
+		if not humanoid then
+			Util.Notify("Uyumluluk: Humanoid bulunamadi. Karakter hazir degil.")
+			return
+		end
+
+		local rig = humanoid.RigType == Enum.HumanoidRigType.R6 and "R6" or "R15"
+		local missing = {}
+		for _, partName in ipairs({"HumanoidRootPart", "Head", "Torso"}) do
+			if not character:FindFirstChild(partName) then
+				table.insert(missing, partName)
+			end
+		end
+		local usableAccessories = 0
+		for _, item in ipairs(character:GetChildren()) do
+			if item:IsA("Accessory") then
+				local handle = item:FindFirstChild("Handle")
+				if handle and handle:IsA("BasePart") then
+					usableAccessories += 1
+				end
+			end
+		end
+
+		if known then
+			if known.rig ~= "R6/R15" and known.rig ~= rig then
+				Util.Notify("Uyumluluk: " .. known.name .. " listede, fakat bu oyun icin " .. known.rig .. " gerekiyor. Senin rig: " .. rig .. ". Destek garanti degil.")
+			else
+				Util.Notify("Uyumluluk: " .. known.name .. " bilinen oyun listesinde. Rig: " .. rig .. ". Bu, mevcut NAM surumunde kesin calisma garantisi degildir.")
+			end
+		else
+			Util.Notify("Uyumluluk: Bu PlaceId bilinen listede yok. Rig: " .. rig .. ". Oyun aday olabilir; destek dogrulanmadi.")
+		end
+
+		if #missing > 0 then
+			Util.Notify("Karakter kontrolu: Eksik parcalar: " .. table.concat(missing, ", ") .. ". Reanimate sorun cikarabilir.")
+		elseif usableAccessories == 0 then
+			Util.Notify("Karakter kontrolu: Handle iceren aksesuar yok. Sapka/uzuv reanimate yontemi bu oyunda calismayabilir.")
+		else
+			Util.Notify("Karakter kontrolu: Temel parcalar tamam; Handle'li aksesuar: " .. tostring(usableAccessories) .. ". Bu yalnizca on kontroldur.")
+		end
+
+		-- Voice-chat visibility cannot be reliably inferred client-side here.
+		Util.Notify("Not: Sesli sohbet kisitlamasi otomatik dogrulanamiyor; diger oyuncularda gorunurluk test edilmeli.")
+	end)
+end
+RunCompatibilityCheck()
+
 if not game:IsLoaded() then
 local notLoaded = Instance.new("Message")
 xpcall(function()
