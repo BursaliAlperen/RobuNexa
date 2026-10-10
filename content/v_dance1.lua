@@ -48,6 +48,11 @@ AddModule(function()
 		animator = AnimLib.Animator.new()
 		animator.rig = figure
 		animator.track = AnimLib.Track.fromfile(AssetGetPathFromFilename("Hakari.anim"))
+		if not animator.track then
+			SetOverrideDanceMusic(nil)
+			warn("NAM: Failed to load animation track Hakari.anim")
+			return false
+		end
 		animator.looped = true
 		animator.map = {{0, 73.845}, {0, 75.6}}
 		instances = {}
