@@ -191,7 +191,10 @@ local function RunCompatibilityCheck()
 
 		local rig = humanoid.RigType == Enum.HumanoidRigType.R6 and "R6" or "R15"
 		local missing = {}
-		for _, partName in ipairs({"HumanoidRootPart", "Head", "Torso"}) do
+		local requiredParts = rig == "R6"
+			and {"HumanoidRootPart", "Head", "Torso"}
+			or {"HumanoidRootPart", "Head", "UpperTorso", "LowerTorso"}
+		for _, partName in ipairs(requiredParts) do
 			if not character:FindFirstChild(partName) then
 				table.insert(missing, partName)
 			end
