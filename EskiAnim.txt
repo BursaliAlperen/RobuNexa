@@ -16,12 +16,14 @@ Music:   Dubmood
 MASTER BOOT RECORD
 Thou shalth not steal. Point at this source if you used a snippet here.
 ]]
+local _RobuNexaEnv = (getgenv and getgenv()) or shared or _G
+if _G.UhhhhhhLoaded or _G.NAMLoaded or _RobuNexaEnv.RobuNexaGelatekRunning then return end
+
 -- Optional reanimation selector. Choose exactly one system at startup.
 -- Gelatek runs instead of NAM; the two systems are never intentionally started together.
 do
     local env = (getgenv and getgenv()) or shared or _G
-    if not env.RobuNexaReanimateChoiceShown then
-        env.RobuNexaReanimateChoiceShown = true
+    if not (_G.UhhhhhhLoaded or _G.NAMLoaded or env.RobuNexaGelatekRunning) then
         local selected
         local parent
         pcall(function()
