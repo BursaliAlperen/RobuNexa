@@ -863,12 +863,11 @@ local function SetUITheme(index)
 		UISound.Click.SoundId = theme[4]
 	end
 end
-SaveData.UITheme = SaveData.UITheme or 1
+SaveData.UITheme = 5 -- NAM custom charcoal/lime theme is the default
 SetUITheme(SaveData.UITheme)
 
 local ReanimPage
 local DancesPage
-local NAMBrandText = "NAM REANIMATE"
 local UIMainWindow, AWindowContent, WindowContent, TopBarFrame, NAMNavButtons
 
 local _funcrefreshes = {}
@@ -902,11 +901,12 @@ do
 	UIMainWindow.Position = UDim2.new(0.5, 0, 0.5, 0)
 	UIMainWindow.Size = UDim2.new(0, 360, 0, 450)
 	UIMainWindow.BackgroundTransparency = 0
-	UIMainWindow.BackgroundColor3 = Color3.new(1, 1, 1)
-	UIMainWindow.BorderSizePixel = 0
-	Stylize(UIMainWindow, {
-		Glow = true
-	})
+	UIMainWindow.BackgroundColor3 = Color3.fromRGB(18, 20, 26)
+	UIMainWindow.BorderSizePixel = 1
+	UIMainWindow.BorderColor3 = Color3.fromRGB(48, 54, 64)
+	local NAMWindowCorner = Instance.new("UICorner")
+	NAMWindowCorner.CornerRadius = UDim.new(0, 8)
+	NAMWindowCorner.Parent = UIMainWindow
 	local _clicksndclicked = false
 	UserInputService.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -936,11 +936,10 @@ do
 	TopBarFrame.Position = UDim2.new(0, 0, 0, 0)
 	TopBarFrame.Size = UDim2.new(1, 0, 0, 30)
 	TopBarFrame.BackgroundTransparency = 0
-	TopBarFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+	TopBarFrame.BackgroundColor3 = Color3.fromRGB(23, 26, 32)
 	TopBarFrame.BorderSizePixel = 0
 	TopBarFrame.ClipsDescendants = true
 	TopBarFrame.ZIndex = 1
-	Stylize(TopBarFrame)
 	
 	local TopBarText = Util.Instance("TextLabel", TopBarFrame)
 	TopBarText.AnchorPoint = Vector2.new(0, 0.5)
@@ -949,14 +948,13 @@ do
 	TopBarText.BackgroundTransparency = 1
 	TopBarText.ClipsDescendants = true
 	TopBarText.Font = Enum.Font.Code
-	TopBarText.TextColor3 = Color3.new(1, 1, 1)
-	TopBarText.TextSize = 20
+	TopBarText.TextColor3 = Color3.fromRGB(164, 255, 74)
+	TopBarText.TextSize = 15
 	TopBarText.TextXAlignment = Enum.TextXAlignment.Left
 	TopBarText.Text = "NAM REANIMATE"
 	TopBarText.RichText = true
 	RegisterTextLabel(TopBarText)
 	Util.ForceTextSize(TopBarText)
-	NAMBrandText = "NAM REANIMATE"
 	
 	local TopBarClose = Util.Instance("TextButton", TopBarFrame)
 	TopBarClose.AnchorPoint = Vector2.new(1, 0)
