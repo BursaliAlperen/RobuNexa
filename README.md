@@ -9,7 +9,6 @@ A compact animation hub with a curated catalog.
 
 ## Catalog
 - **Hakari's Dance** — uses `content/Hakari.anim` and `content/Hakari.mp3`.
-- **Gojo Awake** — R6 keyframe animation stored in `content/Gojo.anim` and loaded through the animation track parser.
 - **Cursed car anim** — the renamed moveset formerly labeled Patchma Hub.
 - **Limb Reanimator** — the only selectable reanimation mode, with Start/Stop and Refresh controls.
 
