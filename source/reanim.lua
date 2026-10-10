@@ -972,7 +972,7 @@ do
 	TopBarText.TextColor3 = Color3.new(1, 1, 1)
 	TopBarText.TextSize = 20
 	TopBarText.TextXAlignment = Enum.TextXAlignment.Left
-	TopBarText.Text = "    NAM | v" .. UhhhhhhVersion
+	TopBarText.Text = "NAM Reanimate | v" .. UhhhhhhVersion
 	TopBarText.RichText = true
 	RegisterTextLabel(TopBarText)
 	Util.ForceTextSize(TopBarText)
@@ -6569,15 +6569,15 @@ do
 	SaveData.SelectedReanimator = SaveData.SelectedReanimator or 1
 	local ReanimateMethodSelect, ReanimatorTypeLabel = UI.CreateDropdown(MainPage, "Reanimate Type", {"Limb Reanimator", "Hats Reanimator"}, SaveData.SelectedReanimator)
 	ReanimatorTypeLabel.Parent.LayoutOrder = -100
-	local ReanimatorConfigTitle = UI.CreateText(MainPage, "REANIMATOR CONFIG", 15, Enum.TextXAlignment.Center)
-	ReanimatorConfigTitle.Parent.LayoutOrder = -99
+	local ReanimatorConfigTitle = UI.CreateText(MainPage, "LIMB REANIMATOR CONFIG", 15, Enum.TextXAlignment.Center)
+	ReanimatorConfigTitle.Parent.LayoutOrder = -95
 	local SelectedReanimator = LimbReanimator
 	if SaveData.SelectedReanimator == 2 then
 		SelectedReanimator = HatReanimator
 		ReanimatorConfigTitle.Text = "HATS REANIMATOR CONFIG"
 	end
 	local ReanimatorConfigCanvas = UI.CreateCanvas(MainPage)
-	ReanimatorConfigCanvas.Parent.LayoutOrder = -98
+	ReanimatorConfigCanvas.Parent.LayoutOrder = -94
 	ReanimateMethodSelect.Changed:Connect(function(value)
 		SaveData.SelectedReanimator = value
 		if value == 1 then
@@ -6594,9 +6594,9 @@ do
 	SelectedReanimator.Config(ReanimatorConfigCanvas)
 	-- Classic EskiAnim-style single-panel controls. Keep the current reanimation logic untouched.
 	local ReanimateText = UI.CreateText(MainPage, "Running: NONE", 15, Enum.TextXAlignment.Center)
-	ReanimateText.Parent.LayoutOrder = -97
+	ReanimateText.Parent.LayoutOrder = -99
 	local ReanimateStartButton, ReanimateStartButtonText = UI.CreateButton(MainPage, "Reanimate", 20)
-	ReanimateStartButton.Parent.LayoutOrder = -96
+	ReanimateStartButton.Parent.LayoutOrder = -98
 	ReanimateStartButton.Activated:Connect(function()
 		ReanimateStartButton.Interactable = false
 		if Reanimate.Current then
@@ -6624,13 +6624,13 @@ do
 		ReanimateStartButton.Interactable = true
 	end)
 	local ReanimateHitboxesButton = UI.CreateButton(MainPage, "Hitboxes", 15)
-	ReanimateHitboxesButton.Parent.LayoutOrder = -95
+	ReanimateHitboxesButton.Parent.LayoutOrder = -97
 	ReanimateHitboxesButton.Activated:Connect(function()
 		if not Reanimate.Character then return end
 		ReanimateShowHitboxes()
 	end)
 	local ReanimateRefreshButton = UI.CreateButton(MainPage, "Refresh", 10)
-	ReanimateRefreshButton.Parent.LayoutOrder = -94
+	ReanimateRefreshButton.Parent.LayoutOrder = -96
 	ReanimateRefreshButton.Activated:Connect(function()
 		if not Reanimate.Character then return end
 		Reanimate.CreateCharacter()
