@@ -6933,17 +6933,21 @@ local function AssetDownload(filename)
 		Util.Notify("Downloading " .. filename .. "...")
 		local body
 		local requestOK, response = pcall(request, {Method = "GET", Url = source})
-		if requestOK and response and response.StatusCode == 200 and type(response.Body) == "string" then
+		if requestOK and response and response.StatusCode == 200
+			and IsAssetContentUsable(response.Body, filename) then
 			body = response.Body
 		end
-		-- Executor request APIs differ; use HttpGet as a fallback rather than
-		-- permanently failing an animation when request() is unavailable.
+		-- Some executor request APIs return a truncated/empty body for large JSON
+		-- tracks. Validate the first response before accepting it, then try HttpGet
+		-- whenever the first transport did not return a usable asset.
 		if not body then
 			local getOK, result = pcall(function() return game:HttpGet(source) end)
-			if getOK and type(result) == "string" and #result > 0 then body = result end
+			if getOK and IsAssetContentUsable(result, filename) then
+				body = result
+			end
 		end
 		local wrote = false
-		if body and IsAssetContentUsable(body, filename) then
+		if body then
 			local writeOK = pcall(writefile, path, body)
 			wrote = writeOK and isfile(path) and IsAssetFileUsable(path, filename)
 		end
