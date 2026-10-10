@@ -23,6 +23,15 @@ Config.AlmightyAccessories = {
 -- Optional native KeyframeSequence objects can be placed in a Folder named YhwachSequences
 -- under this script's parent. If a matching sequence exists, AnimLib plays it locally
 -- without requiring a published AnimationId. Raw GitHub .anim files are NOT instances.
+Config.BinaryModuleNames = {
+	AlmightyAwakening = "AlmightyAwake",
+	AlmightyAura = "AlmightyAura",
+	AlmightySlash = "AlmightySlash",
+	Auswahlen = "Auswahlen",
+	BlutVeneAnhaben = "BlutVeneAnhaben",
+	Sklaverei = "Sklaverei",
+}
+
 Config.SequenceNames = {
 	AlmightyAwakening = "AlmightyAwake",
 	AlmightyAura = "AlmightyAura",
