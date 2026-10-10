@@ -1,54 +1,54 @@
 # Yhwach — The Almighty
 
-A mobile-first Yhwach-themed Roblox character presentation starter for an experience you own. Includes the dark-glass GUI, accessory manifest, a safe accessory-handle pose tween module, and a local controller scaffold for published animation/audio assets.
+A mobile-friendly Yhwach-themed animation and visual-control starter for a Roblox experience you own. The project includes a dark violet UI, a local animation controller, an accessory manifest, a safe pose tween helper, and six source animation files.
 
-## Folder layout
+## Files
 
-```text
-YhwachAlmighty/
-├── README.md
-├── YhwachUI.client.lua
-├── AlmightyController.client.lua
-├── AccessoryConfig.lua
-├── HatAnimation.lua
-└── Assets/
-    ├── Animations/   # drop .anim source files here
-    ├── Audio/        # drop .mp3 source files here
-    ├── Accessories/  # notes / accessory metadata
-    └── Effects/      # aura/effect source notes
-```
+- `YhwachUI.client.lua` — responsive GUI; emits local action requests and displays controller status.
+- `AlmightyController.client.lua` — loads published Roblox animations and optional sounds; stops tracks on reset/respawn.
+- `AccessoryConfig.lua` — ModuleScript containing animation, sound, and catalog-reference configuration.
+- `HatAnimation.lua` — ModuleScript for posing an accessory already equipped on the character.
+- `YhwachMoveset.lua` — standalone all-in-one alternative. **Do not install this together with the modular UI/controller**, or you will get duplicate interfaces.
 
-## Setup
+## Recommended Studio setup
 
-1. Put the four Lua files in `StarterPlayer > StarterPlayerScripts` in an experience you own.
-2. Keep the names exact: `YhwachUI.client`, `AlmightyController.client`, `AccessoryConfig`, and `HatAnimation`. If Roblox renames a script on import, update the matching `WaitForChild` call.
-3. Put your source `.anim` files in `Assets/Animations` and source `.mp3` files in `Assets/Audio` in the repository.
-4. Import/publish animations and audio using Roblox's supported workflow, then add their published IDs to `AccessoryConfig.lua`.
-5. Test with the same rig type your animations were authored for (R6 or R15).
+In an experience you own, place these four scripts under `StarterPlayer > StarterPlayerScripts`:
 
-## Animation and sound IDs
+| File | Roblox instance type |
+|---|---|
+| `YhwachUI.client.lua` | LocalScript |
+| `AlmightyController.client.lua` | LocalScript |
+| `AccessoryConfig.lua` | ModuleScript |
+| `HatAnimation.lua` | ModuleScript |
+
+Keep the instance names exact: `YhwachUI.client`, `AlmightyController.client`, `AccessoryConfig`, and `HatAnimation`. The controller listens to the UI's local `ActionRequested` event and reports playback/errors back through `StatusChanged`.
+
+## Animation setup
 
 Six source animations are present in `Assets/Animations`:
 
 | Source file | Config key | Intended action |
 |---|---|---|
 | `AlmightyAwake.anim` | `AlmightyAwakening` | Awakening sequence |
-| `AlmightyAura.anim` | `AlmightyAura` | Looping Almighty/aura pose |
+| `AlmightyAura.anim` | `AlmightyAura` | Looping Almighty pose |
 | `AlmightySlash.anim` | `AlmightySlash` | Move 1 |
 | `Auswählen.anim` | `Auswahlen` | Move 2 |
 | `Blut Vene Anhaben.anim` | `BlutVeneAnhaben` | Move 3 |
 | `Sklaverei .anim` | `Sklaverei` | Move 4 |
 
-Roblox does not play repository `.anim` / `.mp3` files directly by filename. Import and publish each animation through Roblox's supported workflow, then replace the empty values in `AnimationIds` and `SoundIds` in `AccessoryConfig.lua` with your authorized `rbxassetid://...` IDs. No audio source files are currently present in `Assets/Audio`; that folder only contains its placeholder note.
+Roblox cannot play a GitHub `.anim` file directly by filename. Import each source into Roblox Studio using the supported Animation Editor workflow, publish it for the correct owner/experience, then replace the empty values in `Config.AnimationIds` with the published `rbxassetid://...` IDs. Use the same rig type the animations were authored for (R6 or R15).
 
-## Included modules
+The UI shows missing animation IDs and load failures in its footer. An animation may still fail if its asset is private, owned by another account/group, uploaded for the wrong rig, or unavailable to the experience.
 
-- `YhwachUI.client.lua`: responsive mobile-friendly GUI and local action events.
-- `AlmightyController.client.lua`: plays the awakening, looping aura pose and four move animations after valid published IDs are configured; stops tracks and sounds on reset/respawn.
-- `AccessoryConfig.lua`: user-supplied catalog IDs plus animation/audio ID placeholders.
-- `HatAnimation.lua`: smoothly tweens a weld/Motor6D for an accessory already equipped by a supported experience. It does not create executor-style reanimation or bypass network/security restrictions.
+## Audio setup
 
-## Supplied catalog manifest
+No audio source files are currently present in `Assets/Audio`; it only contains a placeholder note. Upload audio you own or have permission to use, then fill `Config.SoundIds` with the published Roblox audio IDs. Empty sound IDs are skipped with a warning.
+
+## Accessory references and limits
+
+The IDs in `Config.BaseAccessories` and `Config.AlmightyAccessories` are catalog references only; they do not automatically equip items. The accessory pose helper only animates a matching accessory already equipped on the local character. This project does not use executor-based reanimation, bypass Roblox permissions, or guarantee that local visual changes replicate to other players.
+
+## Included catalog references
 
 ### Base set
 - `87291559615126` — Literal Hammer Head [White]
@@ -60,14 +60,10 @@ Roblox does not play repository `.anim` / `.mp3` files directly by filename. Imp
 ### Almighty set
 - `108684178086287` — Yhwach Reishi Sword
 - `75672773594451` — Yhwach Bleach TYBW Almighty King Hair
-- `83293970715566` — user-supplied related item
-- `122497534796344` — user-supplied related item
-- `104304509923191` — user-supplied related item
-- `87969060185631` — Soul king almighty aura
-- `100693570818976` — user-designated Aura B; metadata unverified
-
-These IDs are references, not embedded asset files. Asset availability and permission are controlled by Roblox.
+- `83293970715566`, `122497534796344`, `104304509923191` — related item references, metadata unverified
+- `87969060185631` — Soul King Almighty Aura
+- `100693570818976` — Aura B, metadata unverified
 
 ## Current status
 
-The UI and local animation controller are wired to the six source-animation roles, with four move buttons. Playback still requires published Roblox animation IDs; sound playback requires uploaded audio IDs. Accessory auto-equipping and custom aura particles are not yet implemented; the supplied catalog list alone does not grant access or replicate changes to other players.
+The modular UI and controller are connected. Actual animation playback requires the source animations to be published and their IDs entered in `AccessoryConfig.lua`. The audio placeholders are empty, and accessory auto-equipping/custom particle VFX are not implemented yet.
