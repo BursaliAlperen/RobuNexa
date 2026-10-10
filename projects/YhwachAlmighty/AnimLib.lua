@@ -92,7 +92,7 @@ local function easedAlpha(alpha, style, direction)
 end
 
 function AnimLib.new()
-	return setmetatable({_track=nil, _poseTracks={}, _connection=nil, _joints={}, _original={}, _elapsed=0, _speed=1, _looped=false, _playing=false, _destroyed=false}, AnimLib)
+	return setmetatable({_track=nil, _poseTracks={}, _connection=nil, _joints={}, _original={}, _rig=nil, _elapsed=0, _speed=1, _looped=false, _playing=false, _destroyed=false}, AnimLib)
 end
 
 function AnimLib:LoadTrack(track, rig)
@@ -113,6 +113,7 @@ function AnimLib:LoadTrack(track, rig)
 		end
 	end
 	self._track = {Name=track.Name or "<unknown>", Length=math.max(tonumber(track.Time) or 0, 0.001)}
+	self._rig = rig
 	self._elapsed = 0
 	self._looped = track.Loop == true
 	return self
@@ -143,7 +144,8 @@ function AnimLib:_step(t)
 				elseif before then cf = before.CFrame
 				elseif after then cf = after.CFrame end
 			end
-			joint.Transform = cf
+			local scale = self._rig and self._rig:GetScale() or 1
+			joint.Transform = cf.Rotation + (cf.Position * scale)
 		end
 	end
 end
@@ -180,6 +182,6 @@ function AnimLib:SetSpeed(value) self._speed = math.clamp(tonumber(value) or 1, 
 function AnimLib:SetLooped(value) self._looped = value == true; return self end
 function AnimLib:IsPlaying() return self._playing end
 function AnimLib:Destroy()
-	self:Stop(); self._track = nil; table.clear(self._poseTracks); table.clear(self._joints); table.clear(self._original); self._destroyed = true
+	self:Stop(); self._track = nil; self._rig = nil; table.clear(self._poseTracks); table.clear(self._joints); table.clear(self._original); self._destroyed = true
 end
 return AnimLib
