@@ -84,6 +84,12 @@ local function easedAlpha(alpha, style, direction)
 		return alpha < 0.5 and 0 or 1
 	end
 	if style == "CubicV2" then style = "Cubic" end
+	if style == "Cubic" then
+		if direction == "In" then return alpha ^ 3 end
+		if direction == "Out" then return 1 - (1 - alpha) ^ 3 end
+		if alpha < 0.5 then return 4 * alpha ^ 3 end
+		return 1 - ((-2 * alpha + 2) ^ 3) / 2
+	end
 	local okStyle, es = pcall(function() return Enum.EasingStyle[style or "Linear"] end)
 	local okDirection, ed = pcall(function() return Enum.EasingDirection[direction or "InOut"] end)
 	if not okStyle or not okDirection or not es or not ed then return alpha end
