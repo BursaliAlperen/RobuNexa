@@ -6,10 +6,13 @@ local SoundService = game:GetService("SoundService")
 local player = Players.LocalPlayer
 local Config = require(script.Parent:WaitForChild("AccessoryConfig"))
 local HatAnimation = require(script.Parent:WaitForChild("HatAnimation"))
+local AnimLib = require(script.Parent:WaitForChild("AnimLib"))
 local uiScript = script.Parent:WaitForChild("YhwachUI.client")
 local actionEvent = uiScript:WaitForChild("ActionRequested")
 local statusEvent = uiScript:WaitForChild("StatusChanged")
 local hatAnimator = HatAnimation.new()
+local sequencePlayer = AnimLib.new()
+local sequenceFolder = script.Parent:FindFirstChild("YhwachSequences")
 
 local function reportStatus(message, color)
 	statusEvent:Fire(message, color or Color3.fromRGB(157, 148, 190))
@@ -72,6 +75,7 @@ local function stopSounds()
 end
 
 local function stopAnimations()
+	sequencePlayer:Stop()
 	for key, track in pairs(activeTracks) do
 		activeTracks[key] = nil
 		pcall(function() track:Stop(0.15); track:Destroy() end)
@@ -80,6 +84,21 @@ local function stopAnimations()
 end
 
 local function playAnimation(key, looped, keepOtherTracks)
+	if not keepOtherTracks then stopAnimations() end
+	local character = getCharacter()
+	local sequenceName = Config.SequenceNames and Config.SequenceNames[key]
+	local sequence = sequenceFolder and sequenceName and sequenceFolder:FindFirstChild(sequenceName)
+	if sequence and sequence:IsA("KeyframeSequence") then
+		local ok, err = pcall(function()
+			sequencePlayer:LoadSequence(sequence, character):SetLooped(looped == true):Play()
+		end)
+		if ok then
+			reportStatus("Playing local sequence: " .. key, Color3.fromRGB(213, 188, 255))
+			return sequencePlayer
+		end
+		warn("[Yhwach] Native sequence failed:", err)
+		reportStatus("Sequence failed: " .. key, Color3.fromRGB(255, 120, 120))
+	end
 	local id = Config.AnimationIds[key]
 	if not id or id == "" then
 		local message = "Animation ID missing: " .. key
@@ -87,9 +106,6 @@ local function playAnimation(key, looped, keepOtherTracks)
 		reportStatus(message, Color3.fromRGB(255, 196, 94))
 		return nil
 	end
-	if not keepOtherTracks then stopAnimations() end
-
-	local character = getCharacter()
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
 	if not humanoid then
 		reportStatus("Humanoid not found on character.", Color3.fromRGB(255, 120, 120))
@@ -195,4 +211,4 @@ player.CharacterAdded:Connect(function()
 	auraOn = false
 end)
 
-print("[Yhwach] Controller ready. Upload the six .anim sources to Roblox and fill AnimationIds.")
+print("[Yhwach] Controller ready. Native KeyframeSequences in YhwachSequences take priority; published AnimationIds are fallback.")
