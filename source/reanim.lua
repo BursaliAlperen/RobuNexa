@@ -7642,6 +7642,7 @@ task.spawn(function()
 								ReanimCharacter:SetAttribute("DanceInternalName", _CurrentDance.InternalName)
 								local initOK, initResult = pcall(_CurrentDance.Init, ReanimCharacter)
 								if not initOK or initResult == false then
+									pcall(_CurrentDance.Destroy, ReanimCharacter)
 									ReanimCharacter:SetAttribute("IsDancing", nil)
 									ReanimCharacter:SetAttribute("DanceInternalName", nil)
 									SetOverrideDanceMusic(nil)
