@@ -29,5 +29,6 @@ jobs:
             echo "No generated animation changes."
           else
             git commit -m "Generate local dog .anim files"
+            git pull --rebase origin main
             git push
           fi
