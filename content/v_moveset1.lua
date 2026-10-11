@@ -1218,7 +1218,8 @@ AddModule(function()
 
 	local scale, isdancing = 1, false
 	local hum, root, torso
-	local originalHipHeight, originalRootPhysics
+	local originalHipHeight, originalRootPhysics, originalWalkSpeed
+	local running, crouching = false, false
 	local originalMotorEnabled = {}
 	local noCollisionConstraints = {}
 
@@ -1444,6 +1445,8 @@ AddModule(function()
 		table.clear(noCollisionConstraints)
 		originalHipHeight = hum.HipHeight
 		originalRootPhysics = root.CustomPhysicalProperties
+		originalWalkSpeed = hum.WalkSpeed
+		running, crouching = false, false
 		for _, joint in figure:GetDescendants() do
 			if joint:IsA("Motor6D") then
 				originalMotorEnabled[joint] = joint.Enabled
@@ -1533,6 +1536,22 @@ AddModule(function()
 		end, true, Enum.UserInputType.MouseButton2)
 		ContextActions:SetTitle("NAM_ImmersiveVRWaveR", "R")
 		ContextActions:SetPosition("NAM_ImmersiveVRWaveR", UDim2.new(1, -180, 1, -130))
+		ContextActions:BindAction("NAM_ImmersiveVRRun", function(_, state, _)
+			if state == Enum.UserInputState.Begin then
+				running = not running
+				if running then crouching = false end
+			end
+		end, true, Enum.KeyCode.LeftShift)
+		ContextActions:SetTitle("NAM_ImmersiveVRRun", "Run")
+		ContextActions:SetPosition("NAM_ImmersiveVRRun", UDim2.new(1, -130, 1, -220))
+		ContextActions:BindAction("NAM_ImmersiveVRCrouch", function(_, state, _)
+			if state == Enum.UserInputState.Begin then
+				crouching = not crouching
+				if crouching then running = false end
+			end
+		end, true, Enum.KeyCode.C)
+		ContextActions:SetTitle("NAM_ImmersiveVRCrouch", "Crouch")
+		ContextActions:SetPosition("NAM_ImmersiveVRCrouch", UDim2.new(1, -200, 1, -220))
 	end
 	m.Update = function(dt: number, figure: Model)
 		local t = os.clock()
@@ -1547,6 +1566,7 @@ AddModule(function()
 		if not hum then return end
 		if not root then return end
 		if not torso then return end
+		hum.WalkSpeed = (originalWalkSpeed or 16) * (running and 1.65 or (crouching and 0.5 or 1))
 
 		-- joints
 		local rj = root:FindFirstChild("RootJoint")
@@ -1559,7 +1579,7 @@ AddModule(function()
 		if not isdancing then
 			rj.Enabled, nj.Enabled, rsj.Enabled, lsj.Enabled, rhj.Enabled, lhj.Enabled = false, false, false, false, false, false
 			--hum.HipHeight = 2 * scale
-			hum.HipHeight = 2 * scale - 2
+			hum.HipHeight = 2 * scale - 2 - (crouching and 0.75 * scale or 0)
 			root.CustomPhysicalProperties = PhysicalProperties.new(3.15, 0.3, 0.5)
 			local head = figure:FindFirstChild("Head")
 			local rarm = figure:FindFirstChild("Right Arm")
@@ -1610,6 +1630,10 @@ AddModule(function()
 	m.Destroy = function(figure: Model?)
 		ContextActions:UnbindAction("NAM_ImmersiveVRWaveL")
 		ContextActions:UnbindAction("NAM_ImmersiveVRWaveR")
+		ContextActions:UnbindAction("NAM_ImmersiveVRRun")
+		ContextActions:UnbindAction("NAM_ImmersiveVRCrouch")
+		running, crouching = false, false
+		if hum and hum.Parent and originalWalkSpeed ~= nil then hum.WalkSpeed = originalWalkSpeed end
 		for joint, wasEnabled in originalMotorEnabled do
 			if joint.Parent then joint.Enabled = wasEnabled end
 		end
