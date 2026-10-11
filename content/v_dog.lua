@@ -1,10 +1,10 @@
 -- DOG movement pack for RobuNexa / NAM
--- Animation IDs are intentionally placeholders until supplied by the user.
+-- Dog animations are converted from the supplied RBXM KeyframeSequence files into NAM .anim files.
 AddModule(function()
 	local m = {}
 	m.ModuleType = "MOVESET"
 	m.Name = "dog"
-	m.Description = "Dog movement pack with Sleep, Sit and Dance controls. Animation IDs pending."
+	m.Description = "Dog movement pack with local Sleep, Sit and Dance animations."
 	m.Assets = {}
 	m.AnimationIds = { Sleep = "", Sit = "", Dance = "" }
 	local tracks = {}
