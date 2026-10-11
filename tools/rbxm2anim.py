@@ -1052,6 +1052,10 @@ class RBXModel:
 							intz = read_RBXInterleavedUint32(b2, count)
 							for i in range(count):
 								values[i] = parser["sharedStrings"][intz[i]]
+						elif typeName == "UniqueId":
+							# UniqueId properties are metadata for this converter; consume each 16-byte value.
+							b2.read(count * 16)
+							typeName = None
 						elif typeName == "SecurityCapabilities":
 							read_RBXInterleavedInt64(b2, count)
 							typeName = None
