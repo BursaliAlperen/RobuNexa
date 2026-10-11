@@ -4863,6 +4863,8 @@ AddModule(function()
 				end
 				task.wait()
 				if not rootu:IsDescendantOf(workspace) then
+					animationOverride = nil
+					attacking = false
 					return
 				end
 			end
@@ -5987,6 +5989,8 @@ AddModule(function()
 				animationOverride = lerps.sword1
 				task.wait(0.16)
 				if not rootu:IsDescendantOf(workspace) then
+					animationOverride = nil
+					attacking = false
 					return
 				end
 				MeleeHitbox(rootu, 0.08, CFrame.new(1 * scale, 0, -3 * scale), Vector3.new(7, 5, 6) * scale)
@@ -5994,11 +5998,15 @@ AddModule(function()
 				swordoff = CFrame.new(0.5, 0.5, 0) * CFrame.Angles(math.rad(-5), 0, math.rad(-90))
 				task.wait(0.08)
 				if not rootu:IsDescendantOf(workspace) then
+					animationOverride = nil
+					attacking = false
 					return
 				end
 				swordoff = CFrame.new(0, 0.5, 0) * CFrame.Angles(0, math.rad(30), 0)
 				task.wait(0.08)
 				if not rootu:IsDescendantOf(workspace) then
+					animationOverride = nil
+					attacking = false
 					return
 				end
 			end
@@ -6007,22 +6015,30 @@ AddModule(function()
 				animationOverride = lerps.sword3
 				task.wait(0.08)
 				if not rootu:IsDescendantOf(workspace) then
+					animationOverride = nil
+					attacking = false
 					return
 				end
 				animationOverride = lerps.sword4
 				task.wait(0.08)
 				if not rootu:IsDescendantOf(workspace) then
+					animationOverride = nil
+					attacking = false
 					return
 				end
 				MeleeHitbox(rootu, 0.08, CFrame.new(-1 * scale, 0, -3 * scale), Vector3.new(7, 5, 6) * scale)
 				animationOverride = lerps.sword5
 				task.wait(0.08)
 				if not rootu:IsDescendantOf(workspace) then
+					animationOverride = nil
+					attacking = false
 					return
 				end
 				animationOverride = lerps.sword6
 				task.wait(0.08)
 				if not rootu:IsDescendantOf(workspace) then
+					animationOverride = nil
+					attacking = false
 					return
 				end
 			end
@@ -6030,6 +6046,8 @@ AddModule(function()
 				animationOverride = lerps.sword7
 				task.wait(0.16)
 				if not rootu:IsDescendantOf(workspace) then
+					animationOverride = nil
+					attacking = false
 					return
 				end
 				CreateSound("12222208", 1, 2)
@@ -6039,6 +6057,8 @@ AddModule(function()
 				swordoff = CFrame.new(0.5, 0.5, 0) * CFrame.Angles(math.rad(-5), 0, math.rad(-90))
 				task.wait(0.2)
 				if not rootu:IsDescendantOf(workspace) then
+					animationOverride = nil
+					attacking = false
 					return
 				end
 			end
@@ -6064,21 +6084,49 @@ AddModule(function()
 			Offset = CFrame.identity
 		}
 		table.insert(HatReanimator.HatCFrameOverride, sword)
-		-- Find sword accessories by accessory name OR handle/mesh name, then override the hat mapping by exact asset IDs.
+		-- Use the first accessory actually worn on the back, regardless of its display name.
+		-- This avoids requiring the accessory to be called "Sword", "Blade", or "Katana".
+		local function IsBackAccessory(accessory)
+			local handle = accessory:FindFirstChild("Handle")
+			if not handle then return false end
+			for _, descendant in handle:GetDescendants() do
+				if descendant:IsA("Attachment") then
+					local name = descendant.Name:lower()
+					if name == "bodybackattachment" or name == "backattachment"
+						or name == "waistbackattachment" or name == "capeattachment" then
+						return true
+					end
+				end
+			end
+			local weld = handle:FindFirstChild("AccessoryWeld")
+			if weld and weld:IsA("Weld") and weld.Part1 == torso then
+				-- R6 back accessories are normally welded behind the torso (local Z offset).
+				return math.abs(weld.C1.Position.Z) >= 0.25
+			end
+			return false
+		end
+		local backAccessoryFound = false
 		for _, accessory in figure:GetChildren() do
-			if accessory:IsA("Accessory") then
+			if not backAccessoryFound and accessory:IsA("Accessory") and IsBackAccessory(accessory) then
 				local handle = accessory:FindFirstChild("Handle")
 				local mesh = handle and handle:FindFirstChildWhichIsA("SpecialMesh")
-				local label = (accessory.Name .. " " .. (handle and handle.Name or "")):lower()
-				if label:find("sword", 1, true) or label:find("blade", 1, true) or label:find("katana", 1, true) then
-					local override = {Name = accessory.Name, Limb = "Right Arm", C0 = CFrame.new(0, -0.65, 0) * CFrame.Angles(math.rad(90), 0, math.rad(90)), C1 = CFrame.identity}
-					if handle then
-						if mesh then override.MeshId = mesh.MeshId end
-						if handle:IsA("MeshPart") then override.MeshId = handle.MeshId end
-						if mesh then override.TextureId = mesh.TextureId elseif handle:IsA("MeshPart") then override.TextureId = handle.TextureID end
+				local override = {
+					Name = accessory.Name,
+					Limb = "Right Arm",
+					C0 = CFrame.new(0, -0.65, 0) * CFrame.Angles(math.rad(90), 0, math.rad(90)),
+					C1 = CFrame.identity,
+				}
+				if handle then
+					if mesh then override.MeshId = mesh.MeshId end
+					if handle:IsA("MeshPart") then override.MeshId = handle.MeshId end
+					if mesh then
+						override.TextureId = mesh.TextureId
+					elseif handle:IsA("MeshPart") then
+						override.TextureId = handle.TextureID
 					end
-					table.insert(HatReanimator.HatCFrameOverride, override)
 				end
+				table.insert(HatReanimator.HatCFrameOverride, override)
+				backAccessoryFound = true
 			end
 		end
 		ContextActions:BindAction("Uhhhhhh_LSSword", function(_, state, _)
