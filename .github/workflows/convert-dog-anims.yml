@@ -1,0 +1,33 @@
+name: Convert dog RBXM animations
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "content/*.rbxm"
+      - "tools/convert_dog_rbxm.py"
+      - "tools/rbxm2anim.py"
+      - ".github/workflows/convert-dog-anims.yml"
+permissions:
+  contents: write
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Convert RBXM KeyframeSequences
+        run: python tools/convert_dog_rbxm.py
+      - name: Commit generated .anim files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/*.anim
+          if git diff --cached --quiet; then
+            echo "No generated animation changes."
+          else
+            git commit -m "Generate local dog .anim files"
+            git push
+          fi
