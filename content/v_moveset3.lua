@@ -1,2 +1,2 @@
--- Patchma Hub removed. Keep this builtin module file so the loader remains compatible.
+-- Empty builtin module slot retained for loader compatibility.
 return {}
