@@ -6947,7 +6947,7 @@ local function AssetGetPathFromFilename(filename)
 end
 local _Assetdownloading = {}
 local function AssetDownload(filename)
-	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.16/content/" .. filename
+	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. filename
 	local split = string.split(filename, "@")
 	if #split > 1 then
 		filename = table.remove(split, 1)
@@ -8072,7 +8072,7 @@ local function getgithubraw(path)
 	InitLogsText.Text ..= "\n[LOG] [GitGET] GET raw./" .. path
 	s, resp = pcall(request, {
 		Method = "GET",
-		Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/v1.0.16/content/" .. path,
+		Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. path,
 	})
 	if s and resp and resp.StatusCode == 200 then
 		return resp.Body
