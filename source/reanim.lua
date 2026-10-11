@@ -6530,6 +6530,62 @@ do
 end
 UI.CreateSeparator(MainPage)
 do
+	UI.CreateText(MainPage, "Self Fling (Delta)", 15, Enum.TextXAlignment.Center)
+	SaveData.SelfFlingEnabled = not not SaveData.SelfFlingEnabled
+	SaveData.SelfFlingPower = math.clamp(tonumber(SaveData.SelfFlingPower) or 85, 20, 180)
+	SaveData.SelfFlingMode = SaveData.SelfFlingMode or "Hybrid"
+	local SelfFlingEnabled = SaveData.SelfFlingEnabled
+	local SelfFlingPower = SaveData.SelfFlingPower
+	local SelfFlingMode = SaveData.SelfFlingMode
+	UI.CreateSwitch(MainPage, "Enable Self Fling", SelfFlingEnabled).Changed:Connect(function(val)
+		SelfFlingEnabled = val
+		SaveData.SelfFlingEnabled = val
+	end)
+	local SelfFlingPowerSlider = UI.CreateSlider(MainPage, "Self Fling Power", SelfFlingPower, 20, 180, 5)
+	SelfFlingPowerSlider.Changed:Connect(function(val)
+		SelfFlingPower = math.clamp(tonumber(val) or 85, 20, 180)
+		SelfFlingPowerSlider.Value = SelfFlingPower
+		SaveData.SelfFlingPower = SelfFlingPower
+	end)
+	UI.CreateDropdown(MainPage, "Self Fling Mode", {
+		"Velocity",
+		"Angular",
+		"Hybrid",
+	}, (table.find({"Velocity", "Angular", "Hybrid"}, SelfFlingMode) or 3)).Changed:Connect(function(val)
+		local modes = {"Velocity", "Angular", "Hybrid"}
+		SelfFlingMode = modes[math.clamp(math.floor(tonumber(val) or 3), 1, #modes)]
+		SaveData.SelfFlingMode = SelfFlingMode
+	end)
+	UI.CreateButton(MainPage, "LAUNCH MY CHARACTER", 22).Activated:Connect(function()
+		if not SelfFlingEnabled then
+			Util.Notify("Enable Self Fling first.")
+			return
+		end
+		local character = Player.Character
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if not root or not root:IsA("BasePart") or not humanoid or humanoid.Health <= 0 then
+			Util.Notify("Your character is not ready.")
+			return
+		end
+		local power = math.clamp(SelfFlingPower, 20, 180)
+		local mass = math.max(root.AssemblyMass, 1)
+		local upward = Vector3.new(0, power * 0.8, 0)
+		if SelfFlingMode == "Velocity" then
+			root.AssemblyLinearVelocity = Vector3.new(root.AssemblyLinearVelocity.X, 0, root.AssemblyLinearVelocity.Z) + upward
+		elseif SelfFlingMode == "Angular" then
+			root.AssemblyAngularVelocity = Vector3.new(power * 0.12, power * 0.12, power * 0.12)
+			root:ApplyImpulse(upward * mass)
+		else
+			root.AssemblyAngularVelocity = Vector3.new(power * 0.12, power * 0.12, power * 0.12)
+			root:ApplyImpulse(upward * mass + root.CFrame.LookVector * mass * (power * 0.35))
+		end
+		Util.Notify("Self Fling launched (" .. SelfFlingMode .. ").")
+	end)
+	UI.CreateText(MainPage, "Only launches your own character; it does not target other players.", 10, Enum.TextXAlignment.Center)
+end
+UI.CreateSeparator(MainPage)
+do
 	UI.CreateText(MainPage, "Internals Settings", 15, Enum.TextXAlignment.Center)
 	UI.CreateSwitch(MainPage, "Hook LoadAnimation", Reanimate.UseLoadAnimationHook).Changed:Connect(function(val)
 		Reanimate.UseLoadAnimationHook = val
