@@ -7055,7 +7055,7 @@ DancesPage.Position = UDim2.new(0.5, 360, 0.5, 0)
 DancesPage.Interactable = false
 DancesPage.Visible = false
 DancesPage:SetAttribute("NAMFavoritesOnly", false)
-local FavoritesFilterButton, FavoritesFilterText = UI.CreateButton(DancesPage.List, "SHOW FAVORITES ONLY", 16)
+local FavoritesFilterButton, FavoritesFilterText = UI.CreateButton(DancesPage.List, "FAVORITES ★", 16)
 local FavoritesFilterRow = FavoritesFilterButton.Parent
 FavoritesFilterRow.Name = "Favorites filter"
 FavoritesFilterRow:SetAttribute("NAMFavoriteFilterRow", true)
@@ -7080,7 +7080,7 @@ end
 FavoritesFilterButton.Activated:Connect(function()
 	local favoritesOnly = not DancesPage:GetAttribute("NAMFavoritesOnly")
 	DancesPage:SetAttribute("NAMFavoritesOnly", favoritesOnly)
-	FavoritesFilterText.Text = favoritesOnly and "SHOW ALL DANCES" or "SHOW FAVORITES ONLY"
+	FavoritesFilterText.Text = favoritesOnly and "ALL EMOTES" or "FAVORITES ★"
 	UpdateDanceListVisibility()
 end)
 DancesPage.Search.Box:GetPropertyChangedSignal("Text"):Connect(UpdateDanceListVisibility)
@@ -7503,6 +7503,20 @@ local function AddMoveset(m)
 			UI.CreateSeparator(page)
 			UI.CreateText(page, "* Configuration *", 15, Enum.TextXAlignment.Center)
 			m.Config(page)
+			UI.CreateSeparator(page)
+			local favoriteButton, favoriteButtonText = UI.CreateButton(page, "", 18)
+			local function RefreshDanceFavoriteState()
+				local isFavorite = SaveData.FavoriteDances[m._NAMFavoriteKey]
+				favoriteButtonText.Text = isFavorite and "★ REMOVE FROM FAVORITES" or "☆ ADD TO FAVORITES"
+				RefreshRowFavoriteState()
+			end
+			RefreshDanceFavoriteState()
+			favoriteButton.Activated:Connect(function()
+				SaveData.FavoriteDances[m._NAMFavoriteKey] = not SaveData.FavoriteDances[m._NAMFavoriteKey]
+				RefreshDanceFavoriteState()
+				UpdateDanceListOrder()
+				UpdateDanceListVisibility()
+			end)
 			MovesetsPage.Interactable = false
 			local tween = TweenService:Create(page, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
 				Position = UDim2.new(0.5, 0, 0.5, 0),
@@ -7589,19 +7603,6 @@ local function AddDance(m)
 			UI.CreateSeparator(page)
 			UI.CreateText(page, m.Name, 20, Enum.TextXAlignment.Left)
 			UI.CreateText(page, m.Description, 15, Enum.TextXAlignment.Left)
-			local favoriteButton, favoriteButtonText = UI.CreateButton(page, "", 18)
-			local function RefreshDanceFavoriteState()
-				local isFavorite = SaveData.FavoriteDances[m._NAMFavoriteKey]
-				favoriteButtonText.Text = isFavorite and "REMOVE FROM FAVORITES" or "ADD TO FAVORITES"
-				RefreshRowFavoriteState()
-			end
-			RefreshDanceFavoriteState()
-			favoriteButton.Activated:Connect(function()
-				SaveData.FavoriteDances[m._NAMFavoriteKey] = not SaveData.FavoriteDances[m._NAMFavoriteKey]
-				RefreshDanceFavoriteState()
-				UpdateDanceListOrder()
-				UpdateDanceListVisibility()
-			end)
 			local equip, equiptext = UI.CreateButton(page, "Play Dance", 20)
 			if CurrentDance == m then
 				equiptext.Text = "Stop Dance"
