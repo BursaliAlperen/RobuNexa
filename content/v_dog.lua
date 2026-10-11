@@ -1,5 +1,10 @@
 -- DOG movement pack for RobuNexa / NAM.
 -- Uses NAM's local .anim parser; no Roblox animation asset IDs are required.
+local modules = {}
+local function AddModule(m)
+	table.insert(modules, m)
+end
+
 AddModule(function()
 	local m = {}
 	m.ModuleType = "MOVESET"
@@ -108,3 +113,5 @@ AddModule(function()
 	end
 	return m
 end)
+
+return modules
