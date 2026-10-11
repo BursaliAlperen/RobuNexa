@@ -1649,12 +1649,12 @@ AddModule(function()
 end)
 
 
--- Bundled dog moveset: keep it inside the guaranteed built-in moveset file.
+-- Bundled dog moveset: touch controls mirror the Immersive VR ContextActionService buttons.
 AddModule(function()
 	local m = {}
 	m.ModuleType = "MOVESET"
 	m.Name = "dog"
-	m.Description = "Dog movement pack with local Sleep, Sit and Dance animations."
+	m.Description = "Dog movement pack with Sleep, Sit, Dance and passive Idle controls."
 	m.Assets = {
 		"DANCEDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/DANCEDAWG.anim",
 		"DOGRUN.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/DOGRUN.anim",
@@ -1662,13 +1662,24 @@ AddModule(function()
 		"SITDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SITDAWG.anim",
 		"Sleepp.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Sleepp.anim",
 	}
-	local animationFiles = { Sleep = "Sleepp.anim", Sit = "SITDAWG.anim", Dance = "DANCEDAWG.anim", Run = "DOGRUN.anim", Jump = "JUMPDOG.anim" }
-	local buttonLabels = { Idle = "•", Sleep = "Zz", Sit = "S", Dance = "♪" }
-	local buttonNames = { Idle = "Idle", Sleep = "Sleep", Sit = "Sit", Dance = "Dance" }
+	local animationFiles = {
+		Sleep = "Sleepp.anim",
+		Sit = "SITDAWG.anim",
+		Dance = "DANCEDAWG.anim",
+		Run = "DOGRUN.anim",
+		Jump = "JUMPDOG.anim",
+	}
+	local actions = {
+		{ key = "Idle", title = "Idle", position = UDim2.new(1, -230, 1, -130) },
+		{ key = "Sleep", title = "Sleep", position = UDim2.new(1, -180, 1, -130) },
+		{ key = "Sit", title = "Sit", position = UDim2.new(1, -130, 1, -130) },
+		{ key = "Dance", title = "Dance", position = UDim2.new(1, -200, 1, -220) },
+	}
 	local activeFigure
 	local activeName
 	local activeAnimator
 	local startedAt = 0
+	local boundActions = false
 
 	local function stopAll()
 		activeAnimator = nil
@@ -1685,11 +1696,8 @@ AddModule(function()
 	local function play(name)
 		if not activeFigure then return end
 		stopAll()
-		if name == "Idle" then
-			activeName = "Idle"
-			startedAt = os.clock()
-			return
-		end
+		-- Idle intentionally does not use a procedural fallback. A real idle asset will be added separately.
+		if name == "Idle" then return end
 		local path = AssetGetPathFromFilename(animationFiles[name])
 		local ok, track = pcall(function() return AnimLib.Track.fromfile(path) end)
 		if not ok or not track or not track.Keyframes or #track.Keyframes == 0 then
@@ -1704,76 +1712,59 @@ AddModule(function()
 		activeName = name
 	end
 
-	m.Config = function(parent: GuiBase2d)
-		local panel = Instance.new("Frame")
-		panel.Name = "DogMovementControls"
-		panel.BackgroundTransparency = 1
-		panel.Size = UDim2.new(1, 0, 0, 46)
-		panel.Parent = parent
-		local layout = Instance.new("UIListLayout")
-		layout.FillDirection = Enum.FillDirection.Horizontal
-		layout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-		layout.VerticalAlignment = Enum.VerticalAlignment.Center
-		layout.Padding = UDim.new(0, 6)
-		layout.Parent = panel
-		for _, name in ipairs({"Idle", "Sleep", "Sit", "Dance"}) do
-			local button = Instance.new("TextButton")
-			button.Name = name .. "Button"
-			button.Size = UDim2.new(0, 42, 0, 42)
-			button.BackgroundColor3 = Color3.fromRGB(38, 42, 52)
-			button.BorderSizePixel = 0
-			button.Text = buttonLabels[name] or name
-			button:SetAttribute("ActionName", buttonNames[name] or name)
-			button.TextScaled = false
-			button.TextSize = name == "Sleep" and 13 or 18
-			button.AutoButtonColor = true
-			button.ClipsDescendants = true
-			button.TextColor3 = Color3.fromRGB(245, 247, 255)
-			button.TextSize = 14
-			button.Font = Enum.Font.GothamMedium
-			button.Parent = panel
-			local corner = Instance.new("UICorner")
-			corner.CornerRadius = UDim.new(1, 0)
-			corner.Parent = button
-			button.Activated:Connect(function()
-				local action = buttonNames[name] or name
-				if activeName == action then stopAll() else play(action) end
-			end)
+	local function bindTouchControls()
+		if boundActions then return end
+		boundActions = true
+		for _, action in ipairs(actions) do
+			local actionName = "NAM_Dog_" .. action.key
+			ContextActionService:BindAction(actionName, function(_, state)
+				if state == Enum.UserInputState.Begin then
+					if action.key == "Idle" then
+						stopAll()
+					elseif activeName == action.key then
+						stopAll()
+					else
+						play(action.key)
+					end
+				end
+				return Enum.ContextActionResult.Sink
+			end, true, Enum.KeyCode.Unknown)
+			ContextActionService:SetTitle(actionName, action.title)
+			ContextActionService:SetPosition(actionName, action.position)
 		end
 	end
 
-	m.Init = function(figure: Model)
-		activeFigure = figure
-		stopAll()
+	local function unbindTouchControls()
+		for _, action in ipairs(actions) do
+			ContextActionService:UnbindAction("NAM_Dog_" .. action.key)
+		end
+		boundActions = false
 	end
+
+	-- Controls are created on moveset start, not inside the settings panel.
+	m.Config = function(parent: GuiBase2d)
+	end
+
+	m.Init = function(figure: Model)
+		stopAll()
+		activeFigure = figure
+		bindTouchControls()
+	end
+
 	m.Update = function(dt: number, figure: Model)
 		activeFigure = figure
 		local humanoid = figure:FindFirstChildOfClass("Humanoid")
-		if activeName == "Idle" then
-			local t = os.clock() - startedAt
-			local scale = 0.025 + math.sin(t * 2.1) * 0.018
-			for _, joint in figure:GetDescendants() do
-				if joint:IsA("Motor6D") then
-					if joint.Name == "RootJoint" or joint.Name == "Root" then
-						joint.Transform = CFrame.new(0, math.sin(t * 2.1) * 0.035, 0) * CFrame.Angles(math.sin(t * 1.05) * 0.018, 0, 0)
-					elseif joint.Name == "Neck" then
-						joint.Transform = CFrame.Angles(math.sin(t * 1.4) * 0.025, math.sin(t * 0.8) * 0.035, 0)
-					end
-				end
-			end
-			return
-		end
 		if activeName == "Sleep" or activeName == "Sit" or activeName == "Dance" then
 			if activeAnimator then activeAnimator:Step(os.clock() - startedAt) end
 			return
 		end
+		if activeName ~= nil then return end
+		-- Run/Jump are automatic only; standing has no idle fallback animation.
 		local wanted
 		if humanoid and humanoid.Jump then
 			wanted = "Jump"
 		elseif humanoid and humanoid.MoveDirection.Magnitude > 0.05 then
 			wanted = "Run"
-		else
-			wanted = "Idle"
 		end
 		if wanted ~= activeName then
 			if wanted then play(wanted) else stopAll() end
@@ -1781,7 +1772,9 @@ AddModule(function()
 			activeAnimator:Step(os.clock() - startedAt)
 		end
 	end
+
 	m.Destroy = function(figure: Model?)
+		unbindTouchControls()
 		stopAll()
 		activeFigure = nil
 	end
