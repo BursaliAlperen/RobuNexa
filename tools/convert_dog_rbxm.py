@@ -14,6 +14,8 @@ SOURCES = {
     "DANCEDAWG.rbxm": "DANCEDAWG",
     "SITDAWG.rbxm": "SITDAWG",
     "Sleepp.rbxm": "Sleepp",
+    "DOGRUN.rbxm": "DOGRUN",
+    "JUMPDOG.rbxm": "JUMPDOG",
 }
 
 def descendants(inst):
