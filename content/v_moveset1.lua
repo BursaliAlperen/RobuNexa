@@ -1776,9 +1776,13 @@ AddModule(function()
 		activeFigure = figure
 		humanoid = figure:FindFirstChildOfClass("Humanoid")
 		local moving = humanoid and humanoid.MoveDirection.Magnitude > 0.05
-		-- Movement cancels a playing emote immediately; locomotion takes over.
+		-- Keep emotes playing while still; any movement cancels them immediately.
 		if moving and activeName and EMOTES[activeName] then
 			stopAll()
+		end
+		if activeName and EMOTES[activeName] and not moving then
+			if activeAnimator then activeAnimator:Step(os.clock() - startedAt) end
+			return
 		end
 		local wanted
 		if humanoid and humanoid.Jump then
