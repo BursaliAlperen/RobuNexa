@@ -1654,7 +1654,7 @@ AddModule(function()
 	local m = {}
 	m.ModuleType = "MOVESET"
 	m.Name = "dog"
-	m.Description = "Dog movement pack with Sleep, Sit, Dance and passive Idle controls."
+	m.Description = "Dog movement pack: Sleep, Sit, Dance, Walk and Run. Moving cancels emotes."
 	m.Assets = {
 		"DANCEDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/DANCEDAWG.anim",
 		"DOGRUN.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/DOGRUN.anim",
@@ -1669,19 +1669,34 @@ AddModule(function()
 		Sit = "SITDAWG.anim",
 		Dance = "DANCEDAWG.anim",
 		Run = "DOGRUN.anim",
+		Walk = "DOGRUN.anim",
 		Jump = "JUMPDOG.anim",
 	}
 	local actions = {
-		{ key = "Idle", title = "Idle", input = Enum.KeyCode.I, position = UDim2.new(1, -230, 1, -130) },
-		{ key = "Sleep", title = "Sleep", input = Enum.KeyCode.Z, position = UDim2.new(1, -180, 1, -130) },
-		{ key = "Sit", title = "Sit", input = Enum.KeyCode.X, position = UDim2.new(1, -130, 1, -130) },
-		{ key = "Dance", title = "Dance", input = Enum.KeyCode.C, position = UDim2.new(1, -200, 1, -220) },
+		{ key = "Sleep", title = "Sleep", input = Enum.KeyCode.Z, position = UDim2.new(1, -190, 1, -130) },
+		{ key = "Sit", title = "Sit", input = Enum.KeyCode.X, position = UDim2.new(1, -140, 1, -130) },
+		{ key = "Dance", title = "Dance", input = Enum.KeyCode.C, position = UDim2.new(1, -240, 1, -130) },
+		{ key = "Walk", title = "Walk", input = Enum.KeyCode.V, position = UDim2.new(1, -190, 1, -190) },
+		{ key = "Run", title = "Run", input = Enum.KeyCode.B, position = UDim2.new(1, -140, 1, -190) },
 	}
 	local activeFigure
 	local activeName
 	local activeAnimator
 	local startedAt = 0
 	local boundActions = false
+	local humanoid
+	local originalWalkSpeed
+	local movementMode = "Walk"
+	local WALK_SPEED = 16
+	local RUN_SPEED = 24
+	local EMOTES = { Sleep = true, Sit = true, Dance = true }
+
+	local function setMovementMode(mode)
+		movementMode = mode
+		if humanoid and humanoid.Parent then
+			humanoid.WalkSpeed = (mode == "Run") and RUN_SPEED or (originalWalkSpeed or WALK_SPEED)
+		end
+	end
 
 	local function stopAll()
 		activeAnimator = nil
@@ -1698,7 +1713,9 @@ AddModule(function()
 	local function play(name)
 		if not activeFigure then return end
 		stopAll()
-		local path = AssetGetPathFromFilename(animationFiles[name])
+		local filename = animationFiles[name]
+		if not filename then return end
+		local path = AssetGetPathFromFilename(filename)
 		local ok, track = pcall(function() return AnimLib.Track.fromfile(path) end)
 		if not ok or not track or not track.Keyframes or #track.Keyframes == 0 then
 			pcall(function() Util.Notify(name .. " animation file missing/invalid. Reload dog movement after conversion.") end)
@@ -1719,8 +1736,9 @@ AddModule(function()
 			local actionName = "NAM_Dog_" .. action.key
 			ContextActionService:BindAction(actionName, function(_, state)
 				if state == Enum.UserInputState.Begin then
-					if action.key == "Idle" then
-						stopAll()
+					if action.key == "Walk" or action.key == "Run" then
+						setMovementMode(action.key)
+						if activeName and EMOTES[activeName] then stopAll() end
 					elseif activeName == action.key then
 						stopAll()
 					else
@@ -1741,38 +1759,37 @@ AddModule(function()
 		boundActions = false
 	end
 
-	-- Controls are created on moveset start, not inside the settings panel.
 	m.Config = function(parent: GuiBase2d)
 	end
 
 	m.Init = function(figure: Model)
 		stopAll()
 		activeFigure = figure
+		humanoid = figure:FindFirstChildOfClass("Humanoid")
+		originalWalkSpeed = humanoid and humanoid.WalkSpeed or WALK_SPEED
+		movementMode = "Walk"
+		setMovementMode("Walk")
 		bindTouchControls()
 	end
 
 	m.Update = function(dt: number, figure: Model)
 		activeFigure = figure
-		local humanoid = figure:FindFirstChildOfClass("Humanoid")
-		if activeName == "Sleep" or activeName == "Sit" or activeName == "Dance" then
-			if activeAnimator then activeAnimator:Step(os.clock() - startedAt) end
-			return
+		humanoid = figure:FindFirstChildOfClass("Humanoid")
+		local moving = humanoid and humanoid.MoveDirection.Magnitude > 0.05
+		-- Movement cancels a playing emote immediately; locomotion takes over.
+		if moving and activeName and EMOTES[activeName] then
+			stopAll()
 		end
-		-- Uploaded real idle sequence runs automatically while standing; no procedural fallback.
 		local wanted
 		if humanoid and humanoid.Jump then
 			wanted = "Jump"
-		elseif humanoid and humanoid.MoveDirection.Magnitude > 0.05 then
-			wanted = "Run"
+		elseif moving then
+			wanted = (movementMode == "Run") and "Run" or "Walk"
 		else
 			wanted = "Idle"
 		end
 		if wanted ~= activeName then
-			if wanted then
-				play(wanted)
-			else
-				stopAll()
-			end
+			play(wanted)
 		elseif activeAnimator then
 			activeAnimator:Step(os.clock() - startedAt)
 		end
@@ -1781,7 +1798,12 @@ AddModule(function()
 	m.Destroy = function(figure: Model?)
 		unbindTouchControls()
 		stopAll()
+		if humanoid and humanoid.Parent and originalWalkSpeed then
+			humanoid.WalkSpeed = originalWalkSpeed
+		end
 		activeFigure = nil
+		humanoid = nil
+		originalWalkSpeed = nil
 	end
 	return m
 end)
