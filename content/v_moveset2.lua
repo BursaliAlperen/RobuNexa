@@ -6063,6 +6063,18 @@ AddModule(function()
 			Limb = "Right Arm",
 			Offset = CFrame.identity
 		}
+		table.insert(HatReanimator.HatCFrameOverride, sword)
+		-- Grip a worn sword accessory that would otherwise sit on the back.
+		for _, accessory in figure:GetChildren() do
+			if accessory:IsA("Accessory") and accessory.Name:lower():find("sword", 1, true) then
+				table.insert(HatReanimator.HatCFrameOverride, {Name = accessory.Name, Limb = "Right Arm", C0 = CFrame.new(0, -0.65, 0) * CFrame.Angles(math.rad(90), 0, math.rad(90)), C1 = CFrame.identity})
+			end
+		end
+		ContextActions:BindAction("Uhhhhhh_LSSword", function(_, state, _)
+			if state == Enum.UserInputState.Begin then LinkedSword() end
+		end, true, Enum.UserInputType.MouseButton1)
+		ContextActions:SetTitle("Uhhhhhh_LSSword", "M1")
+		ContextActions:SetPosition("Uhhhhhh_LSSword", UDim2.new(1, -130, 1, -130))
 		if chatconn then
 			chatconn:Disconnect()
 		end
