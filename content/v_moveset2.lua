@@ -4863,8 +4863,6 @@ AddModule(function()
 				end
 				task.wait()
 				if not rootu:IsDescendantOf(workspace) then
-					animationOverride = nil
-					attacking = false
 					return
 				end
 			end
