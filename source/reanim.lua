@@ -8221,6 +8221,70 @@ local function ForceModuleReload(force)
 	if not Reanimate.Character then return end
 	Reanimate.CreateCharacter()
 end
+-- NPC-only Fling Lab integration (does not target player characters).
+do
+	local flingEnabled = false
+	local flingRange = 35
+	local flingImpulse = 65
+	local flingCooldown = 0.8
+	local lastFling = 0
+	local PlayersSvc = Players
+
+	local function getFlingRoot(model)
+		return model:FindFirstChild("HumanoidRootPart")
+			or model:FindFirstChild("Torso")
+			or model:FindFirstChild("UpperTorso")
+	end
+
+	local function findNearestNPC()
+		local character = Player.Character
+		local myRoot = character and getFlingRoot(character)
+		if not myRoot then return nil end
+		local nearest, nearestDistance
+		for _, instance in workspace:GetDescendants() do
+			if instance:IsA("Model") and instance ~= character
+				and not PlayersSvc:GetPlayerFromCharacter(instance) then
+				local humanoid = instance:FindFirstChildOfClass("Humanoid")
+				local root = getFlingRoot(instance)
+				if humanoid and humanoid.Health > 0 and root and not root.Anchored then
+					local distance = (root.Position - myRoot.Position).Magnitude
+					if distance <= flingRange and (not nearestDistance or distance < nearestDistance) then
+						nearest, nearestDistance = instance, distance
+					end
+				end
+			end
+		end
+		return nearest, myRoot
+	end
+
+	local toggle, toggleText = UI.CreateButton(MainPage, "NPC Fling: OFF", 15)
+	toggle.Activated:Connect(function()
+		flingEnabled = not flingEnabled
+		toggleText.Text = flingEnabled and "NPC Fling: ON" or "NPC Fling: OFF"
+		Util.Notify(flingEnabled and "NPC Fling enabled (NPCs only)" or "NPC Fling disabled")
+	end)
+
+	local flingConnection
+	flingConnection = RunService.Heartbeat:Connect(function()
+		if not toggle.Parent then
+			flingConnection:Disconnect()
+			return
+		end
+		if not flingEnabled or os.clock() - lastFling < flingCooldown then return end
+		local npc, myRoot = findNearestNPC()
+		if not npc then return end
+		local root = getFlingRoot(npc)
+		if not root or PlayersSvc:GetPlayerFromCharacter(npc) then return end
+		local delta = root.Position - myRoot.Position
+		local direction = delta.Magnitude > 0.01 and delta.Unit or myRoot.CFrame.LookVector
+		local ok = pcall(function()
+			root:ApplyImpulse((direction * flingImpulse + Vector3.new(0, flingImpulse * 0.65, 0))
+				* math.clamp(root.AssemblyMass, 1, 20))
+		end)
+		if ok then lastFling = os.clock() end
+	end)
+end
+
 UI.CreateSeparator(MainPage)
 UI.CreateText(MainPage, "<b>MODULES MANAGEMENT</b>", 15, Enum.TextXAlignment.Center)
 UI.CreateButton(MainPage, "Reload Modules", 20).Activated:Connect(function()
