@@ -1661,6 +1661,7 @@ AddModule(function()
 		"JUMPDOG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/JUMPDOG.anim",
 		"SITDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SITDAWG.anim",
 		"Sleepp.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Sleepp.anim",
+		"IDLEDOGSMOOTH.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/IDLEDOGSMOOTH.anim",
 	}
 	local animationFiles = {
 		Sleep = "Sleepp.anim",
@@ -1696,8 +1697,6 @@ AddModule(function()
 	local function play(name)
 		if not activeFigure then return end
 		stopAll()
-		-- Idle intentionally does not use a procedural fallback. A real idle asset will be added separately.
-		if name == "Idle" then return end
 		local path = AssetGetPathFromFilename(animationFiles[name])
 		local ok, track = pcall(function() return AnimLib.Track.fromfile(path) end)
 		if not ok or not track or not track.Keyframes or #track.Keyframes == 0 then
@@ -1758,12 +1757,14 @@ AddModule(function()
 			if activeAnimator then activeAnimator:Step(os.clock() - startedAt) end
 			return
 		end
-		-- Run/Jump are automatic only; standing has no idle fallback animation.
+		-- Uploaded real idle sequence runs automatically while standing; no procedural fallback.
 		local wanted
 		if humanoid and humanoid.Jump then
 			wanted = "Jump"
 		elseif humanoid and humanoid.MoveDirection.Magnitude > 0.05 then
 			wanted = "Run"
+		else
+			wanted = "Idle"
 		end
 		if wanted ~= activeName then
 			if wanted then
