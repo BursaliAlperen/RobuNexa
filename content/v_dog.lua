@@ -1,54 +1,50 @@
--- DOG movement pack for RobuNexa / NAM
--- Dog animations are converted from the supplied RBXM KeyframeSequence files into NAM .anim files.
+-- DOG movement pack for RobuNexa / NAM.
+-- Uses NAM's local .anim parser; no Roblox animation asset IDs are required.
 AddModule(function()
 	local m = {}
 	m.ModuleType = "MOVESET"
 	m.Name = "dog"
 	m.Description = "Dog movement pack with local Sleep, Sit and Dance animations."
-	m.Assets = {}
-	m.AnimationIds = { Sleep = "", Sit = "", Dance = "" }
-	local tracks = {}
-	local gui
+	m.Assets = {
+		"DANCEDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/DANCEDAWG.anim",
+		"SITDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SITDAWG.anim",
+		"Sleepp.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Sleepp.anim",
+	}
+	local animationFiles = { Sleep = "Sleepp.anim", Sit = "SITDAWG.anim", Dance = "DANCEDAWG.anim" }
 	local activeFigure
 	local activeName
+	local activeAnimator
+	local startedAt = 0
+
 	local function stopAll()
-		for name, track in pairs(tracks) do
-			pcall(function() track:Stop(0.15) track:Destroy() end)
-			tracks[name] = nil
-		end
+		activeAnimator = nil
 		activeName = nil
+		if activeFigure then
+			for _, joint in activeFigure:GetDescendants() do
+				if joint:IsA("Motor6D") then
+					pcall(function() joint.Transform = CFrame.identity end)
+				end
+			end
+		end
 	end
+
 	local function play(name)
 		if not activeFigure then return end
-		local id = m.AnimationIds[name]
-		if not id or id == "" then
-			pcall(function()
-				Util.Notify(name .. " animation ID not set yet — send the animation IDs.")
-			end)
-			return
-		end
-		local humanoid = activeFigure:FindFirstChildOfClass("Humanoid")
-		if not humanoid then return end
-		local animator = humanoid:FindFirstChildOfClass("Animator")
-		if not animator then
-			animator = Instance.new("Animator")
-			animator.Parent = humanoid
-		end
 		stopAll()
-		local animation = Instance.new("Animation")
-		animation.AnimationId = tostring(id):find("rbxassetid://", 1, true) and tostring(id) or ("rbxassetid://" .. tostring(id))
-		local ok, track = pcall(function() return animator:LoadAnimation(animation) end)
-		animation:Destroy()
-		if not ok or not track then
-			pcall(function() Util.Notify("Could not load " .. name .. " animation.") end)
+		local path = AssetGetPathFromFilename(animationFiles[name])
+		local ok, track = pcall(function() return AnimLib.Track.fromfile(path) end)
+		if not ok or not track or not track.Keyframes or #track.Keyframes == 0 then
+			pcall(function() Util.Notify(name .. " animation file missing/invalid. Reload dog movement after conversion.") end)
 			return
 		end
-		track.Priority = Enum.AnimationPriority.Action
-		track.Looped = true
-		tracks[name] = track
+		activeAnimator = AnimLib.Animator.new()
+		activeAnimator.rig = activeFigure
+		activeAnimator.track = track
+		activeAnimator.looped = true
+		startedAt = os.clock()
 		activeName = name
-		track:Play(0.15)
 	end
+
 	m.Config = function(parent: GuiBase2d)
 		local panel = Instance.new("Frame")
 		panel.Name = "DogMovementControls"
@@ -61,13 +57,13 @@ AddModule(function()
 		layout.VerticalAlignment = Enum.VerticalAlignment.Center
 		layout.Padding = UDim.new(0, 6)
 		layout.Parent = panel
-		for _, item in ipairs({{"Sleep","Sleep"},{"Sit","Sit"},{"Dance","Dance"}}) do
+		for _, name in ipairs({"Sleep", "Sit", "Dance"}) do
 			local button = Instance.new("TextButton")
-			button.Name = item[1] .. "Button"
+			button.Name = name .. "Button"
 			button.Size = UDim2.new(0, 88, 0, 34)
 			button.BackgroundColor3 = Color3.fromRGB(38, 42, 52)
 			button.BorderSizePixel = 0
-			button.Text = item[2]
+			button.Text = name
 			button.TextColor3 = Color3.fromRGB(245, 247, 255)
 			button.TextSize = 14
 			button.Font = Enum.Font.GothamMedium
@@ -76,20 +72,20 @@ AddModule(function()
 			corner.CornerRadius = UDim.new(1, 0)
 			corner.Parent = button
 			button.Activated:Connect(function()
-				if activeName == item[1] then
-					stopAll()
-				else
-					play(item[1])
-				end
+				if activeName == name then stopAll() else play(name) end
 			end)
 		end
 	end
+
 	m.Init = function(figure: Model)
 		activeFigure = figure
 		stopAll()
 	end
 	m.Update = function(dt: number, figure: Model)
 		activeFigure = figure
+		if activeAnimator and activeName then
+			activeAnimator:Step(os.clock() - startedAt)
+		end
 	end
 	m.Destroy = function(figure: Model?)
 		stopAll()
