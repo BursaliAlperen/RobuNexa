@@ -1664,6 +1664,7 @@ AddModule(function()
 		"IDLEDOGSMOOTH.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/IDLEDOGSMOOTH.anim",
 	}
 	local animationFiles = {
+		Idle = "IDLEDOGSMOOTH.anim",
 		Sleep = "Sleepp.anim",
 		Sit = "SITDAWG.anim",
 		Dance = "DANCEDAWG.anim",
