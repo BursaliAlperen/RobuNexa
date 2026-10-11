@@ -6064,10 +6064,21 @@ AddModule(function()
 			Offset = CFrame.identity
 		}
 		table.insert(HatReanimator.HatCFrameOverride, sword)
-		-- Grip a worn sword accessory that would otherwise sit on the back.
+		-- Find sword accessories by accessory name OR handle/mesh name, then override the hat mapping by exact asset IDs.
 		for _, accessory in figure:GetChildren() do
-			if accessory:IsA("Accessory") and accessory.Name:lower():find("sword", 1, true) then
-				table.insert(HatReanimator.HatCFrameOverride, {Name = accessory.Name, Limb = "Right Arm", C0 = CFrame.new(0, -0.65, 0) * CFrame.Angles(math.rad(90), 0, math.rad(90)), C1 = CFrame.identity})
+			if accessory:IsA("Accessory") then
+				local handle = accessory:FindFirstChild("Handle")
+				local mesh = handle and handle:FindFirstChildWhichIsA("SpecialMesh")
+				local label = (accessory.Name .. " " .. (handle and handle.Name or "")):lower()
+				if label:find("sword", 1, true) or label:find("blade", 1, true) or label:find("katana", 1, true) then
+					local override = {Name = accessory.Name, Limb = "Right Arm", C0 = CFrame.new(0, -0.65, 0) * CFrame.Angles(math.rad(90), 0, math.rad(90)), C1 = CFrame.identity}
+					if handle then
+						if mesh then override.MeshId = mesh.MeshId end
+						if handle:IsA("MeshPart") then override.MeshId = handle.MeshId end
+						if mesh then override.TextureId = mesh.TextureId elseif handle:IsA("MeshPart") then override.TextureId = handle.TextureID end
+					end
+					table.insert(HatReanimator.HatCFrameOverride, override)
+				end
 			end
 		end
 		ContextActions:BindAction("Uhhhhhh_LSSword", function(_, state, _)
