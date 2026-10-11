@@ -1758,7 +1758,6 @@ AddModule(function()
 			if activeAnimator then activeAnimator:Step(os.clock() - startedAt) end
 			return
 		end
-		if activeName ~= nil then return end
 		-- Run/Jump are automatic only; standing has no idle fallback animation.
 		local wanted
 		if humanoid and humanoid.Jump then
@@ -1767,7 +1766,11 @@ AddModule(function()
 			wanted = "Run"
 		end
 		if wanted ~= activeName then
-			if wanted then play(wanted) else stopAll() end
+			if wanted then
+				play(wanted)
+			else
+				stopAll()
+			end
 		elseif activeAnimator then
 			activeAnimator:Step(os.clock() - startedAt)
 		end
