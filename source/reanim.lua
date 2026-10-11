@@ -7553,6 +7553,7 @@ local function AddDance(m)
 		msname.Name = "LabelName"
 		msdesc.Name = "LabelDesc"
 		item.Parent.Name = m.Name .. " " .. m.Description
+		UpdateDanceListOrder()
 		UpdateDanceListVisibility()
 		Util.LinkDestroyI2C(item, item.Activated:Connect(function()
 			local page = UI.CreatePage()
