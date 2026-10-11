@@ -1670,10 +1670,10 @@ AddModule(function()
 		Jump = "JUMPDOG.anim",
 	}
 	local actions = {
-		{ key = "Idle", title = "Idle", position = UDim2.new(1, -230, 1, -130) },
-		{ key = "Sleep", title = "Sleep", position = UDim2.new(1, -180, 1, -130) },
-		{ key = "Sit", title = "Sit", position = UDim2.new(1, -130, 1, -130) },
-		{ key = "Dance", title = "Dance", position = UDim2.new(1, -200, 1, -220) },
+		{ key = "Idle", title = "Idle", input = Enum.KeyCode.I, position = UDim2.new(1, -230, 1, -130) },
+		{ key = "Sleep", title = "Sleep", input = Enum.KeyCode.Z, position = UDim2.new(1, -180, 1, -130) },
+		{ key = "Sit", title = "Sit", input = Enum.KeyCode.X, position = UDim2.new(1, -130, 1, -130) },
+		{ key = "Dance", title = "Dance", input = Enum.KeyCode.C, position = UDim2.new(1, -200, 1, -220) },
 	}
 	local activeFigure
 	local activeName
@@ -1728,7 +1728,7 @@ AddModule(function()
 					end
 				end
 				return Enum.ContextActionResult.Sink
-			end, true, Enum.KeyCode.Unknown)
+			end, true, action.input)
 			ContextActionService:SetTitle(actionName, action.title)
 			ContextActionService:SetPosition(actionName, action.position)
 		end
