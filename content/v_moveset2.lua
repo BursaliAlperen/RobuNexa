@@ -5605,7 +5605,7 @@ AddModule(function()
 	m.ModuleType = "MOVESET"
 	m.Name = "Linked Sword"
 	m.InternalName = "SORETROGUY"
-	m.Description = "He has been fighting since 2006!\nM1 - Linked Sword\nZ - Superball\nX - Rocket Launcher\nC - Timebomb"
+	m.Description = "Linked Sword\nM1 - Sword combo only"
 	m.Assets = {}
 
 	m.Notifications = true
@@ -5662,20 +5662,6 @@ AddModule(function()
 		return workspace:Raycast(origin, direction, rcp)
 	end
 	local mouse = Player:GetMouse()
-	local function MouseHit()
-		local Camera = workspace.CurrentCamera
-		local ray = mouse.UnitRay
-		if UserInputService.TouchEnabled and Camera then
-			local pos = Camera.ViewportSize * Vector2.new(0.5, 0.3)
-			ray = Camera:ViewportPointToRay(pos.X, pos.Y, 1e-6)
-		end
-		local dist = 2000
-		local raycast = ShootRaycast(ray.Origin, ray.Direction * dist)
-		if raycast then
-			return raycast.Position
-		end
-		return ray.Origin + ray.Direction * dist
-	end
 	local function CreateSound(id, pitch, extra)
 		if not m.Sounds then return end
 		if not torso then return end
@@ -5698,13 +5684,6 @@ AddModule(function()
 		sound.Ended:Connect(function()
 			sound:Destroy()
 		end)
-	end
-	local function AimTowards(target)
-		if not root then return end
-		if flight then return end
-		local tcf = CFrame.lookAt(root.Position, target)
-		local _,off,_ = root.CFrame:ToObjectSpace(tcf):ToEulerAngles(Enum.RotationOrder.YXZ)
-		root.AssemblyAngularVelocity = Vector3.new(0, off, 0) * 60
 	end
 	local function Attack(cf, size)
 		if m.HitboxDebug then
@@ -5810,10 +5789,6 @@ AddModule(function()
 		sw = CFrame.identity,
 	}
 	local sword = {}
-	local rocket = {}
-	local superball = {}
-	local timebomb = {}
-	local bullet = {}
 	local attacking = false
 	local timingsine = 0
 	local animationOverride = nil
@@ -5927,114 +5902,8 @@ AddModule(function()
 			lht = CFrame.new(-0.614, -2, -0.011, 1, 0, 0, 0, 1, 0, 0, 0, 1)
 			return rt, nt, rst, lst, rht, lht, 16
 		end,
-		superball1 = function(timingsine, rt, nt, rst, lst, rht, lht)
-			AimTowards(MouseHit())
-			rt = CFrame.new(-0.014, 0.023, 0.020, 0.642, 0, 0.766, 0, 1, 0, -0.766, 0, 0.642)
-			nt = CFrame.new(0, 1.499, 0, 0.609, 0, -0.792, 0, 1, 0, 0.792, 0, 0.609)
-			rst = CFrame.new(1.7, 0.078, 0.291, 0.98, -0.19, -0.036, 0.192, 0.924, 0.329, -0.029, -0.33, 0.943)
-			lst = CFrame.new(-1.939, 0.331, -0.314, 0.117, 0.856, -0.502, -0.987, 0.048, -0.147, -0.101, 0.513, 0.851)
-			rht = CFrame.new(0.596, -2.044, 0.245, 0.999, 0.005, -0.003, -0.004, 0.951, 0.308, 0.005, -0.308, 0.951)
-			lht = CFrame.new(-0.699, -2, 0.021, 0.984, 0, 0.173, 0, 1, 0, -0.173, 0, 0.984)
-			return rt, nt, rst, lst, rht, lht, 16
-		end,
-		superball2 = function(timingsine, rt, nt, rst, lst, rht, lht)
-			AimTowards(MouseHit())
-			rt = CFrame.new(-0.014, 0.023, 0.020, 0.642, 0, -0.766, 0, 1, 0, 0.766, 0, 0.642)
-			nt = CFrame.new(0, 1.499, 0, 0.674, 0, 0.737, 0, 1, 0, -0.737, 0, 0.674)
-			rst = CFrame.new(1.674, 0.116, -0.235, 0.935, -0.291, 0.198, 0.329, 0.924, -0.192, -0.127, 0.245, 0.96)
-			lst = CFrame.new(-1.586, 0.765, -0.846, -0.12, 0.321, -0.939, -0.987, -0.131, 0.081, -0.097, 0.937, 0.333)
-			rht = CFrame.new(0.766, -1.96, -0.107, 0.976, -0.137, 0.168, 0.138, 0.99, 0.004, -0.167, 0.018, 0.985)
-			lht = CFrame.new(-0.403, -1.999, -0.061, 0.984, 0, 0.173, 0, 1, 0, -0.173, 0, 0.984)
-			return rt, nt, rst, lst, rht, lht, 16
-		end,
-		rocket1 = function(timingsine, rt, nt, rst, lst, rht, lht)
-			rt = CFrame.new(-0.014, 0.023, 0.020, 1, 0, 0, 0, 0.984, 0.173, 0, -0.173, 0.984)
-			nt = CFrame.new(0.015, 1.552, -0.091, 0.999, 0.018, -0.038, -0.007, 0.965, 0.258, 0.042, -0.258, 0.965)
-			rst = CFrame.new(1.287, 0.004, -0.065, 0.89, 0.23, -0.393, -0.298, 0.946, -0.12, 0.344, 0.225, 0.911)
-			lst = CFrame.new(-1.595, 0.053, -0.298, 0.986, 0.153, -0.064, -0.162, 0.801, -0.576, -0.036, 0.578, 0.814)
-			rht = CFrame.new(0.573, -1.805, -0.374, 0.999, -0.037, 0.013, 0.039, 0.981, -0.187, -0.006, 0.188, 0.982)
-			lht = CFrame.new(-0.433, -1.951, 0.175, 1, 0, 0, 0, 0.984, 0.173, 0, -0.173, 0.984)
-			return rt, nt, rst, lst, rht, lht, 16
-		end,
-		rocket2 = function(timingsine, rt, nt, rst, lst, rht, lht)
-			AimTowards(MouseHit())
-			rt = CFrame.new(-0.014, -1.088, 0.020, 1, 0, 0, 0, 0.984, 0.173, 0, -0.173, 0.984)
-			nt = CFrame.new(0.015, 1.552, -0.091, 0.999, 0.018, -0.038, -0.007, 0.965, 0.258, 0.042, -0.258, 0.965)
-			rst = CFrame.new(0.428, 0.573, -1.086, 0.629, 0.736, -0.245, -0.133, -0.208, -0.968, -0.765, 0.642, -0.033)
-			lst = CFrame.new(-1.24, 0.563, -0.472, 0.974, -0.15, -0.165, -0.176, -0.068, -0.981, 0.136, 0.986, -0.093)
-			rht = CFrame.new(0.542, -1.055, -0.494, 0.999, -0.039, 0.007, 0.039, 0.999, -0.014, -0.006, 0.014, 0.999)
-			lht = CFrame.new(-0.433, -1.479, 0.259, 1, 0, 0, 0, 0.173, 0.984, 0, -0.984, 0.173)
-			return rt, nt, rst, lst, rht, lht, 16
-		end,
-		rocket3 = function(timingsine, rt, nt, rst, lst, rht, lht)
-			AimTowards(MouseHit())
-			rt = CFrame.new(-0.014, -1.088, 0.020, 1, 0, 0, 0, 0.984, -0.173, 0, 0.173, 0.984)
-			nt = CFrame.new(-0.015, 1.613, 0.079, 0.999, -0.011, -0.041, 0.007, 0.996, -0.087, 0.042, 0.086, 0.995)
-			rst = CFrame.new(0.489, 0.316, -1.246, 0.629, 0.683, -0.369, -0.387, -0.136, -0.911, -0.673, 0.717, 0.178)
-			lst = CFrame.new(-1.24, 0.367, -0.636, 0.974, -0.198, -0.103, -0.119, -0.070, -0.99, 0.188, 0.977, -0.092)
-			rht = CFrame.new(0.542, -1.161, -0.103, 0.999, -0.039, 0.007, 0.034, 0.943, 0.328, -0.019, -0.327, 0.944)
-			lht = CFrame.new(-0.433, -1.302, 0.749, 1, 0, 0, 0, -0.173, 0.984, 0, -0.984, -0.173)
-			return rt, nt, rst, lst, rht, lht, 16
-		end,
-		timebomb1 = function(timingsine, rt, nt, rst, lst, rht, lht)
-			rt = CFrame.new(-0.014, 0.023, 0.020, 0.642, 0, 0.766, 0, 1, 0, -0.766, 0, 0.642)
-			nt = CFrame.new(0, 1.499, 0, 0.609, 0, -0.792, 0, 1, 0, 0.792, 0, 0.609)
-			rst = CFrame.new(1.7, 0.078, 0.291, 0.98, -0.19, -0.036, 0.192, 0.924, 0.329, -0.029, -0.33, 0.943)
-			lst = CFrame.new(-1.668, 0.166, -0.183, 0.845, 0.182, -0.502, -0.291, 0.945, -0.147, 0.447, 0.27, 0.851)
-			rht = CFrame.new(0.596, -2.044, 0.245, 0.999, 0.005, -0.003, -0.004, 0.951, 0.308, 0.005, -0.308, 0.951)
-			lht = CFrame.new(-0.699, -2, 0.021, 0.984, 0, 0.173, 0, 1, 0, -0.173, 0, 0.984)
-			return rt, nt, rst, lst, rht, lht, 16
-		end,
-		timebomb2 = function(timingsine, rt, nt, rst, lst, rht, lht)
-			rt = CFrame.new(-0.014, 0.023, 0.020, 0.642, 0, -0.766, 0, 1, 0, 0.766, 0, 0.642)
-			nt = CFrame.new(0, 1.499, 0, 0.674, 0, 0.737, 0, 1, 0, -0.737, 0, 0.674)
-			rst = CFrame.new(1.674, 0.116, -0.235, 0.935, -0.291, 0.198, 0.329, 0.924, -0.192, -0.127, 0.245, 0.96)
-			lst = CFrame.new(-1.53, 0.231, -0.558, 0.939, 0.343, -0.002, -0.081, 0.213, -0.973, -0.333, 0.914, 0.228)
-			rht = CFrame.new(0.766, -1.96, -0.107, 0.976, -0.137, 0.168, 0.138, 0.99, 0.004, -0.167, 0.018, 0.985)
-			lht = CFrame.new(-0.403, -1.999, -0.061, 0.984, 0, 0.173, 0, 1, 0, -0.173, 0, 0.984)
-			return rt, nt, rst, lst, rht, lht, 16
-		end,
+
 	}
-	local function createhatmap(mlist, tbl)
-		table.clear(tbl)
-		for _,v in string.split(mlist, "|") do
-			if #v > 0 then
-				local w = string.split(v, ",")
-				if #w == 14 then
-					local ref = {
-						MeshId = w[1]:gsub("^%s*(.-)%s*$", "%1"), TextureId = w[2]:gsub("^%s*(.-)%s*$", "%1"),
-						C0 = CFrame.identity,
-						C1 = CFrame.new(
-							tonumber(w[3]),
-							tonumber(w[4]),
-							tonumber(w[5]),
-							tonumber(w[6]),
-							tonumber(w[7]),
-							tonumber(w[8]),
-							tonumber(w[9]),
-							tonumber(w[10]),
-							tonumber(w[11]),
-							tonumber(w[12]),
-							tonumber(w[13]),
-							tonumber(w[14])
-						),
-					}
-					table.insert(HatReanimator.HatCFrameOverride, ref)
-					table.insert(tbl, ref)
-				end
-			end
-		end
-	end
-	local function sethatmaplimbname(tbl, limbname)
-		for _,v in tbl do
-			v.Limb = limbname
-		end
-	end
-	local function sethatmapcframe(tbl, cf)
-		for _,v in tbl do
-			v.C0 = cf
-		end
-	end
 	local function CreatePart(cf, size, color, material, transp, reflec)
 		local rng = Instance.new("Part", workspace)
 		rng.Anchored = true
@@ -6076,27 +5945,12 @@ AddModule(function()
 		end)
 		return part
 	end
-	local function Explosion(position, radius)
-		radius = radius or 14
-		local radius2 = radius * (8 / 14)
-		local base = MagicSphere(Vector3.zero, 300, CFrame.new(position), Color3.new(1, 0, 0), Vector3.zero, Vector3.zero, 1)
-		MagicSphere(Vector3.one * radius2, 30, CFrame.new(position), Color3.new(1, 0, 0), Vector3.zero)
-		MagicSphere(Vector3.one * radius2, 5, CFrame.new(position), Color3.new(1, 0, 0), Vector3.one * radius2 / 4)
-		CreateSound(base, "169628396")
-		Attack(CFrame.new(position), Vector3.one * radius)
-	end
 	local function SliceEffect(targets)
 		for _,v in targets do
 			CreateSound(v, "851453784")
 			for _=1, 5 do
 				MagicSphere(Vector3.new(1, 0, 0.1), 10, v.CFrame * CFrame.Angles(math.random() * math.pi * 2, math.random() * math.pi * 2, math.random() * math.pi * 2), Color3.new(1, 1, 1), Vector3.new(2, 0.01, 0.1))
 			end
-		end
-	end
-	local function BonkedEffect(targets)
-		for _,v in targets do
-			CreateSound(v, "140626490819228", 1, 2)
-			MagicSphere(Vector3.one, 30, v.CFrame, Color3.new(1, 1, 1), Vector3.one * 0.15)
 		end
 	end
 	local function MeleeHitbox(part, dur, cf, size)
@@ -6116,10 +5970,7 @@ AddModule(function()
 			until os.clock() - s > dur
 		end)
 	end
-	local LinkedSword_index = 1
-	local BulletReference = nil
-	local SuperballReference = nil
-	local TimebombReference = nil
+	local LinkedSword_index = 0
 	local function LinkedSword()
 		if not m.IgnoreDancing then
 			if isdancing then return end
@@ -6195,191 +6046,12 @@ AddModule(function()
 			attacking = false
 		end)
 	end
-	local function Superball()
-		if not m.IgnoreDancing then
-			if isdancing then return end
-		end
-		if attacking and not m.NoCooldown then return end
-		if not root or not hum or not torso then return end
-		local rootu = root
-		local larm = rootu.Parent:FindFirstChild("Left Arm")
-		if not larm then return end
-		attacking = true
-		task.spawn(function()
-			animationOverride = lerps.superball1
-			local proj = CreatePart(CFrame.identity, Vector3.one * 2, Color3.new(1, 0, 0), "Plastic", 0, 0.4)
-			proj.Shape = "Ball"
-			SuperballReference = proj
-			local s = os.clock()
-			repeat
-				proj.CFrame = larm.CFrame * CFrame.new(0, -1 * scale - 1, 0)
-				task.wait()
-				if not rootu:IsDescendantOf(workspace) then
-					proj:Destroy()
-					return
-				end
-			until os.clock() - s >= 0.3
-			CreateSound("12222124")
-			local target = MouseHit()
-			local speed = 200
-			local aim = target - proj.Position
-			proj.Velocity = aim.Unit * speed
-			task.spawn(function()
-				local s = os.clock()
-				local oldpos = proj.Position
-				repeat
-					local dt = task.wait()
-					local raycast = PhysicsRaycast(proj.Position, proj.Velocity * dt)
-					if raycast then
-						CreateSound(proj, "112503990")
-						proj.Position = raycast.Position
-						proj.Velocity += raycast.Normal * raycast.Normal:Dot(-proj.Velocity) * 2
-					else
-						proj.Position += proj.Velocity * dt
-					end
-					BonkedEffect(Attack(CFrame.lookAt((proj.Position + oldpos) / 2, proj.Position), Vector3.new(3, 3, (proj.Position - oldpos).Magnitude)))
-					oldpos = proj.Position
-				until os.clock() - s > 2 or not rootu:IsDescendantOf(workspace)
-				proj:Destroy()
-			end)
-			animationOverride = lerps.superball2
-			task.wait(0.16)
-			if not rootu:IsDescendantOf(workspace) then
-				return
-			end
-			animationOverride = nil
-			attacking = false
-		end)
-	end
-	local function RocketLauncher()
-		if not m.IgnoreDancing then
-			if isdancing then return end
-		end
-		if attacking and not m.NoCooldown then return end
-		if not root or not hum or not torso then return end
-		local rootu = root
-		local larm = rootu.Parent:FindFirstChild("Left Arm")
-		if not larm then return end
-		attacking = true
-		freezemove = true
-		task.spawn(function()
-			rocket.Disable = false
-			animationOverride = lerps.rocket1
-			task.wait(0.16)
-			if not rootu:IsDescendantOf(workspace) then
-				return
-			end
-			animationOverride = lerps.rocket2
-			task.wait(0.5)
-			if not rootu:IsDescendantOf(workspace) then
-				return
-			end
-			CreateForce(rootu, rootu.CFrame.LookVector * -20, 0.25)
-			local proj = CreatePart(CFrame.lookAt(rootu.CFrame * Vector3.new(0, 0, -6), MouseHit()), Vector3.new(1, 1, 4), Color3.new(0.05, 0.41, 0.67), "Plastic", 0, 0)
-			BulletReference = proj
-			CreateSound(proj, "31761785")
-			proj.Velocity = proj.CFrame.LookVector * 100
-			task.spawn(function()
-				local s = os.clock()
-				local oldpos = proj.Position
-				repeat
-					local dt = task.wait()
-					local raycast = PhysicsRaycast(proj.Position, proj.Velocity * dt)
-					if raycast then
-						Explosion(proj.Position, 14)
-						break
-					end
-					proj.Position += proj.Velocity * dt
-					local hits = Attack(CFrame.lookAt((proj.Position + oldpos) / 2, proj.Position), Vector3.new(1, 1, (proj.Position - oldpos).Magnitude + 4))
-					if #hits > 0 then
-						Explosion(proj.Position, 14)
-						break
-					end
-					oldpos = proj.Position
-				until os.clock() - s > 2 or not rootu:IsDescendantOf(workspace)
-				proj:Destroy()
-			end)
-			animationOverride = lerps.rocket3
-			task.wait(0.3)
-			if not rootu:IsDescendantOf(workspace) then
-				return
-			end
-			rocket.Disable = true
-			animationOverride = nil
-			attacking = false
-			freezemove = false
-		end)
-	end
-	local function Timebomb()
-		if not m.IgnoreDancing then
-			if isdancing then return end
-		end
-		if attacking and not m.NoCooldown then return end
-		if not root or not hum or not torso then return end
-		local rootu = root
-		local larm = rootu.Parent:FindFirstChild("Left Arm")
-		if not larm then return end
-		attacking = true
-		task.spawn(function()
-			animationOverride = lerps.timebomb1
-			local proj = CreatePart(CFrame.identity, Vector3.one, Color3.new(0.1, 0.16, 0.2), "Plastic", 0, 0)
-			CreateSound(proj, "11565378")
-			local mesh = Instance.new("SpecialMesh", proj)
-			mesh.MeshType = "FileMesh"
-			mesh.MeshId = "rbxasset://fonts/timebomb.mesh"
-			mesh.TextureId = "rbxasset://textures/bombtex.png"
-			TimebombReference = proj
-			local s = os.clock()
-			repeat
-				proj.CFrame = larm.CFrame * CFrame.new(0, -1 * scale - 1, 0)
-				task.wait()
-				if not rootu:IsDescendantOf(workspace) then
-					proj:Destroy()
-					return
-				end
-			until os.clock() - s >= 0.3
-			animationOverride = lerps.timebomb2
-			local s = os.clock()
-			repeat
-				proj.CFrame = larm.CFrame * CFrame.new(0, -1 * scale - 1, 0)
-				task.wait()
-				if not rootu:IsDescendantOf(workspace) then
-					proj:Destroy()
-					return
-				end
-			until os.clock() - s >= 0.08
-			proj.CFrame = rootu.CFrame * CFrame.new(0, 0, -3)
-			proj.Anchored = false
-			proj.CanCollide = true
-			proj.Velocity = rootu.CFrame.LookVector * 50
-			task.spawn(function()
-				local s = os.clock()
-				repeat task.wait()
-					if not rootu:IsDescendantOf(workspace) then
-						proj:Destroy()
-						return
-					end
-				until os.clock() - s > 4
-				Explosion(proj.Position, 30)
-				proj:Destroy()
-			end)
-			task.wait(0.08)
-			if not rootu:IsDescendantOf(workspace) then
-				return
-			end
-			animationOverride = nil
-			attacking = false
-		end)
-	end
 	m.Init = function(figure)
 		start = os.clock()
 		timingsine = 0
 		attacking = false
 		freezemove = false
 		animationOverride = nil
-		BulletReference = nil
-		SuperballReference = nil
-		TimebombReference = nil
 		hum = figure:FindFirstChild("Humanoid")
 		root = figure:FindFirstChild("HumanoidRootPart")
 		torso = figure:FindFirstChild("Torso")
@@ -6391,49 +6063,6 @@ AddModule(function()
 			Limb = "Right Arm",
 			Offset = CFrame.identity
 		}
-		rocket = {
-			Group = "Gun",
-			Limb = "Left Arm",
-			Offset = CFrame.new(0, -0.7, -0.4) * CFrame.Angles(3.14, 0, 0),
-			Disable = true
-		}
-		bullet = {
-			Group = "Bullet",
-			CFrame = CFrame.identity
-		}
-		table.insert(HatReanimator.HatCFrameOverride, sword)
-		table.insert(HatReanimator.HatCFrameOverride, rocket)
-		table.insert(HatReanimator.HatCFrameOverride, bullet)
-		createhatmap(LINKEDSWORD_HATMAP_BALL, superball)
-		createhatmap(LINKEDSWORD_HATMAP_BOMB, timebomb)
-		ContextActions:BindAction("Uhhhhhh_LSSword", function(_, state, _)
-			if state == Enum.UserInputState.Begin then
-				LinkedSword()
-			end
-		end, true, Enum.UserInputType.MouseButton1)
-		ContextActions:SetTitle("Uhhhhhh_LSSword", "M1")
-		ContextActions:SetPosition("Uhhhhhh_LSSword", UDim2.new(1, -130, 1, -130))
-		ContextActions:BindAction("Uhhhhhh_LSBall", function(_, state, _)
-			if state == Enum.UserInputState.Begin then
-				Superball()
-			end
-		end, true, Enum.KeyCode.Z)
-		ContextActions:SetTitle("Uhhhhhh_LSBall", "Z")
-		ContextActions:SetPosition("Uhhhhhh_LSBall", UDim2.new(1, -180, 1, -130))
-		ContextActions:BindAction("Uhhhhhh_LSRocket", function(_, state, _)
-			if state == Enum.UserInputState.Begin then
-				RocketLauncher()
-			end
-		end, true, Enum.KeyCode.X)
-		ContextActions:SetTitle("Uhhhhhh_LSRocket", "X")
-		ContextActions:SetPosition("Uhhhhhh_LSRocket", UDim2.new(1, -230, 1, -130))
-		ContextActions:BindAction("Uhhhhhh_LSBomb", function(_, state, _)
-			if state == Enum.UserInputState.Begin then
-				Timebomb()
-			end
-		end, true, Enum.KeyCode.C)
-		ContextActions:SetTitle("Uhhhhhh_LSBomb", "C")
-		ContextActions:SetPosition("Uhhhhhh_LSBomb", UDim2.new(1, -280, 1, -130))
 		if chatconn then
 			chatconn:Disconnect()
 		end
@@ -6521,45 +6150,10 @@ AddModule(function()
 		sword.Offset = joints.sw:Inverse() * CFrame.Angles(1.57, 0, 1.57)
 		sword.Disable = not not isdancing or freezemove
 		
-		-- superball
-		if SuperballReference and not SuperballReference:IsDescendantOf(workspace) then
-			SuperballReference = nil
-		end
-		if SuperballReference then
-			sethatmaplimbname(superball, nil)
-			sethatmapcframe(superball, SuperballReference.CFrame)
-		else
-			sethatmaplimbname(superball, "Torso")
-			sethatmapcframe(superball, CFrame.new(-1, -1, 0.5))
-		end
-		
-		-- bullet
-		if BulletReference and not BulletReference:IsDescendantOf(workspace) then
-			BulletReference = nil
-		end
-		if BulletReference then
-			bullet.CFrame = BulletReference.CFrame
-		else
-			bullet.CFrame = root.CFrame + Vector3.new(0, -18, 0)
-		end
-		
-		-- timebomb
-		if TimebombReference and not TimebombReference:IsDescendantOf(workspace) then
-			TimebombReference = nil
-		end
-		if TimebombReference then
-			sethatmaplimbname(timebomb, nil)
-			sethatmapcframe(timebomb, TimebombReference.CFrame)
-		else
-			sethatmaplimbname(timebomb, "Torso")
-			sethatmapcframe(timebomb, CFrame.new(-1, -1, -0.5))
-		end
+
 	end
 	m.Destroy = function(figure: Model?)
 		ContextActions:UnbindAction("Uhhhhhh_LSSword")
-		ContextActions:UnbindAction("Uhhhhhh_LSBall")
-		ContextActions:UnbindAction("Uhhhhhh_LSRocket")
-		ContextActions:UnbindAction("Uhhhhhh_LSBomb")
 		root, torso, hum = nil, nil, nil
 	end
 	return m
