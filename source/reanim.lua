@@ -7552,6 +7552,19 @@ local function AddDance(m)
 		local msdesc = UI.CreateText(item, string.split(m.Description, "\n")[1], 12, Enum.TextXAlignment.Left)
 		msname.Name = "LabelName"
 		msdesc.Name = "LabelDesc"
+		local favoriteRowButton, favoriteRowText = UI.CreateButton(item, "", 14)
+		local function RefreshRowFavoriteState()
+			local isFavorite = SaveData.FavoriteDances[m._NAMFavoriteKey]
+			favoriteRowText.Text = isFavorite and "★ FAVORITED — TAP TO REMOVE" or "☆ ADD TO FAVORITES"
+			msname.Text = (isFavorite and "[FAV] " or "") .. m.Name .. " &gt;"
+		end
+		RefreshRowFavoriteState()
+		favoriteRowButton.Activated:Connect(function()
+			SaveData.FavoriteDances[m._NAMFavoriteKey] = not SaveData.FavoriteDances[m._NAMFavoriteKey]
+			RefreshRowFavoriteState()
+			UpdateDanceListOrder()
+			UpdateDanceListVisibility()
+		end)
 		item.Parent.Name = m.Name .. " " .. m.Description
 		UpdateDanceListOrder()
 		UpdateDanceListVisibility()
@@ -7580,7 +7593,7 @@ local function AddDance(m)
 			local function RefreshDanceFavoriteState()
 				local isFavorite = SaveData.FavoriteDances[m._NAMFavoriteKey]
 				favoriteButtonText.Text = isFavorite and "REMOVE FROM FAVORITES" or "ADD TO FAVORITES"
-				msname.Text = (isFavorite and "[FAV] " or "") .. m.Name .. " &gt;"
+				RefreshRowFavoriteState()
 			end
 			RefreshDanceFavoriteState()
 			favoriteButton.Activated:Connect(function()
