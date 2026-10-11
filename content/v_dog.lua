@@ -7,10 +7,12 @@ AddModule(function()
 	m.Description = "Dog movement pack with local Sleep, Sit and Dance animations."
 	m.Assets = {
 		"DANCEDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/DANCEDAWG.anim",
+		"DOGRUN.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/DOGRUN.anim",
+		"JUMPDOG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/JUMPDOG.anim",
 		"SITDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SITDAWG.anim",
 		"Sleepp.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Sleepp.anim",
 	}
-	local animationFiles = { Sleep = "Sleepp.anim", Sit = "SITDAWG.anim", Dance = "DANCEDAWG.anim" }
+	local animationFiles = { Sleep = "Sleepp.anim", Sit = "SITDAWG.anim", Dance = "DANCEDAWG.anim", Run = "DOGRUN.anim", Jump = "JUMPDOG.anim" }
 	local activeFigure
 	local activeName
 	local activeAnimator
@@ -83,7 +85,20 @@ AddModule(function()
 	end
 	m.Update = function(dt: number, figure: Model)
 		activeFigure = figure
-		if activeAnimator and activeName then
+		local humanoid = figure:FindFirstChildOfClass("Humanoid")
+		if activeName == "Sleep" or activeName == "Sit" or activeName == "Dance" then
+			if activeAnimator then activeAnimator:Step(os.clock() - startedAt) end
+			return
+		end
+		local wanted
+		if humanoid and humanoid.Jump then
+			wanted = "Jump"
+		elseif humanoid and humanoid.MoveDirection.Magnitude > 0.05 then
+			wanted = "Run"
+		end
+		if wanted ~= activeName then
+			if wanted then play(wanted) else stopAll() end
+		elseif activeAnimator then
 			activeAnimator:Step(os.clock() - startedAt)
 		end
 	end
