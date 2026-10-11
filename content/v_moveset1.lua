@@ -1673,11 +1673,11 @@ AddModule(function()
 		Jump = "JUMPDOG.anim",
 	}
 	local actions = {
-		{ key = "Sleep", title = "Sleep", input = Enum.KeyCode.Z, position = UDim2.new(1, -190, 1, -130) },
-		{ key = "Sit", title = "Sit", input = Enum.KeyCode.X, position = UDim2.new(1, -140, 1, -130) },
-		{ key = "Dance", title = "Dance", input = Enum.KeyCode.C, position = UDim2.new(1, -240, 1, -130) },
-		{ key = "Walk", title = "Walk", input = Enum.KeyCode.V, position = UDim2.new(1, -190, 1, -190) },
-		{ key = "Run", title = "Run", input = Enum.KeyCode.B, position = UDim2.new(1, -140, 1, -190) },
+		{ key = "Sleep", title = "Sleep", input = Enum.KeyCode.Z, position = UDim2.new(1, -190, 0, 150) },
+		{ key = "Sit", title = "Sit", input = Enum.KeyCode.X, position = UDim2.new(1, -140, 0, 150) },
+		{ key = "Dance", title = "Dance", input = Enum.KeyCode.C, position = UDim2.new(1, -240, 0, 150) },
+		{ key = "Walk", title = "Walk", input = Enum.KeyCode.V, position = UDim2.new(1, -190, 0, 210) },
+		{ key = "Run", title = "Run", input = Enum.KeyCode.B, position = UDim2.new(1, -140, 0, 210) },
 	}
 	local activeFigure
 	local activeName
