@@ -32,8 +32,8 @@ AddModule(function()
  local originalSpeed, originalFov, originalClock
  local spawned = {}
  local busy = false
- local keys = {WorldCut="Z", Rush="X", Furnance="C", Laugh="V"}
- local abilityNames = {WorldCut="Dismantle", Rush="Rush", Furnance="Fuuga", Laugh="Laugh"}
+ local keys = {Awaken="Z", Shrine="X", Furnance="C", WorldCut="V", Rush="B", Laugh="N"}
+ local abilityNames = {Awaken="Awaken", Shrine="Malevolent Shrine", WorldCut="Dismantle", Rush="Rush", Furnance="Fuuga", Laugh="Laugh"}
 
  local function findDeep(parent, name)
   return parent and parent:FindFirstChild(name, true)
@@ -256,7 +256,7 @@ AddModule(function()
   local layout=Instance.new("UIListLayout"); layout.FillDirection=Enum.FillDirection.Horizontal
   layout.HorizontalAlignment=Enum.HorizontalAlignment.Left; layout.VerticalAlignment=Enum.VerticalAlignment.Center
   layout.Padding=UDim.new(0,5); layout.Parent=panel
-  for _,name in ipairs({"WorldCut","Rush","Furnance","Laugh"}) do
+  for _,name in ipairs({"Awaken","Shrine","Furnance","WorldCut","Rush","Laugh"}) do
    local button=Instance.new("TextButton"); button.Name=name.."Button"; button.Size=UDim2.new(0,100,0,34)
    button.BackgroundColor3=Color3.fromRGB(90,22,32); button.BorderSizePixel=0
    button.Text=abilityNames[name].." ["..keys[name].."]"; button.TextColor3=Color3.new(1,1,1)
@@ -281,9 +281,31 @@ AddModule(function()
   importModel("SukunaWorldSlash.rbxm")
   importModel("SukunaRushFX.rbxm")
   if inputConn then inputConn:Disconnect() end
+  -- BindAction's createTouchButton flag creates native mobile/virtual buttons.
+  -- Position each button in a compact right-side cluster, and unbind on teardown.
+  local buttonPositions = {
+   Awaken = UDim2.new(1, -250, 1, -310),
+   Shrine = UDim2.new(1, -175, 1, -310),
+   Furnance = UDim2.new(1, -100, 1, -310),
+   WorldCut = UDim2.new(1, -250, 1, -235),
+   Rush = UDim2.new(1, -175, 1, -235),
+   Laugh = UDim2.new(1, -100, 1, -235),
+  }
+  for name, key in pairs(keys) do
+   local bindName = "RobuNexa_Sukuna_" .. name
+   ContextActionService:UnbindAction(bindName)
+   ContextActionService:BindAction(bindName, function(_, state)
+    if state == Enum.UserInputState.Begin then activate(name) end
+    return Enum.ContextActionResult.Sink
+   end, true, Enum.KeyCode[key])
+   ContextActionService:SetTitle(bindName, abilityNames[name] or name)
+   ContextActionService:SetPosition(bindName, buttonPositions[name])
+  end
   inputConn=UIS.InputBegan:Connect(function(input,processed)
    if processed then return end
-   for name,key in pairs(keys) do if input.KeyCode.Name==key then activate(name); break end end
+   for name,key in pairs(keys) do
+    if input.KeyCode.Name==key then activate(name); break end
+   end
   end)
  end
  m.Update = function(dt: number, figure: Model)
@@ -292,6 +314,9 @@ AddModule(function()
  end
  m.Destroy = function(figure: Model?)
   if inputConn then inputConn:Disconnect(); inputConn=nil end
+  for name in pairs(keys) do
+   ContextActionService:UnbindAction("RobuNexa_Sukuna_" .. name)
+  end
   stopAnimation()
   for _,obj in ipairs(spawned) do pcall(function() obj:Destroy() end) end
   table.clear(spawned)
