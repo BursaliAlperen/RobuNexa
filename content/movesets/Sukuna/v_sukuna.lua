@@ -848,10 +848,13 @@ AddModule(function()
         end
 
         local function getRootPosition()
+            -- The accessory is mapped onto the reanimated rig, so use that rig's root
+            -- for world-space HatCFrameOverride calculations.
+            local rigRoot = (activeFigure and resolveRoot(activeFigure)) or root
+            if rigRoot and rigRoot:IsA("BasePart") then return rigRoot.Position, rigRoot end
             local current = getLocalCharacter()
             local currentRoot = current and (current:FindFirstChild("HumanoidRootPart") or current.PrimaryPart)
             if currentRoot and currentRoot:IsA("BasePart") then return currentRoot.Position, currentRoot end
-            if root and root:IsA("BasePart") then return root.Position, root end
             return nil, nil
         end
 
@@ -897,7 +900,6 @@ AddModule(function()
         local meshId, textureId = getMeshTexture()
         local hatOverride
         if not HatReanimator or type(HatReanimator.HatCFrameOverride) ~= "table" then
-            marker = nil
             notify("Hat Reanimation bulunamadı; aksesuarı dünyaya sabitleyemiyorum.")
             return
         end
