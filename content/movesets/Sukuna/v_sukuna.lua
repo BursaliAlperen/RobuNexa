@@ -437,7 +437,7 @@ AddModule(function()
         for name, button in pairs(skillButtons) do
             if button and button.Parent then
                 local remaining = math.max(0, (abilityReadyAt[name] or 0) - os.clock())
-                button.Text = LABELS[name] .. "\\n" .. (remaining > 0 and string.format("%.1fs", remaining) or name)
+                button.Text = LABELS[name] .. "\n" .. (remaining > 0 and string.format("%.1fs", remaining) or name)
                 button.BackgroundColor3 = remaining > 0 and Color3.fromRGB(74, 35, 42) or Color3.fromRGB(43, 22, 30)
             end
         end
@@ -611,7 +611,7 @@ AddModule(function()
             button.BackgroundColor3 = Color3.fromRGB(43, 22, 30)
             button.BackgroundTransparency = 0.05
             button.BorderSizePixel = 0
-            button.Text = LABELS[name] .. "\\n" .. name
+            button.Text = LABELS[name] .. "\n" .. name
             button.TextColor3 = Color3.fromRGB(255, 239, 239)
             button.TextSize = 11
             button.Font = Enum.Font.GothamBold
