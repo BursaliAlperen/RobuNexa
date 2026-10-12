@@ -1,28 +1,18 @@
-# Sukuna Moveset
+# Sukuna Moveset — One-Finger / Cleave Focus
 
-This folder contains the Sukuna moveset module for RobuNexa / NAM.
+This NAM moveset is focused on the equipped Cleave accessory. It does not send chat messages and does not expose Domain or Fuuga abilities.
 
-## Strict accessory allowlist
+## Equipped accessory
 
-The moveset accepts only these seven catalog asset IDs; other equipped accessories are ignored by its target-matching logic:
+- Cleave accessory: `101090904148116`
+- The moveset only matches accessories already equipped on the character; it does not fetch catalog items or create replacement accessories.
 
-- Domain / Malevolent Shrine (active target): `18445594182`
-- Additional supplied asset: `131873641508713`
-- Sukuna's Finger (pickup check): `18762839664`
-- Legacy Shrine asset ID (allowlisted, not used as the active Domain target): `18726352770`
-- Fuga / Furnace: `124144353587446`
-- Cleave/Dismantle aura: `100475161263482`
-- Domain slash accessory: `97087028126781`
+## Abilities and cooldowns
 
-The moveset only matches accessories already equipped on the character; it does not fetch catalog items or create replacement accessories. The Finger check accepts the exact asset ID from the applied HumanoidDescription or supported accessory attributes, with an exact-name fallback for clients that omit ID metadata.
+- **Cleave** — primary slash animation and target marker; 2.25-second cooldown.
+- **Dismantle** — secondary slash; 3.5-second cooldown.
+- Cooldowns use `os.clock()` timestamps and repeated input is ignored while an ability is cooling down.
+- **Domain** and **Fuuga** are disabled; their buttons are not shown.
+- No chat announcements or finger-pickup chat system is started.
 
-## Current abilities
-
-- **Domain**: camera cutscene and a slow Shrine rise from underground; slash accessories move continuously while active.
-- **Cleave**: short, faster slash burst.
-- **Dismantle**: a second short slash burst.
-- **Fuuga**: flame-arrow visual prototype.
-
-## Finger pickup prototype limitation
-
-The eleven spinning finger pickups and their chat messages are currently client-local. A real shared-world collection system requires server-side scripts in the Roblox experience so every player sees the same spawn positions and the server validates collection.
+The moveset uses NAM's bundled `.anim` loader and the currently equipped accessory. Visibility of client-side visuals to other players depends on Roblox replication and the execution environment.
