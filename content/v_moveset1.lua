@@ -1654,7 +1654,7 @@ AddModule(function()
 	local m = {}
 	m.ModuleType = "MOVESET"
 	m.Name = "dog"
-	m.Description = "Dog movement pack: Sleep, Sit, Dance, Walk and Run. Moving cancels emotes."
+	m.Description = "Dog movement pack: Sleep, Sit, Dance and a Walk/Run toggle. Moving cancels emotes."
 	m.Assets = {
 		"DANCEDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/DANCEDAWG.anim",
 		"DOGRUN.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/DOGRUN.anim",
@@ -1673,11 +1673,10 @@ AddModule(function()
 		Jump = "JUMPDOG.anim",
 	}
 	local actions = {
-		{ key = "Sleep", title = "Sleep", input = Enum.KeyCode.Z, position = UDim2.new(1, -190, 0, 150) },
-		{ key = "Sit", title = "Sit", input = Enum.KeyCode.X, position = UDim2.new(1, -140, 0, 150) },
-		{ key = "Dance", title = "Dance", input = Enum.KeyCode.C, position = UDim2.new(1, -240, 0, 150) },
-		{ key = "Walk", title = "Walk", input = Enum.KeyCode.V, position = UDim2.new(1, -190, 0, 210) },
-		{ key = "Run", title = "Run", input = Enum.KeyCode.B, position = UDim2.new(1, -140, 0, 210) },
+		{ key = "Sleep", title = "Sleep", input = Enum.KeyCode.Z, position = UDim2.new(1, -190, 0, 65) },
+		{ key = "Sit", title = "Sit", input = Enum.KeyCode.X, position = UDim2.new(1, -140, 0, 65) },
+		{ key = "Dance", title = "Dance", input = Enum.KeyCode.C, position = UDim2.new(1, -240, 0, 65) },
+		{ key = "MoveMode", title = "Walk", input = Enum.KeyCode.V, secondaryInput = Enum.KeyCode.B, position = UDim2.new(1, -190, 0, 125) },
 	}
 	local activeFigure
 	local activeName
@@ -1734,10 +1733,12 @@ AddModule(function()
 		boundActions = true
 		for _, action in ipairs(actions) do
 			local actionName = "NAM_Dog_" .. action.key
-			ContextActionService:BindAction(actionName, function(_, state)
+			local function onAction(_, state)
 				if state == Enum.UserInputState.Begin then
-					if action.key == "Walk" or action.key == "Run" then
-						setMovementMode(action.key)
+					if action.key == "MoveMode" then
+						local nextMode = (movementMode == "Walk") and "Run" or "Walk"
+						setMovementMode(nextMode)
+						ContextActionService:SetTitle(actionName, nextMode)
 						if activeName and EMOTES[activeName] then stopAll() end
 					elseif activeName == action.key then
 						stopAll()
@@ -1746,7 +1747,12 @@ AddModule(function()
 					end
 				end
 				return Enum.ContextActionResult.Sink
-			end, true, action.input)
+			end
+			if action.secondaryInput then
+				ContextActionService:BindAction(actionName, onAction, true, action.input, action.secondaryInput)
+			else
+				ContextActionService:BindAction(actionName, onAction, true, action.input)
+			end
 			ContextActionService:SetTitle(actionName, action.title)
 			ContextActionService:SetPosition(actionName, action.position)
 		end
