@@ -57,6 +57,7 @@ AddModule(function()
     local activateAbility
     local abilityCooldowns = {Domain = 12, Cleave = 3, Dismantle = 2.5, Fuuga = 8}
     local abilityReadyAt = {}
+    local abilityTargets = {}
     local targetMarker
     local fuugaTargetPosition
     local domainStartedAt = 0
@@ -479,25 +480,36 @@ AddModule(function()
         if domainEnabled then
             local rise = math.clamp((os.clock() - domainStartedAt) / 2.6, 0, 1)
             local eased = rise * rise * (3 - 2 * rise)
-            local shrinePosition = root.Position + root.CFrame.LookVector * -22 + Vector3.new(0, -18 + eased * 24, 0)
+            local target = abilityTargets.Domain or (root.Position + root.CFrame.LookVector * -22)
+            local shrinePosition = target + Vector3.new(0, -8 + eased * 14, 0)
             setHatWorldCFrame(18726352770,
-                CFrame.new(shrinePosition) * root.CFrame.Rotation * CFrame.Angles(0, math.rad(180), 0))
+                root.CFrame:ToObjectSpace(CFrame.new(shrinePosition) * root.CFrame.Rotation * CFrame.Angles(0, math.rad(180), 0)))
         else
             setHatWorldCFrame(18726352770,
                 hiddenCenter * CFrame.new(0, TARGETS[18726352770].hiddenHeight, 0))
         end
-        setHatWorldCFrame(124144353587446,
-            hiddenCenter * CFrame.new(0, TARGETS[124144353587446].hiddenHeight, 0))
+        if abilityTargets.Fuuga and fuugaBusy then
+            setHatWorldCFrame(124144353587446, root.CFrame:ToObjectSpace(CFrame.new(abilityTargets.Fuuga + Vector3.new(0, 3, 0))))
+        else
+            setHatWorldCFrame(124144353587446,
+                hiddenCenter * CFrame.new(0, TARGETS[124144353587446].hiddenHeight, 0))
+        end
 
         if active then
             local pulse = math.sin(t * rate)
+            local effectTarget = abilityTargets.Cleave or abilityTargets.Dismantle
+            if domainEnabled and abilityTargets.Domain then effectTarget = abilityTargets.Domain end
             local sweep = math.cos(t * rate * 1.13)
+            local leftTarget = abilityTargets.Cleave or effectTarget
+            local rightTarget = abilityTargets.Dismantle or effectTarget
             setHatWorldCFrame(100475161263482,
-                center * CFrame.new(pulse * (fast and 2.8 or 1.4), 1 + math.abs(pulse) * 1.2, sweep * (fast and 2.8 or 1.4))
-                    * CFrame.Angles(math.rad(pulse * 10), t * (fast and 3.5 or 0.45), math.rad(sweep * 8)))
+                leftTarget and root.CFrame:ToObjectSpace(CFrame.new(leftTarget + Vector3.new(pulse * 1.2, 2 + math.abs(pulse), sweep * 1.2)) * CFrame.Angles(0, t * 2, 0))
+                or (center * CFrame.new(pulse * (fast and 2.8 or 1.4), 1 + math.abs(pulse) * 1.2, sweep * (fast and 2.8 or 1.4))
+                    * CFrame.Angles(math.rad(pulse * 10), t * (fast and 3.5 or 0.45), math.rad(sweep * 8))))
             setHatWorldCFrame(97087028126781,
-                center * CFrame.new(sweep * (fast and 3.5 or 1.8), 2.5 + pulse, pulse * (fast and 3.5 or 1.8))
-                    * CFrame.Angles(math.rad(sweep * 18), t * (fast and 8 or 1.1), math.rad(pulse * 15)))
+                rightTarget and root.CFrame:ToObjectSpace(CFrame.new(rightTarget + Vector3.new(sweep * 1.2, 2.5 + pulse, pulse * 1.2)) * CFrame.Angles(0, t * 3, 0))
+                or (center * CFrame.new(sweep * (fast and 3.5 or 1.8), 2.5 + pulse, pulse * (fast and 3.5 or 1.8))
+                    * CFrame.Angles(math.rad(sweep * 18), t * (fast and 8 or 1.1), math.rad(pulse * 15))))
         else
             setHatWorldCFrame(100475161263482,
                 hiddenCenter * CFrame.new(0, TARGETS[100475161263482].hiddenHeight, 0))
@@ -703,6 +715,7 @@ AddModule(function()
         abilityReadyAt[name] = now + (abilityCooldowns[name] or 2)
         targetPosition = typeof(targetPosition) == "Vector3" and targetPosition
             or (root.Position + root.CFrame.LookVector * 32)
+        abilityTargets[name] = targetPosition
 
         if name == "Domain" then
             domainEnabled = not domainEnabled
@@ -710,10 +723,10 @@ AddModule(function()
                 domainStartedAt = now
                 -- Place the Shrine and slash accessories around the chosen target;
                 -- unused effects remain far below the map until activated.
-                setHatWorldCFrame(18726352770, CFrame.new(targetPosition + Vector3.new(0, 2, 0)) * root.CFrame.Rotation)
-                setHatWorldCFrame(124144353587446, CFrame.new(targetPosition + Vector3.new(0, 5, 0)) * root.CFrame.Rotation)
-                setHatWorldCFrame(100475161263482, CFrame.new(targetPosition + Vector3.new(-5, 2, 0)))
-                setHatWorldCFrame(97087028126781, CFrame.new(targetPosition + Vector3.new(5, 2, 0)))
+                setHatWorldCFrame(18726352770, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0)) * root.CFrame.Rotation))
+                setHatWorldCFrame(124144353587446, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 5, 0)) * root.CFrame.Rotation))
+                setHatWorldCFrame(100475161263482, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(-5, 2, 0))))
+                setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(5, 2, 0))))
                 playDomainCutscene(targetPosition)
                 playBundledAnimation("Sukuna/DomainCombo.anim", "combo", false)
                 task.delay(1.8, function()
@@ -727,21 +740,21 @@ AddModule(function()
             end
         elseif name == "Cleave" then
             cleaveUntil = now + 1.2
-            setHatWorldCFrame(100475161263482, CFrame.new(targetPosition + Vector3.new(0, 2, 0)))
+            setHatWorldCFrame(100475161263482, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
             playSkillAnimation()
             playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
             showTargetMarker(targetPosition, "Cleave")
             chatAbilityMessage("Cleave!")
         elseif name == "Dismantle" then
             cleaveUntil = now + 1.2
-            setHatWorldCFrame(97087028126781, CFrame.new(targetPosition + Vector3.new(0, 2, 0)))
+            setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
             playSkillAnimation()
             playBundledAnimation("Sukuna/DomainCombo.anim", "dismantle", false)
             showTargetMarker(targetPosition, "Dismantle")
             chatAbilityMessage("Dismantle!")
         elseif name == "Fuuga" then
             fuugaBusy = true
-            setHatWorldCFrame(124144353587446, CFrame.new(targetPosition + Vector3.new(0, 3, 0)))
+            setHatWorldCFrame(124144353587446, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 3, 0))))
             playBundledAnimation("Sukuna/FlameArrow.anim", "flame", false)
             showTargetMarker(targetPosition, "Fuuga / Flame Arrow")
             chatAbilityMessage("Fuuga: Flame Arrow!")
@@ -1202,6 +1215,7 @@ AddModule(function()
         domainEnabled = false
         cleaveUntil = 0
         fuugaBusy = false
+        abilityTargets = {}
         if fuugaAnimationTrack then pcall(function() fuugaAnimationTrack:Stop(0.1); fuugaAnimationTrack:Destroy() end); fuugaAnimationTrack = nil end
         if laughAnimationTrack then pcall(function() laughAnimationTrack:Stop(0.1); laughAnimationTrack:Destroy() end); laughAnimationTrack = nil end
         if fuugaProjectile then pcall(function() fuugaProjectile:Destroy() end); fuugaProjectile = nil end
