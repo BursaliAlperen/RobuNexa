@@ -3961,6 +3961,33 @@ function LimbReanimator.Start()
 		end
 	end
 
+	-- Accessories named after rig body parts are cosmetic body proxies, not
+	-- reanimation hats. Keep them attached to the character instead of adding
+	-- them to CharHats (where the hat solver may claim/reposition them).
+	local BodyPartAccessoryNames = {
+		head = true,
+		torso = true,
+		uppertorso = true,
+		lowertorso = true,
+		humanoidrootpart = true,
+		leftarm = true,
+		rightarm = true,
+		leftleg = true,
+		rightleg = true,
+		leftupperarm = true,
+		leftlowerarm = true,
+		rightupperarm = true,
+		rightlowerarm = true,
+		leftupperleg = true,
+		leftlowerleg = true,
+		rightupperleg = true,
+		rightlowerleg = true,
+	}
+	local function IsBodyPartProxyAccessory(accessory)
+		local normalizedName = string.lower(accessory.Name):gsub("[%s%p_]+", "")
+		return BodyPartAccessoryNames[normalizedName] == true
+	end
+
 	local CharOnDesc = function(v)
 		if v:IsA("BasePart") then
 			if not table.find(BaseParts, v) then
@@ -5282,6 +5309,9 @@ function HatReanimator.Start()
 				if not v.Disabled then v.Disabled = true end
 			end)
 		elseif v:IsA("Accessory") and v.Parent == Player.Character then
+			if IsBodyPartProxyAccessory(v) then
+				return
+			end
 			if not table.find(CharHats, v) then
 				table.insert(CharHats, v)
 				local conn = nil
