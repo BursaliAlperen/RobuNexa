@@ -313,6 +313,8 @@ AddModule(function()
   originalSpeed=humanoid and humanoid.WalkSpeed or 16
   -- Startup sequence: Sukuna laugh first, then transition to Linked Sword idle.
   startupLaughUntil = os.clock() + 2.6
+  -- Prevent a second ability from racing the startup animation loader.
+  setBusy(true)
   task.defer(function()
    if activeFigure == figure then
     sound("Laugh")
@@ -323,6 +325,7 @@ AddModule(function()
      if activeFigure == figure then
       if activeAnimName == "Awaken" then stopAnimation() end
       if humanoid and humanoid.Parent then humanoid.WalkSpeed = originalSpeed or 16 end
+      setBusy(false)
      end
     end)
    end
