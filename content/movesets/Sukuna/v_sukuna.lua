@@ -142,6 +142,7 @@ AddModule(function()
     -- Keep only one action clip active so concurrent tracks cannot reset each
     -- other's Motor6D transforms and make Cleave/Combo appear not to play.
     local activeActionTrack
+    local actionAnimationTrack
     local function playBundledAnimation(filename, preferredName, looped)
         if not activeFigure or not activeFigure.Parent then return false end
         local path = AssetGetPathFromFilename(filename)
@@ -156,6 +157,18 @@ AddModule(function()
             return false
         end
 
+        local clipName = string.lower(tostring(preferredName or filename))
+        local isMovementClip = clipName == "walk" or clipName == "run" or clipName == "idle"
+            or clipName == "jump" or clipName == "fall"
+        if not isMovementClip then
+            -- Stop movement before an attack; otherwise the next Update recreates
+            -- the walk/idle track and immediately overwrites the attack pose.
+            if walkAnimationTrack and walkAnimationTrack.IsPlaying then
+                pcall(function() walkAnimationTrack:Stop(0.05); walkAnimationTrack:Destroy() end)
+            end
+            walkAnimationTrack = nil
+            movementAnimationName = nil
+        end
         if activeActionTrack and activeActionTrack.IsPlaying then
             activeActionTrack:Stop(0.05)
         end
@@ -185,6 +198,7 @@ AddModule(function()
             self.IsPlaying = false
             if stepConnection then stepConnection:Disconnect(); stepConnection = nil end
             if activeActionTrack == self then activeActionTrack = nil end
+            if actionAnimationTrack == self then actionAnimationTrack = nil end
             if activeFigure and activeFigure.Parent then
                 for _, item in ipairs(activeFigure:GetDescendants()) do
                     if item:IsA("Motor6D") then
@@ -197,6 +211,7 @@ AddModule(function()
             self:Stop()
         end
         activeActionTrack = controller
+        if not isMovementClip then actionAnimationTrack = controller end
         stepConnection = game:GetService("RunService").RenderStepped:Connect(function()
             if stopped or not activeFigure or not activeFigure.Parent then
                 controller:Stop()
@@ -800,7 +815,12 @@ AddModule(function()
         return ray.Origin + ray.Direction * 80
     end
 
+    -- Skill targeting is intentionally marker-free: no red ring/finger marker is
+    -- spawned when Cleave, Dismantle, or Combo is used.
     local function showTargetMarker(position, abilityName)
+        return nil
+        -- Legacy implementation below is unreachable and retained only to keep
+        -- this patch narrowly scoped; it is removed from all skill call sites.
         if targetMarker then targetMarker:Destroy() end
         local folder = Instance.new("Folder")
         folder.Name = "SukunaTargetMarker_Local"
@@ -928,7 +948,6 @@ AddModule(function()
                 notify("Cleave animation failed to load; using fallback arm swing.")
                 playSkillAnimation()
             end
-            showTargetMarker(targetPosition, "Cleave")
             chatAbilityMessage("Cleave!")
             task.delay(1.35, function()
                 if abilityTargets.Cleave == targetPosition then abilityTargets.Cleave = nil end
@@ -957,7 +976,6 @@ AddModule(function()
             else
                 playSkillAnimation()
             end
-            showTargetMarker(targetPosition, isCombo and "Combo" or "Dismantle")
             -- Combo produces three staggered local slash pulses without chat output.
             if isCombo then
                 for hit = 1, 3 do
@@ -1420,6 +1438,17 @@ AddModule(function()
             return
         end
 
+        -- Action clips (Cleave/Combo/Laugh/etc.) have priority. Do not recreate
+        -- idle/walk while one is applying Motor6D transforms.
+        if actionAnimationTrack and actionAnimationTrack.IsPlaying then
+            if walkAnimationTrack then
+                pcall(function() walkAnimationTrack:Stop(0.05); walkAnimationTrack:Destroy() end)
+                walkAnimationTrack = nil
+            end
+            movementAnimationName = nil
+            return
+        end
+
         -- The intro laugh has priority; clear the movement pose while it plays.
         if laughAnimationTrack and laughAnimationTrack.IsPlaying then
             if walkAnimationTrack then
@@ -1513,6 +1542,7 @@ AddModule(function()
         abilityTargets = {}
         if fuugaAnimationTrack then pcall(function() fuugaAnimationTrack:Stop(0.1); fuugaAnimationTrack:Destroy() end); fuugaAnimationTrack = nil end
         if laughAnimationTrack then pcall(function() laughAnimationTrack:Stop(0.1); laughAnimationTrack:Destroy() end); laughAnimationTrack = nil end
+        if actionAnimationTrack then pcall(function() actionAnimationTrack:Stop(0.05); actionAnimationTrack:Destroy() end); actionAnimationTrack = nil end
         if walkAnimationTrack then pcall(function() walkAnimationTrack:Stop(0.1); walkAnimationTrack:Destroy() end); walkAnimationTrack = nil end
         movementAnimationName = nil
         if fuugaProjectile then pcall(function() fuugaProjectile:Destroy() end); fuugaProjectile = nil end
