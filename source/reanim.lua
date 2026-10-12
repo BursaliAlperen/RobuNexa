@@ -2742,7 +2742,27 @@ local Reanimate = {
 	ShouldRotationType = function(self)
 		if self.Camera:IsMouseLocked() and not self.Camera.Scriptable and self.Character then
 			local hum = self.Character:FindFirstChildOfClass("Humanoid")
-			if hum and hum.AutoRotate and hum.RootPart and not hum.RootPart:IsGrounded() then
+	-- IsGrounded() is not a standard Roblox BasePart method and may be nil in some executors.
+	-- Use it only when available, then fall back to Humanoid.FloorMaterial / a short raycast.
+	local function IsGroundedPart(part)
+		if not part or not part:IsA("BasePart") then return false end
+		local customOk, customResult = pcall(function()
+			return part:IsGrounded()
+		end)
+		if customOk and type(customResult) == "boolean" then return customResult end
+		local model = part:FindFirstAncestorOfClass("Model")
+		local humanoid = model and model:FindFirstChildOfClass("Humanoid")
+		if humanoid and humanoid.RootPart == part then
+			return humanoid.FloorMaterial ~= Enum.Material.Air
+		end
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Exclude
+		params.FilterDescendantsInstances = {model or part}
+		params.IgnoreWater = true
+		local distance = math.max(part.Size.Y * 0.5 + 0.2, 0.75)
+		return workspace:Raycast(part.Position, Vector3.new(0, -distance, 0), params) ~= nil
+	end
+			if hum and hum.AutoRotate and hum.RootPart and not IsGroundedPart(hum.RootPart) then
 				local state = hum:GetState().Name
 				if table.find({"Running", "Jumping", "Freefall", "Landed", "Climbing"}, state) then
 					return true
@@ -3390,7 +3410,7 @@ Reanimate.CreateCharacter = function(InitCFrame)
 		local RCHumanoidState = RCHumanoid:GetState().Name
 		local gravaff = not not table.find(fallingStates, RCHumanoidState)
 		if gravaff then
-			if Reanimate.ScaleGravity and not RCRootPart:IsGrounded() then
+			if Reanimate.ScaleGravity and not IsGroundedPart(RCRootPart) then
 				RCRootPart.AssemblyLinearVelocity += Vector3.new(0, -workspace.Gravity * (scale - 1) * 0.25 * dt, 0)
 			end
 		end
@@ -4244,7 +4264,7 @@ function LimbReanimator.Start()
 						flingtarget = nil
 					end
 				end
-				if not RootPart:IsGrounded() then
+				if not IsGroundedPart(RootPart) then
 					if flingtarget then
 						if LimbReanimator.UseNaNFling then
 							RootPart.CFrame = CFrame.new(flingcf.Position + Vector3.new(0, 0, math.random(0, 1) * 0.005)) * CFrame.Angles(0, os.clock() * 15, 0)
@@ -5308,7 +5328,7 @@ function HatReanimator.Start()
 		local lastcf = handle:GetAttribute("_NAM_LastPosition")
 		local claimtime = handle:GetAttribute("_NAM_ClaimTime")
 		if typeof(lastcf) ~= "CFrame" then lastcf = handle.CFrame end
-		if not handle:IsGrounded() and IsNetworkOwner(handle) then
+		if not IsGroundedPart(handle) and IsNetworkOwner(handle) then
 			local newpos = newcf.Position
 			local lastpos = lastcf.Position
 			local vel = (newpos - lastpos) / dt
@@ -5935,7 +5955,7 @@ function HatReanimator.Start()
 				end
 			end
 			if flingtarget then
-				if not RootPart:IsGrounded() then
+				if not IsGroundedPart(RootPart) then
 					if LimbReanimator.UseNaNFling then
 						RootPart.CFrame = CFrame.new(flingcf.Position + Vector3.new(0, 0, math.random(0, 1) * 0.005)) * CFrame.Angles(0, os.clock() * 15, 0)
 						RootPart.Velocity, RootPart.RotVelocity = Vector3.zero, Vector3.zero
@@ -6553,7 +6573,7 @@ _G_NAM.Fling = function(part)
 			end
 		end
 		local hum = part:FindFirstChildOfClass("Humanoid")
-		if hum and hum.RootPart and not hum.RootPart:IsGrounded() then
+		if hum and hum.RootPart and not hum.IsGroundedPart(RootPart) then
 			return ReanimateFling(part)
 		end
 	end
