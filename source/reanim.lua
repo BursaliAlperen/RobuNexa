@@ -6481,14 +6481,46 @@ do
 		else
 			ReanimateStartButtonText.Text = "Starting"
 			Reanimate.Starting = true
+			Reanimate.Stopping = false
 			Reanimate.Current = SelectedReanimator
 			HumanoidLASetHookState(Reanimate.UseLoadAnimationHook)
-			ReanimateText.Text = "Running: " .. Reanimate.Current.Name
-			task.spawn(Reanimate.Current.Start)
-			repeat task.wait() until not Reanimate.Starting
-			Reanimate.Current.Running = true
-			task.wait(1)
-			ReanimateStartButtonText.Text = "Deanimate"
+			ReanimateText.Text = "Starting: " .. Reanimate.Current.Name
+
+			local selected = Reanimate.Current
+			local startFinished = false
+			local startError = nil
+			task.spawn(function()
+				local ok, err = xpcall(selected.Start, debug.traceback)
+				if not ok then
+					startError = tostring(err)
+					warn("[NAM Reanimate] Start failed:\\n" .. startError)
+					Reanimate.Stopping = true
+					Reanimate.Starting = false
+				end
+				startFinished = true
+			end)
+
+			local startedAt = os.clock()
+			while Reanimate.Starting and not startFinished and os.clock() - startedAt < 30 do
+				task.wait(0.1)
+			end
+
+			if startError or (Reanimate.Starting and not startFinished) then
+				if not startError then
+					startError = "Startup timed out after 30 seconds. Check the executor console for the first error."
+					warn("[NAM Reanimate] " .. startError)
+				end
+				Reanimate.Stopping = true
+				Reanimate.Starting = false
+				Reanimate.Current = nil
+				HumanoidLASetHookState(false)
+				ReanimateText.Text = "Running: NONE (startup failed)"
+				ReanimateStartButtonText.Text = "Reanimate"
+			else
+				Reanimate.Current.Running = true
+				task.wait(1)
+				ReanimateStartButtonText.Text = "Deanimate"
+			end
 		end
 		ReanimateStartButton.Interactable = true
 	end)
