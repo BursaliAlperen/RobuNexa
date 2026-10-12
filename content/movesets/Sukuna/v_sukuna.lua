@@ -586,6 +586,8 @@ AddModule(function()
             arrowHead.CFrame = cf * CFrame.new(0, 0, -1.45)
         end
         placeArrow(position)
+        -- Keep the flame arrow visible in the hand briefly before release.
+        task.wait(0.45)
 
         task.spawn(function()
             local runService = game:GetService("RunService")
@@ -800,6 +802,7 @@ AddModule(function()
         accessoryInstances = {}
         presentIds = {}
         overrideById = {}
+        lastHatCFrames = {}
 
         if HatReanimator then
             savedWantAllHats = HatReanimator.IWantAllHats
@@ -836,6 +839,20 @@ AddModule(function()
     m.Destroy = function()
         domainEnabled = false
         cleaveUntil = 0
+        fuugaBusy = false
+        if fuugaAnimationTrack then pcall(function() fuugaAnimationTrack:Stop(0.1); fuugaAnimationTrack:Destroy() end); fuugaAnimationTrack = nil end
+        if fuugaProjectile then pcall(function() fuugaProjectile:Destroy() end); fuugaProjectile = nil end
+        for _, aura in ipairs(fuugaAuraInstances) do pcall(function() aura:Destroy() end) end
+        table.clear(fuugaAuraInstances)
+        for _, saved in pairs(scaledMeshes) do
+            if saved.instance and saved.instance.Parent then
+                pcall(function()
+                    if saved.kind == "mesh" then saved.instance.Scale = saved.original
+                    elseif saved.kind == "part" then saved.instance.Size = saved.original end
+                end)
+            end
+        end
+        scaledMeshes = {}
         if inventoryTool then pcall(function() inventoryTool:Destroy() end); inventoryTool = nil end
         if fingerFolder then fingerFolder:Destroy(); fingerFolder = nil end
         if cutsceneActive then
@@ -875,6 +892,7 @@ AddModule(function()
         domainButton, cleaveButton, dismantleButton, fuugaButton = nil, nil, nil, nil
         activeFigure, root = nil, nil
         accessoryInstances, presentIds, overrideById = {}, {}, {}
+        lastHatCFrames = {}
         savedWantAllHats = nil
         lastAccessorySignature = nil
     end
