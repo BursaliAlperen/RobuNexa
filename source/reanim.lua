@@ -6357,33 +6357,85 @@ _G_NAM.Fling = function(part)
 end
 
 do
-	SaveData.SelectedReanimator = SaveData.SelectedReanimator or 1
-	local ReanimateMethodSelect = UI.CreateDropdown(MainPage, "Reanimator", {"Limb Reanimator", "Hats Reanimator"}, SaveData.SelectedReanimator)
+	-- Built-in NAM reanimators plus mutually-exclusive external engines.
+	local EXTERNAL_ENGINES = {
+		[3] = {Name = "KRYPTON", Url = "https://raw.githubusercontent.com/KadeTheExploiter/Krypton/main/Module.luau"},
+		[4] = {Name = "GELATEK", Url = "https://raw.githubusercontent.com/Gelatekussy/GelatekReanimate/main/Main.lua"},
+		[5] = {Name = "GELATEK_EDIT", Url = "https://raw.githubusercontent.com/InfinityNess/GelatekReanimateEdit/main/Main.lua"},
+	}
+	SaveData.SelectedReanimator = math.clamp(tonumber(SaveData.SelectedReanimator) or 1, 1, 5)
+	local ReanimateMethodSelect = UI.CreateDropdown(MainPage, "Reanimator", {
+		"Limb Reanimator", "Hats Reanimator", "KRYPTON (external)", "GELATEK (external)", "GELATEK_EDIT (external)"
+	}, SaveData.SelectedReanimator)
 	local ReanimatorConfigTitle = UI.CreateText(MainPage, "-=+ Limb Reanimator Config +=-", 15, Enum.TextXAlignment.Center)
 	local SelectedReanimator = LimbReanimator
-	if SaveData.SelectedReanimator == 2 then
-		SelectedReanimator = HatReanimator
-		ReanimatorConfigTitle.Text = "-=+ Hats Reanimator Config +=-"
-	end
 	local ReanimatorConfigCanvas = UI.CreateCanvas(MainPage)
-	ReanimateMethodSelect.Changed:Connect(function(value)
-		SaveData.SelectedReanimator = value
+	local function ApplyReanimatorSelection(value)
 		if value == 1 then
 			SelectedReanimator = LimbReanimator
 			ReanimatorConfigTitle.Text = "-=+ Limb Reanimator Config +=-"
-		end
-		if value == 2 then
+			Util.ClearAllChildrenGui(ReanimatorConfigCanvas)
+			SelectedReanimator.Config(ReanimatorConfigCanvas)
+		elseif value == 2 then
 			SelectedReanimator = HatReanimator
 			ReanimatorConfigTitle.Text = "-=+ Hats Reanimator Config +=-"
+			Util.ClearAllChildrenGui(ReanimatorConfigCanvas)
+			SelectedReanimator.Config(ReanimatorConfigCanvas)
+		else
+			SelectedReanimator = {Name = EXTERNAL_ENGINES[value].Name, External = true}
+			ReanimatorConfigTitle.Text = "-=+ " .. EXTERNAL_ENGINES[value].Name .. " External Engine +=-"
+			Util.ClearAllChildrenGui(ReanimatorConfigCanvas)
+			UI.CreateText(ReanimatorConfigCanvas, "External engine: " .. EXTERNAL_ENGINES[value].Name, 14, Enum.TextXAlignment.Center)
+			UI.CreateText(ReanimatorConfigCanvas, "This engine runs separately from NAM. Stop is not supported by its upstream loader; restart your client to switch/stop safely. Never run two reanimation engines together.", 11, Enum.TextXAlignment.Center)
 		end
-		Util.ClearAllChildrenGui(ReanimatorConfigCanvas)
-		SelectedReanimator.Config(ReanimatorConfigCanvas)
+	end
+	ApplyReanimatorSelection(SaveData.SelectedReanimator)
+	ReanimateMethodSelect.Changed:Connect(function(value)
+		if Reanimate.Current then
+			warn("[RobuNexa] Stop the current reanimation before changing engines.")
+			return
+		end
+		value = math.clamp(tonumber(value) or 1, 1, 5)
+		SaveData.SelectedReanimator = value
+		ApplyReanimatorSelection(value)
 	end)
-	SelectedReanimator.Config(ReanimatorConfigCanvas)
+	local function StartExternalEngine(engine)
+		local Global = (getgenv and getgenv()) or shared
+		if engine.Name == "KRYPTON" then
+			Global.KryptonConfiguration = {
+				WaitTime = 0.251, FakeRigScale = 1, DestroyHeightOffset = 50, TeleportOffsetRadius = 20,
+				RefitHatCount = 2, RigName = "RobuNexa", ReturnOnDeath = true,
+				Flinging = {Enabled = false, MethodUsed = "Tool", FlingMagnitude = 8000},
+				Reclaim = false, Refit = true, SetCharacter = true, Animations = true, NoCollisions = true,
+				AntiVoiding = false, SetSimulationRadius = false, DisableCharacterScripts = true,
+				AccessoryFallbackDefaults = true, OverlayFakeCharacter = false, LimitHatsPerLimb = false,
+				NoBodyNearby = true, PermanentDeath = true, Hats = {},
+			}
+		elseif engine.Name == "GELATEK" or engine.Name == "GELATEK_EDIT" then
+			Global.GelatekReanimateConfig = {
+				AnimationsDisabled = false, R15ToR6 = false, DontBreakHairWelds = true,
+				PermanentDeath = true, Headless = false, TeleportBackWhenVoided = false,
+				AlignReanimate = false, FullForceAlign = false, FasterHeartbeat = false,
+				DynamicalVelocity = false, DisableTweaks = false, OptimizeGame = false,
+				LoadLibrary = false, DetailedCredits = false, TorsoFling = false, BulletEnabled = false,
+				BulletConfig = {RunAfterReanimate = false, LockBulletOnTorso = false, ElementalCrystalBullet = false},
+			}
+		end
+		local source = game:HttpGet(engine.Url)
+		assert(type(source) == "string" and #source > 0, engine.Name .. " returned empty source")
+		local chunk, compileError = loadstring(source)
+		assert(type(chunk) == "function", compileError or (engine.Name .. " failed to compile"))
+		local ok, err = pcall(chunk)
+		assert(ok, engine.Name .. " failed to start: " .. tostring(err))
+	end
 	UI.CreateText(ReanimPage, "Enjoy my really awful UI design! It's awful, but hey atleast clicking Reanimate is faster!", 8, Enum.TextXAlignment.Center)
 	local ReanimateText = UI.CreateText(ReanimPage, "Running: NONE", 15, Enum.TextXAlignment.Center)
 	local ReanimateStartButton, ReanimateStartButtonText = UI.CreateButton(ReanimPage, "Reanimate", 20)
 	ReanimateStartButton.Activated:Connect(function()
+		if Reanimate.Current and Reanimate.Current.External then
+			warn("[RobuNexa] This external engine cannot be stopped in-place. Restart the client before choosing another engine.")
+			return
+		end
 		ReanimateStartButton.Interactable = false
 		if Reanimate.Current then
 			ReanimateStartButtonText.Text = "Stopping"
@@ -6396,16 +6448,31 @@ do
 			task.wait(1)
 			ReanimateStartButtonText.Text = "Reanimate"
 		else
+			local chosen = SelectedReanimator
 			ReanimateStartButtonText.Text = "Starting"
-			Reanimate.Starting = true
-			Reanimate.Current = SelectedReanimator
-			HumanoidLASetHookState(Reanimate.UseLoadAnimationHook)
-			ReanimateText.Text = "Running: " .. Reanimate.Current.Name
-			task.spawn(Reanimate.Current.Start)
-			repeat task.wait() until not Reanimate.Starting
-			Reanimate.Current.Running = true
-			task.wait(1)
-			ReanimateStartButtonText.Text = "Deanimate"
+			ReanimateText.Text = "Running: " .. chosen.Name
+			if chosen.External then
+				local engine = EXTERNAL_ENGINES[SaveData.SelectedReanimator]
+				local ok, err = pcall(StartExternalEngine, engine)
+				if not ok then
+					warn("[RobuNexa] " .. engine.Name .. " failed: " .. tostring(err))
+					ReanimateText.Text = "Failed: " .. engine.Name
+					ReanimateStartButtonText.Text = "Reanimate"
+					ReanimateStartButton.Interactable = true
+					return
+				end
+				Reanimate.Current = chosen
+				ReanimateStartButtonText.Text = "Restart to Stop"
+			else
+				Reanimate.Starting = true
+				Reanimate.Current = chosen
+				HumanoidLASetHookState(Reanimate.UseLoadAnimationHook)
+				task.spawn(chosen.Start)
+				repeat task.wait() until not Reanimate.Starting
+				Reanimate.Current.Running = true
+				task.wait(1)
+				ReanimateStartButtonText.Text = "Deanimate"
+			end
 		end
 		ReanimateStartButton.Interactable = true
 	end)
