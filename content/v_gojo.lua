@@ -14,14 +14,14 @@ AddModule(function()
 	-- Map Gojo movement slots to real .anim files already present in this repository.
 	-- The Gojo .rbxm files are model assets, not files AnimLib.Track.fromfile can parse directly.
 	m.Assets = {
-		"GojoIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoIdle.anim",
-		"Sokamona.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/Sokamona.anim",
-		"GojoWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoWalk.anim",
-		"GojoJump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoJump.anim",
-		"GojoLapseBlue.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoLapseBlue.anim",
-		"CursedTechniqueRed.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/CursedTechniqueRed.anim",
-		"RedReversal.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/RedReversal.anim",
-		"HollowPurple.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/HollowPurple.anim",
+		"Gojo/GojoIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoIdle.anim",
+		"Gojo/Sokamona.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/Sokamona.anim",
+		"Gojo/GojoWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoWalk.anim",
+		"Gojo/GojoJump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoJump.anim",
+		"Gojo/GojoLapseBlue.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoLapseBlue.anim",
+		"Gojo/CursedTechniqueRed.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/CursedTechniqueRed.anim",
+		"Gojo/RedReversal.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/RedReversal.anim",
+		"Gojo/HollowPurple.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/HollowPurple.anim",
 	}
 	local animationFiles = {
 		Sokamona = "Gojo/Sokamona.anim",
