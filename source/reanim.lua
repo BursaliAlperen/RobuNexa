@@ -5313,9 +5313,21 @@ function HatReanimator.Start()
 		end)
 		currentping = Player:GetNetworkPing()
 		table.clear(BaseParts)
-		table.clear(CharHats)
+		-- Keep live accessories that were intentionally dropped by the reanimation death step.
+		-- Clearing CharHats here loses the accessory map on CharacterAdded and can trigger
+		-- repeated death/respawn cycles while Hats Reanimator is trying to rebuild.
+		for i = #CharHats, 1, -1 do
+			local hat = CharHats[i]
+			local handle = hat and hat:FindFirstChild("Handle")
+			if not hat or not hat:IsA("Accessory")
+				or not handle or not handle:IsA("BasePart")
+				or (hat.Parent ~= nil and not hat:IsDescendantOf(workspace)) then
+				table.remove(CharHats, i)
+			end
+		end
 		table.clear(CharTools)
 		ResetHatRefs()
+		HatReanimator.RebuildRequired = true
 		character.DescendantAdded:Connect(CharOnDesc)
 		for _,v in character:GetDescendants() do
 			CharOnDesc(v)
