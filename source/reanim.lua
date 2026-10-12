@@ -493,17 +493,40 @@ do
 		local skipped = 0
 		local assetsdownload = 0
 		local downloadfile = function(meta)
-			local fil = "NAMReanim/Assets/" .. meta.name
+			local fil = "NAMReanim/Assets/" .. tostring(meta.name or "")
+			if not meta.name or meta.name == "" then
+				skipped += 1
+				downloaded += 1
+				return
+			end
 			if not redownloadeverything then
-				local s, d = pcall(isfile, fil)
-				if s and d then
+				local existsOk, exists = pcall(isfile, fil)
+				if existsOk and exists then
 					downloaded += 1
 					return
 				end
 			end
-			if not pcall(function()
-				writefile(fil, game:HttpGet(meta.download_url))
-			end) then skipped += 1 end
+
+			local url = meta.download_url
+			if type(url) ~= "string" or url == "" then
+				url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/uiassets/" .. meta.name
+			end
+			local ok, body = pcall(function()
+				local response = request({ Url = url, Method = "GET" })
+				if type(response) ~= "table" then error("HTTP request returned no response") end
+				local status = tonumber(response.StatusCode or response.Status or 0)
+				if status < 200 or status >= 300 then error("HTTP status " .. tostring(status)) end
+				local data = response.Body
+				if type(data) ~= "string" or #data == 0 then error("empty response body") end
+				return data
+			end)
+			if ok and type(body) == "string" and #body > 0 then
+				local writeOk = pcall(writefile, fil, body)
+				if not writeOk then skipped += 1 end
+			else
+				skipped += 1
+				warn("[NAM] Asset download failed: " .. tostring(meta.name) .. " from " .. tostring(url))
+			end
 			downloaded += 1
 		end
 		local Downloading = Util.Instance("TextLabel", UIMainFrame)
