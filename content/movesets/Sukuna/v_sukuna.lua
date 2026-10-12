@@ -437,7 +437,9 @@ AddModule(function()
         for name, button in pairs(skillButtons) do
             if button and button.Parent then
                 local remaining = math.max(0, (abilityReadyAt[name] or 0) - os.clock())
-                button.Text = LABELS[name] .. "\n" .. (remaining > 0 and string.format("%.1fs", remaining) or name)
+                button.Text = remaining > 0
+                    and string.format("%.1fs", remaining)
+                    or (LABELS[name] .. "\n" .. KEYBINDS[name].Name)
                 button.BackgroundColor3 = remaining > 0 and Color3.fromRGB(74, 35, 42) or Color3.fromRGB(43, 22, 30)
             end
         end
@@ -575,13 +577,22 @@ AddModule(function()
     end
 
     local KEYBINDS = {Domain = Enum.KeyCode.Z, Cleave = Enum.KeyCode.X, Dismantle = Enum.KeyCode.C, Fuuga = Enum.KeyCode.V}
-    local LABELS = {Domain = "領域", Cleave = "斬", Dismantle = "解", Fuuga = "炎"}
+    local LABELS = {Domain = "DOMAIN", Cleave = "CLEAVE", Dismantle = "DISM.", Fuuga = "FUUGA"}
     local function createSkillControls()
         local player = game:GetService("Players").LocalPlayer
         local playerGui = player and (player:FindFirstChildOfClass("PlayerGui") or player:WaitForChild("PlayerGui", 5))
         if not playerGui then notify("Skill UI kurulamadı: PlayerGui yok."); return end
         local old = playerGui:FindFirstChild("SukunaAbilityHUD")
         if old then old:Destroy() end
+        local backpack = player:FindFirstChildOfClass("Backpack")
+        for _, container in ipairs({backpack, player.Character}) do
+            if container then
+                for _, toolName in ipairs({"Sukuna", "Domain", "Cleave", "Dismantle", "Fuuga"}) do
+                    local oldTool = container:FindFirstChild(toolName)
+                    if oldTool and oldTool:IsA("Tool") then oldTool:Destroy() end
+                end
+            end
+        end
         hud = Instance.new("ScreenGui")
         hud.Name = "SukunaAbilityHUD"
         hud.ResetOnSpawn = false
@@ -611,7 +622,7 @@ AddModule(function()
             button.BackgroundColor3 = Color3.fromRGB(43, 22, 30)
             button.BackgroundTransparency = 0.05
             button.BorderSizePixel = 0
-            button.Text = LABELS[name] .. "\n" .. name
+            button.Text = LABELS[name] .. "\n" .. KEYBINDS[name].Name
             button.TextColor3 = Color3.fromRGB(255, 239, 239)
             button.TextSize = 11
             button.Font = Enum.Font.GothamBold
