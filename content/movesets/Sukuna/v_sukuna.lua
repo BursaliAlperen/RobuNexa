@@ -401,8 +401,8 @@ AddModule(function()
         local rate = fast and 7.5 or 1.8
 
         -- Domain slash accessories grow 20x while Domain is active, then restore.
-        setAccessoryScale(100475161263482, domainEnabled and 20 or 1)
-        setAccessoryScale(97087028126781, domainEnabled and 20 or 1)
+        setAccessoryScale(100475161263482, domainEnabled and 1.75 or 1)
+        setAccessoryScale(97087028126781, domainEnabled and 1.75 or 1)
 
         -- The Shrine itself rises slowly from below ground while Domain is active.
         if domainEnabled then
@@ -538,16 +538,41 @@ AddModule(function()
     local function playSkillAnimation(animationId)
         local humanoid = activeFigure and activeFigure:FindFirstChildOfClass("Humanoid")
         if not humanoid then return end
-        pcall(function()
-            local animator = humanoid:FindFirstChildOfClass("Animator")
-            if not animator then animator = Instance.new("Animator"); animator.Parent = humanoid end
-            local animation = Instance.new("Animation")
-            animation.AnimationId = "rbxassetid://" .. tostring(animationId)
-            local track = animator:LoadAnimation(animation)
-            track.Priority = Enum.AnimationPriority.Action
-            track:Play(0.1, 1, 1)
-            game:GetService("Debris"):AddItem(animation, 8)
-            task.delay(6, function() pcall(function() track:Stop(0.15); track:Destroy() end) end)
+        if animationId then
+            pcall(function()
+                local animator = humanoid:FindFirstChildOfClass("Animator")
+                if not animator then animator = Instance.new("Animator"); animator.Parent = humanoid end
+                local animation = Instance.new("Animation")
+                animation.AnimationId = "rbxassetid://" .. tostring(animationId)
+                local track = animator:LoadAnimation(animation)
+                track.Priority = Enum.AnimationPriority.Action
+                track:Play(0.1, 1, 1)
+                game:GetService("Debris"):AddItem(animation, 8)
+                task.delay(6, function() pcall(function() track:Stop(0.15); track:Destroy() end) end)
+            end)
+            return
+        end
+        -- Local procedural arm swing for Cleave/Dismantle; works without inventing an animation asset ID.
+        local shoulder
+        for _, descendant in ipairs(activeFigure:GetDescendants()) do
+            if descendant:IsA("Motor6D") and (descendant.Name == "Right Shoulder" or descendant.Name == "RightShoulder") then
+                shoulder = descendant
+                break
+            end
+        end
+        if not shoulder then return end
+        local original = shoulder.Transform
+        local tweenService = game:GetService("TweenService")
+        local swing = tweenService:Create(shoulder, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Transform = original * CFrame.Angles(math.rad(-85), math.rad(10), math.rad(35))
+        })
+        swing:Play()
+        task.delay(0.13, function()
+            if shoulder and shoulder.Parent then
+                tweenService:Create(shoulder, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+                    Transform = original
+                }):Play()
+            end
         end)
     end
 
@@ -843,22 +868,22 @@ AddModule(function()
         targetPosition = targetPosition or (root.Position + root.CFrame.LookVector * 24)
         showTargetMarker(targetPosition, name)
         playDomainCutscene(targetPosition)
+        if name == "Domain" then playSkillAnimation(nil) end
         abilityReadyAt[name] = now + (abilityCooldowns[name] or 3)
         if name == "Domain" then
             domainEnabled = not domainEnabled
             if domainEnabled then domainStartedAt = os.clock(); notify("Malevolent Shrine açıldı.") else notify("Domain kapatıldı.") end
             applyAccessoryPositions()
         elseif name == "Cleave" then
-            playSkillAnimation(131873641508713)
+            playSkillAnimation(nil)
             cleaveUntil = os.clock() + 2.5
             applyAccessoryPositions()
         elseif name == "Dismantle" then
-            playSkillAnimation(131873641508713)
+            playSkillAnimation(nil)
             cleaveUntil = os.clock() + 1.6
             applyAccessoryPositions()
         elseif name == "Fuuga" then
             fuugaTargetPosition = targetPosition
-            playSkillAnimation(131873641508713)
             launchFuuga()
         end
         refreshButtons()
