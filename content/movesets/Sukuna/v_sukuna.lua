@@ -736,27 +736,9 @@ AddModule(function()
         end)
     end
 
-    local function chatAbilityMessage(message)
-        return -- Chat output intentionally disabled.
-        local sent = false
-        pcall(function()
-            local service = game:GetService("TextChatService")
-            local channels = service:FindFirstChild("TextChannels")
-            local channel = channels and (channels:FindFirstChild("RBXGeneral") or channels:GetChildren()[1])
-            if channel and channel.SendAsync then
-                channel:SendAsync("[SUKUNA] " .. message)
-                sent = true
-            end
-        end)
-        if not sent then
-            pcall(function()
-                game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", {
-                    Text = "[SUKUNA] " .. message,
-                    Color = Color3.fromRGB(255, 65, 85),
-                    Font = Enum.Font.GothamBold,
-                })
-            end)
-        end
+    -- Intentionally silent: no chat output. Keep this as a valid no-op function.
+    local function chatAbilityMessage(_message)
+        return nil
     end
 
     local function activateSukunaAbility(name, targetPosition)
