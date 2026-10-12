@@ -246,40 +246,49 @@ AddModule(function()
 	end
 
 	m.Config = function(parent: GuiBase2d)
+		-- Small circular touch controls, matching the Immersive VR action buttons.
 		local panel = Instance.new("Frame")
 		panel.Name = "GojoMovesetControls"
-		panel.AnchorPoint = Vector2.new(1, 0)
-		panel.Position = UDim2.new(1, -12, 0, 58)
-		panel.Size = UDim2.new(0, 154, 0, 0)
-		panel.AutomaticSize = Enum.AutomaticSize.Y
+		panel.AnchorPoint = Vector2.new(1, 1)
+		panel.Position = UDim2.new(1, -14, 1, -150)
+		panel.Size = UDim2.fromOffset(224, 104)
 		panel.BackgroundTransparency = 1
 		panel.Parent = parent
-		local layout = Instance.new("UIListLayout")
-		layout.FillDirection = Enum.FillDirection.Vertical
-		layout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-		layout.SortOrder = Enum.SortOrder.LayoutOrder
-		layout.Padding = UDim.new(0, 5)
-		layout.Parent = panel
+
+		local grid = Instance.new("UIGridLayout")
+		grid.CellSize = UDim2.fromOffset(48, 48)
+		grid.CellPadding = UDim2.fromOffset(7, 5)
+		grid.FillDirectionMaxCells = 3
+		grid.HorizontalAlignment = Enum.HorizontalAlignment.Right
+		grid.VerticalAlignment = Enum.VerticalAlignment.Bottom
+		grid.SortOrder = Enum.SortOrder.LayoutOrder
+		grid.Parent = panel
+
 		for index, name in ipairs(abilityNames) do
 			local button = Instance.new("TextButton")
 			button.Name = name .. "Button"
 			button.LayoutOrder = index
-			button.Size = UDim2.new(0, 142, 0, 34)
-			button.BackgroundColor3 = Color3.fromRGB(24, 35, 55)
+			button.Size = UDim2.fromOffset(48, 48)
+			button.BackgroundColor3 = Color3.fromRGB(22, 30, 48)
+			button.BackgroundTransparency = 0.12
 			button.BorderSizePixel = 0
-			button.Text = name
+			button.Text = name == "Purple" and "PURP" or name
 			button.TextColor3 = Color3.fromRGB(235, 245, 255)
-			button.TextSize = 14
-			button.Font = Enum.Font.GothamSemibold
+			button.TextSize = 10
+			button.TextWrapped = true
+			button.Font = Enum.Font.GothamBold
 			button.AutoButtonColor = true
 			button.Parent = panel
+
 			local corner = Instance.new("UICorner")
-			corner.CornerRadius = UDim.new(0, 9)
+			corner.CornerRadius = UDim.new(1, 0)
 			corner.Parent = button
 			local stroke = Instance.new("UIStroke")
 			stroke.Color = Color3.fromRGB(80, 175, 255)
-			stroke.Transparency = 0.25
+			stroke.Thickness = 1.2
+			stroke.Transparency = 0.2
 			stroke.Parent = button
+
 			buttons[name] = button
 			table.insert(guiConnections, button.Activated:Connect(function()
 				useAbility(name)
