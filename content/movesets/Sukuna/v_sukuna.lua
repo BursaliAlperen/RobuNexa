@@ -73,12 +73,7 @@ AddModule(function()
     local hud
     local skillButtons = {}
     local activateAbility
-    local abilityCooldowns = {
-        Domain = math.huge, Fuuga = math.huge,
-        Cleave = 2.25,
-        Dismantle1 = 3.5, Dismantle2 = 3.5, Dismantle3 = 3.5,
-        Combo1 = 4.5, Combo2 = 4.5, Combo3 = 4.5,
-    }
+    local abilityCooldowns = {Cleave = 2.25, Dismantle = 3.5, Combo = 4.5}
     local abilityReadyAt = {}
     local abilityTargets = {}
     local targetMarker
@@ -106,6 +101,7 @@ AddModule(function()
     local fuugaBusy = false
     local fuugaAnimationTrack
     local laughAnimationTrack
+    local walkAnimationTrack
     local fuugaProjectile
     local fuugaAuraInstances = {}
     local STATUS_INTERVAL = 1.25
@@ -550,7 +546,7 @@ AddModule(function()
         if active then
             local pulse = math.sin(t * rate)
             local dismantleTarget = abilityTargets.Dismantle
-                or abilityTargets.Combo1 or abilityTargets.Combo2 or abilityTargets.Combo3
+                or abilityTargets.Combo
             local effectTarget = abilityTargets.Cleave or dismantleTarget
             if domainEnabled and abilityTargets.Domain then effectTarget = abilityTargets.Domain end
             local sweep = math.cos(t * rate * 1.13)
@@ -743,8 +739,8 @@ AddModule(function()
 
     local function activateSukunaAbility(name, targetPosition)
         if name == "Domain" or name == "Fuuga" then return end
-        local isDismantle = name == "Dismantle1" or name == "Dismantle2" or name == "Dismantle3"
-        local isCombo = name == "Combo1" or name == "Combo2" or name == "Combo3"
+        local isDismantle = name == "Dismantle"
+        local isCombo = name == "Combo"
         if name ~= "Cleave" and not isDismantle and not isCombo then return end
         if not activeFigure or not activeFigure.Parent or not root or not root.Parent then
             notify("Moveset is not ready yet; waiting for the Hat Reanimation rig.")
@@ -787,15 +783,12 @@ AddModule(function()
             abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
             playSkillAnimation()
-            -- Combo uses the former Cleave animation, renamed to Combo.anim.
-            -- Dismantle remains separate and optional until its own file is supplied.
+            -- Combo uses the supplied bundled animation. Dismantle uses the procedural arm swing.
             if isCombo then
                 playBundledAnimation("Sukuna/Combo.anim", "combo", false)
-            else
-                playBundledAnimation("Sukuna/Dismantle.anim", "dismantle", false)
             end
-            showTargetMarker(targetPosition, isCombo and ("Combo " .. name:sub(-1)) or ("Dismantle " .. name:sub(-1)))
-            -- Combo variants produce three staggered local slash pulses without chat output.
+            showTargetMarker(targetPosition, isCombo and "Combo" or "Dismantle")
+            -- Combo produces three staggered local slash pulses without chat output.
             if isCombo then
                 for hit = 1, 3 do
                     task.delay((hit - 1) * 0.18, function()
@@ -830,15 +823,15 @@ AddModule(function()
 
     local KEYBINDS = {
         Cleave = Enum.KeyCode.X,
-        Dismantle1 = Enum.KeyCode.C, Dismantle2 = Enum.KeyCode.V, Dismantle3 = Enum.KeyCode.B,
-        Combo1 = Enum.KeyCode.Z, Combo2 = Enum.KeyCode.G, Combo3 = Enum.KeyCode.H,
+        Dismantle = Enum.KeyCode.C,
+        Combo = Enum.KeyCode.Z,
     }
     local LABELS = {
         Cleave = "CLEAVE",
-        Dismantle1 = "DISMANTLE 1", Dismantle2 = "DISMANTLE 2", Dismantle3 = "DISMANTLE 3",
-        Combo1 = "COMBO 1", Combo2 = "COMBO 2", Combo3 = "COMBO 3",
+        Dismantle = "DISMANTLE",
+        Combo = "COMBO",
     }
-    local SKILL_ORDER = {"Cleave", "Dismantle1", "Dismantle2", "Dismantle3", "Combo1", "Combo2", "Combo3"}
+    local SKILL_ORDER = {"Cleave", "Dismantle", "Combo"}
     local function createSkillControls()
         local player = game:GetService("Players").LocalPlayer
         local playerGui = player and (player:FindFirstChildOfClass("PlayerGui") or player:WaitForChild("PlayerGui", 5))
@@ -916,7 +909,7 @@ AddModule(function()
                 end
             end
         end))
-        notify("Sukuna skills ready: X Cleave, C/V/B Dismantle 1-3, Z/G/H Combo 1-3. Chat messages, Domain and Fuuga are disabled.")
+        notify("Sukuna skills ready: X Cleave, C Dismantle, Z Combo. Exactly 3 skills.")
     end
 
     local function announceFinger(text)
@@ -1250,6 +1243,30 @@ AddModule(function()
         end)
     end
 
+    local function updateWalkAnimation()
+        if not activeFigure or not activeFigure.Parent then
+            if walkAnimationTrack then pcall(function() walkAnimationTrack:Stop(0.1); walkAnimationTrack:Destroy() end); walkAnimationTrack = nil end
+            return
+        end
+        local humanoid = activeFigure:FindFirstChildOfClass("Humanoid")
+        local moving = humanoid and humanoid.MoveDirection.Magnitude > 0.05
+        if not moving and root and root.Parent then
+            local velocity = root.AssemblyLinearVelocity
+            moving = Vector3.new(velocity.X, 0, velocity.Z).Magnitude > 1.25
+        end
+        -- The intro laugh has priority; begin walking once it finishes.
+        if laughAnimationTrack and laughAnimationTrack.IsPlaying then moving = false end
+        if moving then
+            if not walkAnimationTrack or not walkAnimationTrack.IsPlaying then
+                if walkAnimationTrack then pcall(function() walkAnimationTrack:Stop(0.05); walkAnimationTrack:Destroy() end) end
+                walkAnimationTrack = playBundledAnimation("Sukuna/Walk.anim", "walk", true)
+            end
+        elseif walkAnimationTrack then
+            pcall(function() walkAnimationTrack:Stop(0.12); walkAnimationTrack:Destroy() end)
+            walkAnimationTrack = nil
+        end
+    end
+
     m.Update = function(dt, figure)
         activeFigure = figure or activeFigure
         root = resolveRoot(activeFigure)
@@ -1265,6 +1282,7 @@ AddModule(function()
         -- Re-add our overrides if NAM cleared the override table during a rig reload.
         ensureHatOverrides()
         applyAccessoryPositions()
+        updateWalkAnimation()
         refreshButtons()
     end
 
@@ -1275,6 +1293,7 @@ AddModule(function()
         abilityTargets = {}
         if fuugaAnimationTrack then pcall(function() fuugaAnimationTrack:Stop(0.1); fuugaAnimationTrack:Destroy() end); fuugaAnimationTrack = nil end
         if laughAnimationTrack then pcall(function() laughAnimationTrack:Stop(0.1); laughAnimationTrack:Destroy() end); laughAnimationTrack = nil end
+        if walkAnimationTrack then pcall(function() walkAnimationTrack:Stop(0.1); walkAnimationTrack:Destroy() end); walkAnimationTrack = nil end
         if fuugaProjectile then pcall(function() fuugaProjectile:Destroy() end); fuugaProjectile = nil end
         for _, aura in ipairs(fuugaAuraInstances) do pcall(function() aura:Destroy() end) end
         table.clear(fuugaAuraInstances)
