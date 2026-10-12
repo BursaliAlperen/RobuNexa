@@ -4,13 +4,12 @@ This NAM moveset keeps Cleave as the primary skill and adds three Dismantle butt
 
 ## Separate animation files
 
-Each action uses its own independent `.anim` file; Dismantle and Combo no longer reuse `DomainCombo.anim`.
+The former Cleave animation is reassigned to Combo and should be stored as `Combo.anim`. Dismantle remains a separate optional animation.
 
-- `content/animations/Sukuna/Cleave.anim` — Cleave animation (already referenced by the moveset).
-- `content/animations/Sukuna/Dismantle.anim` — separate Dismantle animation file to add.
-- `content/animations/Sukuna/Combo.anim` — separate Combo animation file to add.
+- `content/animations/Sukuna/Combo.anim` — the former Cleave animation, used by all three Combo buttons.
+- `content/animations/Sukuna/Dismantle.anim` — separate Dismantle animation file.
 
-The Dismantle and Combo files are optional during moveset startup, so missing files do not prevent the entire moveset from loading. Until the actual `.anim` files are added, those actions show a missing-animation notice and their custom animation will not play. This change wires up the file paths; it does not fabricate animation data.
+Combo will use the former Cleave animation after its binary file is moved to `Combo.anim`. Dismantle remains optional; if its file is absent, the moveset still loads but Dismantle custom animation will not play.
 
 ## Equipped accessory
 
@@ -29,7 +28,7 @@ The Dismantle and Combo files are optional during moveset startup, so missing fi
 | Combo 2 | G | 4.5 s |
 | Combo 3 | H | 4.5 s |
 
-Each Dismantle and Combo button has its own cooldown timestamp. Combo variants use the separate Combo animation and trigger three staggered local slash-effect pulses. On mobile, the seven skills appear as circular buttons on the right.
+Each Dismantle and Combo button has its own cooldown timestamp. Combo variants use the former Cleave animation through `Combo.anim` and trigger three staggered local slash-effect pulses. On mobile, the seven skills appear as circular buttons on the right.
 
 - **Domain** and **Fuuga** are disabled; their buttons are not shown.
 - No chat announcements or finger-pickup chat system is started.
