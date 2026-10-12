@@ -466,7 +466,16 @@ do
 			Size = UDim2.new(1, 0, 0, 32)
 		}):Play()
 		task.wait(0.5)
-		local s, assetsof = pcall(game.HttpGet, game, "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/uiassets/")
+		-- Fetching GitHub metadata synchronously can hang forever in some executors.
+		-- Run it separately and cap the wait so the UI can always close.
+		local metadataDone, metadataOk, assetsof = false, false, nil
+		task.spawn(function()
+			metadataOk, assetsof = pcall(game.HttpGet, game, "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/uiassets/")
+			metadataDone = true
+		end)
+		local metadataDeadline = os.clock() + 12
+		while not metadataDone and os.clock() < metadataDeadline do task.wait(0.1) end
+		local s = metadataDone and metadataOk
 		if s and assetsof then
 			s, assetsof = pcall(HttpService.JSONDecode, HttpService, assetsof)
 			if s and assetsof then
@@ -478,9 +487,8 @@ do
 					task.spawn(function()
 						-- A single unexpected downloader error must never leave the UI
 						-- waiting forever for a counter that will not advance.
-						local finished = false
 						local ok = pcall(downloadfile, file)
-						if not ok and not finished then
+						if not ok then
 							skipped += 1
 							downloaded += 1
 						end
