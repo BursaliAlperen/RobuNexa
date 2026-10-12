@@ -301,16 +301,77 @@ AddModule(function()
    ContextActionService:SetTitle(bindName, abilityNames[name] or name)
    ContextActionService:SetPosition(bindName, buttonPositions[name])
   end
-  inputConn=UIS.InputBegan:Connect(function(input,processed)
-   if processed then return end
-   for name,key in pairs(keys) do
-    if input.KeyCode.Name==key then activate(name); break end
-   end
-  end)
+  -- ContextActionService handles both keyboard and touch input, preventing duplicate activations.
+ end
+ local moveSine = 0
+ local moveJoints = {r=CFrame.identity,n=CFrame.identity,rs=CFrame.identity,ls=CFrame.identity,rh=CFrame.identity,lh=CFrame.identity}
+ local function applyLinkedSwordLocomotion(dt, figure)
+  if not figure or busy or (activeAnimator and activeTrack) then return end
+  local hum = figure:FindFirstChildOfClass("Humanoid")
+  local rootPart = figure:FindFirstChild("HumanoidRootPart") or figure:FindFirstChild("Torso")
+  local torso = figure:FindFirstChild("Torso")
+  if not hum or not rootPart or not torso then return end
+  local rj = rootPart:FindFirstChild("RootJoint")
+  local nj = torso:FindFirstChild("Neck")
+  local rsj = torso:FindFirstChild("Right Shoulder")
+  local lsj = torso:FindFirstChild("Left Shoulder")
+  local rhj = torso:FindFirstChild("Right Hip")
+  local lhj = torso:FindFirstChild("Left Hip")
+  moveSine += dt * 60
+  local velocity = rootPart.AssemblyLinearVelocity.Magnitude
+  local vy = rootPart.AssemblyLinearVelocity.Y
+  local rt, nt, rst, lst, rht, lht
+  local state = hum:GetState()
+  if state == Enum.HumanoidStateType.Jumping then
+   rt=CFrame.new(-0.014,0.023,0.020,1,0,0,0,0.965,0.258,0,-0.258,0.965)
+   nt=CFrame.new(0.017,1.545,-0.003,0.999,0.007,-0.042,-0.011,0.996,-0.086,0.041,0.087,0.995)
+   rst=CFrame.new(1.54,0.254,-0.521,0.89,-0.152,-0.429,-0.327,0.44,-0.835,0.317,0.884,0.341)
+   lst=CFrame.new(-1.557,0.112,0.343,0.986,0.113,0.122,-0.158,0.861,0.481,-0.050,-0.494,0.867)
+   rht=CFrame.new(0.566,-1.597,-0.481,0.999,-0.038,-0.009,0.039,0.943,0.328,-0.003,-0.328,0.944)
+   lht=CFrame.new(-0.433,-1.959,0.005,1,0,0,0,0.965,0.258,0,-0.258,0.965)
+  elseif state == Enum.HumanoidStateType.Freefall or vy < -1 and hum.FloorMaterial == Enum.Material.Air then
+   rt=CFrame.new(-0.014,0.023,0.020,1,0,0,0,0.984,0.173,0,-0.173,0.984)
+   nt=CFrame.new(0.015,1.552,-0.091,0.999,0.018,-0.038,-0.007,0.965,0.258,0.042,-0.258,0.965)
+   rst=CFrame.new(1.44,0.051,-0.418,0.89,-0.076,-0.449,-0.298,0.647,-0.701,0.344,0.758,0.553)
+   lst=CFrame.new(-1.557,0.141,0.332,0.986,0.113,0.122,-0.162,0.815,0.555,-0.036,-0.567,0.822)
+   rht=CFrame.new(0.573,-1.805,-0.374,0.999,-0.037,0.013,0.039,0.981,-0.187,-0.006,0.188,0.982)
+   lht=CFrame.new(-0.433,-1.951,0.175,1,0,0,0,0.984,0.173,0,-0.173,0.984)
+  elseif hum.MoveDirection.Magnitude > 0.05 then
+   local phase = moveSine / 6
+   rt=CFrame.new(-0.014,0.023,0.020,1,0,0,0,1,0,0,0,1)*CFrame.Angles(-0.2,math.rad(-5*math.cos(phase)),0)
+   nt=CFrame.new(0,1.499,0,0.999,0,-0.042,0,1,0,0.042,0,0.999)
+   rst=CFrame.new(1.668,0.125,0.167,0.975,-0.217,-0.034,0.22,0.967,0.121,0.006,-0.125,0.992)*CFrame.new(0,0,0.1*math.cos(phase))*CFrame.Angles(math.rad(-15*math.cos(phase)),0,0)
+   lst=CFrame.new(-1.589,0.026,-0.146,0.986,0.166,-0.008,-0.166,0.981,-0.095,-0.008,0.095,0.995)*CFrame.new(0,0,-0.15*math.cos(phase))*CFrame.Angles(math.rad(15*math.cos(phase)),0,0)
+   rht=CFrame.new(0.5,-1.64-0.4*math.cos(phase),1.0*math.sin(phase)/3)*CFrame.Angles(math.rad(-50*math.sin(phase)),math.rad(-3),0)
+   lht=CFrame.new(-0.5,-1.64+0.4*math.cos(phase),-1.0*math.sin(phase)/3)*CFrame.Angles(math.rad(50*math.sin(phase)),math.rad(3),0)
+  else
+   local bob = 0.05*math.cos(moveSine/25)
+   rt=CFrame.new(-0.014,0.023,0.020,0.866,0,-0.5,0,1,0,0.5,0,0.866)*CFrame.new(0,bob,0)
+   nt=CFrame.new(0,1.499,0,0.886,0,0.462,0,1,0,-0.462,0,0.886)*CFrame.Angles(0.08*math.cos(moveSine/25),0,0)
+   rst=CFrame.new(1.7,0.169,0.31,0.827,-0.251,-0.501,0.215,0.967,-0.13,0.517,0,0.855)
+   lst=CFrame.new(-1.619,0.059,0,0.981,0.191,0,-0.191,0.981,0,0,0,1)
+   rht=CFrame.new(0.649,-1.999,0,0.989,-0.143,0,0.143,0.989,0,0,0,1)*CFrame.new(0,-0.08*math.cos(moveSine/25),0)
+   lht=CFrame.new(-0.5,-2,0,1,0,0,0,1,0,0,0,1)*CFrame.new(0,-0.08*math.cos(moveSine/25),0)
+  end
+  local alpha = math.exp(-16*dt)
+  moveJoints.r=rt:Lerp(moveJoints.r,alpha); moveJoints.n=nt:Lerp(moveJoints.n,alpha)
+  moveJoints.rs=rst:Lerp(moveJoints.rs,alpha); moveJoints.ls=lst:Lerp(moveJoints.ls,alpha)
+  moveJoints.rh=rht:Lerp(moveJoints.rh,alpha); moveJoints.lh=lht:Lerp(moveJoints.lh,alpha)
+  if rj then SetC0C1Joint(rj,moveJoints.r,CFrame.identity,figure:GetScale()) end
+  if nj then SetC0C1Joint(nj,moveJoints.n,CFrame.identity,figure:GetScale()) end
+  if rsj then SetC0C1Joint(rsj,moveJoints.rs,CFrame.identity,figure:GetScale()) end
+  if lsj then SetC0C1Joint(lsj,moveJoints.ls,CFrame.identity,figure:GetScale()) end
+  if rhj then SetC0C1Joint(rhj,moveJoints.rh,CFrame.identity,figure:GetScale()) end
+  if lhj then SetC0C1Joint(lhj,moveJoints.lh,CFrame.identity,figure:GetScale()) end
  end
  m.Update = function(dt: number, figure: Model)
   activeFigure=figure
-  if activeAnimator and activeTrack then activeAnimator:Step(os.clock() - (animationStartedAt or os.clock())) end
+  if activeAnimator and activeTrack then
+   local ok = pcall(function() activeAnimator:Step(os.clock() - (animationStartedAt or os.clock())) end)
+   if not ok then stopAnimation() end
+  else
+   applyLinkedSwordLocomotion(dt, figure)
+  end
  end
  m.Destroy = function(figure: Model?)
   if inputConn then inputConn:Disconnect(); inputConn=nil end
