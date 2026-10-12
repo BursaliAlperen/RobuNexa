@@ -7,7 +7,6 @@ Engines:
   KRYPTON             - Kade's current/recommended engine; R6/R15 support depends on game/executor.
   GELATEK             - original legacy limb reanimation; upstream says it is unreliable in modern games.
   GELATEK_EDIT        - community fork of GelatekReanimate with additional options.
-  CATWARE_LEGACY      - discontinued; kept only for compatibility/testing.
 
 NAM's built-in hat/limb reanimation remains in source/reanim.lua and is NOT an external-engine mode.
 Gojo and Sukuna remain separate NAM movesets; this selector does not merge them.
@@ -17,9 +16,6 @@ local Global = (getgenv and getgenv()) or shared
 
 -- Change only this value. Never run multiple reanimation engines simultaneously.
 local ENGINE = "KRYPTON"
-
--- Used by CATWARE_LEGACY: "Raw", "Fling", "Bullet", or "Godmode".
-local CATWARE_TYPE = "Raw"
 
 -- Used by GELATEK_EDIT.
 local GELATEK_EDIT_CONFIG = {
@@ -50,7 +46,6 @@ local SOURCES = {
     KRYPTON = "https://raw.githubusercontent.com/KadeTheExploiter/Krypton/main/Module.luau",
     GELATEK = "https://raw.githubusercontent.com/Gelatekussy/GelatekReanimate/main/Main.lua",
     GELATEK_EDIT = "https://raw.githubusercontent.com/InfinityNess/GelatekReanimateEdit/main/Main.lua",
-    CATWARE_LEGACY = "https://raw.githubusercontent.com/Gelatekussy/CatwareReanimate/main/src/Source.lua",
 }
 
 local function loadRemote(url, label)
@@ -126,25 +121,6 @@ elseif ENGINE == "GELATEK_EDIT" then
     local ok, err = pcall(loadRemote, SOURCES.GELATEK_EDIT, "Gelatek Edit")
     if not ok then warn("[RobuNexa] Gelatek Edit failed: " .. tostring(err)) end
 
-elseif ENGINE == "CATWARE_LEGACY" then
-    Global.Options = {
-        Jitteryness = Vector3.new(30.5, 0, 0),
-        Jitterless = true,
-        Type = CATWARE_TYPE,
-        InstantBullet = {
-            Bool = CATWARE_TYPE == "Bullet" or CATWARE_TYPE == "Godmode",
-            SmartLock = true,
-        },
-        R15Method = "Align",
-        R6Method = "Align",
-        BonusProperties = true,
-        RigAnimations = true,
-        LoadLibrary = false,
-        Logging = false,
-    }
-    local ok, err = pcall(loadRemote, SOURCES.CATWARE_LEGACY, "Catware legacy")
-    if not ok then warn("[RobuNexa] Catware legacy failed: " .. tostring(err)) end
-
 else
-    error("[RobuNexa] Unknown ENGINE '" .. tostring(ENGINE) .. "'. Choose KRYPTON, GELATEK, GELATEK_EDIT, or CATWARE_LEGACY.")
+    error("[RobuNexa] Unknown ENGINE '" .. tostring(ENGINE) .. "'. Choose KRYPTON, GELATEK, or GELATEK_EDIT.")
 end
