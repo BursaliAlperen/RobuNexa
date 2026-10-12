@@ -361,6 +361,38 @@ AddModule(function()
                     used[nextInstances[id]] = true
                 end
             end
+
+            -- Explicitly recover the requested slash accessory when the avatar
+            -- API reports its AssetId but does not expose an applied-instance
+            -- reference. Some clients put the reanimated copy under activeFigure.
+            if not nextInstances[18908729586] then
+                local containers = {}
+                if character then table.insert(containers, character) end
+                if activeFigure and activeFigure ~= character then table.insert(containers, activeFigure) end
+                for _, container in ipairs(containers) do
+                    for _, child in ipairs(container:GetChildren()) do
+                        if child:IsA("Accessory") then
+                            local assetId = tonumber(child:GetAttribute("AssetId"))
+                                or tonumber(child:GetAttribute("_RobuNexaSukunaAssetId"))
+                            local lowerName = string.lower(child.Name)
+                            local explicitId = string.find(lowerName, "18908729586", 1, true) ~= nil
+                            local slashName = string.find(lowerName, "cleave slash", 1, true) ~= nil
+                                or string.find(lowerName, "slash effect", 1, true) ~= nil
+                            if assetId == 18908729586 or explicitId then
+                                nextInstances[18908729586] = child
+                                nextPresent[18908729586] = true
+                                break
+                            elseif slashName and not used[child] then
+                                nextInstances[18908729586] = child
+                                nextPresent[18908729586] = true
+                                used[child] = true
+                                break
+                            end
+                        end
+                    end
+                    if nextInstances[18908729586] then break end
+                end
+            end
         end
 
         -- The Finger catalog item is expected to remain equipped on the character.
