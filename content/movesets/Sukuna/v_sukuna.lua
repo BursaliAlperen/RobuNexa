@@ -1152,7 +1152,7 @@ AddModule(function()
                 if track then laughAnimationTrack = track end
             end)
             moveToNewSpot()
-        end)
+        end))
         chatMessage("Sukuna parmağı yakın çevrede, açık ve ulaşılabilir bir noktaya yerleştirildi. İşaretçiyi takip et.")
     end
 
