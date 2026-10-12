@@ -1121,7 +1121,7 @@ AddModule(function()
             cleaveUntil = os.clock() + 2.5
             applyAccessoryPositions()
         elseif name == "Dismantle" then
-            playBundledAnimation("Sukuna/Cleave.rbxm", "cleave", false)
+            playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
             cleaveUntil = os.clock() + 1.6
             applyAccessoryPositions()
         elseif name == "Fuuga" then
@@ -1161,7 +1161,7 @@ AddModule(function()
         task.spawn(function()
             for attempt = 1, 10 do
                 if not activeFigure or not activeFigure.Parent then return end
-                local track = playBundledAnimation("Sukuna/Sukuna Laugh.rbxm", "laugh", false)
+                local track = playBundledAnimation("Sukuna/SukunaLaugh.anim", "laugh", false)
                 if track then
                     laughAnimationTrack = track
                     return
