@@ -5158,13 +5158,17 @@ function HatReanimator.Start()
 				table.insert(CharHats, v)
 				local conn = nil
 				conn = v.AncestryChanged:Connect(function()
-					-- Accessories intentionally leave the dying Character during hat
-					-- reanimation. Keep tracking them while they remain alive in Workspace
-					-- so the rebuilt hat map can continue driving them after respawn.
-					if not v:IsDescendantOf(workspace) then
-						local i = table.find(CharHats, v)
-						if i then table.remove(CharHats, i) end
-					end
+					-- Accessories can briefly have Parent=nil while Roblox performs the
+					-- death/respawn transition. Wait before deciding that a hat is gone.
+					task.delay(1.5, function()
+						if not v:IsDescendantOf(workspace) and v.Parent ~= nil then
+							local i = table.find(CharHats, v)
+							if i then table.remove(CharHats, i) end
+						elseif v.Parent == nil and not v:FindFirstChild("Handle") then
+							local i = table.find(CharHats, v)
+							if i then table.remove(CharHats, i) end
+						end
+					end)
 				end)
 			end
 		elseif v:IsA("Tool") and v.Parent == Player.Character then
@@ -5563,7 +5567,8 @@ function HatReanimator.Start()
 			local hat = CharHats[i]
 			local handle = hat and hat:FindFirstChild("Handle")
 			if not hat or not hat:IsA("Accessory") or not handle
-				or not handle:IsA("BasePart") or not hat:IsDescendantOf(workspace) then
+				or not handle:IsA("BasePart")
+				or (hat.Parent ~= nil and not hat:IsDescendantOf(workspace)) then
 				table.remove(CharHats, i)
 			end
 		end
