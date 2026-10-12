@@ -133,14 +133,17 @@ do
 	end
 end
 
--- WILL THIS FIX CRASHES IDK ????????
+-- Preserve the native protected-call functions before wrapping them.
+-- Referencing the locally shadowed pcall/xpcall here would recurse until stack overflow,
+-- causing Reanimate.Start to fail and the UI to return to "Running: NONE".
+local nativePcall, nativeXpcall = pcall, xpcall
 local pcall = function(func, ...)
-	return pcall(function(...)
+	return nativePcall(function(...)
 		return func(...)
 	end, ...)
 end
 local xpcall = function(func, ...)
-	return xpcall(function(...)
+	return nativeXpcall(function(...)
 		return func(...)
 	end, ...)
 end
