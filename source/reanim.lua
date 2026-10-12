@@ -400,14 +400,10 @@ do
 		"glowingpala.graphic.png",
 	}
 	local redownloadeverything = SaveData.CDNVersion ~= CDNVersion
+	-- The legacy uiassets/ directory is not present in the current repository.
+	-- Do not force a download/failure screen forever just because optional legacy files
+	-- are absent locally; CDNVersion still allows a deliberate refresh when assets return.
 	local theresassetsmissing = redownloadeverything
-	for _,rfile in AllFileNames do
-		local fil = "NAMReanim/Assets/" .. rfile
-		local s, d = pcall(isfile, fil)
-		if not (s and d) then
-			theresassetsmissing = true
-		end
-	end
 	if theresassetsmissing then
 		local downloaded = 0
 		local skipped = 0
@@ -493,11 +489,13 @@ do
 			metadataDone = true
 		end)
 		local metadataDeadline = os.clock() + 12
+		local metadataHandled = false
 		while not metadataDone and os.clock() < metadataDeadline do task.wait(0.1) end
 		local s = metadataDone and metadataOk
 		if s and assetsof then
 			s, assetsof = pcall(HttpService.JSONDecode, HttpService, assetsof)
-			if s and assetsof then
+			if s and type(assetsof) == "table" then
+				metadataHandled = true
 				for i,file in assetsof do
 					if not table.find(AllFileNames, file.name) then
 						continue
@@ -531,6 +529,13 @@ do
 					theresassetsmissing = true
 				end
 			end
+		end
+		if not metadataHandled or assetsdownload == 0 then
+			-- Optional CDN art/sound bundle is currently missing from the repo. Continue
+			-- with built-in UI instead of reporting a false fatal download failure.
+			theresassetsmissing = false
+			Downloading.Text = "Optional UI assets unavailable; continuing..."
+			Downloading.BackgroundColor3 = Color3.new(0, 0, 0)
 		end
 		SaveData.CDNVersion = CDNVersion
 		if theresassetsmissing then
