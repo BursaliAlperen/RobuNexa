@@ -1,21 +1,39 @@
 # RobuNexa Reanimation Engines
 
-## Separate Gojo and Sukuna
+## Important: choose one reanimation owner
 
-The NAM built-in module loader registers Gojo and Sukuna as separate movesets. Do not merge their entries. The current `source/reanim.lua` keeps the built-in path list for both:
+The project has two separate entrypoints:
+
+- **NAM + movesets:** `source/reanim.lua`. This contains NAM's native reanimation APIs and loads Gojo and Sukuna as separate movesets.
+- **External engine selector:** `source/reanimation/engine.lua`. This is a standalone alternative for testing external engines.
+
+**Do not execute both entrypoints in the same session.** They both manage the local character rig and can fight over the character, accessories, animation controller, and death state.
+
+## Available external engines
+
+Edit the `ENGINE` value near the top of `engine.lua`. Only one option can run at a time.
+
+| Value | Upstream | Notes |
+|---|---|---|
+| `KRYPTON` | [KadeTheExploiter/Krypton](https://github.com/KadeTheExploiter/Krypton) | Recommended current option. Configures `PermanentDeath = true`; fling is disabled. |
+| `GELATEK` | [Gelatekussy/GelatekReanimate](https://github.com/Gelatekussy/GelatekReanimate) | Legacy limb handler. Its upstream warns it is unreliable in modern games. |
+| `GELATEK_EDIT` | [InfinityNess/GelatekReanimateEdit](https://github.com/InfinityNess/GelatekReanimateEdit) | Community fork; configured with permanent death enabled and fling/bullet modes disabled. |
+| `CATWARE_LEGACY` | [StrokeThePea/CatwareReanimate](https://github.com/StrokeThePea/CatwareReanimate) | Archived/discontinued. Compatibility/testing only. Change `CATWARE_TYPE` to `Raw`, `Fling`, `Bullet`, or `Godmode`. |
+
+Krypton is the default. Upstream projects may change or become unavailable, and external executor scripts cannot be validated in every Roblox experience from a repository commit.
+
+## NAM and movesets
+
+Gojo and Sukuna stay **separate** in NAM's module list:
+
 - `content/movesets/Gojo/module.lua`
 - `content/movesets/Sukuna/v_sukuna.lua`
 
-## Kade Krypton / Gelatek legacy selector
+The external selector does **not** automatically adapt the NAM-specific `Reanimate`, `HatReanimator`, or `LimbReanimator` APIs. Therefore, using an external engine does not imply that NAM's movesets are compatible with it. For NAM movesets and their existing hat/limb handling, use `source/reanim.lua) alone.
 
-`source/reanimation/engine.lua` is a standalone engine selector:
-- Default: KadeTheExploiter/Krypton with `PermanentDeath = true`.
-- Optional legacy mode: Gelatekussy/GelatekReanimate with `PermanentDeath = true`.
+## Sources
 
-Change `ENGINE` at the top of the file to `"GELATEK_LEGACY"` only when specifically testing the legacy engine. The Gelatek repository warns that its code no longer works reliably in modern games; Krypton is the recommended default.
-
-**Do not run this standalone selector alongside `source/reanim.lua`.** Both engines manage the local character and would conflict. The selector is not yet a drop-in replacement for NAM's internal `Reanimate`, `HatReanimator`, and `LimbReanimator` APIs, so NAM movesets are not automatically compatible with this standalone entrypoint. A full replacement requires an adapter/port and in-game validation; this repository change does not claim that integration is complete.
-
-Upstream references:
-- Krypton: https://github.com/KadeTheExploiter/Krypton
-- Gelatek legacy: https://github.com/Gelatekussy/GelatekReanimate
+- [Krypton README](https://github.com/KadeTheExploiter/Krypton)
+- [Gelatek legacy README](https://github.com/Gelatekussy/GelatekReanimate)
+- [Gelatek Edit README](https://github.com/InfinityNess/GelatekReanimateEdit)
+- [Catware Reanimate README](https://github.com/Gelatekussy/CatwareReanimate)
