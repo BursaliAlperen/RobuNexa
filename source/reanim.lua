@@ -8527,12 +8527,11 @@ local function ForceModuleReload(force)
 	else
 		InitLogsText.Text ..= "\n" .. table.concat(failureLines, "\n")
 	end
-	if string.find(InitLogsText.Text, "[ERROR]", 1, true) then
-		InitLogsText.Text ..= "\n[WARN] Init finished with errors; review the log above."
-		Util.Notify("Init finished with errors; check Init Logs")
+	if #failureLines > 0 then
+		InitLogsText.Text ..= "\n[WARN] Init finished with failures/warnings; review the entries above."
+		Util.Notify("Init finished with failures; check Init Logs")
 	else
-		InitLogsText.Text ..= "\n[LOG] Init complete!"
-		Util.Notify("Init complete")
+		Util.Notify("Init complete; no failures or warnings")
 	end
 	IsNAMFullyLoaded = true
 	if not Reanimate.Character then return end
