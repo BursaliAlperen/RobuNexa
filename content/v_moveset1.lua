@@ -1656,12 +1656,12 @@ AddModule(function()
 	m.Name = "dog"
 	m.Description = "Dog movement pack: Sleep, Sit, Dance and a Walk/Run toggle. Moving cancels emotes."
 	m.Assets = {
-		"DANCEDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/DANCEDAWG.anim",
-		"DOGRUN.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/DOGRUN.anim",
-		"JUMPDOG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/JUMPDOG.anim",
-		"SITDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/SITDAWG.anim",
-		"Sleepp.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/Sleepp.anim",
-		"IDLEDOGSMOOTH.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/IDLEDOGSMOOTH.anim",
+		"Dog/DANCEDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/DANCEDAWG.anim",
+		"Dog/DOGRUN.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/DOGRUN.anim",
+		"Dog/JUMPDOG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/JUMPDOG.anim",
+		"Dog/SITDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/SITDAWG.anim",
+		"Dog/Sleepp.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/Sleepp.anim",
+		"Dog/IDLEDOGSMOOTH.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/IDLEDOGSMOOTH.anim",
 	}
 	local animationFiles = {
 		Idle = "Dog/IDLEDOGSMOOTH.anim",
