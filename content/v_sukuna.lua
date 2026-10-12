@@ -83,7 +83,7 @@ AddModule(function()
         if not candidate then
             pcall(function() candidate = descriptionEntry.Instance end)
         end
-        if candidate and candidate:IsA("Accessory") then
+        if typeof(candidate) == "Instance" and candidate:IsA("Accessory") then
             if candidate.Parent == character or candidate:IsDescendantOf(character) then
                 return candidate
             end
