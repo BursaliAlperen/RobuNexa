@@ -23,6 +23,7 @@ AddModule(function()
  local player = game:GetService("Players").LocalPlayer
  local UIS = game:GetService("UserInputService")
  local RunService = game:GetService("RunService")
+ local ContextActionService = game:GetService("ContextActionService")
  local TweenService = game:GetService("TweenService")
  local Lighting = game:GetService("Lighting")
  local Debris = game:GetService("Debris")
@@ -31,6 +32,8 @@ AddModule(function()
  local inputConn, updateConn
  local originalSpeed, originalFov, originalClock
  local spawned = {}
+ local moveSine = 0
+ local startupLaughUntil = 0
  local busy = false
  local keys = {Awaken="Z", Shrine="X", Furnance="C", WorldCut="V", Rush="B", Laugh="N"}
  local abilityNames = {Awaken="Awaken", Shrine="Malevolent Shrine", WorldCut="Dismantle", Rush="Rush", Furnance="Fuuga", Laugh="Laugh"}
@@ -332,8 +335,6 @@ AddModule(function()
   end
   -- ContextActionService handles both keyboard and touch input, preventing duplicate activations.
  end
- local moveSine = 0
- local startupLaughUntil = 0
  -- Linked Sword's joint pose helper must live in this module's scope;
  -- locals declared inside another moveset are not visible here.
  local function SetC0C1Joint(j, c0, c1, scale)
