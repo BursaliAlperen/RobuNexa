@@ -96,15 +96,21 @@ AddModule(function()
   local fileName = animationFiles[name]
   local ok, track = false, nil
   if fileName then
-   -- Match the dog moveset: read the already-cached .anim directly and fail
-   -- fast if the asset is not ready, rather than freezing input for 12 seconds.
+   -- User-triggered dog animations usually have time to download before play;
+   -- Sukuna's startup animation runs immediately after Init, so allow the async
+   -- asset cache a short window without blocking the reanimation update loop.
    local assetPath = getAssetPath(fileName)
+   local deadline = os.clock() + 8
    local exists = false
-   pcall(function() exists = isfile(assetPath) end)
+   repeat
+    pcall(function() exists = isfile(assetPath) end)
+    if exists then break end
+    task.wait(0.1)
+   until os.clock() >= deadline
    if exists then
     ok, track = pcall(function() return AnimLib.Track.fromfile(assetPath) end)
    else
-    ok, track = false, "asset did not finish downloading: " .. fileName
+    ok, track = false, "asset cache timeout: " .. fileName
    end
    if not ok then
     pcall(function() Util.Notify("Sukuna animation load error (" .. name .. "): " .. tostring(track)) end)
@@ -307,13 +313,12 @@ AddModule(function()
   originalSpeed=humanoid and humanoid.WalkSpeed or 16
   -- Startup sequence: Sukuna laugh first, then transition to Linked Sword idle.
   startupLaughUntil = os.clock() + 2.6
-  if humanoid then
-   humanoid.WalkSpeed = 0
-  end
   task.defer(function()
    if activeFigure == figure then
     sound("Laugh")
     local duration = playAnimation("Awaken", 1.1, false) or 0
+    if activeFigure ~= figure then return end
+    if duration > 0 and humanoid and humanoid.Parent then humanoid.WalkSpeed = 0 end
     task.delay(math.max(1.5, duration + 0.25), function()
      if activeFigure == figure then
       if activeAnimName == "Awaken" then stopAnimation() end
