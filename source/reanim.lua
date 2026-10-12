@@ -9,7 +9,7 @@ NAM — maintained and rebranded by mamalalanam.
 Original-source and third-party notices are preserved in the README.
 ]]
 
-local NAMVersion = "1.0.23 BETA"
+local NAMVersion = "1.0.24 BETA"
 if _G.NAMLoaded or _G["U" .. "hhhhhhLoaded"] then
 	warn("[NAM] v" .. NAMVersion .. " did not start: v" .. tostring(_G.NAMVersion or "older/unknown") .. " is already active. Leave and rejoin to apply the update.")
 	return
@@ -7524,6 +7524,14 @@ end
 local function AddMoveset(m, moduleFileName, moduleSource)
 	if type(m) == "table" then
 		if not m.Name then return end
+		-- Avoid duplicate entries from a built-in module and an old local USER copy.
+		local normalizedName = string.lower(tostring(m.Name)):gsub("%s+", "")
+		for _, existing in ipairs(MovementStyles) do
+			local existingName = string.lower(tostring(existing.Name or "")):gsub("%s+", "")
+			if existingName == normalizedName then
+				return false
+			end
+		end
 		if not m.Description then return end
 		if not m.Config then return end
 		if not m.Assets then return end
