@@ -3891,10 +3891,28 @@ function LimbReanimator.Start()
 		if not accessory or not accessory:IsA("Accessory") then return false end
 		local ok, accessoryType = pcall(function() return accessory.AccessoryType end)
 		if ok and accessoryType == Enum.AccessoryType.Neck then return true end
+
+		-- Some layered/custom neck items are tagged as Unknown or Other.
+		-- Their attachment names are a more reliable fallback than the item name.
+		local handle = accessory:FindFirstChild("Handle")
+		if handle then
+			for _, descendant in ipairs(handle:GetDescendants()) do
+				if descendant:IsA("Attachment") then
+					local attachmentName = string.lower(descendant.Name)
+					if attachmentName == "neckattachment"
+						or attachmentName == "neckrigattachment" then
+						return true
+					end
+				end
+			end
+		end
+
 		local name = string.lower(accessory.Name or "")
-		return name:find("necklace", 1, true) ~= nil
-			or name:find("choker", 1, true) ~= nil
+		return name:find("neck", 1, true) ~= nil
 			or name:find("necklace", 1, true) ~= nil
+			or name:find("choker", 1, true) ~= nil
+			or name:find("collar", 1, true) ~= nil
+		or name:find("chain", 1, true) ~= nil
 	end
 	local function PersistentAccessoryKey(accessory)
 		if not accessory or not accessory:IsA("Accessory") then return nil end
@@ -5292,9 +5310,17 @@ function HatReanimator.Start()
 			end)
 		elseif v:IsA("Accessory") and v.Parent == Player.Character then
 			-- Cache neck accessories before the reanimation transition, but never
-			-- enlist them as physics hats: doing so can detach/destroy necklaces.
+			-- enlist them as physics hats: they must stay attached to the avatar.
 			CachePersistentAccessory(v)
 			if IsNeckAccessory(v) then
+				local existingIndex = table.find(CharHats, v)
+				if existingIndex then table.remove(CharHats, existingIndex) end
+				local handle = v:FindFirstChild("Handle")
+				if handle and handle:IsA("BasePart") then
+					handle.CanCollide = false
+					handle.CanTouch = false
+					handle.CanQuery = false
+				end
 				return
 			end
 			if not table.find(CharHats, v) then
