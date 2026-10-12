@@ -1,0 +1,42 @@
+name: Extract Sukuna Keyframe Animations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "content/models/Sukuna/*.rbxm"
+      - "tools/extract_sukuna_anims.py"
+      - ".github/workflows/extract-sukuna-anims.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Build Roblox model converter
+        run: |
+          git clone --depth 1 https://github.com/rojo-rbx/rbx-dom.git /tmp/rbx-dom
+          cd /tmp/rbx-dom
+          cargo build --release -p rbx_util
+          mkdir -p "$GITHUB_WORKSPACE/target/release"
+          cp target/release/rbx_util "$GITHUB_WORKSPACE/target/release/rbx_util"
+      - name: Extract real KeyframeSequence data
+        run: python3 tools/extract_sukuna_anims.py
+      - name: Commit generated .anim files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/animations/Sukuna/*.anim
+          if git diff --cached --quiet; then
+            echo "No animation changes to commit."
+          else
+            git commit -m "Extract Sukuna KeyframeSequences as real anim files"
+            git push
+          fi
