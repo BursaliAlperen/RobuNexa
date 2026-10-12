@@ -6627,8 +6627,8 @@ do
 			ReanimateText.Text = "Starting: " .. Reanimate.Current.Name
 
 			local selected = Reanimate.Current
-			local startFinished = false
 			local startError = nil
+			local startReturned = false
 			task.spawn(function()
 				local ok, err
 				if type(selected) ~= "table" or type(selected.Start) ~= "function" then
@@ -6637,35 +6637,38 @@ do
 				else
 					ok, err = xpcall(function()
 						selected.Start()
-					end, debug.traceback)
+					end, function(message)
+						local trace = (debug and debug.traceback) and debug.traceback(tostring(message), 2) or tostring(message)
+						return trace
+					end)
 				end
 				if not ok then
 					startError = tostring(err)
-					warn("[NAM Reanimate] Start failed:\\n" .. startError)
+					warn("[NAM Reanimate] Start failed:\n" .. startError)
 					Reanimate.Stopping = true
 					Reanimate.Starting = false
 				end
-				startFinished = true
+				startReturned = true
 			end)
 
 			local startedAt = os.clock()
-			while Reanimate.Starting and not startFinished and os.clock() - startedAt < 30 do
+			while Reanimate.Starting and not startError and os.clock() - startedAt < 30 do
 				task.wait(0.1)
 			end
 
-			if startError or (Reanimate.Starting and not startFinished) then
-				if not startError then
-					startError = "Startup timed out after 30 seconds. Check the executor console for the first error."
-					warn("[NAM Reanimate] " .. startError)
-				end
+			if startError or Reanimate.Starting then
+				local reason = startError or "Startup timed out after 30 seconds while the reanimator was still initializing."
+				warn("[NAM Reanimate] " .. reason)
 				Reanimate.Stopping = true
 				Reanimate.Starting = false
 				Reanimate.Current = nil
 				HumanoidLASetHookState(false)
-				ReanimateText.Text = "Running: NONE (startup failed)"
+				ReanimateText.Text = "Startup failed: " .. string.sub(reason:gsub("[%r\n]+", " "), 1, 90)
 				ReanimateStartButtonText.Text = "Reanimate"
 			else
-				Reanimate.Current.Running = true
+				if selected then
+					selected.Running = true
+				end
 				task.wait(1)
 				ReanimateStartButtonText.Text = "Deanimate"
 			end
