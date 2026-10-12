@@ -89,7 +89,6 @@ AddModule(function()
     local abilityCooldowns = {Cleave = 5, Dismantle = 7, Combo = 15}
     local abilityReadyAt = {}
     local abilityTargets = {}
-    local targetMarker
     local fuugaTargetPosition
     local domainStartedAt = 0
     local cutsceneActive = false
@@ -813,47 +812,6 @@ AddModule(function()
         local result = workspace:Raycast(ray.Origin, ray.Direction * 700, params)
         if result then return result.Position end
         return ray.Origin + ray.Direction * 80
-    end
-
-    -- Skill targeting is intentionally marker-free: no red ring/finger marker is
-    -- spawned when Cleave, Dismantle, or Combo is used.
-    local function showTargetMarker(position, abilityName)
-        return nil
-        -- Legacy implementation below is unreachable and retained only to keep
-        -- this patch narrowly scoped; it is removed from all skill call sites.
-        if targetMarker then targetMarker:Destroy() end
-        local folder = Instance.new("Folder")
-        folder.Name = "SukunaTargetMarker_Local"
-        folder.Parent = workspace
-        targetMarker = folder
-        local ring = Instance.new("Part")
-        ring.Name = "TargetRing"
-        ring.Shape = Enum.PartType.Cylinder
-        ring.Size = Vector3.new(0.16, 5, 5)
-        ring.Material = Enum.Material.Neon
-        ring.Color = Color3.fromRGB(195, 30, 50)
-        ring.Transparency = 0.12
-        ring.Anchored = true
-        ring.CanCollide, ring.CanTouch, ring.CanQuery = false, false, false
-        ring.CFrame = CFrame.new(position + Vector3.new(0, 0.12, 0)) * CFrame.Angles(0, 0, math.rad(90))
-        ring.Parent = folder
-        local finger = Instance.new("Part")
-        finger.Name = "ClientFingerMarker"
-        finger.Size = Vector3.new(0.32, 1.3, 0.32)
-        finger.Material = Enum.Material.Neon
-        finger.Color = Color3.fromRGB(255, 45, 68)
-        finger.Anchored = true
-        finger.CanCollide, finger.CanTouch, finger.CanQuery = false, false, false
-        finger.CFrame = CFrame.new(position + Vector3.new(0, 1.15, 0)) * CFrame.Angles(0, 0, math.rad(18))
-        finger.Parent = folder
-        local light = Instance.new("PointLight")
-        light.Color, light.Range, light.Brightness = finger.Color, 12, 2
-        light.Parent = finger
-        task.delay(2.8, function()
-            if targetMarker == folder then targetMarker = nil end
-            if folder.Parent then folder:Destroy() end
-        end)
-        notify(abilityName .. ": target marked on the client.")
     end
 
     local function playSkillAnimation(animationId)
@@ -1617,7 +1575,6 @@ AddModule(function()
         -- Skill controls are GUI-only; no Backpack Tools are created.
 
         skillButtons = {}
-        if targetMarker then targetMarker:Destroy(); targetMarker = nil end
         activeFigure, root = nil, nil
         accessoryInstances, presentIds, overrideById = {}, {}, {}
         lastHatCFrames = {}
