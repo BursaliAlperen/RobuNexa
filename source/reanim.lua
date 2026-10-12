@@ -9,7 +9,7 @@ NAM — maintained and rebranded by mamalalanam.
 Original-source and third-party notices are preserved in the README.
 ]]
 
-local NAMVersion = "1.0.22 BETA"
+local NAMVersion = "1.0.23 BETA"
 if _G.NAMLoaded or _G["U" .. "hhhhhhLoaded"] then
 	warn("[NAM] v" .. NAMVersion .. " did not start: v" .. tostring(_G.NAMVersion or "older/unknown") .. " is already active. Leave and rejoin to apply the update.")
 	return
@@ -8159,15 +8159,13 @@ local function ForceModuleReload(force)
 	-- Gojo and Sukuna are built-in movesets on desktop and mobile.
 	local filesofbuiltins = {"movesets/Gojo/module.lua", "movesets/Sukuna/v_sukuna.lua", "movesets/MoveSet1/module.lua", "movesets/MoveSet2/module.lua", "movesets/Dog/module.lua", "dances/BuiltIn1/module.lua", "dances/BuiltIn2/module.lua", "systems/d_limbmap.lua", "systems/d_hatsmap.lua"}
 	local filesofbuiltins_m = {"movesets/Gojo/module.lua", "movesets/Sukuna/v_sukuna.lua", "movesets/MoveSet1/module.lua", "movesets/MoveSet2/module.lua", "movesets/Dog/module.lua", "dances/BuiltIn1/module.lua", "dances/BuiltIn2/module.lua"}
-	-- Explicitly invalidate nested module hashes. The old /contents/content/ call
-	-- only returns root entries, so it cannot notice changes inside subfolders.
-	for _, modulePath in ipairs(filesofbuiltins) do
-		if string.find(modulePath, "/", 1, true) then
-			SaveData.ContentHash[modulePath] = nil
-		end
-	end
 	local filesofbuiltins_d = {"systems/d_limbmap.lua", "systems/d_hatsmap.lua"}
 	SaveData.ContentHash = SaveData.ContentHash or {}
+	-- Explicitly invalidate nested module hashes. The /contents/content/ request
+	-- returns only root entries, so it cannot verify files inside subfolders.
+	for _, modulePath in ipairs(filesofbuiltins) do
+		SaveData.ContentHash[modulePath] = nil
+	end
 	xpcall(function()
 		local s, resp = pcall(request, {
 			Method = "GET",
@@ -8296,7 +8294,10 @@ local function ForceModuleReload(force)
 			elseif string.find(x, "Gojo", 1, true) then
 				InitLogsText.Text ..= "\n[LOG] Gojo reached AddMoveset and was registered."
 			elseif string.find(x, "Sukuna", 1, true) then
-				InitLogsText.Text ..= "\n[LOG] Sukuna moveset source loaded and was passed to AddModules."
+				if movesetsAdded == 0 then
+					error(x .. " downloaded but registered zero movesets.")
+				end
+				InitLogsText.Text ..= "\n[LOG] Sukuna registered successfully (" .. tostring(movesetsAdded) .. " moveset)."
 			end
 		end, function(msg)
 			InitLogsText.Text ..= "\n[ERROR] Failed to load VANILLA " .. x .. ": See traceback below."
