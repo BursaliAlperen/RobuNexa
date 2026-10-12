@@ -384,13 +384,15 @@ AddModule(function()
    rht=CFrame.new(0.573,-1.805,-0.374,0.999,-0.037,0.013,0.039,0.981,-0.187,-0.006,0.188,0.982)
    lht=CFrame.new(-0.433,-1.951,0.175,1,0,0,0,0.984,0.173,0,-0.173,0.984)
   elseif hum.MoveDirection.Magnitude > 0.05 then
-   local phase = moveSine / 6
-   rt=CFrame.new(-0.014,0.023,0.020,1,0,0,0,1,0,0,0,1)*CFrame.Angles(-0.2,math.rad(-5*math.cos(phase)),0)
+   local isRunning = hum.WalkSpeed >= 20
+   local phase = moveSine / (isRunning and 4 or 6)
+   local swing = isRunning and 1.35 or 1
+   rt=CFrame.new(-0.014,0.023,0.020,1,0,0,0,1,0,0,0,1)*CFrame.Angles(isRunning and -0.28 or -0.2,math.rad(-5*math.cos(phase)),0)
    nt=CFrame.new(0,1.499,0,0.999,0,-0.042,0,1,0,0.042,0,0.999)
-   rst=CFrame.new(1.668,0.125,0.167,0.975,-0.217,-0.034,0.22,0.967,0.121,0.006,-0.125,0.992)*CFrame.new(0,0,0.1*math.cos(phase))*CFrame.Angles(math.rad(-15*math.cos(phase)),0,0)
-   lst=CFrame.new(-1.589,0.026,-0.146,0.986,0.166,-0.008,-0.166,0.981,-0.095,-0.008,0.095,0.995)*CFrame.new(0,0,-0.15*math.cos(phase))*CFrame.Angles(math.rad(15*math.cos(phase)),0,0)
-   rht=CFrame.new(0.5,-1.64-0.4*math.cos(phase),1.0*math.sin(phase)/3)*CFrame.Angles(math.rad(-50*math.sin(phase)),math.rad(-3),0)
-   lht=CFrame.new(-0.5,-1.64+0.4*math.cos(phase),-1.0*math.sin(phase)/3)*CFrame.Angles(math.rad(50*math.sin(phase)),math.rad(3),0)
+   rst=CFrame.new(1.668,0.125,0.167,0.975,-0.217,-0.034,0.22,0.967,0.121,0.006,-0.125,0.992)*CFrame.new(0,0,0.1*swing*math.cos(phase))*CFrame.Angles(math.rad(-15*swing*math.cos(phase)),0,0)
+   lst=CFrame.new(-1.589,0.026,-0.146,0.986,0.166,-0.008,-0.166,0.981,-0.095,-0.008,0.095,0.995)*CFrame.new(0,0,-0.15*swing*math.cos(phase))*CFrame.Angles(math.rad(15*swing*math.cos(phase)),0,0)
+   rht=CFrame.new(0.5,-1.64-0.4*swing*math.cos(phase),1.0*swing*math.sin(phase)/3)*CFrame.Angles(math.rad(-50*swing*math.sin(phase)),math.rad(-3),0)
+   lht=CFrame.new(-0.5,-1.64+0.4*swing*math.cos(phase),-1.0*swing*math.sin(phase)/3)*CFrame.Angles(math.rad(50*swing*math.sin(phase)),math.rad(3),0)
   else
    local bob = 0.05*math.cos(moveSine/25)
    rt=CFrame.new(-0.014,0.023,0.020,0.866,0,-0.5,0,1,0,0.5,0,0.866)*CFrame.new(0,bob,0)
