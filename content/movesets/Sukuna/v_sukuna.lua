@@ -13,7 +13,6 @@ AddModule(function()
     -- Match Gojo's asset loader contract: logical local path @ raw GitHub URL.
     -- These are NAM AnimLib binary .anim files, not .rbxm models.
     m.Assets = {
-        "Sukuna/DomainCombo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/DomainCombo.anim",
         "Sukuna/MalevolentShrine.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/MalevolentShrine.anim",
         "Sukuna/FlameArrow.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/FlameArrow.anim",
         "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
@@ -650,7 +649,7 @@ AddModule(function()
         -- Two-clip sequence: Combo intro, then Domain Expansion. Both clips are
         -- loaded from the bundled Roblox models; no placeholder asset IDs.
         task.spawn(function()
-            local first = playBundledAnimation("Sukuna/DomainCombo.anim", "combo", false)
+            local first = playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
             if first then
                 local timeout = os.clock() + math.max((first.Duration or 0) + 1.25, 15)
                 while first.IsPlaying and os.clock() < timeout and cutsceneActive do
@@ -855,7 +854,7 @@ AddModule(function()
             -- Combo must use its converted .anim clip; the procedural shoulder swing
             -- can override the clip on the same Motor6D, so only use it as a fallback.
             if isCombo then
-                local comboTrack = playBundledAnimation("Sukuna/DomainCombo.anim", "combo", false)
+                local comboTrack = playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
                 if not comboTrack then
                     notify("Combo animation failed to load; using fallback arm swing.")
                     playSkillAnimation()
