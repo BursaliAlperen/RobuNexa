@@ -1,22 +1,30 @@
 --[[
- _   _   _    __  __
-| \ | | / \  |  \/  |
-|  \| |/ _ \ | |\/| |
-| |\  / ___ \| |  | |
-|_| \/_/_/   \_\_|  |_|
+ ...    :::::        ::        ::        ::        ::        ::        
+ ;;     ;;;;;;       ;;;       ;;;       ;;;       ;;;       ;;;       
+[['     [[[[[[[cc,,. [[[[cc,,. [[[[cc,,. [[[[cc,,. [[[[cc,,. [[[[cc,,. 
+$$      $$$$$$"""$$$ $$$"""$$$ $$$"""$$$ $$$"""$$$ $$$"""$$$ $$$"""$$$ 
+88    .d888888   "88o888   "88o888   "88o888   "88o888   "88o888   "88o
+ "YmmMMMM""MMM    YMMMMM    YMMMMM    YMMMMM    YMMMMM    YMMMMM    YMM
+       "DREAMS WILL NEVER COME TRUE UNTIL YOU ACTUALLY MAKE IT."       
 
-NAM — maintained and rebranded by mamalalanam.
-Original-source and third-party notices are preserved in the README.
+       Code:    STEVETHEREALONE
+       GFX:     STEVETHEREALONE
+                AALib
+                some random generators
+       Music:   Dubmood
+                4mat
+                MASTER BOOT RECORD
+
+Thou shalth not steal. Point at this source if you used a snippet here.
 ]]
 
-local NAMVersion = "1.0.26 BETA"
-if _G.NAMLoaded or _G["U" .. "hhhhhhLoaded"] then
-	warn("[NAM] v" .. NAMVersion .. " did not start: v" .. tostring(_G.NAMVersion or "older/unknown") .. " is already active. Leave and rejoin to apply the update.")
-	return
-end
-_G.NAMLoaded = true
-_G["U" .. "hhhhhhLoaded"] = true
-_G.NAMVersion = NAMVersion
+local _RobuNexaEnv = (getgenv and getgenv()) or shared or _G
+if _G.UhhhhhhLoaded or _G.NAMLoaded or _RobuNexaEnv.RobuNexaKryptonRunning or _RobuNexaEnv.RobuNexaSyntaxRunning then return end
+
+if _G.UhhhhhhLoaded then return end
+_G.UhhhhhhLoaded = true
+
+local UhhhhhhVersion = "1.0.9 BETA"
 
 local Debris = cloneref(game:GetService("Debris"))
 local CoreGui = cloneref(game:GetService("CoreGui"))
@@ -30,13 +38,10 @@ local TweenService = cloneref(game:GetService("TweenService"))
 local TextChatService = cloneref(game:GetService("TextChatService"))
 local UserInputService = cloneref(game:GetService("UserInputService"))
 local ContextActionService = cloneref(game:GetService("ContextActionService"))
+local VRService = cloneref(game:GetService("VRService"))
+
 local Util = {}
-Util.RandomIndex = function(list)
-	if type(list) ~= "table" then return nil end
-	local count = #list
-	if count < 1 then return nil end
-	return math.random(1, count)
-end
+
 Util.RandomString = function(length)
 	length = length or math.random(32, 256)
 	local str = ""
@@ -57,7 +62,7 @@ Util.DeepcopyTable = function(t)
 end
 Util.Notify = function(text)
 	StarterGui:SetCore("SendNotification", {
-		Title = "NAM",
+		Title = "NAM Reanimate",
 		Text = text,
 		Duration = 5
 	})
@@ -71,9 +76,7 @@ request = request or (http and http.request)
 do
 	local function diefatal(msg)
 		Util.Notify("Executor not supported. " .. msg)
-		_G.NAMLoaded = nil
-		_G["U" .. "hhhhhhLoaded"] = nil
-		_G.NAMVersion = nil
+		_G.UhhhhhhLoaded = nil
 		error("fatal error cant start")
 	end
 	local function ismissing(func)
@@ -147,6 +150,68 @@ end
 local b_getfenv = getfenv
 
 local Player = Players.LocalPlayer
+-- NAM compatibility diagnostics: reports evidence only; it never changes the character.
+local function RunCompatibilityCheck()
+	task.spawn(function()
+		local knownPlaces = {
+			[654732683] = {name = "Car Crushers 2", rig = "R6"},
+			[5683833663] = {name = "Ragdoll Engine", rig = "R6/R15"},
+			[112399477218954] = {name = "Circuit Board", rig = "R6/R15"},
+			[81239378558719] = {name = "Hide the body", rig = "R6/R15"},
+		}
+		local placeId = game.PlaceId
+		local known = knownPlaces[placeId]
+		local character = Player.Character or Player.CharacterAdded:Wait()
+		local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid", 10)
+		if not humanoid then
+			Util.Notify("Uyumluluk: Humanoid bulunamadi. Karakter hazir degil.")
+			return
+		end
+
+		local rig = humanoid.RigType == Enum.HumanoidRigType.R6 and "R6" or "R15"
+		local missing = {}
+		local requiredParts = rig == "R6"
+			and {"HumanoidRootPart", "Head", "Torso"}
+			or {"HumanoidRootPart", "Head", "UpperTorso", "LowerTorso"}
+		for _, partName in ipairs(requiredParts) do
+			if not character:FindFirstChild(partName) then
+				table.insert(missing, partName)
+			end
+		end
+		local usableAccessories = 0
+		for _, item in ipairs(character:GetChildren()) do
+			if item:IsA("Accessory") then
+				local handle = item:FindFirstChild("Handle")
+				if handle and handle:IsA("BasePart") then
+					usableAccessories += 1
+				end
+			end
+		end
+
+		if known then
+			if known.rig ~= "R6/R15" and known.rig ~= rig then
+				Util.Notify("Uyumluluk: " .. known.name .. " listede, fakat bu oyun icin " .. known.rig .. " gerekiyor. Senin rig: " .. rig .. ". Destek garanti degil.")
+			else
+				Util.Notify("Uyumluluk: " .. known.name .. " bilinen oyun listesinde. Rig: " .. rig .. ". Bu, mevcut NAM surumunde kesin calisma garantisi degildir.")
+			end
+		else
+			Util.Notify("Uyumluluk: Bu PlaceId bilinen listede yok. Rig: " .. rig .. ". Oyun aday olabilir; destek dogrulanmadi.")
+		end
+
+		if #missing > 0 then
+			Util.Notify("Karakter kontrolu: Eksik parcalar: " .. table.concat(missing, ", ") .. ". Reanimate sorun cikarabilir.")
+		elseif usableAccessories == 0 then
+			Util.Notify("Karakter kontrolu: Handle iceren aksesuar yok. Sapka/uzuv reanimate yontemi bu oyunda calismayabilir.")
+		else
+			Util.Notify("Karakter kontrolu: Temel parcalar tamam; Handle'li aksesuar: " .. tostring(usableAccessories) .. ". Bu yalnizca on kontroldur.")
+		end
+
+		-- Voice-chat visibility cannot be reliably inferred client-side here.
+		Util.Notify("Not: Sesli sohbet kisitlamasi otomatik dogrulanamiyor; diger oyuncularda gorunurluk test edilmeli.")
+	end)
+end
+RunCompatibilityCheck()
+
 
 if not game:IsLoaded() then
 	local notLoaded = Instance.new("Message")
@@ -155,7 +220,7 @@ if not game:IsLoaded() then
 	end, function()
 		notLoaded.Parent = workspace
 	end)
-	notLoaded.Text = "NAM is waiting for the game to load"
+	notLoaded.Text = "NAM Reanimate is waiting for the game to load"
 	game.Loaded:Wait()
 	for i=1, 60 do
 		while task.wait() > 1 / 10 do end
@@ -276,7 +341,7 @@ Util.QueryPlayerSelector = function(query, excludespeaker)
 	return nil
 end
 
-local IsNAMFullyLoaded = false
+local IsUhhhhhhFullyLoaded = false
 
 local SCREENGUI = Util.Instance("ScreenGui")
 SCREENGUI.IgnoreGuiInset = true
@@ -302,27 +367,9 @@ UIMainFrame.ZIndex = 2147483647
 
 local SaveData = {}
 do
-	pcall(makefolder, "NAMReanim")
-	pcall(writefile, "NAMReanim/.nomedia", "")
-	local SaveDataFilename = "NAMReanim/tree.ehehetilde"
-	local LegacyRoot = "U" .. "hhhhhhReanim"
-	if not isfile(SaveDataFilename) then
-		local legacySaveOk, legacySave = pcall(readfile, LegacyRoot .. "/tree.ehehetilde")
-		if legacySaveOk and legacySave then pcall(writefile, SaveDataFilename, legacySave) end
-	end
-	pcall(makefolder, "NAMReanim/Modules")
-	local legacyModulesOk, legacyModules = pcall(listfiles, LegacyRoot .. "/Modules")
-	if legacyModulesOk and type(legacyModules) == "table" then
-		for _, legacyPath in legacyModules do
-			local moduleName = string.match(legacyPath, "([^/]+)$")
-			if moduleName and isfile(legacyPath) and not isfile("NAMReanim/Modules/" .. moduleName) then
-				local moduleOk, moduleData = pcall(readfile, legacyPath)
-				if moduleOk and moduleData then
-					pcall(writefile, "NAMReanim/Modules/" .. moduleName, moduleData)
-				end
-			end
-		end
-	end
+	pcall(makefolder, "UhhhhhhReanim")
+	pcall(writefile, "UhhhhhhReanim/.nomedia", "")
+	local SaveDataFilename = "UhhhhhhReanim/tree.ehehetilde"
 	local s, data = pcall(readfile, SaveDataFilename)
 	if s and data then
 		s, data = pcall(HttpService.JSONDecode, HttpService, data)
@@ -355,15 +402,15 @@ do
 			end
 		end
 	end)
-	pcall(makefolder, "NAMReanim/Assets")
-	pcall(makefolder, "NAMReanim/Modules")
-	pcall(makefolder, "NAMReanim/BuiltinModules")
-	pcall(makefolder, "NAMReanim/Content")
-	pcall(makefolder, "NAMReanim/Content/Anims")
-	pcall(makefolder, "NAMReanim/Content/Sounds")
-	pcall(makefolder, "NAMReanim/Content/Images")
-	pcall(makefolder, "NAMReanim/Content/Models")
-	pcall(makefolder, "NAMReanim/Content/Unknown")
+	pcall(makefolder, "UhhhhhhReanim/Assets")
+	pcall(makefolder, "UhhhhhhReanim/Modules")
+	pcall(makefolder, "UhhhhhhReanim/BuiltinModules")
+	pcall(makefolder, "UhhhhhhReanim/Content")
+	pcall(makefolder, "UhhhhhhReanim/Content/Anims")
+	pcall(makefolder, "UhhhhhhReanim/Content/Sounds")
+	pcall(makefolder, "UhhhhhhReanim/Content/Images")
+	pcall(makefolder, "UhhhhhhReanim/Content/Models")
+	pcall(makefolder, "UhhhhhhReanim/Content/Unknown")
 end
 
 do
@@ -396,72 +443,33 @@ do
 		"fr_keygen31.ft2.mp3",
 		"lightinursoul.graphic.png",
 		"letriangul.graphic.png",
-		"wearegenesis.graphic.png",
 		"glowingpala.graphic.png",
 	}
 	local redownloadeverything = SaveData.CDNVersion ~= CDNVersion
-	-- The legacy uiassets/ directory is not present in the current repository.
-	-- Do not force a download/failure screen forever just because optional legacy files
-	-- are absent locally; CDNVersion still allows a deliberate refresh when assets return.
 	local theresassetsmissing = redownloadeverything
+	for _,rfile in AllFileNames do
+		local fil = "UhhhhhhReanim/Assets/" .. rfile
+		local s, d = pcall(isfile, fil)
+		if not (s and d) then
+			theresassetsmissing = true
+		end
+	end
 	if theresassetsmissing then
 		local downloaded = 0
 		local skipped = 0
 		local assetsdownload = 0
 		local downloadfile = function(meta)
-			local fil = "NAMReanim/Assets/" .. tostring(meta.name or "")
-			if not meta.name or meta.name == "" then
-				skipped += 1
-				downloaded += 1
-				return
-			end
+			local fil = "UhhhhhhReanim/Assets/" .. meta.name
 			if not redownloadeverything then
-				local existsOk, exists = pcall(isfile, fil)
-				if existsOk and exists then
+				local s, d = pcall(isfile, fil)
+				if s and d then
 					downloaded += 1
 					return
 				end
 			end
-
-			local urls = {}
-			if type(meta.download_url) == "string" and meta.download_url ~= "" then
-				table.insert(urls, meta.download_url)
-			end
-			table.insert(urls, "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/uiassets/" .. meta.name)
-			local body, lastError
-			for attempt = 1, 3 do
-				for _, url in ipairs(urls) do
-					local ok, result = pcall(function()
-						local response = request({ Url = url, Method = "GET" })
-						if type(response) ~= "table" then error("HTTP request returned no response") end
-						local status = tonumber(response.StatusCode or response.Status or 0)
-						if status < 200 or status >= 300 then error("HTTP status " .. tostring(status)) end
-						local data = response.Body
-						if type(data) ~= "string" or #data == 0 then error("empty response body") end
-						return data
-					end)
-					if ok and type(result) == "string" and #result > 0 then
-						body = result
-						break
-					else
-						lastError = tostring(result)
-					end
-				end
-				if body then break end
-				task.wait(0.35 * attempt)
-			end
-			if body then
-				pcall(makefolder, "NAMReanim")
-				pcall(makefolder, "NAMReanim/Assets")
-				local writeOk, writeError = pcall(writefile, fil, body)
-				if not writeOk then
-					skipped += 1
-					warn("[NAM] Asset write failed: " .. tostring(meta.name) .. " :: " .. tostring(writeError))
-				end
-			else
-				skipped += 1
-				warn("[NAM] Asset download failed: " .. tostring(meta.name) .. " :: " .. tostring(lastError))
-			end
+			if not pcall(function()
+				writefile(fil, game:HttpGet(meta.download_url))
+			end) then skipped += 1 end
 			downloaded += 1
 		end
 		local Downloading = Util.Instance("TextLabel", UIMainFrame)
@@ -481,61 +489,26 @@ do
 			Size = UDim2.new(1, 0, 0, 32)
 		}):Play()
 		task.wait(0.5)
-		-- Fetching GitHub metadata synchronously can hang forever in some executors.
-		-- Run it separately and cap the wait so the UI can always close.
-		local metadataDone, metadataOk, assetsof = false, false, nil
-		task.spawn(function()
-			metadataOk, assetsof = pcall(game.HttpGet, game, "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/uiassets/")
-			metadataDone = true
-		end)
-		local metadataDeadline = os.clock() + 12
-		local metadataHandled = false
-		while not metadataDone and os.clock() < metadataDeadline do task.wait(0.1) end
-		local s = metadataDone and metadataOk
+		local s, assetsof = pcall(game.HttpGet, game, "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/uiassets/")
 		if s and assetsof then
 			s, assetsof = pcall(HttpService.JSONDecode, HttpService, assetsof)
-			if s and type(assetsof) == "table" then
-				metadataHandled = true
+			if s and assetsof then
 				for i,file in assetsof do
 					if not table.find(AllFileNames, file.name) then
 						continue
 					end
 					assetsdownload += 1
-					task.spawn(function()
-						-- A single unexpected downloader error must never leave the UI
-						-- waiting forever for a counter that will not advance.
-						local ok = pcall(downloadfile, file)
-						if not ok then
-							warn("[NAM] Unexpected asset downloader error: " .. tostring(file.name))
-							skipped += 1
-							downloaded += 1
-						end
-					end)
+					task.spawn(downloadfile, file)
 				end
-				local downloadDeadline = os.clock() + 45
 				repeat
 					Downloading.Text = `Downloading assets {downloaded}/{assetsdownload}... ({skipped} skipped)`
 					Downloading.BackgroundColor3 = Color3.new(0, 0, 0)
-					if os.clock() >= downloadDeadline then break end
-					task.wait(0.1)
-				until downloaded >= assetsdownload
-				if downloaded >= assetsdownload then
-					Downloading.Text = "Download complete! \\(^o^)/"
-					Downloading.BackgroundColor3 = Color3.new(0, 1, 0)
-					theresassetsmissing = skipped > 0
-				else
-					Downloading.Text = `Download timed out ({downloaded}/{assetsdownload}); continuing...`
-					Downloading.BackgroundColor3 = Color3.new(1, 0, 0)
-					theresassetsmissing = true
-				end
+					task.wait()
+				until downloaded == assetsdownload
+				Downloading.Text = "Download complete! \\(^o^)/"
+				Downloading.BackgroundColor3 = Color3.new(0, 1, 0)
+				theresassetsmissing = false
 			end
-		end
-		if not metadataHandled or assetsdownload == 0 then
-			-- Optional CDN art/sound bundle is currently missing from the repo. Continue
-			-- with built-in UI instead of reporting a false fatal download failure.
-			theresassetsmissing = false
-			Downloading.Text = "Optional UI assets unavailable; continuing..."
-			Downloading.BackgroundColor3 = Color3.new(0, 0, 0)
 		end
 		SaveData.CDNVersion = CDNVersion
 		if theresassetsmissing then
@@ -552,7 +525,7 @@ do
 end
 
 Util.GetCDNAsset = function(filename)
-	local path = "NAMReanim/Assets/" .. filename
+	local path = "UhhhhhhReanim/Assets/" .. filename
 	local s, id = pcall(isfile, path)
 	if s and id then
 		s, id = pcall(getcustomasset, path)
@@ -718,20 +691,14 @@ MusicPlayer.PlayMusic = function(i)
 	MusicPlayer.Switching = true
 	local last = MusicPlayer.LastMusic
 	if not i then
-		local database = MusicPlayer.Database
-		i = Util.RandomIndex(database)
-		if not i then
-			MusicPlayer.Switching = false
-			return
+		i = last
+		while i == last do
+			i = math.random(1, #MusicPlayer.Database)
+			task.wait()
 		end
-		if #database > 1 and i == last then i = i % #database + 1 end
 	end
 	MusicPlayer.LastMusic = i
 	local hi = MusicPlayer.Database[i]
-	if not hi then
-		MusicPlayer.Switching = false
-		return
-	end
 	local soundid, soundname = hi[1], hi[2]
 	UISound.Music.SoundId = Util.GetCDNAsset(soundid)
 	UISound.Music.Name = soundname
@@ -748,27 +715,8 @@ UISound.Music.Ended:Connect(function()
 	MusicPlayer.PlayMusic()
 end)
 
--- fake obfuscation lag
-do local s = os.clock() + 0.5 + math.random() while os.clock() < s do end end
-task.wait(0.2)
-
 SaveData.SkipIntro = not not SaveData.SkipIntro
-do
-	local genesis = Instance.new("ImageLabel", UIMainFrame)
-	genesis.AnchorPoint = Vector2.new(0.5, 0.5)
-	genesis.Position = UDim2.fromScale(0.5, 0.5)
-	genesis.Size = UDim2.fromOffset(100, 100)
-	genesis.Rotation = 15
-	genesis.BackgroundTransparency = 1
-	genesis.Image = Util.GetCDNAsset("wearegenesis.graphic.png")
-	genesis.ImageColor3 = Color3.new(0, 0, 1)
-	genesis.ImageTransparency = 1
-	genesis.ZIndex = 99999
-	TweenService:Create(genesis, TweenInfo.new(0.75, Enum.EasingStyle.Linear, Enum.EasingDirection.In, -1, true), {ImageTransparency = 0}):Play()
-	local dur = 2 + math.random() * 3
-	Debris:AddItem(genesis, dur + math.random() * 2)
-	task.wait(dur)
-end
+
 
 MusicPlayer.PlayMusic()
 
@@ -907,8 +855,8 @@ local function SetUITheme(index)
 		{Fore = Color3.fromRGB(49, 203, 233), Back = Color3.fromRGB(38, 38, 38), Text = Color3.fromRGB(49, 203, 233)},
 		-- Patchma-like
 		{Fore = Color3.new(0.0941177, 0.317647, 0.878431), Text = Color3.new(0.560784, 0.560784, 0.560784)},
-		-- Genesis V4 - Neptunian V
-		{Fore = Color3.fromHex("7733FF"), Back = Color3.fromHex("161330"), SndClick = "rbxassetid://80526571264304"},
+		-- NAM custom charcoal and lime theme
+		{Fore = Color3.fromRGB(164, 255, 74), Back = Color3.fromRGB(18, 20, 26), Text = Color3.fromRGB(232, 236, 242)},
 		-- Crimson
 		{Fore = Color3.new(0.9, 0, 0), Back = Color3.new(0.05, 0, 0)},
 		-- r/masterhacker
@@ -960,9 +908,8 @@ local function SetUITheme(index)
 		end
 	end
 	if index == #UIThemes + 1 then
-		local customTheme = _G.NAMTheme or _G["U" .. "hhhhhhTheme"]
-		if type(customTheme) == "table" and getmetatable(customTheme) == nil then
-			processtable(customTheme)
+		if type(_G.UhhhhhhTheme) == "table" and getmetatable(_G.UhhhhhhTheme) == nil then
+			processtable(_G.UhhhhhhTheme)
 			SaveData.UIThemeUserDefined = {
 				Fore = theme[1] and theme[1]:ToHex(),
 				Back = theme[2] and theme[2]:ToHex(),
@@ -982,12 +929,12 @@ local function SetUITheme(index)
 		UISound.Click.SoundId = theme[4]
 	end
 end
-SaveData.UITheme = SaveData.UITheme or 1
+SaveData.UITheme = 5 -- NAM custom charcoal/lime theme is the default
 SetUITheme(SaveData.UITheme)
 
 local ReanimPage
-local CracktroFrameText = "NAM Reanimate V" .. NAMVersion
-local UIMainWindow, AWindowContent, WindowContent
+local DancesPage
+local UIMainWindow, AWindowContent, WindowContent, TopBarFrame, NAMNavButtons
 
 local _funcrefreshes = {}
 local function AddToRenderStep(func, linkto)
@@ -1003,7 +950,7 @@ local function AddToRenderStep(func, linkto)
 	return func
 end
 local _totalrendertime = 0
-RunService:BindToRenderStep("NAM_Render" .. Util.RandomString(), Enum.RenderPriority.Last.Value - 69, function(dt)
+RunService:BindToRenderStep("Uhhhhhh_Render" .. Util.RandomString(), Enum.RenderPriority.Last.Value - 69, function(dt)
 	_totalrendertime += dt
 	UpdateGrads(_totalrendertime)
 	AWindowContent.Visible = UIMainWindow.Size.Y.Offset > 36
@@ -1018,13 +965,14 @@ do
 	UIMainWindow.Active = true
 	UIMainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
 	UIMainWindow.Position = UDim2.new(0.5, 0, 0.5, 0)
-	UIMainWindow.Size = UDim2.new(0, 480, 0, 280)
+	UIMainWindow.Size = UDim2.new(0, 360, 0, 450)
 	UIMainWindow.BackgroundTransparency = 0
-	UIMainWindow.BackgroundColor3 = Color3.new(1, 1, 1)
-	UIMainWindow.BorderSizePixel = 0
-	Stylize(UIMainWindow, {
-		Glow = true
-	})
+	UIMainWindow.BackgroundColor3 = Color3.fromRGB(18, 20, 26)
+	UIMainWindow.BorderSizePixel = 1
+	UIMainWindow.BorderColor3 = Color3.fromRGB(48, 54, 64)
+	local NAMWindowCorner = Instance.new("UICorner")
+	NAMWindowCorner.CornerRadius = UDim.new(0, 8)
+	NAMWindowCorner.Parent = UIMainWindow
 	local _clicksndclicked = false
 	UserInputService.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -1050,15 +998,14 @@ do
 		end
 	end)
 	
-	local TopBarFrame = Util.Instance("Frame", UIMainWindow)
+	TopBarFrame = Util.Instance("Frame", UIMainWindow)
 	TopBarFrame.Position = UDim2.new(0, 0, 0, 0)
 	TopBarFrame.Size = UDim2.new(1, 0, 0, 30)
-	TopBarFrame.BackgroundTransparency = 1
-	TopBarFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+	TopBarFrame.BackgroundTransparency = 0
+	TopBarFrame.BackgroundColor3 = Color3.fromRGB(23, 26, 32)
 	TopBarFrame.BorderSizePixel = 0
 	TopBarFrame.ClipsDescendants = true
 	TopBarFrame.ZIndex = 1
-	--Stylize(TopBarFrame)
 	
 	local TopBarText = Util.Instance("TextLabel", TopBarFrame)
 	TopBarText.AnchorPoint = Vector2.new(0, 0.5)
@@ -1066,20 +1013,20 @@ do
 	TopBarText.Size = UDim2.new(1, -35, 1, 0)
 	TopBarText.BackgroundTransparency = 1
 	TopBarText.ClipsDescendants = true
-	TopBarText.Font = Enum.Font.Code
-	TopBarText.TextColor3 = Color3.new(1, 1, 1)
-	TopBarText.TextSize = 20
+	TopBarText.Font = Enum.Font.GothamBold
+	TopBarText.TextColor3 = Color3.fromRGB(164, 255, 74)
+	TopBarText.TextSize = 15
 	TopBarText.TextXAlignment = Enum.TextXAlignment.Left
-	TopBarText.Text = "    NAM | v" .. NAMVersion
+	TopBarText.Text = "NAM REANIMATE"
 	TopBarText.RichText = true
 	RegisterTextLabel(TopBarText)
+	TopBarText.TextColor3 = Color3.fromRGB(164, 255, 74)
 	Util.ForceTextSize(TopBarText)
-	CracktroFrameText = "NAM • mamalalanam"
 	
 	local TopBarClose = Util.Instance("TextButton", TopBarFrame)
 	TopBarClose.AnchorPoint = Vector2.new(1, 0)
 	TopBarClose.Position = UDim2.new(1, 0, 0, 0)
-	TopBarClose.Size = UDim2.new(0, 30, 1, 0)
+	TopBarClose.Size = UDim2.new(0, 30, 0, 30)
 	TopBarClose.BackgroundTransparency = 1
 	TopBarClose.Text = ""
 	do
@@ -1107,9 +1054,13 @@ do
 		end)
 	end
 	
+
+	-- Top tab row removed; feature pages are opened from the main page buttons.
+	NAMNavButtons = nil
+
 	AWindowContent = Util.Instance("Frame", UIMainWindow)
 	AWindowContent.Position = UDim2.new(0, 0, 0, 30)
-	AWindowContent.Size = UDim2.new(1, 0, 1, -35)
+	AWindowContent.Size = UDim2.new(1, 0, 1, -30)
 	AWindowContent.BackgroundTransparency = 1
 	AWindowContent.ClipsDescendants = true
 	AWindowContent.ZIndex = 0
@@ -1122,7 +1073,7 @@ do
 	ReanimPage.BackgroundColor3 = Color3.new(0, 0, 0)
 	ReanimPage.BorderSizePixel = 1
 	ReanimPage.BorderColor3 = Color3.new(1, 1, 1)
-	ReanimPage.Visible = true
+	ReanimPage.Visible = false
 	ReanimPage.ZIndex = 0
 	ReanimPage.ClipsDescendants = true
 	AddToRenderStep(function(t)
@@ -1145,6 +1096,7 @@ do
 	impala.BorderSizePixel = 1
 	impala.BorderColor3 = Color3.new(1, 1, 1)
 	impala.Image = Util.GetCDNAsset("glowingpala.graphic.png")
+	impala.Visible = false -- Remove the old triangle/logo from the refreshed NAM UI.
 	impala.ImageColor3 = Color3.new(0, 0, 1)
 	impala.ZIndex = 5
 	AddToRenderStep(function(t)
@@ -1154,8 +1106,8 @@ do
 	Stylize(impala)
 	
 	WindowContent = Util.Instance("Frame", AWindowContent)
-	WindowContent.Position = UDim2.new(0, 120, 0, 0)
-	WindowContent.Size = UDim2.new(1, -120, 1, 0)
+	WindowContent.Position = UDim2.new(0, 0, 0, 0)
+	WindowContent.Size = UDim2.new(1, 0, 1, 0)
 	WindowContent.BackgroundTransparency = 1
 	WindowContent.ClipsDescendants = true
 	WindowContent.ZIndex = 0
@@ -1189,13 +1141,13 @@ do
 				MainWindowTweening = false
 			end)
 		else
-			TopBarText.Text = "    NAM | v" .. NAMVersion
+			TopBarText.Text = "NAM REANIMATE"
 			WindowContent.Visible = true
 			MainWindowPosClose = UIMainWindow.Position
 			SaveData.WindowClosedPosition = {MainWindowPosClose.X.Scale, MainWindowPosClose.X.Offset, MainWindowPosClose.Y.Scale, MainWindowPosClose.Y.Offset}
 			TweenService:Create(UIMainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Position = MainWindowPosOpen,
-				Size = UDim2.fromOffset(480, 280)
+				Size = UDim2.fromOffset(360, 450)
 			}):Play()
 			TweenService:Create(TopBarClose.A, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Rotation = 0
@@ -1247,288 +1199,20 @@ end
 do
 	Util.Notify = function(text)
 		StarterGui:SetCore("SendNotification", {
-			Title = "NAM",
+			Title = "NAM Reanimate",
 			Text = text,
 			Duration = 5
 		})
 	end
 end
 
-local CracktroFrame = Util.Instance("Frame", WindowContent)
-CracktroFrame.Active = true
-CracktroFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-CracktroFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-CracktroFrame.Size = UDim2.new(0, 360, 0, 245)
-CracktroFrame.BackgroundTransparency = 0
-CracktroFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-CracktroFrame.BorderSizePixel = 1
-CracktroFrame.BorderColor3 = Color3.new(1, 1, 1)
-CracktroFrame.ZIndex = 10
-CracktroFrame.ClipsDescendants = true
-AddToRenderStep(function(t)
-	CracktroFrame.BorderColor3 = GetUIColor(t)
-	CracktroFrame.BackgroundColor3 = GetUIBGColor(t)
-end, CracktroFrame)
-
-do -- homepage
-	local TriforceClip = Util.Instance("CanvasGroup", CracktroFrame)
-	TriforceClip.Position = UDim2.new(0, 0, 0, 0)
-	TriforceClip.Size = UDim2.new(1, 0, 1, 0)
-	TriforceClip.BackgroundTransparency = 1
-	TriforceClip.ZIndex = 0
-
-	local Glowy = Util.Instance("ImageLabel", CracktroFrame)
-	Glowy.AnchorPoint = Vector2.new(0.5, 0.5)
-	Glowy.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Glowy.Size = UDim2.new(0, 260, 0, 260)
-	Glowy.BackgroundTransparency = 1
-	Glowy.Image = Util.GetCDNAsset("lightinursoul.graphic.png")
-	Glowy.ImageColor3 = UITextColor.Value
-	Glowy.ImageTransparency = 0.7
-	Glowy.ZIndex = -2
-
-	local Triforce = Util.MakeTriforce(3, Color3.new(1, 0.7, 0), 0)
-	Triforce.AnchorPoint = Vector2.new(0.5, 0.5)
-	Triforce.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Triforce.Size = UDim2.new(0, 160, 0, 160)
-	Triforce.Parent = TriforceClip
-
-	local particles = {}
-	local ps = 128
-	local psc = Color3.new(1, 0.9, 0)
-	for i=1, ps do
-		local r = (i / ps) * 2 * math.pi
-		local p = Util.Instance("Frame", CracktroFrame)
-		p.AnchorPoint = Vector2.new(0.5, 0.5)
-		p.Size = UDim2.fromOffset(2, 2)
-		p.BackgroundColor3 = psc
-		p.BackgroundTransparency = 0
-		p.BorderSizePixel = 0
-		p.ZIndex = -1
-		p.Visible = false
-		table.insert(particles, {
-			p, Vector2.new(math.sin(r), math.cos(r)) * 8,
-			Vector2.new(math.random(-128, 128), math.random(-128, 128)),
-			math.random() * 2 - 1, false, -1
-		})
-	end
-
-	local trivel = 360
-	local oldpbl = 0
-
-	local text = Util.MakeText(CracktroFrameText)
-	text.AnchorPoint = Vector2.new(0.5, 1)
-	text.Position = UDim2.new(0.5, 0, 1, -25)
-	text.ZIndex = 3
-	text.Parent = CracktroFrame
-	local text0 = Util.MakeText("NAM: github.com/BursaliAlperen/RobuNexa")
-	text0.AnchorPoint = Vector2.new(0.5, 1)
-	text0.Position = UDim2.new(0.5, 0, 1, -17)
-	text0.ZIndex = 3
-	text0.Parent = CracktroFrame
-	local text1 = Util.MakeText("Made by mamalalanam :" .. (math.random() < 0.333 and "3" or (math.random() < 0.5 and "D" or "P")))
-	text1.AnchorPoint = Vector2.new(0.5, 1)
-	text1.Position = UDim2.new(0.5, 0, 1, -17)
-	text1.ZIndex = 3
-	text1.Parent = CracktroFrame
-	local text2 = Util.MakeText("Click me to start!")
-	text2.AnchorPoint = Vector2.new(0.5, 1)
-	text2.Position = UDim2.new(0.5, 0, 1, -17)
-	text2.ZIndex = 3
-	text2.Parent = CracktroFrame
-	Util.SetTextColor(text, UITextColor.Value, 0)
-	Util.SetTextColor(text0, UITextColor.Value, 0)
-	Util.SetTextColor(text1, UITextColor.Value, 0)
-	Util.SetTextColor(text2, UITextColor.Value, 0)
-	local quotes = {
-		"\"EVERY CLIENT ORBITS A SERVER...\"",
-		Player.Name .. ", how is your " .. os.date("%A") .. "?",
-		"A great " .. os.date("%A") .. " today, eh?",
-		"Hello, " .. Player.Name .. ".",
-		"What makes you play at " .. os.date("%I %p") .. "?",
-		"You are going to love NAM, I just know it.",
-		"This script is very \"verbose\".",
-		"Written mostly on a mobile phone.",
-		"I am pretty new in this community! :D",
-		"\"Dreams come true!\"",
-		"Idea originated from a dream.",
-		"If you love this program, join my Discord!",
-	}
-	local text3 = nil
-	local function changequote()
-		if text3 then text3:Destroy() end
-		local quoteIndex = Util.RandomIndex(quotes)
-		text3 = Util.MakeText(quoteIndex and quotes[quoteIndex] or "Welcome to NAM.")
-		text3.AnchorPoint = Vector2.new(0.5, 1)
-		text3.Position = UDim2.new(0.5, 0, 1, -17)
-		text3.ZIndex = 3
-		text3.Parent = CracktroFrame
-		Util.SetTextColor(text3, UITextColor.Value, 0)
-		task.delay(12, changequote)
-	end
-	changequote()
-	UITextColor.Changed:Connect(function(val)
-		Util.SetTextColor(text, val, 0)
-		Util.SetTextColor(text0, val, 0)
-		Util.SetTextColor(text1, val, 0)
-		Util.SetTextColor(text2, val, 0)
-		Util.SetTextColor(text3, val, 0)
-	end)
-
-	local PositionProcessor = {
-		function(i, v, dt, pbl, spike)
-			local inst, pos, vel, zind, lvis, lzind = unpack(v)
-			local d = pos.Magnitude
-			if d > 0 then
-				local r = math.atan2(pos.X / d, pos.Y / d)
-				local a = math.pi * 0.375
-				local out = Vector2.new(math.sin(r + a), math.cos(r + a))
-				local tp = out * (40 + pbl / 12)
-				local tv = (tp - pos) * 2
-				vel = tv:Lerp(vel, math.exp(-2 * dt))
-				if math.random() < 0.01 then
-					vel += Vector2.new(math.random(-64, 64), math.random(-64, 64))
-				end
-				if spike > 64 then
-					vel += out * 64 * math.random()
-				end
-				pos += vel * dt
-			else
-				pos += Vector2.new(0, 10)
-			end
-			v[2], v[3] = pos, vel
-			return Vector3.new(zind * pos.Magnitude / 6, pos.Y, pos.X)
-		end,
-		function(i, v, dt, pbl, spike)
-			local inst, pos, vel, zind, lvis, lzind = unpack(v)
-			local a = i / ps
-			local s = (a * 6) % 1
-			local r = (a + s / 8) * 2 * math.pi + os.clock() * 2 + zind * math.pi * 0.125 * (pbl / 200) * (1 - s)
-			pos = Vector2.new(math.sin(r), math.cos(r)) * s * (100 + pbl / 15)
-			v[2], v[3] = pos, Vector2.zero
-			return Vector3.new(0, pos.Y, pos.X)
-		end,
-		function(i, v, dt, pbl, spike)
-			local inst, pos, vel, zind, lvis, lzind = unpack(v)
-			local a = i / ps
-			local b = 1 / 3
-			local c = math.sqrt(3) / 2
-			local d = {
-				{Vector2.new(0, b + c), Vector2.new(-0.5, b)},
-				{Vector2.new(-0.5, b), Vector2.new(-1, b - c)},
-				{Vector2.new(-1, b - c), Vector2.new(0, b - c)},
-				{Vector2.new(0, b - c), Vector2.new(1, b - c)},
-				{Vector2.new(1, b - c), Vector2.new(0.5, b)},
-				{Vector2.new(0.5, b), Vector2.new(0, b - c)},
-				{Vector2.new(0, b - c), Vector2.new(-0.5, b)},
-				{Vector2.new(-0.5, b), Vector2.new(0.5, b)},
-				{Vector2.new(0.5, b), Vector2.new(0, b + c)},
-			}
-			local t = a * #d
-			local i = math.floor(t) + 1
-			local u = t % 1
-			if i > #d then
-				i = #d
-				u = 1
-			end
-			pos = d[i][1]:Lerp(d[i][2], u) * 150
-			local r = os.clock() * 2
-			pos = Vector2.new(
-				pos.X * math.cos(r) - pos.Y * math.sin(r),
-				pos.X * math.sin(r) + pos.Y * math.cos(r)
-			)
-			v[2], v[3] = pos, Vector2.zero
-			return Vector3.new(0, pos.Y, pos.X)
-		end,
-	}
-	local currentprocessor = 1
-
-	AddToRenderStep(function(t, dt)
-		if Util.IsGuiVisible(CracktroFrame) then
-			local pp = PositionProcessor[currentprocessor]
-			local CracktroFrameAbsoluteSize = CracktroFrame.AbsoluteSize
-			Glowy.ImageColor3 = UITextColor.Value
-			Glowy.ImageTransparency = 0.75 + math.sin(((os.clock() / 10) % 2) * math.pi) * 0.05
-			local pbl = UISound.Music.PlaybackLoudness
-			local spike = math.max(0, (pbl - oldpbl) - 16)
-			oldpbl = pbl
-			local trivelt = pbl * 2 * dt
-			trivel = trivelt + (trivel - trivelt) * math.exp(-8 * dt)
-			Triforce.Rotation = (Triforce.Rotation + trivel) % 360
-			local ring = CFrame.Angles(
-				0,
-				math.cos(((t / 5) % 2) * math.pi) * math.pi * 0.5,
-				(1 - math.cos(((t / 7) % 2) * math.pi)) * math.pi * 0.5
-			)
-			local fov = 220
-			for i,v in particles do
-				local inst, pos, vel, zind, lvis, lzind = unpack(v)
-				local sp = ring:VectorToWorldSpace(pp(i, v, dt, pbl, spike))
-				local z = sp.Z
-				local sc = fov / (z + fov)
-				sp = Vector2.new(sp.X, sp.Y) * sc
-				local nvis, nzind = lvis, lzind
-				if z > 1 - fov then
-					inst.Position = Util.Vector2ToUDim2Offset(sp + CracktroFrameAbsoluteSize / 2)
-					inst.Size = UDim2.fromOffset(sc * 2.5, sc * 2.5)
-					--inst.BackgroundColor3 = psc:Lerp(Color3.new(0, 0, 0), math.clamp(z / (fov * 2), 0, 1))
-					nvis = true
-					if z > 0 then
-						nzind = -1
-					else
-						nzind = 1
-					end
-				else
-					nvis = false
-				end
-				if lvis ~= nvis then
-					inst.Visible = nvis
-					v[5] = nvis
-				end
-				if lzind ~= nzind then
-					inst.ZIndex = nzind
-					v[6] = nzind
-				end
-			end
-			local textsel = t % 9
-			if IsNAMFullyLoaded then
-				textsel = t % 12
-			end
-			textsel //= 3
-			if textsel == 0 then
-				text0.Visible = true
-				text1.Visible = false
-				text2.Visible = false
-				text3.Visible = false
-			elseif textsel == 1 then
-				text0.Visible = false
-				text1.Visible = true
-				text2.Visible = false
-				text3.Visible = false
-			elseif textsel == 2 then
-				text0.Visible = false
-				text1.Visible = false
-				text2.Visible = false
-				text3.Visible = true
-			else
-				text0.Visible = false
-				text1.Visible = false
-				text2.Visible = true
-				text3.Visible = false
-			end
-		else
-			currentprocessor = Util.RandomIndex(PositionProcessor) or currentprocessor
-		end
-	end, CracktroFrame)
-end
-task.wait()
 
 local UI = {}
 function UI.CreatePage()
 	local Frame = Util.Instance("ScrollingFrame", WindowContent)
 	Frame.AnchorPoint = Vector2.new(0.5, 0.5)
 	Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Frame.Size = UDim2.new(0, 360, 0, 245)
+	Frame.Size = UDim2.new(1, -10, 1, -10)
 	Frame.BackgroundTransparency = 0
 	Frame.BackgroundColor3 = Color3.new(0, 0, 0)
 	Frame.BorderSizePixel = 1
@@ -1539,8 +1223,8 @@ function UI.CreatePage()
 	Frame.CanvasSize = UDim2.new(0, 0, 0, 0)
 	Frame.ClipsDescendants = true
 	AddToRenderStep(function(t)
-		Frame.BorderColor3 = GetUIColor(t)
-		Frame.BackgroundColor3 = GetUIBGColor(t)
+		Frame.BorderColor3 = Color3.fromRGB(48, 54, 64)
+		Frame.BackgroundColor3 = Color3.fromRGB(18, 20, 26)
 	end, Frame)
 	Frame.ScrollingDirection = Enum.ScrollingDirection.Y
 	Frame.ScrollBarThickness = 3
@@ -2207,7 +1891,7 @@ function UI.CreateItemListPage()
 	local Frame = Util.Instance("Frame", WindowContent)
 	Frame.AnchorPoint = Vector2.new(0.5, 0.5)
 	Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Frame.Size = UDim2.new(0, 360, 0, 245)
+	Frame.Size = UDim2.new(1, -10, 1, -10)
 	Frame.BackgroundTransparency = 0
 	Frame.BackgroundColor3 = Color3.new(0, 0, 0)
 	Frame.BorderSizePixel = 1
@@ -2216,8 +1900,8 @@ function UI.CreateItemListPage()
 	Frame.ZIndex = 0
 	Frame.ClipsDescendants = true
 	AddToRenderStep(function(t)
-		Frame.BorderColor3 = GetUIColor(t)
-		Frame.BackgroundColor3 = GetUIBGColor(t)
+		Frame.BorderColor3 = Color3.fromRGB(48, 54, 64)
+		Frame.BackgroundColor3 = Color3.fromRGB(18, 20, 26)
 	end, Frame)
 	local Padding = Util.Instance("UIPadding", Frame)
 	Padding.PaddingTop = UDim.new(0, margin)
@@ -2366,41 +2050,17 @@ function UI.CreateItemListItem(parent)
 end
 
 local MainPage = UI.CreatePage()
-MainPage.Interactable = false
-CracktroFrame.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		if _totalrendertime < 1 or not IsNAMFullyLoaded then return end
-		CracktroFrame.Interactable = false
-		CracktroFrame.Visible = true
-		MainPage.Interactable = false
-		local tween = TweenService:Create(CracktroFrame, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
-			Position = UDim2.new(0.5, -362, 0.5, 0),
-		})
-		tween:Play()
-		tween.Completed:Connect(function()
-			CracktroFrame.Visible = false
-			MainPage.Interactable = true
-		end)
-	end
-end)
-local AsciiText = UI.CreateText(MainPage, "", 18, Enum.TextXAlignment.Center)
-AsciiText.Text = [=[N   N   A   M   M
-NN  N  A A  MM MM
-N N N AAAAA M M M
-N  NN A   A M   M
+MainPage.Interactable = true
 
-NAM  |  mamalalanam]=]
-UI.CreateText(MainPage, `NAM • v{NAMVersion} • mamalalanam`, 15, Enum.TextXAlignment.Center)
-UI.CreateSeparator(MainPage)
-UI.CreateSwitch(MainPage, "Skip Intro", SaveData.SkipIntro).Changed:Connect(function(value)
-	SaveData.SkipIntro = value
-end)
+
+
+
 UI.CreateDropdown(MainPage, "UI Theme", {
 	"RGB/Default",
 	"ALONE",
 	"Oxide",
 	"Patchma Hub",
-	"Genesis V4",
+	"NAM",
 	"Crimson",
 	"r/masterhacker",
 	"Homer Simpson",
@@ -2420,8 +2080,20 @@ end)
 UI.CreateSeparator(MainPage)
 
 local MusicName = UI.CreateText(MainPage, "", 15, Enum.TextXAlignment.Center)
-UI.CreateButton(MainPage, "Play UI Music", 20).Activated:Connect(function()
+UI.CreateButton(MainPage, "Random UI Music", 20).Activated:Connect(function()
 	MusicPlayer.PlayMusic()
+end)
+local _musicnames = {"-- Choose --"}
+for i=1, #MusicPlayer.Database do
+	local hi = MusicPlayer.Database[i]
+	table.insert(_musicnames, hi[2])
+end
+local MusicSelect = UI.CreateDropdown(MainPage, "UI Music", _musicnames, 1)
+MusicSelect.Changed:Connect(function(val)
+	if val > 1 then
+		MusicSelect.Value = 1
+		MusicPlayer.PlayMusic(val - 1)
+	end
 end)
 UI.CreateSwitch(MainPage, "Mute UI Music", SaveData.MuteUIMusic).Changed:Connect(function(value)
 	SaveData.MuteUIMusic = value
@@ -2559,7 +2231,7 @@ end)
 
 local function CreateHumanoidCharacter()
 	local char = Util.Instance("Model")
-	char.Name = "(C) NAM V" .. NAMVersion
+	char.Name = "(C) Uhhhhhh V" .. UhhhhhhVersion
 
 	local god = Util.Instance("ForceField", char)
 	god.Name = "heyy!! :33"
@@ -2701,13 +2373,10 @@ SaveData.PatchmaVoidFloat = not not SaveData.PatchmaVoidFloat
 SaveData.PlaceholderTransparency = SaveData.PlaceholderTransparency or 0.5
 
 -- empyrean-like thing
-local _G_NAM = {}
+local _G_Uhhhhhh = {}
 -- jjsloit didnt have _G, just making sure if 100% unc execs dont have this even
-pcall(function()
-	_G.NAM = _G_NAM
-	_G["U" .. "hhhhhh"] = _G_NAM
-end)
-_G_NAM.BindableEvent = Util.Instance("BindableEvent") -- not used 3:
+pcall(function() _G.Uhhhhhh = _G_Uhhhhhh end)
+_G_Uhhhhhh.BindableEvent = Util.Instance("BindableEvent") -- not used 3:
 
 local Reanimate = {
 	Current = nil,
@@ -2752,6 +2421,7 @@ local Reanimate = {
 		CFrame = CFrame.identity,
 		Focus = CFrame.identity,
 		Scriptable = false,
+		VRMode = false,
 		Zoom = 16,
 		FieldOfView = 70,
 		Input = Vector3.zero,
@@ -2826,6 +2496,19 @@ local Reanimate = {
 		}
 	}
 }
+Reanimate.Camera.GetMovementCFrame = function(self)
+	local ccf = self.CFrame
+	if self.VRMode then
+		local ok, headCFrame = pcall(function()
+			return VRService:GetUserCFrame(Enum.UserCFrame.Head)
+		end)
+		if ok and headCFrame then
+			local _, yaw, _ = headCFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
+			ccf *= CFrame.Angles(0, yaw, 0)
+		end
+	end
+	return ccf
+end
 Reanimate.Camera.IsFirstPerson = function(self)
 	return self.Zoom < 0.75
 end
@@ -2961,7 +2644,7 @@ do
 		UserInputService.WindowFocusReleased:Connect(resetInputDevices)
 		UserInputService.TextBoxFocusReleased:Connect(resetInputDevices)
 		GuiService.MenuOpened:Connect(resetInputDevices)
-		RunService:BindToRenderStep("NAM_Control", Enum.RenderPriority.Input.Value + 1, function(dt)
+		RunService:BindToRenderStep("Uhhhhhh_Control", Enum.RenderPriority.Input.Value + 1, function(dt)
 			if UserInputService:GetFocusedTextBox() then
 				resetInputDevices()
 			end
@@ -3024,6 +2707,16 @@ do
 				if input.KeyCode == Enum.KeyCode.Right then
 					self.Inputs.KB.Right = true
 				end
+			end
+			if input.KeyCode == Enum.KeyCode.ButtonL3 then
+				if self.VRMode then
+					self.Zoom = self.Zoom < 7 and 7 or 0.5
+				else
+					self.Zoom = self.Zoom <= 0.5 and 20 or (self.Zoom <= 10 and 0.5 or (self.Zoom <= 20 and 10 or 20))
+				end
+			end
+			if input.KeyCode == Enum.KeyCode.ButtonR3 and self.VRMode then
+				pcall(function() VRService:RecenterUserHeadCFrame() end)
 			end
 			if input.UserInputType == Enum.UserInputType.MouseButton2 then
 				if gpe then return end
@@ -3150,7 +2843,8 @@ do
 		MobileShiftlock.Activated:Connect(function()
 			Reanimate.Shiftlocked = Reanimate.ShiftlockEnabled and not Reanimate.Shiftlocked
 		end)
-		RunService:BindToRenderStep("NAM_Camera", Enum.RenderPriority.Camera.Value + 1, function(dt)
+		RunService:BindToRenderStep("Uhhhhhh_Camera", Enum.RenderPriority.Camera.Value + 1, function(dt)
+			self.VRMode = VRService.VREnabled
 			if UserInputService:GetFocusedTextBox() then
 				resetInputDevices()
 			end
@@ -3162,6 +2856,7 @@ do
 			end
 			local input = self.Input * Vector3.new(1, GameSettings:GetCameraYInvertValue(), 1)
 			self.Input = Vector3.zero
+			if self.VRMode then input *= Vector3.new(1, 0, 1) end
 			local ltm = Reanimate.LocalTransparencyModifier
 			local tltm = 0
 			local sltm = dt * 3
@@ -3220,7 +2915,9 @@ do
 						Camera.FieldOfViewMode = "Vertical"
 						local newCameraCFrame, newCameraFocus = self.CFrame, self.Focus
 						local subjectPosition = RootPart.Position + RootPart.CFrame.UpVector * 1.5
-						subjectPosition += RootPart.CFrame.Rotation * Humanoid.CameraOffset
+						if not self.VRMode then
+							subjectPosition += RootPart.CFrame.Rotation * Humanoid.CameraOffset
+						end
 						local zoomDelta = input.Z
 						if math.abs(zoomDelta) > 0 then
 							if zoomDelta > 0 then
@@ -3239,6 +2936,14 @@ do
 						local startCFrame = CFrame.lookAt(Vector3.zero, currLookVector)
 						local newLookCFrame = CFrame.Angles(0, -constrainedRotateInput.X, 0) * startCFrame * CFrame.Angles(-constrainedRotateInput.Y, 0, 0)
 						local newLookVector = newLookCFrame.LookVector
+						if self.VRMode then
+							newLookVector = newLookVector * Vector3.new(1, 0, 1)
+							if newLookVector.Magnitude < 0.001 then
+								newLookVector = Vector3.zAxis
+							else
+								newLookVector = newLookVector.Unit
+							end
+						end
 						if self:IsMouseLocked() and not self:IsFirstPerson() then
 							local cameraRelativeOffset = newLookCFrame * Vector3.new(1.7, 0, 0)
 							if cameraRelativeOffset == cameraRelativeOffset then
@@ -3247,6 +2952,7 @@ do
 						end
 						newCameraFocus = CFrame.new(subjectPosition)
 						local cameraFocusP = newCameraFocus.Position
+						if self.VRMode then cameraFocusP += newLookVector * 0.5 end
 						newCameraCFrame = CFrame.lookAt(cameraFocusP - newLookVector * self._Zoom, cameraFocusP)
 						self.CFrame, self.Focus = newCameraCFrame, newCameraFocus
 					end
@@ -3376,7 +3082,7 @@ Reanimate.CreateCharacter = function(InitCFrame)
 	local CMove, CJump = Vector3.zero, false
 	Util.LinkDestroyI2C(RC, RunService.PreAnimation:Connect(function(dt)
 		CMove, CJump = Reanimate.Control.Move, Reanimate.Control.Jump
-		local CamCF = Reanimate.Camera.CFrame
+		local CamCF = Reanimate.Camera:GetMovementCFrame()
 		local _,x,_ = CamCF:ToEulerAngles(Enum.RotationOrder.YXZ)
 		local MoveCF = CFrame.Angles(0, x, 0)
 		pcall(sethiddenproperty, RCRootPart, "PhysicsRepRootPart", nil)
@@ -3466,19 +3172,19 @@ Reanimate.CreateCharacter = function(InitCFrame)
 			RCRootPart.Velocity *= Vector3.new(1, 0, 1)
 		end
 		if Reanimate:ShouldRotationType() then
-			local ax, ay, az = Reanimate.Camera.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
+			local ax, ay, az = Reanimate.Camera:GetMovementCFrame():ToEulerAngles(Enum.RotationOrder.YXZ)
 			local bx, by, bz = RCRootPart.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
 			tcf = CFrame.fromEulerAngles(bx, ay, bz, Enum.RotationOrder.YXZ)
 		end
 		RCRootPart.CFrame = tcf + pos
 	end))
 	Reanimate.Character = RC
-	_G_NAM.Character = RC
+	_G_Uhhhhhh.Character = RC
 end
 Reanimate.DestroyCharacter = function()
 	if Reanimate.Character then
 		Reanimate.Character = Reanimate.Character:Destroy()
-		_G_NAM.Character = nil
+		_G_Uhhhhhh.Character = nil
 	end
 end
 
@@ -3659,13 +3365,13 @@ Util.PredictionFling = function(target)
 				end
 			end
 			--cf += Vector3.new(0, -0.5, 0)
-			local oldpos = target:GetAttribute("_NAM_LastPosition")
+			local oldpos = target:GetAttribute("_Uhhhhhh_LastPosition")
 			if not oldpos then
 				oldpos = target.Position
-				target:SetAttribute("_NAM_LastPosition", oldpos)
+				target:SetAttribute("_Uhhhhhh_LastPosition", oldpos)
 			end
 			if (target.Position - oldpos).Magnitude > 200 then
-				target:SetAttribute("_NAM_LastPosition", nil)
+				target:SetAttribute("_Uhhhhhh_LastPosition", nil)
 				return cf, true
 			end
 			return cf, false
@@ -3803,85 +3509,6 @@ function LimbReanimator.Config(parent)
 		dinit.Value = LimbReanimator.InitMode + 1
 	end))
 end
--- Keep a local in-memory copy of accessories inserted by avatar/export tools.
--- These accessories may not exist in the player's HumanoidDescription, so they
--- must be restored from the observed instance instead of fetched from the catalog.
-local PersistentAccessoryTemplates = {}
-local function PersistentAccessoryKey(accessory)
-	if not accessory or not accessory:IsA("Accessory") then return nil end
-	local mesh, texture = GetHatMeshAndTexture(accessory)
-	local name = string.lower(accessory.Name or "")
-	if mesh and texture then
-		return "mesh:" .. tostring(mesh) .. "|texture:" .. tostring(texture) .. "|name:" .. name
-	end
-	return "name:" .. name
-end
-local function CachePersistentAccessory(accessory)
-	local key = PersistentAccessoryKey(accessory)
-	if not key then return end
-	local handle = accessory:FindFirstChild("Handle")
-	if not handle or not handle:IsA("BasePart") then return end
-	local entry = PersistentAccessoryTemplates[key]
-	if not entry then
-		local oldArchivable = accessory.Archivable
-		local ok, template = pcall(function()
-			accessory.Archivable = true
-			return accessory:Clone()
-		end)
-		pcall(function() accessory.Archivable = oldArchivable end)
-		if not ok or not template then return end
-		template.Parent = nil
-		entry = {Template = template, LiveInstances = {}}
-		PersistentAccessoryTemplates[key] = entry
-	end
-	entry.LiveInstances[accessory] = true
-end
-local function RestorePersistentAccessories(character, humanoid)
-	if not character or not humanoid or not character.Parent then return end
-	local restored = 0
-	for key, entry in pairs(PersistentAccessoryTemplates) do
-		local alreadyOnCharacter = false
-		for _, child in ipairs(character:GetChildren()) do
-			if child:IsA("Accessory") and PersistentAccessoryKey(child) == key then
-				alreadyOnCharacter = true
-				break
-			end
-		end
-		if not alreadyOnCharacter then
-			-- If the original accessory is still alive in Workspace, Hat Reanimation
-			-- can keep using that exact instance; only recreate truly lost accessories.
-			local originalStillAlive = false
-			for instance in pairs(entry.LiveInstances) do
-				if instance and instance.Parent and instance:IsDescendantOf(workspace) then
-					originalStillAlive = true
-				else
-					entry.LiveInstances[instance] = nil
-				end
-			end
-			if not originalStillAlive and entry.Template then
-				local ok, clone = pcall(function() return entry.Template:Clone() end)
-				if ok and clone then
-					clone.Name = entry.Template.Name
-					local handle = clone:FindFirstChild("Handle")
-					local oldWeld = handle and handle:FindFirstChild("AccessoryWeld")
-					if oldWeld then pcall(function() oldWeld:Destroy() end) end
-					local added = pcall(function() humanoid:AddAccessory(clone) end)
-					if not added or clone.Parent ~= character then
-						clone.Parent = character
-					end
-					entry.LiveInstances[clone] = true
-					restored += 1
-				end
-			end
-		end
-	end
-	if restored > 0 then
-		HatReanimator.RebuildRequired = true
-		HatReanimator.Status.ReanimState = ("Restored %d cached accessory(s) after respawn."):format(restored)
-	end
-end
-
-
 function LimbReanimator.Start()
 	local LimbNames = {"Head", "Torso", "Left Arm", "Right Arm", "Left Leg", "Right Leg"}
 	local rootposition = Vector3.new(
@@ -3933,7 +3560,7 @@ function LimbReanimator.Start()
 		end
 	end
 
-	local LimbMapping = loadstring(readfile("NAMReanim/BuiltinModules/d_limbmap.lua"))()
+	local LimbMapping = loadstring(readfile("UhhhhhhReanim/BuiltinModules/d_limbmap.lua"))()
 
 	local FakeTools = {}
 	local function CreateFakeTool()
@@ -3962,7 +3589,6 @@ function LimbReanimator.Start()
 
 	local BaseParts = {}
 	local UnknownMotor6Ds = {}
-
 	local CharOnDesc = function(v)
 		if v:IsA("BasePart") then
 			if not table.find(BaseParts, v) then
@@ -4062,6 +3688,10 @@ function LimbReanimator.Start()
 			task.spawn(CharOnDesc, v)
 		end
 		local humanoid = character:WaitForChild("Humanoid", 5)
+		if not humanoid or not humanoid:IsA("Humanoid") then
+			warn("[RobuNexa] Character spawned without a Humanoid; skipping character setup.")
+			return
+		end
 		local stupid = humanoid:FindFirstChildWhichIsA("Animator")
 		if stupid then
 			stupid:Destroy()
@@ -4287,7 +3917,7 @@ HatReanimator.HatCollideMethod = SaveData.Reanimator.HatsCollideMethod
 -- 7 - idk honestly but this is just modified heavily for now
 HatReanimator.IWantAllHats = SaveData.Reanimator.IWantAllHats
 HatReanimator.IWantHatCollide = SaveData.Reanimator.IWantHatCollide
-HatReanimator.Permadeath = not SaveData.Reanimator.HatsPatchmahub
+HatReanimator.Permadeath = false--not SaveData.Reanimator.HatsPatchmahub
 HatReanimator.HatFling = SaveData.Reanimator.HatsFling
 HatReanimator.HatSpin = SaveData.Reanimator.HatsSpin
 HatReanimator.FlingMethod = SaveData.Reanimator.HatsFlingMethod
@@ -4316,7 +3946,7 @@ function HatReanimator.ShowHitboxes()
 			if v:IsA("Accessory") then
 				local handle = v:FindFirstChild("Handle")
 				if handle and handle:IsA("BasePart") then
-					if handle:GetAttribute("_NAM_HasCollide") then
+					if handle:GetAttribute("_Uhhhhhh_HasCollide") then
 						Util.ShowPartHitbox(handle)
 					end
 				end
@@ -4379,13 +4009,13 @@ function HatReanimator.Config(parent)
 	UI.CreateText(parent, "if ur hats get voided when u try to hat collide\nvvv try changing this vvv", 10, Enum.TextXAlignment.Center)
 	UI.CreateDropdown(parent, "Torso Offset", {
 		"1 - ShownApe's method (???)",
-		"2 - mamalalanam's method V1 (specific)",
+		"2 - STEVE's method V1 (specific)",
 		"3 - 2 but for back accessories",
 		"4 - 2 but for shoulder accessories",
 		"5 - 2 but for waist accessories",
-		"6 - mamalalanam's method V2 (kinda stable)",
+		"6 - STEVE's method V2 (kinda stable)",
 		"7 - 6 but further from void (gl getting hatdrop)",
-		"8 - mamalalanam's method V3 (most stable)",
+		"8 - STEVE's method V3 (most stable)",
 		"9 - experimental do not use",
 	}, HatReanimator.HatCollideMethod + 1).Changed:Connect(function(val)
 		HatReanimator.HatCollideMethod = val - 1
@@ -4496,7 +4126,7 @@ function HatReanimator.Start()
 		FaceCenterAttachment = {"Head", CFrame.new(0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)},
 	}
 
-	local HatMeshDatabase, HatNameDatabase, HatKnownAccessoriesDatabase = loadstring(readfile("NAMReanim/BuiltinModules/d_hatsmap.lua"))()
+	local HatMeshDatabase, HatNameDatabase, HatKnownAccessoriesDatabase = loadstring(readfile("UhhhhhhReanim/BuiltinModules/d_hatsmap.lua"))()
 
 	local function GetTools()
 		local tools = {}
@@ -4665,7 +4295,7 @@ function HatReanimator.Start()
 			p.CanTouch = false
 			p.CanQuery = false
 			p.Transparency = 0.75
-			p.Name = "(C) NAM V" .. NAMVersion .. " :: HAT PLACEHOLDER"
+			p.Name = "(C) Uhhhhhh V" .. UhhhhhhVersion .. " :: HAT PLACEHOLDER"
 			for _,v in p:GetDescendants() do
 				if v:IsA("LuaSourceContainer") then
 					v:Destroy()
@@ -5191,8 +4821,8 @@ function HatReanimator.Start()
 		end
 		local netless = Reanimate.NetlessVelocity + (math.sin(timing * 0.5) + 1) / 2
 		local aligned = true
-		local lastcf = handle:GetAttribute("_NAM_LastPosition")
-		local claimtime = handle:GetAttribute("_NAM_ClaimTime")
+		local lastcf = handle:GetAttribute("_Uhhhhhh_LastPosition")
+		local claimtime = handle:GetAttribute("_Uhhhhhh_ClaimTime")
 		if typeof(lastcf) ~= "CFrame" then lastcf = handle.CFrame end
 		if not handle:IsGrounded() and IsNetworkOwner(handle) then
 			local newpos = newcf.Position
@@ -5261,8 +4891,8 @@ function HatReanimator.Start()
 			lastcf = handle.CFrame
 			aligned = false
 		end
-		handle:SetAttribute("_NAM_LastPosition", lastcf)
-		handle:SetAttribute("_NAM_ClaimTime", claimtime)
+		handle:SetAttribute("_Uhhhhhh_LastPosition", lastcf)
+		handle:SetAttribute("_Uhhhhhh_ClaimTime", claimtime)
 		return aligned
 	end
 
@@ -5284,22 +4914,14 @@ function HatReanimator.Start()
 				if not v.Disabled then v.Disabled = true end
 			end)
 		elseif v:IsA("Accessory") and v.Parent == Player.Character then
-			CachePersistentAccessory(v)
 			if not table.find(CharHats, v) then
 				table.insert(CharHats, v)
 				local conn = nil
 				conn = v.AncestryChanged:Connect(function()
-					-- Accessories can briefly have Parent=nil while Roblox performs the
-					-- death/respawn transition. Wait before deciding that a hat is gone.
-					task.delay(1.5, function()
-						if not v:IsDescendantOf(workspace) and v.Parent ~= nil then
-							local i = table.find(CharHats, v)
-							if i then table.remove(CharHats, i) end
-						elseif v.Parent == nil and not v:FindFirstChild("Handle") then
-							local i = table.find(CharHats, v)
-							if i then table.remove(CharHats, i) end
-						end
-					end)
+					if v.Parent ~= Player.Character then
+						local i = table.find(CharHats, v)
+						if i then table.remove(CharHats, i) end
+					end
 				end)
 			end
 		elseif v:IsA("Tool") and v.Parent == Player.Character then
@@ -5325,7 +4947,7 @@ function HatReanimator.Start()
 				exists += 1
 				if handle.CanCollide then
 					collidable += 1
-					handle:SetAttribute("_NAM_HasCollide", true)
+					handle:SetAttribute("_Uhhhhhh_HasCollide", true)
 				end
 				handle.CanCollide = false
 			end
@@ -5691,21 +5313,9 @@ function HatReanimator.Start()
 		end)
 		currentping = Player:GetNetworkPing()
 		table.clear(BaseParts)
-		-- Do not discard hats that were dropped into Workspace by the intentional
-		-- death step of reanimation. Keep valid live Accessories and remove only
-		-- destroyed/out-of-world instances; new character accessories are added below.
-		for i = #CharHats, 1, -1 do
-			local hat = CharHats[i]
-			local handle = hat and hat:FindFirstChild("Handle")
-			if not hat or not hat:IsA("Accessory") or not handle
-				or not handle:IsA("BasePart")
-				or (hat.Parent ~= nil and not hat:IsDescendantOf(workspace)) then
-				table.remove(CharHats, i)
-			end
-		end
+		table.clear(CharHats)
 		table.clear(CharTools)
 		ResetHatRefs()
-		HatReanimator.RebuildRequired = true
 		character.DescendantAdded:Connect(CharOnDesc)
 		for _,v in character:GetDescendants() do
 			CharOnDesc(v)
@@ -5753,14 +5363,6 @@ function HatReanimator.Start()
 		end
 		local RootPart = character:WaitForChild("HumanoidRootPart", 10)
 		if not RootPart then return end
-		-- Avatar-exported accessories are often injected locally and are absent from
-		-- HumanoidDescription. Give the game's normal appearance a moment to load,
-		-- then restore only cached accessories whose original instances were destroyed.
-		task.delay(3.5, function()
-			if Player.Character == character and character:IsDescendantOf(workspace) then
-				RestorePersistentAccessories(character, Humanoid)
-			end
-		end)
 		local RootPosition = Vector3.new(RootPart.Position.X, FallenPartsDestroyHeight, RootPart.Position.Z)
 		if ReanimCharacter then
 			local root = ReanimCharacter:FindFirstChild("HumanoidRootPart")
@@ -5949,7 +5551,7 @@ function HatReanimator.Start()
 					end
 				end))
 				handle:BreakJoints()
-				handle:SetAttribute("_NAM_HasCollide", false)
+				handle:SetAttribute("_Uhhhhhh_HasCollide", false)
 			end
 		end
 		Humanoid:ChangeState(Enum.HumanoidStateType.FallingDown)
@@ -6064,7 +5666,15 @@ function HatReanimator.Start()
 		local ReanimCharacter = Reanimate.Character
 		if Character and Character:IsDescendantOf(workspace) then
 			if CurrentCharacter == Character then
-				if #CharHats > 0 then
+				-- Do not hide the fallback body when only a few hats are available.
+				-- Partial hat ownership/mapping can otherwise make the whole avatar appear invisible.
+				local usableHatCount = 0
+				for _, hat in CharHats do
+					if hat and hat.Parent and hat:FindFirstChild("Handle") then
+						usableHatCount += 1
+					end
+				end
+				if usableHatCount >= 6 then
 					ReanimOkay = true
 				end
 				if HatReanimator.HasPermadeath and not IsRespawning and HatReanimator.IWantAllHats then
@@ -6151,14 +5761,14 @@ function HatReanimator.Start()
 							claimoverride += Vector3.new(0, -workspace.Gravity, 0) * 0.5 * a * a
 						end
 					end
-					if not v:GetAttribute("_NAM_ActivateConn") then
-						v:SetAttribute("_NAM_ActivateConn", true)
+					if not v:GetAttribute("_Uhhhhhh_ActivateConn") then
+						v:SetAttribute("_Uhhhhhh_ActivateConn", true)
 						v.Activated:Connect(function()
-							v:SetAttribute("_NAM_Activate", true)
+							v:SetAttribute("_Uhhhhhh_Activate", true)
 						end)
 					end
-					if v:GetAttribute("_NAM_Activate") then
-						v:SetAttribute("_NAM_Activate", nil)
+					if v:GetAttribute("_Uhhhhhh_Activate") then
+						v:SetAttribute("_Uhhhhhh_Activate", nil)
 						toolactivate = true
 						toolactivated = v
 					end
@@ -6202,8 +5812,8 @@ function HatReanimator.Start()
 							Debris:AddItem(sound, 1)
 						end
 						if toolactivate then
-							local newuse = FakeTool:GetAttribute("_NAM_Sword_CD") or 0
-							local lastuse = FakeTool:GetAttribute("_NAM_Sword_LU") or 0
+							local newuse = FakeTool:GetAttribute("_Uhhhhhh_Sword_CD") or 0
+							local lastuse = FakeTool:GetAttribute("_Uhhhhhh_Sword_LU") or 0
 							if t > newuse then
 								if t - lastuse < 0.2 then
 									newuse = t + 1
@@ -6245,8 +5855,8 @@ function HatReanimator.Start()
 								end
 								lastuse = t
 							end
-							FakeTool:SetAttribute("_NAM_Sword_CD", newuse)
-							FakeTool:SetAttribute("_NAM_Sword_LU", lastuse)
+							FakeTool:SetAttribute("_Uhhhhhh_Sword_CD", newuse)
+							FakeTool:SetAttribute("_Uhhhhhh_Sword_LU", lastuse)
 						end
 					end
 				else
@@ -6291,7 +5901,7 @@ function HatReanimator.Start()
 						local biggestarea = 0
 						for _,hat in CharHats do
 							local handle = hat:FindFirstChild("Handle")
-							if handle and handle:IsA("BasePart") and handle:GetAttribute("_NAM_HasCollide") and IsNetworkOwner(handle) then
+							if handle and handle:IsA("BasePart") and handle:GetAttribute("_Uhhhhhh_HasCollide") and IsNetworkOwner(handle) then
 								local area = handle.Size.X * handle.Size.Y * handle.Size.Z
 								if biggestarea < area then
 									biggest = handle
@@ -6309,7 +5919,7 @@ function HatReanimator.Start()
 						for _,hat in CharHats do
 							local handle = hat:FindFirstChild("Handle")
 							if handle and handle:IsA("BasePart") then
-								if handle:GetAttribute("_NAM_HasCollide") then
+								if handle:GetAttribute("_Uhhhhhh_HasCollide") then
 									collide = true
 								end
 							end
@@ -6426,7 +6036,7 @@ local function ReanimateFling(target, duration)
 	return false
 end
 -- SetCharacter thing, very empyrean-like system
-_G_NAM.Fling = function(part)
+_G_Uhhhhhh.Fling = function(part)
 	if part and part.Parent then
 		if part:IsA("BasePart") then
 			part = part.Parent
@@ -6443,35 +6053,90 @@ end
 
 do
 	SaveData.SelectedReanimator = SaveData.SelectedReanimator or 1
-	local ReanimateMethodSelect = UI.CreateDropdown(MainPage, "Reanimator", {"Limb Reanimator", "Hats Reanimator"}, SaveData.SelectedReanimator)
-	local ReanimatorConfigTitle = UI.CreateText(MainPage, "-=+ Limb Reanimator Config +=-", 15, Enum.TextXAlignment.Center)
+	local SyntaxFlingButton, SyntaxFlingButtonText
+	local ReanimateMethodSelect, ReanimatorTypeLabel = UI.CreateDropdown(MainPage, "Reanimate Type", {"Limb Reanimator", "Hats Reanimator", "Krypton Reanimate", "Syntax Reanimate"}, SaveData.SelectedReanimator)
+	ReanimatorTypeLabel.Parent.LayoutOrder = -100
+	local ReanimatorConfigTitle = UI.CreateText(MainPage, "LIMB REANIMATOR CONFIG", 15, Enum.TextXAlignment.Center)
+	ReanimatorConfigTitle.Parent.LayoutOrder = -95
 	local SelectedReanimator = LimbReanimator
 	if SaveData.SelectedReanimator == 2 then
 		SelectedReanimator = HatReanimator
-		ReanimatorConfigTitle.Text = "-=+ Hats Reanimator Config +=-"
+		ReanimatorConfigTitle.Text = "HATS REANIMATOR CONFIG"
+	elseif SaveData.SelectedReanimator == 3 then
+		SelectedReanimator = nil
+		ReanimatorConfigTitle.Text = "KRYPTON REANIMATE"
+	elseif SaveData.SelectedReanimator == 4 then
+		SelectedReanimator = nil
+		ReanimatorConfigTitle.Text = "SYNTAX REANIMATE"
 	end
 	local ReanimatorConfigCanvas = UI.CreateCanvas(MainPage)
+	ReanimatorConfigCanvas.Parent.LayoutOrder = -94
 	ReanimateMethodSelect.Changed:Connect(function(value)
 		SaveData.SelectedReanimator = value
+		if SyntaxFlingButton then
+			SyntaxFlingButton.Visible = value == 4
+			if value ~= 4 then
+				local env = (getgenv and getgenv()) or shared or _G
+				env.bulletattacking = false
+				SyntaxFlingButtonText.Text = "Syntax Fling: OFF"
+			end
+		end
 		if value == 1 then
 			SelectedReanimator = LimbReanimator
-			ReanimatorConfigTitle.Text = "-=+ Limb Reanimator Config +=-"
+			ReanimatorConfigTitle.Text = "LIMB REANIMATOR CONFIG"
 		end
 		if value == 2 then
 			SelectedReanimator = HatReanimator
-			ReanimatorConfigTitle.Text = "-=+ Hats Reanimator Config +=-"
+			ReanimatorConfigTitle.Text = "HATS REANIMATOR CONFIG"
+		elseif value == 3 then
+			SelectedReanimator = nil
+			ReanimatorConfigTitle.Text = "KRYPTON REANIMATE"
+		elseif value == 4 then
+			SelectedReanimator = nil
+			ReanimatorConfigTitle.Text = "SYNTAX REANIMATE"
 		end
 		Util.ClearAllChildrenGui(ReanimatorConfigCanvas)
-		SelectedReanimator.Config(ReanimatorConfigCanvas)
+		if SelectedReanimator then
+			SelectedReanimator.Config(ReanimatorConfigCanvas)
+		else
+			if SaveData.SelectedReanimator == 4 then
+				UI.CreateText(ReanimatorConfigCanvas, "Syntax starts from the Reanimate button. Fling code is retained.", 12, Enum.TextXAlignment.Center)
+			else
+				UI.CreateText(ReanimatorConfigCanvas, "Krypton starts from the Reanimate button.", 12, Enum.TextXAlignment.Center)
+			end
+		end
 	end)
-	SelectedReanimator.Config(ReanimatorConfigCanvas)
-	UI.CreateText(ReanimPage, "Enjoy my really awful UI design! It's awful, but hey atleast clicking Reanimate is faster!", 8, Enum.TextXAlignment.Center)
-	local ReanimateText = UI.CreateText(ReanimPage, "Running: NONE", 15, Enum.TextXAlignment.Center)
-	local ReanimateStartButton, ReanimateStartButtonText = UI.CreateButton(ReanimPage, "Reanimate", 20)
+	if SelectedReanimator then
+		SelectedReanimator.Config(ReanimatorConfigCanvas)
+	else
+		if SaveData.SelectedReanimator == 4 then
+			UI.CreateText(ReanimatorConfigCanvas, "Syntax starts from the Reanimate button. Fling code is retained.", 12, Enum.TextXAlignment.Center)
+		else
+			UI.CreateText(ReanimatorConfigCanvas, "Krypton starts from the Reanimate button.", 12, Enum.TextXAlignment.Center)
+		end
+	end
+	-- Classic EskiAnim-style single-panel controls. Keep the current reanimation logic untouched.
+	local ReanimateText = UI.CreateText(MainPage, "Running: NONE", 15, Enum.TextXAlignment.Center)
+	ReanimateText.Parent.LayoutOrder = -99
+	local ReanimateStartButton, ReanimateStartButtonText = UI.CreateButton(MainPage, "Reanimate", 20)
+	ReanimateStartButton.Parent.LayoutOrder = -98
+	SyntaxFlingButton, SyntaxFlingButtonText = UI.CreateButton(MainPage, "Syntax Fling: OFF", 16)
+	SyntaxFlingButton.Parent.LayoutOrder = -97
+	SyntaxFlingButton.Visible = SaveData.SelectedReanimator == 4
+	SyntaxFlingButton.Activated:Connect(function()
+		local env = (getgenv and getgenv()) or shared or _G
+		if not env.RobuNexaSyntaxRunning then
+			warn("[RobuNexa] Start Syntax Reanimate before toggling fling.")
+			return
+		end
+		env.bulletattacking = not env.bulletattacking
+		SyntaxFlingButtonText.Text = env.bulletattacking and "Syntax Fling: ON" or "Syntax Fling: OFF"
+	end)
 	ReanimateStartButton.Activated:Connect(function()
 		ReanimateStartButton.Interactable = false
+		local env = (getgenv and getgenv()) or shared or _G
 		if Reanimate.Current then
-			ReanimateStartButtonText.Text = "Stopping"
+			ReanimateStartButtonText.Text = "Stopping..."
 			Reanimate.Stopping = true
 			repeat task.wait() until not Reanimate.Stopping
 			Reanimate.Current.Running = nil
@@ -6480,57 +6145,81 @@ do
 			ReanimateText.Text = "Running: NONE"
 			task.wait(1)
 			ReanimateStartButtonText.Text = "Reanimate"
+		elseif SaveData.SelectedReanimator == 3 then
+			if env.RobuNexaKryptonRunning then
+				ReanimateText.Text = "Running: KRYPTON REANIMATE"
+				ReanimateStartButtonText.Text = "Krypton Running"
+			else
+				ReanimateStartButtonText.Text = "Starting Krypton..."
+				env.RobuNexaAllowKryptonFromNAM = true
+				local ok, err = pcall(function()
+					local loader = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/source/krypton-reanimate.lua")
+					local runLoader = loadstring(loader)
+					assert(type(runLoader) == "function", "Krypton loader could not be compiled")
+					runLoader()
+				end)
+				env.RobuNexaAllowKryptonFromNAM = nil
+				if not ok then
+					ReanimateText.Text = "Krypton failed to start"
+					ReanimateStartButtonText.Text = "Reanimate"
+					warn("[RobuNexa] Krypton failed: " .. tostring(err))
+				else
+					ReanimateText.Text = "Running: KRYPTON REANIMATE"
+					ReanimateStartButtonText.Text = "Krypton Running"
+				end
+			end
+		elseif SaveData.SelectedReanimator == 4 then
+			if env.RobuNexaSyntaxRunning then
+				ReanimateText.Text = "Running: SYNTAX REANIMATE"
+				ReanimateStartButtonText.Text = "Syntax Running"
+			else
+				ReanimateStartButtonText.Text = "Starting Syntax..."
+				env.RobuNexaAllowSyntaxFromNAM = true
+				local ok, err = pcall(function()
+					local loader = game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/source/syntax-reanimate.lua")
+					local runLoader = loadstring(loader)
+					assert(type(runLoader) == "function", "Syntax loader could not be compiled")
+					runLoader()
+				end)
+				env.RobuNexaAllowSyntaxFromNAM = nil
+				if not ok then
+					ReanimateText.Text = "Syntax failed to start"
+					ReanimateStartButtonText.Text = "Reanimate"
+					warn("[RobuNexa] Syntax failed: " .. tostring(err))
+				else
+					ReanimateText.Text = "Running: SYNTAX REANIMATE"
+					ReanimateStartButtonText.Text = "Syntax Running"
+				end
+			end
 		else
-			ReanimateStartButtonText.Text = "Starting"
+			if env.RobuNexaKryptonRunning or env.RobuNexaSyntaxRunning then
+				ReanimateText.Text = "Stop active reanimation and respawn before switching."
+				ReanimateStartButtonText.Text = "Reanimate"
+				ReanimateStartButton.Interactable = true
+				return
+			end
+			ReanimateStartButtonText.Text = "Starting..."
 			Reanimate.Starting = true
-			Reanimate.Stopping = false
 			Reanimate.Current = SelectedReanimator
 			HumanoidLASetHookState(Reanimate.UseLoadAnimationHook)
-			ReanimateText.Text = "Starting: " .. Reanimate.Current.Name
-
-			local selected = Reanimate.Current
-			local startFinished = false
-			local startError = nil
-			task.spawn(function()
-				local ok, err = xpcall(selected.Start, debug.traceback)
-				if not ok then
-					startError = tostring(err)
-					warn("[NAM Reanimate] Start failed:\\n" .. startError)
-					Reanimate.Stopping = true
-					Reanimate.Starting = false
-				end
-				startFinished = true
-			end)
-
-			local startedAt = os.clock()
-			while Reanimate.Starting and not startFinished and os.clock() - startedAt < 30 do
-				task.wait(0.1)
-			end
-
-			if startError or (Reanimate.Starting and not startFinished) then
-				if not startError then
-					startError = "Startup timed out after 30 seconds. Check the executor console for the first error."
-					warn("[NAM Reanimate] " .. startError)
-				end
-				Reanimate.Stopping = true
-				Reanimate.Starting = false
-				Reanimate.Current = nil
-				HumanoidLASetHookState(false)
-				ReanimateText.Text = "Running: NONE (startup failed)"
-				ReanimateStartButtonText.Text = "Reanimate"
-			else
-				Reanimate.Current.Running = true
-				task.wait(1)
-				ReanimateStartButtonText.Text = "Deanimate"
-			end
+			ReanimateText.Text = "Running: " .. Reanimate.Current.Name
+			task.spawn(Reanimate.Current.Start)
+			repeat task.wait() until not Reanimate.Starting
+			Reanimate.Current.Running = true
+			task.wait(1)
+			ReanimateStartButtonText.Text = "Deanimate"
 		end
 		ReanimateStartButton.Interactable = true
 	end)
-	UI.CreateButton(ReanimPage, "Hitboxes", 15).Activated:Connect(function()
+	local ReanimateHitboxesButton = UI.CreateButton(MainPage, "Hitboxes", 15)
+	ReanimateHitboxesButton.Parent.LayoutOrder = -97
+	ReanimateHitboxesButton.Activated:Connect(function()
 		if not Reanimate.Character then return end
 		ReanimateShowHitboxes()
 	end)
-	UI.CreateButton(ReanimPage, "Refresh", 10).Activated:Connect(function()
+	local ReanimateRefreshButton = UI.CreateButton(MainPage, "Refresh", 10)
+	ReanimateRefreshButton.Parent.LayoutOrder = -96
+	ReanimateRefreshButton.Activated:Connect(function()
 		if not Reanimate.Character then return end
 		Reanimate.CreateCharacter()
 	end)
@@ -6538,7 +6227,7 @@ end
 UI.CreateSeparator(MainPage)
 
 do
-	UI.CreateText(MainPage, "Reanimate Character Settings", 15, Enum.TextXAlignment.Center)
+	UI.CreateText(MainPage, "SETTINGS", 15, Enum.TextXAlignment.Center)
 	UI.CreateSwitch(MainPage, "Infinite Jump", Reanimate.InfiniteJump).Changed:Connect(function(val)
 		Reanimate.InfiniteJump = val
 		SaveData.NoInfiniteJump = not val
@@ -6749,7 +6438,7 @@ do
 end
 UI.CreateSeparator(MainPage)
 do
-	UI.CreateText(MainPage, "Internals Settings", 15, Enum.TextXAlignment.Center)
+	UI.CreateText(MainPage, "ADVANCED SETTINGS", 15, Enum.TextXAlignment.Center)
 	UI.CreateSwitch(MainPage, "Hook LoadAnimation", Reanimate.UseLoadAnimationHook).Changed:Connect(function(val)
 		Reanimate.UseLoadAnimationHook = val
 		SaveData.NoLoadAnimationHook = not val
@@ -6854,10 +6543,36 @@ do
 	end
 	function Track.fromfile(path)
 		local s, data = pcall(readfile, path)
-		if s and data then
-			local buf = buffer.fromstring(data)
-			return Track.frombuffer(buf)
+		if not s or type(data) ~= "string" then return nil end
+
+		-- Converted NAM tracks are JSON; older bundled animations use AnimLib's binary format.
+		-- Detect JSON before passing the file into buffer.fromstring/Track.frombuffer.
+		if data:match("^%s*{") then
+			local decodedOK, anim = pcall(function()
+				return HttpService:JSONDecode(data)
+			end)
+			if decodedOK and type(anim) == "table" and type(anim.Keyframes) == "table" then
+				local unpackValues = table.unpack or unpack
+				for _, keyframe in ipairs(anim.Keyframes) do
+					if type(keyframe.Poses) == "table" then
+						for _, pose in ipairs(keyframe.Poses) do
+							if type(pose.CFrame) == "table" then
+								local values = pose.CFrame
+								if #values >= 12 then
+									pose.CFrame = CFrame.new(unpackValues(values, 1, 12))
+								end
+							end
+						end
+					end
+				end
+				return anim
+			end
+			warn("NAM: JSON animation track could not be decoded: " .. tostring(path))
+			return nil
 		end
+
+		local buf = buffer.fromstring(data)
+		return Track.frombuffer(buf)
 	end
 	function Track.frominstance(ks)
 		assert(ks and ks:IsA("KeyframeSequence"))
@@ -7152,66 +6867,95 @@ do
 	AnimLib.Animator = Animator
 end
 local function AssetGetPathFromFilename(filename)
-	local filetype = "Unknown"
+	local filetype = "Unknown/"
 	if filename:sub(-4, -1) == ".mp3" then
-		filetype = "Sounds"
+		filetype = "Sounds/"
 	elseif filename:sub(-5, -1) == ".anim" then
-		filetype = "Anims"
+		filetype = "Anims/"
 	elseif filename:sub(-4, -1) == ".png" then
-		filetype = "Images"
+		filetype = "Images/"
 	elseif filename:sub(-4, -1) == ".rbxm" then
-		filetype = "Models"
+		filetype = "Models/"
+	end
+	return "UhhhhhhReanim/Content/" .. filetype .. filename
+end
+local function IsAssetContentUsable(data, filename)
+	if type(data) ~= "string" or #data == 0 then
+		return false
 	end
 
-	-- Moved assets use paths such as Gojo/HollowPurple.anim. Create every
-	-- nested cache directory before writefile/getcustomasset tries to use it.
-	local base = "NAMReanim/Content/" .. filetype
-	pcall(makefolder, "NAMReanim")
-	pcall(makefolder, "NAMReanim/Content")
-	pcall(makefolder, base)
-	local parts = string.split(filename, "/")
-	local folder = base
-	for i = 1, #parts - 1 do
-		folder = folder .. "/" .. parts[i]
-		pcall(makefolder, folder)
+	-- Converted NAM tracks are JSON. Reject empty or malformed JSON tracks
+	-- instead of treating a zero-byte cached file as a successful download.
+	if filename:sub(-5) == ".anim" and data:match("^%s*{") then
+		local decodedOK, decoded = pcall(HttpService.JSONDecode, HttpService, data)
+		if not decodedOK or type(decoded) ~= "table"
+			or type(decoded.Keyframes) ~= "table" or #decoded.Keyframes == 0
+			or (tonumber(decoded.Time) or 0) <= 0 then
+			return false
+		end
+
+		local poseCount = 0
+		for _, keyframe in ipairs(decoded.Keyframes) do
+			if type(keyframe) == "table" and type(keyframe.Poses) == "table" then
+				poseCount += #keyframe.Poses
+			end
+		end
+		if poseCount == 0 then return false end
 	end
-	return base .. "/" .. filename
+
+	-- Non-JSON .anim files are legacy binary AnimLib/KeyframeSequence assets;
+	-- they must be non-empty but must not be JSON-decoded.
+	return true
 end
+
+local function IsAssetFileUsable(path, filename)
+	local readOK, data = pcall(readfile, path)
+	return readOK and IsAssetContentUsable(data, filename)
+end
+
 local _Assetdownloading = {}
-local function GetRepoAssetPath(filename)
-	local lower = string.lower(filename)
-	if lower:sub(1, 11) == "animations/" or lower:sub(1, 7) == "sounds/" or lower:sub(1, 7) == "models/" or lower:sub(1, 7) == "images/" then
-		return filename
-	end
-	if lower:sub(-5) == ".anim" then return "animations/" .. filename end
-	if lower:sub(-4) == ".mp3" then return "sounds/" .. filename end
-	if lower:sub(-5) == ".rbxm" then return "models/" .. filename end
-	if lower:sub(-4) == ".png" then return "images/" .. filename end
-	return filename
-end
 local function AssetDownload(filename)
-	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. GetRepoAssetPath(filename)
+	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. filename
 	local split = string.split(filename, "@")
 	if #split > 1 then
 		filename = table.remove(split, 1)
 		source = table.concat(split, "@")
 	end
 	local path = AssetGetPathFromFilename(filename)
-	if isfile(path) then return true end
+	if isfile(path) then
+		if IsAssetFileUsable(path, filename) then return true end
+		-- A stale/partial local file must never block a fresh download.
+		pcall(delfile, path)
+	end
 	if _Assetdownloading[filename] then return false end
 	_Assetdownloading[filename] = true
 	task.spawn(function()
 		Util.Notify("Downloading " .. filename .. "...")
-		local s, resp = pcall(request, {
-			Method = "GET",
-			Url = source,
-		})
-		if s and resp and resp.StatusCode == 200 then
-			pcall(writefile, path, resp.Body)
-		else
-			Util.Notify("Failed to download " .. filename .. "!")
+		local body
+		local requestOK, response = pcall(request, {Method = "GET", Url = source})
+		if requestOK and response and response.StatusCode == 200
+			and IsAssetContentUsable(response.Body, filename) then
+			body = response.Body
 		end
-		task.wait(10)
+		-- Some executor request APIs return a truncated/empty body for large JSON
+		-- tracks. Validate the first response before accepting it, then try HttpGet
+		-- whenever the first transport did not return a usable asset.
+		if not body then
+			local getOK, result = pcall(function() return game:HttpGet(source) end)
+			if getOK and IsAssetContentUsable(result, filename) then
+				body = result
+			end
+		end
+		local wrote = false
+		if body then
+			local writeOK = pcall(writefile, path, body)
+			wrote = writeOK and isfile(path) and IsAssetFileUsable(path, filename)
+		end
+		if not wrote then
+			pcall(delfile, path)
+			Util.Notify("Failed to download a valid " .. filename .. "!")
+		end
+		task.wait(2)
 		_Assetdownloading[filename] = nil
 	end)
 	return false
@@ -7292,41 +7036,11 @@ MovesetsPage.Back.Activated:Connect(function()
 		MovesetsPage.Visible = false
 	end)
 end)
-local DancesPage = UI.CreateItemListPage()
+DancesPage = UI.CreateItemListPage()
 DancesPage.ZIndex = 1
 DancesPage.Position = UDim2.new(0.5, 360, 0.5, 0)
 DancesPage.Interactable = false
 DancesPage.Visible = false
-DancesPage:SetAttribute("NAMFavoritesOnly", false)
-local FavoritesFilterButton, FavoritesFilterText = UI.CreateButton(DancesPage.List, "FAVORITES ★", 16)
-local FavoritesFilterRow = FavoritesFilterButton.Parent
-FavoritesFilterRow.Name = "Favorites filter"
-FavoritesFilterRow:SetAttribute("NAMFavoriteFilterRow", true)
-FavoritesFilterRow.LayoutOrder = -1
-local function UpdateDanceListVisibility()
-	local favoritesOnly = DancesPage:GetAttribute("NAMFavoritesOnly")
-	local favorites = type(SaveData.FavoriteDances) == "table" and SaveData.FavoriteDances or {}
-	local searchText = DancesPage.Search.Box.Text:lower()
-	for _,row in DancesPage.List:GetChildren() do
-		if row:IsA("GuiObject") then
-			if row:GetAttribute("NAMFavoriteFilterRow") then
-				row.Visible = true
-			else
-				local matchesSearch = searchText == "" or row.Name:lower():find(searchText, 1, true) ~= nil
-				local favoriteKey = row:GetAttribute("NAMFavoriteKey")
-				local matchesFavorites = not favoritesOnly or (favoriteKey and favorites[favoriteKey])
-				row.Visible = matchesSearch and not not matchesFavorites
-			end
-		end
-	end
-end
-FavoritesFilterButton.Activated:Connect(function()
-	local favoritesOnly = not DancesPage:GetAttribute("NAMFavoritesOnly")
-	DancesPage:SetAttribute("NAMFavoritesOnly", favoritesOnly)
-	FavoritesFilterText.Text = favoritesOnly and "ALL EMOTES" or "FAVORITES ★"
-	UpdateDanceListVisibility()
-end)
-DancesPage.Search.Box:GetPropertyChangedSignal("Text"):Connect(UpdateDanceListVisibility)
 UI.CreateButton(MainPage, "Dances &gt;", 20).Activated:Connect(function()
 	DancesPage.Interactable = false
 	DancesPage.Visible = true
@@ -7450,7 +7164,7 @@ do
 	local actions, actionsmap = ContextActions._Actions, ContextActions._ActionsMap
 	function ContextActions:RunBinding(caac, input)
 		local s, result = xpcall(caac.Callback, function(m)
-			warn(debug.traceback("NAM :: Custom ContextActions Error - " .. m))
+			warn(debug.traceback("Uhhhhhh :: Custom ContextActions Error - " .. m))
 		end, caac.Name, input.UserInputState, input)
 		if s then
 			if result == Enum.ContextActionResult.Sink then
@@ -7692,17 +7406,9 @@ local function GetModuleHash(m)
 	m.Hash = str
 	return str
 end
-local function AddMoveset(m, moduleFileName, moduleSource)
+local function AddMoveset(m)
 	if type(m) == "table" then
 		if not m.Name then return end
-		-- Avoid duplicate entries from a built-in module and an old local USER copy.
-		local normalizedName = string.lower(tostring(m.Name)):gsub("%s+", "")
-		for _, existing in ipairs(MovementStyles) do
-			local existingName = string.lower(tostring(existing.Name or "")):gsub("%s+", "")
-			if existingName == normalizedName then
-				return false
-			end
-		end
 		if not m.Description then return end
 		if not m.Config then return end
 		if not m.Assets then return end
@@ -7751,10 +7457,10 @@ local function AddMoveset(m, moduleFileName, moduleSource)
 				equiptext.Text = "* ACTIVE *"
 				MovementStyleIndex = table.find(MovementStyles, m)
 			end)
-				UI.CreateSeparator(page)
-				UI.CreateText(page, "* Configuration *", 15, Enum.TextXAlignment.Center)
-				m.Config(page)
-				MovesetsPage.Interactable = false
+			UI.CreateSeparator(page)
+			UI.CreateText(page, "* Configuration *", 15, Enum.TextXAlignment.Center)
+			m.Config(page)
+			MovesetsPage.Interactable = false
 			local tween = TweenService:Create(page, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
 				Position = UDim2.new(0.5, 0, 0.5, 0),
 			})
@@ -7763,19 +7469,6 @@ local function AddMoveset(m, moduleFileName, moduleSource)
 				page.Interactable = true
 			end)
 		end))
-		return true
-	end
-end
-if type(SaveData.FavoriteDances) ~= "table" then
-	SaveData.FavoriteDances = {}
-end
-local function UpdateDanceListOrder()
-	for _,dance in DanceableDances do
-		local item = dance._NAMFavoriteItem
-		if item and item.Parent then
-			local favorite = SaveData.FavoriteDances[dance._NAMFavoriteKey]
-			item.Parent.LayoutOrder = (favorite and 0 or 100000) + dance._NAMFavoriteIndex
-		end
 	end
 end
 local function AddDance(m)
@@ -7794,32 +7487,12 @@ local function AddDance(m)
 			end
 		end
 		table.insert(DanceableDances, m)
-		m._NAMFavoriteIndex = #DanceableDances
-		m._NAMFavoriteKey = m.InternalName or m.Name
 		local item = UI.CreateItemListItem(DancesPage.List)
-		m._NAMFavoriteItem = item
-		item.Parent:SetAttribute("NAMFavoriteKey", m._NAMFavoriteKey)
-		local msname = UI.CreateText(item, (SaveData.FavoriteDances[m._NAMFavoriteKey] and "[FAV] " or "") .. m.Name .. " &gt;", 20, Enum.TextXAlignment.Left)
-		m._NAMFavoriteLabel = msname
+		local msname = UI.CreateText(item, m.Name .. " &gt;", 20, Enum.TextXAlignment.Left)
 		local msdesc = UI.CreateText(item, string.split(m.Description, "\n")[1], 12, Enum.TextXAlignment.Left)
 		msname.Name = "LabelName"
 		msdesc.Name = "LabelDesc"
-		local favoriteRowButton, favoriteRowText = UI.CreateButton(item, "", 14)
-		local function RefreshRowFavoriteState()
-			local isFavorite = SaveData.FavoriteDances[m._NAMFavoriteKey]
-			favoriteRowText.Text = isFavorite and "★ FAVORITED — TAP TO REMOVE" or "☆ ADD TO FAVORITES"
-			msname.Text = (isFavorite and "[FAV] " or "") .. m.Name .. " &gt;"
-		end
-		RefreshRowFavoriteState()
-		favoriteRowButton.Activated:Connect(function()
-			SaveData.FavoriteDances[m._NAMFavoriteKey] = not SaveData.FavoriteDances[m._NAMFavoriteKey]
-			RefreshRowFavoriteState()
-			UpdateDanceListOrder()
-			UpdateDanceListVisibility()
-		end)
 		item.Parent.Name = m.Name .. " " .. m.Description
-		UpdateDanceListOrder()
-		UpdateDanceListVisibility()
 		Util.LinkDestroyI2C(item, item.Activated:Connect(function()
 			local page = UI.CreatePage()
 			page.ZIndex = 2
@@ -7868,12 +7541,12 @@ local function AddDance(m)
 		end))
 	end
 end
-local function AddModule(func, moduleFileName, moduleSource)
+local function AddModule(func)
 	GiveFunctionsToFunction(func)
 	local m = func()
 	if m and type(m) == "table" then
 		if m.ModuleType == "MOVESET" then
-			return AddMoveset(m, moduleFileName, moduleSource)
+			AddMoveset(m)
 		elseif m.ModuleType == "DANCE" then
 			AddDance(m)
 		else
@@ -7883,17 +7556,13 @@ local function AddModule(func, moduleFileName, moduleSource)
 		error("Module return value is not a table. Got " .. typeof(m) .. " instead.")
 	end
 end
-local function AddModules(list, moduleFileName, moduleSource)
-	local addedMovesets = 0
+local function AddModules(list)
 	if type(list) == "table" then
 		for i=1, #list do
-			if AddModule(list[i], moduleFileName, moduleSource) then
-				addedMovesets += 1
-			end
+			AddModule(list[i])
 			task.wait()
 		end
 	end
-	return addedMovesets
 end
 task.spawn(function()
 	local function SaveConfig(m)
@@ -7952,10 +7621,8 @@ task.spawn(function()
 				CurrentMovementStyle = MovementStyles[MovementStyleIndex]
 				SetOverrideMovesetMusic(nil)
 				if ReanimCharacter:GetAttribute("MovementInit") then
-					-- Switching movesets should reinitialize the module on the existing rig,
-					-- not destroy/recreate the reanimated character.
-					ReanimCharacter:SetAttribute("MovementInit", nil)
-					ReanimCharacter:SetAttribute("MovesetInternalName", nil)
+					Reanimate.CreateCharacter()
+					ReanimCharacter = Reanimate.Character
 				end
 			end
 			if CurrentMovementStyle then
@@ -7977,7 +7644,19 @@ task.spawn(function()
 							if AssetEnsure(_CurrentDance.Assets) then
 								ReanimCharacter:SetAttribute("IsDancing", true)
 								ReanimCharacter:SetAttribute("DanceInternalName", _CurrentDance.InternalName)
-								_CurrentDance.Init(ReanimCharacter)
+								local initOK, initResult = pcall(_CurrentDance.Init, ReanimCharacter)
+								if not initOK or initResult == false then
+									pcall(_CurrentDance.Destroy, ReanimCharacter)
+									ReanimCharacter:SetAttribute("IsDancing", nil)
+									ReanimCharacter:SetAttribute("DanceInternalName", nil)
+									SetOverrideDanceMusic(nil)
+									if not initOK then
+										warn("NAM: Dance initialization failed: " .. tostring(initResult))
+									end
+									-- Do not leave the failed dance stuck in an initialized state.
+									CurrentDance = nil
+									_CurrentDance = nil
+								end
 							else
 								SetOverrideDanceMusic(nil)
 							end
@@ -8059,15 +7738,15 @@ UI.CreateButton(CreditsPage, "&lt; Hurry back", 20).Activated:Connect(function()
 		CreditsPage.Visible = false
 	end)
 end)
-local NAMFire = UI.CreateText(CreditsPage, "", 12, Enum.TextXAlignment.Center)
-Util.ForceTextSize(NAMFire)
-UI.CreateText(CreditsPage, "Reanimate by mamalalanam :D", 15, Enum.TextXAlignment.Right)
-local NAMFiret = UI.CreateSlider(CreditsPage, "Transparency", 0.25, 0, 1, 0)
-local NAMFirep = {}
+local UhhhhhhFire = UI.CreateText(CreditsPage, "", 12, Enum.TextXAlignment.Center)
+Util.ForceTextSize(UhhhhhhFire)
+UI.CreateText(CreditsPage, "Reanimate by STEVE :D", 15, Enum.TextXAlignment.Right)
+local UhhhhhhFiret = UI.CreateSlider(CreditsPage, "Transparency", 0.25, 0, 1, 0)
+local UhhhhhhFirep = {}
 for i=1, 64 do
-	table.insert(NAMFirep, {i / 64, 0.98 + math.random() * 0.04, math.random(), math.random() - 0.5})
+	table.insert(UhhhhhhFirep, {i / 64, 0.98 + math.random() * 0.04, math.random(), math.random() - 0.5})
 end
-local NAMFirea = {
+local UhhhhhhFirea = {
 	"XX    XX XX      XX      XX      XX      XX      XX     ",
 	"XX    XX XX      XX      XX      XX      XX      XX     ",
 	"XX    XX XXXXXX  XXXXXX  XXXXXX  XXXXXX  XXXXXX  XXXXXX ",
@@ -8075,15 +7754,15 @@ local NAMFirea = {
 	"XXX  XXX XX   XX XX   XX XX   XX XX   XX XX   XX XX   XX",
 	" XXXXXX  XX   XX XX   XX XX   XX XX   XX XX   XX XX   XX",
 }
-local NAMFirex = #NAMFirea[1]
-local NAMFirey = #NAMFirea
+local UhhhhhhFirex = #UhhhhhhFirea[1]
+local UhhhhhhFirey = #UhhhhhhFirea
 AddToRenderStep(function(t, dt)
 	local radius = 0.1
-	local ratio = (NAMFirey / NAMFirex) * 1.75
-	if Util.IsGuiVisible(NAMFire) then
-		local tr = math.clamp(NAMFiret.Value, 0, 1)
+	local ratio = (UhhhhhhFirey / UhhhhhhFirex) * 1.75
+	if Util.IsGuiVisible(UhhhhhhFire) then
+		local tr = math.clamp(UhhhhhhFiret.Value, 0, 1)
 		local pp = {}
-		for _,v in NAMFirep do
+		for _,v in UhhhhhhFirep do
 			v[1] += dt * v[2]
 			if v[1] >= 1 then
 				v[1], v[2], v[3], v[4] = 0, 0.98 + math.random() * 0.04, math.random(), math.random() - 0.5
@@ -8091,15 +7770,15 @@ AddToRenderStep(function(t, dt)
 			table.insert(pp, {1 - v[1], v[3] + v[4] * v[1] * 0.25, (1 - v[1]) * (1 + radius / ratio)})
 		end
 		local aa = {}
-		for y=1, NAMFirey do
+		for y=1, UhhhhhhFirey do
 			local a = ""
-			for x=1, NAMFirex do
-				local b = NAMFirea[y]:sub(x, x)
+			for x=1, UhhhhhhFirex do
+				local b = UhhhhhhFirea[y]:sub(x, x)
 				if b == " " and tr < 0.1 then
 					a ..= " "
 				else
 					local bright = 0
-					local x1, y1 = x / NAMFirex, y / NAMFirey
+					local x1, y1 = x / UhhhhhhFirex, y / UhhhhhhFirey
 					for _,v in pp do
 						local x2, y2 = v[2], v[3]
 						local x3, y3 = x2 - x1, (y2 - y1) * ratio
@@ -8132,7 +7811,7 @@ AddToRenderStep(function(t, dt)
 			end
 			table.insert(aa, a)
 		end
-		NAMFire.Text = table.concat(aa, "\n")
+		UhhhhhhFire.Text = table.concat(aa, "\n")
 		pp = nil
 	end
 end)
@@ -8170,7 +7849,7 @@ UI.CreateText(CreditsPage, "pls dont kick dubmood's ass lol", 12, Enum.TextXAlig
 UI.CreateText(CreditsPage, "<b>pouet.net</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "other than rez' and anat's demos theres lots of good demos there", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "tho im considered a LAMER with no scene ID loool", 12, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "so NAM....", 12, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "NAM Reanimate", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "...greetings to lamers and fuckings to elites?", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "<b>github.com</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "YES!! KEEP SAVING ME FROM MY DATA CORRUPTION!!!", 12, Enum.TextXAlignment.Center)
@@ -8193,10 +7872,9 @@ UI.CreateText(CreditsPage, "thats a good lua code snippet trade :)", 12, Enum.Te
 UI.CreateText(CreditsPage, "<b>Roblox</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "this program's primary target", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "expose more backend functions for me like a good boy", 12, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "<b>rqz's Genesis FE</b>", 14, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "<b>NAM</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "ill be taking ALL your convertions >:D", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "actually, im just taking the names, search it up on script sources, read the source, convert it and stuff then done", 12, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "<b>Empyrean Reanimate (reference)</b>", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "your tool fling is great reference!", 12, Enum.TextXAlignment.Center)
 UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "<b>* Greetings to *</b>", 15, Enum.TextXAlignment.Center)
@@ -8212,56 +7890,77 @@ do
 	local quotes = {
 		"why are you here",
 	}
-	local quoteIndex = Util.RandomIndex(quotes)
-	if quoteIndex then UI.CreateText(CreditsPage, quotes[quoteIndex], 12, Enum.TextXAlignment.Center) end
+	for _ = 1, 15 do
+		-- Quotes are consumed with table.remove; stop safely when the list is empty.
+		if #quotes == 0 then
+			break
+		end
+		local idx = math.random(1, #quotes)
+		local quote = table.remove(quotes, idx)
+		if quote then
+			UI.CreateText(CreditsPage, quote, 12, Enum.TextXAlignment.Center)
+		end
+	end
 end
 UI.CreateSeparator(CreditsPage)
-UI.CreateText(CreditsPage, "DISCLAIMER: Some random quotes made here are jokes (e.g.: 'this script mogs genesis') and should not be taken seriously. This also includes all the self-glazing quotes. It's your choice to agree with them or not, and if you do or don't, don't come harass/mock any individuals from it. In the end, a joke quote is a joke quote.", 15, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "DISCLAIMER: Some quotes in this project are jokes and should not be taken seriously. Please do not use them to harass or mock anyone.", 15, Enum.TextXAlignment.Center)
 UI.CreateSeparator(CreditsPage)
-UI.CreateText(CreditsPage, "Source code and third-party media may have different license terms; see the NAM README.", 15, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "If you want to add content to NAM, like Dances or Movesets, go to <font color=\"#4444FF\">this thing</font>.", 15, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
+UI.CreateText(CreditsPage, "This \"software\" is FREE, meaning YOU SHOULD NOT REDISTRIBUTE WITH RENUMERATIVE INTENT!!", 15, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "To add content to NAM Reanimate, use the project repository.", 15, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		Util.Notify("Link copied!")
-		pcall(setclipboard, "https://github.com/BursaliAlperen/RobuNexa/")
+		pcall(setclipboard, "https://github.com/STEVE-916-create/Uhhhhhh/")
 	end
 end)
 UI.CreateSeparator(CreditsPage)
-UI.CreateText(CreditsPage, "<b>NAM • maintained by mamalalanam</b>", 14, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "License and asset notes: see the NAM README.", 14, Enum.TextXAlignment.Center)
-local ReadmePage = UI.CreatePage()
-ReadmePage.ZIndex = 1
-ReadmePage.Position = UDim2.new(0.5, 360, 0.5, 0)
-ReadmePage.Interactable = false
-ReadmePage.Visible = false
-UI.CreateButton(MainPage, "NAM README / loadstring", 15).Activated:Connect(function()
-	ReadmePage.Interactable = false
-	ReadmePage.Visible = true
+UI.CreateText(CreditsPage, "<b>(C) 2026 STEVETHEREALONE</b>", 14, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "all rights reserved", 14, Enum.TextXAlignment.Center)
+local ChangelogsPage = UI.CreatePage()
+ChangelogsPage.ZIndex = 1
+ChangelogsPage.Position = UDim2.new(0.5, 360, 0.5, 0)
+ChangelogsPage.Interactable = false
+ChangelogsPage.Visible = false
+UI.CreateButton(MainPage, "Changelogs", 15).Activated:Connect(function()
+	ChangelogsPage.Interactable = false
+	ChangelogsPage.Visible = true
 	MainPage.Interactable = false
-	local tween = TweenService:Create(ReadmePage, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
+	local tween = TweenService:Create(ChangelogsPage, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 	})
 	tween:Play()
 	tween.Completed:Connect(function()
-		ReadmePage.Interactable = true
+		ChangelogsPage.Interactable = true
 	end)
 end)
-UI.CreateButton(ReadmePage, "&lt; Hurry back", 20).Activated:Connect(function()
-	ReadmePage.Interactable = false
+UI.CreateButton(ChangelogsPage, "&lt; Hurry back", 20).Activated:Connect(function()
+	ChangelogsPage.Interactable = false
 	MainPage.Interactable = false
-	local tween = TweenService:Create(ReadmePage, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
+	local tween = TweenService:Create(ChangelogsPage, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 		Position = UDim2.new(0.5, 360, 0.5, 0),
 	})
 	tween:Play()
 	tween.Completed:Connect(function()
 		MainPage.Interactable = true
-		ReadmePage.Visible = false
+		ChangelogsPage.Visible = false
 	end)
 end)
-UI.CreateText(ReadmePage, "NAM README & loadstring", 24, Enum.TextXAlignment.Center)
-UI.CreateText(ReadmePage, "Usage and loadstring are in the NAM repository README.", 14, Enum.TextXAlignment.Center)
-UI.CreateButton(ReadmePage, "Copy loadstring", 20).Activated:Connect(function()
-	pcall(setclipboard, 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/c6769fb025b6026604eade9a4e74a9339d5b31b0/source/reanim.lua"))()')
-	Util.Notify("Loadstring copied!")
+task.spawn(function()
+	UI.CreateText(ChangelogsPage, "Changelogs", 30, Enum.TextXAlignment.Center)
+	local content = UI.CreateText(ChangelogsPage, "Loading...", 12, Enum.TextXAlignment.Left)
+	xpcall(function()
+		local logs = game:HttpGet("https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh/main/CHANGELOGS")
+		content.Text = "Rendering error."
+		for _,v in string.split(logs, "\n") do
+			if v:sub(1, 2) == "# " then
+				UI.CreateText(ChangelogsPage, "<b>" .. v:sub(3) .. "</b>", 15, Enum.TextXAlignment.Left)
+			else
+				UI.CreateText(ChangelogsPage, v, 12, Enum.TextXAlignment.Left)
+			end
+		end
+		content.Parent:Destroy()
+	end, function()
+		content.Text = "ERROR: Could not fetch"
+	end)
 end)
 task.wait()
 local InitLogsPage = UI.CreatePage()
@@ -8331,22 +8030,17 @@ local function getgithubraw(path)
 	return nil
 end
 local function ForceModuleReload(force)
-	IsNAMFullyLoaded = false
+	IsUhhhhhhFullyLoaded = false
 	InitLogsText.Text = "Init Logs -- This is where you check what happened."
 	ClearModules()
-
 	Util.Notify("Loading...")
 	InitLogsText.Text ..= "\n[LOG] Checking SHA1 hashes..."
-	-- Gojo and Sukuna are built-in movesets on desktop and mobile.
-	local filesofbuiltins = {"movesets/Gojo/module.lua", "movesets/Sukuna/v_sukuna.lua", "movesets/MoveSet1/module.lua", "movesets/MoveSet2/module.lua", "movesets/Dog/module.lua", "dances/BuiltIn1/module.lua", "dances/BuiltIn2/module.lua", "systems/d_limbmap.lua", "systems/d_hatsmap.lua"}
-	local filesofbuiltins_m = {"movesets/Gojo/module.lua", "movesets/Sukuna/v_sukuna.lua", "movesets/MoveSet1/module.lua", "movesets/MoveSet2/module.lua", "movesets/Dog/module.lua", "dances/BuiltIn1/module.lua", "dances/BuiltIn2/module.lua"}
-	local filesofbuiltins_d = {"systems/d_limbmap.lua", "systems/d_hatsmap.lua"}
+	-- Only load curated modules that actually ship in content/. Missing legacy modules
+	-- must not be reported as failed downloads on every startup.
+	local filesofbuiltins = {"v_moveset3.lua", "v_dance1.lua", "v_dance2.lua", "v_dance3.lua", "d_limbmap.lua", "d_hatsmap.lua"}
+	local filesofbuiltins_m = {"v_moveset3.lua", "v_dance1.lua", "v_dance2.lua", "v_dance3.lua"}
+	local filesofbuiltins_d = {"d_limbmap.lua", "d_hatsmap.lua"}
 	SaveData.ContentHash = SaveData.ContentHash or {}
-	-- Explicitly invalidate nested module hashes. The /contents/content/ request
-	-- returns only root entries, so it cannot verify files inside subfolders.
-	for _, modulePath in ipairs(filesofbuiltins) do
-		SaveData.ContentHash[modulePath] = nil
-	end
 	xpcall(function()
 		local s, resp = pcall(request, {
 			Method = "GET",
@@ -8360,7 +8054,7 @@ local function ForceModuleReload(force)
 						if SaveData.ContentHash[file.name] ~= file.sha then
 							SaveData.ContentHash[file.name] = file.sha
 							if table.find(filesofbuiltins, file.name) then
-								local path = "NAMReanim/BuiltinModules/" .. file.name
+								local path = "UhhhhhhReanim/BuiltinModules/" .. file.name
 								if isfile(path) then
 									InitLogsText.Text ..= "\n[LOG] BuiltinModules/" .. file.name .. " has been updated on the repo."
 									delfile(path)
@@ -8388,13 +8082,7 @@ local function ForceModuleReload(force)
 	end
 	InitLogsText.Text ..= "\n[LOG] Loading maps..."
 	for _,x in filesofbuiltins_d do
-		local path = "NAMReanim/BuiltinModules/" .. x
-		local folder = "NAMReanim/BuiltinModules"
-		local segments = string.split(x, "/")
-		for i = 1, #segments - 1 do
-			folder ..= "/" .. segments[i]
-			pcall(makefolder, folder)
-		end
+		local path = "UhhhhhhReanim/BuiltinModules/" .. x
 		local exist = false
 		local s, a = pcall(isfile, path)
 		if s and a then exist = true end
@@ -8414,71 +8102,36 @@ local function ForceModuleReload(force)
 	end
 	InitLogsText.Text ..= "\n[LOG] Loading builtin (also called vanilla) modules..."
 	for _,x in filesofbuiltins_m do
-		local path = "NAMReanim/BuiltinModules/" .. x
-		-- Module files now live in nested content folders. Ensure every cache
-		-- directory exists before writefile; executors do not create parents.
-		local cacheFolder = "NAMReanim/BuiltinModules"
-		local pathSegments = string.split(x, "/")
-		for i = 1, #pathSegments - 1 do
-			cacheFolder ..= "/" .. pathSegments[i]
-			pcall(makefolder, cacheFolder)
-		end
+		local path = "UhhhhhhReanim/BuiltinModules/" .. x
 		local exist = false
 		local s, a = pcall(isfile, path)
 		if s and a then exist = true end
 		if wasold then exist = false end
 		if force then exist = false end
-		-- Always fetch Gojo and Sukuna from GitHub so stale local copies cannot override fixes.
-		if string.find(x, "/", 1, true) then exist = false end
-		local data = nil
+		local data = ""
 		if exist then
 			InitLogsText.Text ..= "\n[LOG] Reading local VANILLA " .. x .. "..."
-			local readOk, localData = pcall(readfile, path)
-			if readOk and type(localData) == "string" and #localData > 0 then
-				data = localData
-			else
-				InitLogsText.Text ..= "\n[WARN] Could not read cached VANILLA " .. x .. "; downloading a fresh copy."
-			end
+			data = readfile(path)
 			task.wait()
 		else
 			InitLogsText.Text ..= "\n[LOG] Downloading VANILLA " .. x .. "..."
 			local content = getgithubraw(x)
-			if type(content) == "string" and #content > 0 then
+			if content then
+				pcall(writefile, path, content)
 				data = content
-				local writeOk, writeErr = pcall(writefile, path, content)
-				if not writeOk then
-					InitLogsText.Text ..= "\n[WARN] Could not cache VANILLA " .. x .. ": " .. tostring(writeErr)
-				end
 			else
-				InitLogsText.Text ..= "\n[ERROR] Failed to load VANILLA " .. x .. ": GitHub download failed or returned an empty response."
+				InitLogsText.Text ..= "\n[ERROR] Failed to load VANILLA " .. x .. ": Download failed."
 				SaveData.ContentHash[x] = nil
 			end
-		end
-		if type(data) ~= "string" or #data == 0 then
-			InitLogsText.Text ..= "\n[ERROR] Skipping VANILLA " .. x .. ": no valid module source is available."
-			continue
 		end
 		task.wait()
 		InitLogsText.Text ..= "\n[LOG] Loadstringing VANILLA " .. x .. "..."
 		xpcall(function()
-			local func, comperr = loadstring(data, "NAM :: VANILLA " .. x)
-			if not func then
+			local func, comperr = loadstring(data, "Uhhhhhh :: VANILLA " .. x)
+			if func then
+				AddModules(func())
+			elseif comperr then
 				error("COMPILE FAILED: " .. comperr)
-			end
-			local moduleList = func()
-			if type(moduleList) ~= "table" then
-				error("Module source did not return a table.")
-			end
-			local movesetsAdded = AddModules(moduleList, x, data)
-			if string.find(x, "Gojo", 1, true) and movesetsAdded == 0 then
-				error(x .. " loaded, but no moveset reached AddMoveset; Gojo was not registered.")
-			elseif string.find(x, "Gojo", 1, true) then
-				InitLogsText.Text ..= "\n[LOG] Gojo reached AddMoveset and was registered."
-			elseif string.find(x, "Sukuna", 1, true) then
-				if movesetsAdded == 0 then
-					error(x .. " downloaded but registered zero movesets.")
-				end
-				InitLogsText.Text ..= "\n[LOG] Sukuna registered successfully (" .. tostring(movesetsAdded) .. " moveset)."
 			end
 		end, function(msg)
 			InitLogsText.Text ..= "\n[ERROR] Failed to load VANILLA " .. x .. ": See traceback below."
@@ -8486,20 +8139,16 @@ local function ForceModuleReload(force)
 		end)
 	end
 	InitLogsText.Text ..= "\n[LOG] Loading user modules..."
-	for _,path in listfiles("NAMReanim/Modules/") do
+	for _,path in listfiles("UhhhhhhReanim/Modules/") do
 		if isfile(path) then
-			local x = string.match(path, "([^/\\\\]+)$") or path
+			local x = path:sub(23)
 			xpcall(function()
 				InitLogsText.Text ..= "\n[LOG] Reading local USER " .. x .. "..."
 				local data = readfile(path)
 				InitLogsText.Text ..= "\n[LOG] Loadstringing USER " .. x .. "..."
-				local func, comperr = loadstring(data, "NAM :: " .. x)
+				local func, comperr = loadstring(data, "Uhhhhhh :: " .. x)
 				if func then
-					local moduleList = func()
-					if type(moduleList) ~= "table" then
-						error("Module source did not return a table.")
-					end
-					AddModules(moduleList, x, data)
+					AddModules(func())
 				elseif comperr then
 					error("COMPILE FAILED: " .. comperr)
 				end
@@ -8511,94 +8160,15 @@ local function ForceModuleReload(force)
 	end
 	InitLogsText.Text ..= "\n[LOG] Refreshing Dance keybinds..."
 	RefreshKeybinds()
-	if string.find(InitLogsText.Text, "[ERROR]", 1, true) then
-		InitLogsText.Text ..= "\n[WARN] Init finished with errors; review the log above."
-		Util.Notify("Init finished with errors; check Init Logs")
-	else
-		InitLogsText.Text ..= "\n[LOG] Init complete!"
-		Util.Notify("Init complete")
-	end
-	IsNAMFullyLoaded = true
+	InitLogsText.Text ..= "\n[LOG] Init complete!"
+	Util.Notify("Init complete" .. (InitLogsText.Text:find("ERROR") and ", there may be errors" or ""))
+	IsUhhhhhhFullyLoaded = true
 	if not Reanimate.Character then return end
 	Reanimate.CreateCharacter()
 end
--- NPC-only Fling Lab integration (does not target player characters).
-do
-	local flingEnabled = false
-	local flingRange = 35
-	local flingImpulse = 65
-	local flingCooldown = 0.8
-	local lastFling = 0
-	local PlayersSvc = Players
-
-	local function getFlingRoot(model)
-		return model:FindFirstChild("HumanoidRootPart")
-			or model:FindFirstChild("Torso")
-			or model:FindFirstChild("UpperTorso")
-	end
-
-	local function findNearestNPC()
-		local character = Player.Character
-		local myRoot = character and getFlingRoot(character)
-		if not myRoot then return nil end
-		local nearest, nearestDistance
-		for _, instance in workspace:GetDescendants() do
-			if instance:IsA("Model") and instance ~= character
-				and not PlayersSvc:GetPlayerFromCharacter(instance) then
-				local humanoid = instance:FindFirstChildOfClass("Humanoid")
-				local root = getFlingRoot(instance)
-				if humanoid and humanoid.Health > 0 and root and not root.Anchored then
-					local distance = (root.Position - myRoot.Position).Magnitude
-					if distance <= flingRange and (not nearestDistance or distance < nearestDistance) then
-						nearest, nearestDistance = instance, distance
-					end
-				end
-			end
-		end
-		return nearest, myRoot
-	end
-
-	local toggle, toggleText = UI.CreateButton(MainPage, "NPC Fling: OFF", 15)
-	toggle.Activated:Connect(function()
-		flingEnabled = not flingEnabled
-		toggleText.Text = flingEnabled and "NPC Fling: ON" or "NPC Fling: OFF"
-		Util.Notify(flingEnabled and "NPC Fling enabled (NPCs only)" or "NPC Fling disabled")
-	end)
-
-	local flingConnection
-	flingConnection = RunService.Heartbeat:Connect(function()
-		if not toggle.Parent then
-			flingConnection:Disconnect()
-			return
-		end
-		if not flingEnabled or os.clock() - lastFling < flingCooldown then return end
-		local npc, myRoot = findNearestNPC()
-		if not npc then return end
-		local root = getFlingRoot(npc)
-		if not root or PlayersSvc:GetPlayerFromCharacter(npc) then return end
-		local delta = root.Position - myRoot.Position
-		local direction = delta.Magnitude > 0.01 and delta.Unit or myRoot.CFrame.LookVector
-		local ok = pcall(function()
-			root:ApplyImpulse((direction * flingImpulse + Vector3.new(0, flingImpulse * 0.65, 0))
-				* math.clamp(root.AssemblyMass, 1, 20))
-		end)
-		if ok then lastFling = os.clock() end
-	end)
-end
-
 UI.CreateSeparator(MainPage)
 UI.CreateText(MainPage, "<b>MODULES MANAGEMENT</b>", 15, Enum.TextXAlignment.Center)
 UI.CreateButton(MainPage, "Reload Modules", 20).Activated:Connect(function()
-	CracktroFrame.Interactable = false
-	CracktroFrame.Visible = true
-	MainPage.Interactable = false
-	local tween = TweenService:Create(CracktroFrame, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
-		Position = UDim2.new(0.5, 0, 0.5, 0),
-	})
-	tween:Play()
-	tween.Completed:Connect(function()
-		CracktroFrame.Interactable = true
-	end)
 	ForceModuleReload(true)
 end)
 UI.CreateText(MainPage, "\n\n\n<b>DANGER ZONE</b>", 15, Enum.TextXAlignment.Center)
@@ -8623,5 +8193,13 @@ clearcontenthash.Activated:Connect(function()
 		clearcontenthashtext.Text = "Cleared, now rejoin to apply"
 	end
 end)
+
+
+-- Keep the main page and its native Movesets / Dances / settings buttons active.
+MainPage.Visible = true
+MainPage.Interactable = true
+MainPage.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainPage.Size = UDim2.new(1, -10, 1, -10)
+
 
 ForceModuleReload(false)
