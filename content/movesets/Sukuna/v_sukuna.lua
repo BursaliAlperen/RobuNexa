@@ -90,6 +90,10 @@ AddModule(function()
     local connections = {}
     local domainEnabled = false
     local cleaveUntil = 0
+    local cleaveAccessoryStartedAt = 0
+    local cleaveAccessoryUntil = 0
+    local comboAccessoryStartedAt = 0
+    local comboAccessoryUntil = 0
     local savedWantAllHats = nil
     local accessoryCheckAccumulator = 0
     local lastAccessorySignature = nil
@@ -543,6 +547,25 @@ AddModule(function()
                 hiddenCenter * CFrame.new(0, TARGETS[124144353587446].hiddenHeight, 0))
         end
 
+        -- Keep the equipped Cleave accessory hidden 5,000 studs away unless a
+        -- Cleave/Combo is actively playing. Animate it relative to the live rig root.
+        local accessoryFrame
+        if t < cleaveAccessoryUntil then
+            local progress = math.clamp((t - cleaveAccessoryStartedAt) / 0.32, 0, 1)
+            local eased = progress * progress * (3 - 2 * progress)
+            local wobble = math.sin(t * 17) * 0.12
+            accessoryFrame = CFrame.new(wobble, 1.5 + math.sin(t * 13) * 0.08, -2 - eased * 9)
+                * CFrame.Angles(math.rad(math.sin(t * 14) * 2), math.rad(math.sin(t * 11) * 3), math.rad(wobble * 8))
+        elseif t < comboAccessoryUntil then
+            local tremble = math.sin(t * 62) * 0.22
+            local trembleY = math.cos(t * 71) * 0.14
+            accessoryFrame = CFrame.new(tremble, 1.5 + trembleY, -5 + math.sin(t * 48) * 0.3)
+                * CFrame.Angles(math.rad(trembleY * 18), math.rad(tremble * 16), math.rad(tremble * 12))
+        else
+            accessoryFrame = CFrame.new(0, TARGETS[101090904148116].hiddenHeight, -5000)
+        end
+        setHatWorldCFrame(101090904148116, accessoryFrame)
+
         if active then
             local pulse = math.sin(t * rate)
             local dismantleTarget = abilityTargets.Dismantle
@@ -771,7 +794,9 @@ AddModule(function()
             end
         elseif name == "Cleave" then
             cleaveUntil = now + 1.2
-            setHatWorldCFrame(101090904148116, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
+            cleaveAccessoryStartedAt = now
+            cleaveAccessoryUntil = now + 0.72
+            comboAccessoryUntil = 0
             playSkillAnimation()
             showTargetMarker(targetPosition, "Cleave")
             chatAbilityMessage("Cleave!")
@@ -780,6 +805,11 @@ AddModule(function()
             end)
         elseif isDismantle or isCombo then
             cleaveUntil = now + (isCombo and 1.8 or 1.2)
+            if isCombo then
+                comboAccessoryStartedAt = now
+                comboAccessoryUntil = now + 1.45
+                cleaveAccessoryUntil = 0
+            end
             abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
             playSkillAnimation()
@@ -1210,6 +1240,10 @@ AddModule(function()
         root = resolveRoot(figure)
         domainEnabled = false
         cleaveUntil = 0
+        cleaveAccessoryStartedAt = 0
+        cleaveAccessoryUntil = 0
+        comboAccessoryStartedAt = 0
+        comboAccessoryUntil = 0
         accessoryCheckAccumulator = 0
         lastAccessorySignature = nil
         accessoryInstances = {}
@@ -1289,6 +1323,8 @@ AddModule(function()
     m.Destroy = function()
         domainEnabled = false
         cleaveUntil = 0
+        cleaveAccessoryUntil = 0
+        comboAccessoryUntil = 0
         fuugaBusy = false
         abilityTargets = {}
         if fuugaAnimationTrack then pcall(function() fuugaAnimationTrack:Stop(0.1); fuugaAnimationTrack:Destroy() end); fuugaAnimationTrack = nil end
