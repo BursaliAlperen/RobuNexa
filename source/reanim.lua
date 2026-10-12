@@ -475,16 +475,33 @@ do
 						continue
 					end
 					assetsdownload += 1
-					task.spawn(downloadfile, file)
+					task.spawn(function()
+						-- A single unexpected downloader error must never leave the UI
+						-- waiting forever for a counter that will not advance.
+						local finished = false
+						local ok = pcall(downloadfile, file)
+						if not ok and not finished then
+							skipped += 1
+							downloaded += 1
+						end
+					end)
 				end
+				local downloadDeadline = os.clock() + 45
 				repeat
 					Downloading.Text = `Downloading assets {downloaded}/{assetsdownload}... ({skipped} skipped)`
 					Downloading.BackgroundColor3 = Color3.new(0, 0, 0)
-					task.wait()
-				until downloaded == assetsdownload
-				Downloading.Text = "Download complete! \\(^o^)/"
-				Downloading.BackgroundColor3 = Color3.new(0, 1, 0)
-				theresassetsmissing = false
+					if os.clock() >= downloadDeadline then break end
+					task.wait(0.1)
+				until downloaded >= assetsdownload
+				if downloaded >= assetsdownload then
+					Downloading.Text = "Download complete! \\(^o^)/"
+					Downloading.BackgroundColor3 = Color3.new(0, 1, 0)
+					theresassetsmissing = skipped > 0
+				else
+					Downloading.Text = `Download timed out ({downloaded}/{assetsdownload}); continuing...`
+					Downloading.BackgroundColor3 = Color3.new(1, 0, 0)
+					theresassetsmissing = true
+				end
 			end
 		end
 		SaveData.CDNVersion = CDNVersion
