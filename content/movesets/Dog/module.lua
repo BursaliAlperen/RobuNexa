@@ -8,7 +8,7 @@ end
 AddModule(function()
 	local m = {}
 	m.ModuleType = "MOVESET"
-	m.Name = "dog"
+	m.Name = "Dog"
 	m.Description = "Dog movement pack with local Sleep, Sit and Dance animations."
 	m.Assets = {
 		"Dog/DANCEDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/DANCEDAWG.anim",
