@@ -14,6 +14,7 @@ AddModule(function()
     -- These are NAM AnimLib binary .anim files, not .rbxm models.
     m.Assets = {
         "Sukuna/Cleave.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Cleave.anim",
+        "Sukuna/DomainCombo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/DomainCombo.anim",
         "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
         "Sukuna/Walk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Walk.anim",
     }
@@ -73,7 +74,12 @@ AddModule(function()
     local hud
     local skillButtons = {}
     local activateAbility
-    local abilityCooldowns = {Domain = math.huge, Cleave = 2.25, Dismantle = 3.5, Fuuga = math.huge}
+    local abilityCooldowns = {
+        Domain = math.huge, Fuuga = math.huge,
+        Cleave = 2.25,
+        Dismantle1 = 3.5, Dismantle2 = 3.5, Dismantle3 = 3.5,
+        Combo1 = 4.5, Combo2 = 4.5, Combo3 = 4.5,
+    }
     local abilityReadyAt = {}
     local abilityTargets = {}
     local targetMarker
@@ -544,11 +550,13 @@ AddModule(function()
 
         if active then
             local pulse = math.sin(t * rate)
-            local effectTarget = abilityTargets.Cleave or abilityTargets.Dismantle
+            local dismantleTarget = abilityTargets.Dismantle
+                or abilityTargets.Combo1 or abilityTargets.Combo2 or abilityTargets.Combo3
+            local effectTarget = abilityTargets.Cleave or dismantleTarget
             if domainEnabled and abilityTargets.Domain then effectTarget = abilityTargets.Domain end
             local sweep = math.cos(t * rate * 1.13)
             local leftTarget = abilityTargets.Cleave or effectTarget
-            local rightTarget = abilityTargets.Dismantle or effectTarget
+            local rightTarget = dismantleTarget or effectTarget
             setHatWorldCFrame(100475161263482,
                 leftTarget and root.CFrame:ToObjectSpace(CFrame.new(leftTarget + Vector3.new(pulse * 1.2, 2 + math.abs(pulse), sweep * 1.2)) * CFrame.Angles(0, t * 2, 0))
                 or (center * CFrame.new(pulse * (fast and 2.8 or 1.4), 1 + math.abs(pulse) * 1.2, sweep * (fast and 2.8 or 1.4))
@@ -754,7 +762,9 @@ AddModule(function()
 
     local function activateSukunaAbility(name, targetPosition)
         if name == "Domain" or name == "Fuuga" then return end
-        if name ~= "Cleave" and name ~= "Dismantle" then return end
+        local isDismantle = name == "Dismantle1" or name == "Dismantle2" or name == "Dismantle3"
+        local isCombo = name == "Combo1" or name == "Combo2" or name == "Combo3"
+        if name ~= "Cleave" and not isDismantle and not isCombo then return end
         if not activeFigure or not activeFigure.Parent or not root or not root.Parent then
             notify("Moveset is not ready yet; waiting for the Hat Reanimation rig.")
             return
@@ -792,14 +802,26 @@ AddModule(function()
             task.delay(1.35, function()
                 if abilityTargets.Cleave == targetPosition then abilityTargets.Cleave = nil end
             end)
-        elseif name == "Dismantle" then
-            cleaveUntil = now + 1.2
+        elseif isDismantle or isCombo then
+            cleaveUntil = now + (isCombo and 1.8 or 1.2)
+            abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
             playSkillAnimation()
-            playBundledAnimation("Sukuna/DomainCombo.anim", "dismantle", false)
-            showTargetMarker(targetPosition, "Dismantle")
-            chatAbilityMessage("Dismantle!")
-            task.delay(1.35, function()
+            playBundledAnimation("Sukuna/DomainCombo.anim", isCombo and "combo" or "dismantle", false)
+            showTargetMarker(targetPosition, isCombo and ("Combo " .. name:sub(-1)) or ("Dismantle " .. name:sub(-1)))
+            -- Combo variants produce three staggered local slash pulses without chat output.
+            if isCombo then
+                for hit = 1, 3 do
+                    task.delay((hit - 1) * 0.18, function()
+                        if activeFigure and activeFigure.Parent and root and root.Parent then
+                            local offset = Vector3.new((hit - 2) * 2.5, 1.5 + hit * 0.35, 0)
+                            setHatWorldCFrame(97087028126781,
+                                root.CFrame:ToObjectSpace(CFrame.new(targetPosition + offset)))
+                        end
+                    end)
+                end
+            end
+            task.delay(1.9, function()
                 if abilityTargets.Dismantle == targetPosition then abilityTargets.Dismantle = nil end
             end)
         elseif name == "Fuuga" then
@@ -819,8 +841,17 @@ AddModule(function()
     end
     activateAbility = activateSukunaAbility
 
-    local KEYBINDS = {Domain = Enum.KeyCode.Z, Cleave = Enum.KeyCode.X, Dismantle = Enum.KeyCode.C, Fuuga = Enum.KeyCode.V}
-    local LABELS = {Cleave = "CLEAVE", Dismantle = "DISMANTLE"}
+    local KEYBINDS = {
+        Cleave = Enum.KeyCode.X,
+        Dismantle1 = Enum.KeyCode.C, Dismantle2 = Enum.KeyCode.V, Dismantle3 = Enum.KeyCode.B,
+        Combo1 = Enum.KeyCode.Z, Combo2 = Enum.KeyCode.G, Combo3 = Enum.KeyCode.H,
+    }
+    local LABELS = {
+        Cleave = "CLEAVE",
+        Dismantle1 = "DISMANTLE 1", Dismantle2 = "DISMANTLE 2", Dismantle3 = "DISMANTLE 3",
+        Combo1 = "COMBO 1", Combo2 = "COMBO 2", Combo3 = "COMBO 3",
+    }
+    local SKILL_ORDER = {"Cleave", "Dismantle1", "Dismantle2", "Dismantle3", "Combo1", "Combo2", "Combo3"}
     local function createSkillControls()
         local player = game:GetService("Players").LocalPlayer
         local playerGui = player and (player:FindFirstChildOfClass("PlayerGui") or player:WaitForChild("PlayerGui", 5))
@@ -846,25 +877,25 @@ AddModule(function()
         panel.Name = "MobileSkillKeys"
         panel.AnchorPoint = Vector2.new(1, 0.5)
         panel.Position = UDim2.new(1, -100, 0.55, 0)
-        panel.Size = UDim2.fromOffset(66, 292)
+        panel.Size = UDim2.fromOffset(70, 366)
         panel.BackgroundTransparency = 1
         panel.Parent = hud
         local layout = Instance.new("UIListLayout")
         layout.FillDirection = Enum.FillDirection.Vertical
         layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
         layout.VerticalAlignment = Enum.VerticalAlignment.Center
-        layout.Padding = UDim.new(0, 8)
+        layout.Padding = UDim.new(0, 5)
         layout.Parent = panel
         local userInputService = game:GetService("UserInputService")
         local mobile = userInputService.TouchEnabled
         -- Keep the mobile ability panel visible on touch devices; don't depend on
         -- an outer/global UserInputService variable injected by the loader.
         panel.Visible = mobile
-        for index, name in ipairs({"Cleave", "Dismantle"}) do
+        for index, name in ipairs(SKILL_ORDER) do
             local button = Instance.new("TextButton")
             button.Name = name .. "Key"
             button.LayoutOrder = index
-            button.Size = UDim2.fromOffset(58, 58)
+            button.Size = UDim2.fromOffset(62, 48)
             button.BackgroundColor3 = Color3.fromRGB(43, 22, 30)
             button.BackgroundTransparency = 0.05
             button.BorderSizePixel = 0
@@ -898,7 +929,7 @@ AddModule(function()
                 end
             end
         end))
-        notify("Skill controls ready: Z = Domain, X = Cleave, C = Dismantle, V = Fuuga. On mobile, use the circular buttons on the right.")
+        notify("Sukuna skills ready: X Cleave, C/V/B Dismantle 1-3, Z/G/H Combo 1-3. Chat messages, Domain and Fuuga are disabled.")
     end
 
     local function announceFinger(text)
