@@ -19,12 +19,6 @@ AddModule(function()
   "SukunaWorldCut.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaWorldCut.anim",
   "SukunaRush.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaRush.anim",
   "SukunaCamera.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaCamera.anim",
-  "SUKUNA.mp3@https://raw.githubusercontent.com/ian49972/smth/main/SUKUNA.mp3",
-  "LAUGH.mp3@https://raw.githubusercontent.com/ian49972/smth/main/LAUGH.mp3",
-  "ArrowExplode.mp3@https://raw.githubusercontent.com/ian49972/smth/main/ArrowExplode.mp3",
-  "Furnance.mp3@https://raw.githubusercontent.com/ian49972/smth/main/Furnance.mp3",
-  "HAHAHA.mp3@https://raw.githubusercontent.com/ian49972/smth/main/HAHAHA.mp3",
-  "SLASH.mp3@https://raw.githubusercontent.com/ian49972/smth/main/SLASH.mp3",
  }
  local player = game:GetService("Players").LocalPlayer
  local UIS = game:GetService("UserInputService")
@@ -38,8 +32,8 @@ AddModule(function()
  local originalSpeed, originalFov, originalClock
  local spawned = {}
  local busy = false
- local keys = {Awaken="Z", Shrine="X", Furnance="C", WorldCut="V", Rush="B"}
- local abilityNames = {Awaken="Awaken", Shrine="Malevolent Shrine", Furnance="Furnance", WorldCut="World Cutting Slash", Rush="Rush Beatdown"}
+ local keys = {WorldCut="Z", Rush="X", Furnance="C", Laugh="V"}
+ local abilityNames = {WorldCut="Dismantle", Rush="Rush", Furnance="Fuuga", Laugh="Laugh"}
 
  local function findDeep(parent, name)
   return parent and parent:FindFirstChild(name, true)
@@ -47,10 +41,15 @@ AddModule(function()
  local function getAssetPath(name)
   return AssetGetPathFromFilename(name)
  end
+ local soundIds = {
+  Laugh = "rbxassetid://137836523944133",
+  Dismantle = "rbxassetid://81148579745420",
+  Rush = "rbxassetid://140644642090775",
+  Fuuga = "rbxassetid://81784387877244",
+ }
  local function sound(name, parent)
-  local path = getAssetPath(name)
-  local ok, asset = pcall(getcustomasset, path)
-  if not ok or not asset then return end
+  local asset = soundIds[name]
+  if not asset then return end
   local s = Instance.new("Sound")
   s.SoundId = asset
   s.Volume = 1
@@ -136,7 +135,7 @@ AddModule(function()
  local function awaken()
   if busy then return end
   setBusy(true)
-  sound("LAUGH.mp3")
+  sound("Laugh")
   local head = activeFigure:FindFirstChild("Head")
   if head and not head:FindFirstChild("SukunaFace") then
    local decal = Instance.new("Decal")
@@ -159,7 +158,7 @@ AddModule(function()
  local function shrine()
   if busy then return end
   setBusy(true)
-  sound("SUKUNA.mp3")
+  sound("Dismantle")
   playAnimation("Shrine", 1, false)
   local domain = findDeep(effects, "Domain")
   local front = root.CFrame * CFrame.new(0, 0, -25)
@@ -178,7 +177,7 @@ AddModule(function()
  local function furnace()
   if busy then return end
   setBusy(true)
-  sound("Furnance.mp3")
+  sound("Fuuga")
   if humanoid then humanoid.WalkSpeed = 0 end
   playAnimation("Open", 1.15, false)
   local furn = findDeep(effects, "Furnance")
@@ -197,7 +196,7 @@ AddModule(function()
     if arrow2 and arrow2:IsA("BasePart") then
      local bv=Instance.new("BodyVelocity"); bv.MaxForce=Vector3.new(1e8,1e8,1e8); bv.Velocity=root.CFrame.LookVector*120; bv.Parent=arrow2; Debris:AddItem(bv,1.5)
     end
-    sound("ArrowExplode.mp3")
+    sound("Fuuga")
     cloneEffect("PreBeam", furn, root.CFrame * CFrame.new(0,0,-14), 2)
     cloneEffect("BeamCore", furn, root.CFrame * CFrame.new(0,8,-14), 7)
     cloneEffect("Floor", furn, root.CFrame * CFrame.new(0,-4,-14), 7)
@@ -213,7 +212,7 @@ AddModule(function()
  local function worldCut()
   if busy then return end
   setBusy(true)
-  sound("SLASH.mp3")
+  sound("Dismantle")
   if humanoid then humanoid.WalkSpeed = 0 end
   playAnimation("WorldCut", 1.5, false)
   local world = findDeep(effects, "WorldSlash")
@@ -233,7 +232,7 @@ AddModule(function()
  local function rush()
   if busy then return end
   setBusy(true)
-  sound("HAHAHA.mp3")
+  sound("Rush")
   playAnimation("Rush", 1.1, false)
   if humanoid then humanoid.WalkSpeed = 48 end
   cloneEffect("Slashes", findDeep(effects,"Rush"), nil, 4)
@@ -244,6 +243,11 @@ AddModule(function()
   end)
  end
  local actions = {Awaken=awaken, Shrine=shrine, Furnance=furnace, WorldCut=worldCut, Rush=rush}
+ local function laugh()
+  if busy then return end
+  sound("Laugh")
+ end
+ actions.Laugh = laugh
  local function activate(name) local f=actions[name]; if f then f() end end
 
  m.Config = function(parent: GuiBase2d)
@@ -252,7 +256,7 @@ AddModule(function()
   local layout=Instance.new("UIListLayout"); layout.FillDirection=Enum.FillDirection.Horizontal
   layout.HorizontalAlignment=Enum.HorizontalAlignment.Left; layout.VerticalAlignment=Enum.VerticalAlignment.Center
   layout.Padding=UDim.new(0,5); layout.Parent=panel
-  for _,name in ipairs({"Awaken","Shrine","Furnance","WorldCut","Rush"}) do
+  for _,name in ipairs({"WorldCut","Rush","Furnance","Laugh"}) do
    local button=Instance.new("TextButton"); button.Name=name.."Button"; button.Size=UDim2.new(0,100,0,34)
    button.BackgroundColor3=Color3.fromRGB(90,22,32); button.BorderSizePixel=0
    button.Text=abilityNames[name].." ["..keys[name].."]"; button.TextColor3=Color3.new(1,1,1)
