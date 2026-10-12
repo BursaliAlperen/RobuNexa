@@ -6357,15 +6357,14 @@ _G_NAM.Fling = function(part)
 end
 
 do
-	-- Built-in NAM reanimators plus mutually-exclusive external engines.
+	-- Only expose the maintained upstream engine as an external option.
+	-- Gelatek's own README warns its legacy reanimator no longer works in modern games.
 	local EXTERNAL_ENGINES = {
 		[3] = {Name = "KRYPTON", Url = "https://raw.githubusercontent.com/KadeTheExploiter/Krypton/main/Module.luau"},
-		[4] = {Name = "GELATEK", Url = "https://raw.githubusercontent.com/Gelatekussy/GelatekReanimate/main/Main.lua"},
-		[5] = {Name = "GELATEK_EDIT", Url = "https://raw.githubusercontent.com/InfinityNess/GelatekReanimateEdit/main/Main.lua"},
 	}
-	SaveData.SelectedReanimator = math.clamp(tonumber(SaveData.SelectedReanimator) or 1, 1, 5)
+	SaveData.SelectedReanimator = math.clamp(tonumber(SaveData.SelectedReanimator) or 1, 1, 3)
 	local ReanimateMethodSelect = UI.CreateDropdown(MainPage, "Reanimator", {
-		"Limb Reanimator", "Hats Reanimator", "KRYPTON (external)", "GELATEK (external)", "GELATEK_EDIT (external)"
+		"Limb Reanimator", "Hats Reanimator", "KRYPTON (recommended external)"
 	}, SaveData.SelectedReanimator)
 	local ReanimatorConfigTitle = UI.CreateText(MainPage, "-=+ Limb Reanimator Config +=-", 15, Enum.TextXAlignment.Center)
 	local SelectedReanimator = LimbReanimator
@@ -6395,7 +6394,7 @@ do
 			warn("[RobuNexa] Stop the current reanimation before changing engines.")
 			return
 		end
-		value = math.clamp(tonumber(value) or 1, 1, 5)
+		value = math.clamp(tonumber(value) or 1, 1, 3)
 		SaveData.SelectedReanimator = value
 		ApplyReanimatorSelection(value)
 	end)
