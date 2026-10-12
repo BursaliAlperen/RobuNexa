@@ -131,10 +131,14 @@ AddModule(function()
 	end
 
 	local function toggleInfinity()
-		infinityEnabled = not infinityEnabled
-		local old = activeFigure and activeFigure:FindFirstChild("GojoInfinityVisual")
+		if not activeFigure or not activeFigure.Parent or not root or not root.Parent then
+			notify("Infinity açılamadı: reanimate karakteri hazır değil.")
+			return
+		end
+		local old = activeFigure:FindFirstChild("GojoInfinityVisual")
 		if old then old:Destroy() end
-		if infinityEnabled and activeFigure then
+		infinityEnabled = not infinityEnabled
+		if infinityEnabled then
 			playSound(SOUND_IDS.Infinity, false, 0.8)
 			local visual = Instance.new("Part")
 			visual.Name = "GojoInfinityVisual"
@@ -143,21 +147,24 @@ AddModule(function()
 			visual.Material = Enum.Material.ForceField
 			visual.Color = Color3.fromRGB(90, 190, 255)
 			visual.Transparency = 0.72
+			visual.Anchored = false
 			visual.CanCollide = false
 			visual.CanTouch = false
 			visual.CanQuery = false
 			visual.Massless = true
+			visual.CFrame = root.CFrame
 			visual.Parent = activeFigure
 			local weld = Instance.new("WeldConstraint")
+			weld.Name = "GojoInfinityWeld"
 			weld.Part0 = root
 			weld.Part1 = visual
 			weld.Parent = visual
-			visual.CFrame = root.CFrame
 		end
 		if buttons.Infinity then
-			buttons.Infinity.Text = infinityEnabled and "Infinity: ON" or "Infinity"
+			buttons.Infinity.Text = infinityEnabled and "∞" or "∞"
+			buttons.Infinity.BackgroundColor3 = infinityEnabled and Color3.fromRGB(28, 105, 150) or Color3.fromRGB(22, 30, 48)
 		end
-		notify(infinityEnabled and "Infinity görseli açıldı." or "Infinity kapatıldı.")
+		notify(infinityEnabled and "Infinity etkinleştirildi." or "Infinity kapatıldı.")
 	end
 
 	local function stopFlight()
@@ -246,15 +253,40 @@ AddModule(function()
 	end
 
 	m.Config = function(parent: GuiBase2d)
-		-- Small circular touch controls, matching the Immersive VR action buttons.
-		local panel = Instance.new("Frame")
-		panel.Name = "GojoMovesetControls"
-		panel.AnchorPoint = Vector2.new(1, 1)
-		panel.Position = UDim2.new(1, -14, 1, -150)
-		panel.Size = UDim2.fromOffset(224, 104)
-		panel.BackgroundTransparency = 1
-		panel.Parent = parent
+		-- Ability buttons are gameplay HUD controls, not settings-page controls.
+		-- The runtime HUD is created only by Init when Gojo is equipped.
+	end
 
+	local function createRuntimeControls()
+		local player = game:GetService("Players").LocalPlayer
+		local playerGui = player and player:FindFirstChildOfClass("PlayerGui")
+		if not playerGui then
+			task.spawn(function()
+				for _ = 1, 30 do
+					task.wait(0.25)
+					playerGui = player and player:FindFirstChildOfClass("PlayerGui")
+					if playerGui then break end
+				end
+				if playerGui and activeFigure then createRuntimeControls() end
+			end)
+			return
+		end
+		local oldGui = playerGui:FindFirstChild("GojoAbilityHUD")
+		if oldGui then oldGui:Destroy() end
+		table.clear(buttons)
+		local screen = Instance.new("ScreenGui")
+		screen.Name = "GojoAbilityHUD"
+		screen.ResetOnSpawn = false
+		screen.IgnoreGuiInset = true
+		screen.DisplayOrder = 50
+		screen.Parent = playerGui
+		local panel = Instance.new("Frame")
+		panel.Name = "AbilityButtons"
+		panel.AnchorPoint = Vector2.new(1, 1)
+		panel.Position = UDim2.new(1, -18, 1, -142)
+		panel.Size = UDim2.fromOffset(168, 108)
+		panel.BackgroundTransparency = 1
+		panel.Parent = screen
 		local grid = Instance.new("UIGridLayout")
 		grid.CellSize = UDim2.fromOffset(48, 48)
 		grid.CellPadding = UDim2.fromOffset(7, 5)
@@ -263,23 +295,21 @@ AddModule(function()
 		grid.VerticalAlignment = Enum.VerticalAlignment.Bottom
 		grid.SortOrder = Enum.SortOrder.LayoutOrder
 		grid.Parent = panel
-
 		for index, name in ipairs(abilityNames) do
 			local button = Instance.new("TextButton")
 			button.Name = name .. "Button"
 			button.LayoutOrder = index
 			button.Size = UDim2.fromOffset(48, 48)
 			button.BackgroundColor3 = Color3.fromRGB(22, 30, 48)
-			button.BackgroundTransparency = 0.12
+			button.BackgroundTransparency = 0.08
 			button.BorderSizePixel = 0
-			button.Text = name == "Purple" and "PURP" or name
+			button.Text = name == "Purple" and "PURP" or (name == "Infinity" and "∞" or name)
 			button.TextColor3 = Color3.fromRGB(235, 245, 255)
 			button.TextSize = 10
 			button.TextWrapped = true
 			button.Font = Enum.Font.GothamBold
 			button.AutoButtonColor = true
 			button.Parent = panel
-
 			local corner = Instance.new("UICorner")
 			corner.CornerRadius = UDim.new(1, 0)
 			corner.Parent = button
@@ -288,7 +318,6 @@ AddModule(function()
 			stroke.Thickness = 1.2
 			stroke.Transparency = 0.2
 			stroke.Parent = button
-
 			buttons[name] = button
 			table.insert(guiConnections, button.Activated:Connect(function()
 				useAbility(name)
@@ -299,11 +328,16 @@ AddModule(function()
 	m.Init = function(figure: Model)
 		stopFlight()
 		stopAnimation()
+		if activeFigure then
+			local oldVisual = activeFigure:FindFirstChild("GojoInfinityVisual")
+			if oldVisual then oldVisual:Destroy() end
+		end
 		activeFigure = figure
 		humanoid = figure:FindFirstChildOfClass("Humanoid")
 		root = figure:FindFirstChild("HumanoidRootPart")
 		originalWalkSpeed = humanoid and humanoid.WalkSpeed or 16
 		infinityEnabled = false
+		createRuntimeControls()
 	end
 
 	m.Update = function(dt: number, figure: Model)
@@ -345,6 +379,10 @@ AddModule(function()
 		infinityEnabled = false
 		for _, connection in ipairs(guiConnections) do pcall(function() connection:Disconnect() end) end
 		table.clear(guiConnections)
+		local player = game:GetService("Players").LocalPlayer
+		local playerGui = player and player:FindFirstChildOfClass("PlayerGui")
+		local hud = playerGui and playerGui:FindFirstChild("GojoAbilityHUD")
+		if hud then hud:Destroy() end
 		table.clear(buttons)
 		activeFigure, humanoid, root = nil, nil, nil
 	end
