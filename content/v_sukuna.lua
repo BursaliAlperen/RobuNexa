@@ -284,6 +284,19 @@ AddModule(function()
   activeFigure=figure; root=figure:FindFirstChild("HumanoidRootPart") or figure:FindFirstChild("Torso")
   humanoid=figure:FindFirstChildOfClass("Humanoid")
   originalSpeed=humanoid and humanoid.WalkSpeed or 16
+  -- Startup sequence: Sukuna laugh first, then transition to Linked Sword idle.
+  startupLaughUntil = os.clock() + 2.6
+  if humanoid then
+   humanoid.WalkSpeed = 0
+   task.delay(2.6, function()
+    if humanoid and humanoid.Parent and activeFigure == figure then
+     humanoid.WalkSpeed = originalSpeed or 16
+    end
+   end)
+  end
+  task.defer(function()
+   if activeFigure == figure then sound("Laugh") end
+  end)
   effects=Instance.new("Folder")
   effects.Name="SukunaEffectsRuntime"
   local function importModel(fileName)
@@ -320,6 +333,15 @@ AddModule(function()
   -- ContextActionService handles both keyboard and touch input, preventing duplicate activations.
  end
  local moveSine = 0
+ local startupLaughUntil = 0
+ -- Linked Sword's joint pose helper must live in this module's scope;
+ -- locals declared inside another moveset are not visible here.
+ local function SetC0C1Joint(j, c0, c1, scale)
+  local t = c0 * c1:Inverse()
+  t += t.Position * (scale - 1)
+  t = j.C0:Inverse() * t * j.C1
+  j.Transform = t
+ end
  local moveJoints = {r=CFrame.identity,n=CFrame.identity,rs=CFrame.identity,ls=CFrame.identity,rh=CFrame.identity,lh=CFrame.identity}
  local function applyLinkedSwordLocomotion(dt, figure)
   if not figure or busy or (activeAnimator and activeTrack) then return end
@@ -338,7 +360,16 @@ AddModule(function()
   local vy = rootPart.AssemblyLinearVelocity.Y
   local rt, nt, rst, lst, rht, lht
   local state = hum:GetState()
-  if state == Enum.HumanoidStateType.Jumping then
+  if os.clock() < startupLaughUntil then
+   -- Short procedural laugh beat at reanimation startup, then blend into Linked Sword idle.
+   local phase = moveSine / 2.5
+   rt=CFrame.new(-0.014,0.023,0.020)*CFrame.Angles(math.rad(-8+5*math.sin(phase*2)),0,math.rad(5*math.sin(phase)))
+   nt=CFrame.new(0,1.499,0)*CFrame.Angles(math.rad(18+7*math.sin(phase*2)),math.rad(8*math.sin(phase)),math.rad(4*math.sin(phase*2)))
+   rst=CFrame.new(1.35,0.22,0.08)*CFrame.Angles(math.rad(-58+8*math.sin(phase*2)),0,math.rad(18))
+   lst=CFrame.new(-1.35,0.22,0.08)*CFrame.Angles(math.rad(-58-8*math.sin(phase*2)),0,math.rad(-18))
+   rht=CFrame.new(0.5,-1.64,0)*CFrame.Angles(math.rad(-4),0,0)
+   lht=CFrame.new(-0.5,-1.64,0)*CFrame.Angles(math.rad(4),0,0)
+  elseif state == Enum.HumanoidStateType.Jumping then
    rt=CFrame.new(-0.014,0.023,0.020,1,0,0,0,0.965,0.258,0,-0.258,0.965)
    nt=CFrame.new(0.017,1.545,-0.003,0.999,0.007,-0.042,-0.011,0.996,-0.086,0.041,0.087,0.995)
    rst=CFrame.new(1.54,0.254,-0.521,0.89,-0.152,-0.429,-0.327,0.44,-0.835,0.317,0.884,0.341)
@@ -399,6 +430,7 @@ AddModule(function()
   table.clear(spawned)
   if effects then effects:Destroy(); effects=nil end
   if humanoid and humanoid.Parent then humanoid.WalkSpeed=originalSpeed or 16 end
+  startupLaughUntil = 0
   activeFigure=nil; root=nil; humanoid=nil; anims=nil; effects=nil; busy=false
  end
  return m
