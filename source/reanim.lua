@@ -5158,7 +5158,10 @@ function HatReanimator.Start()
 				table.insert(CharHats, v)
 				local conn = nil
 				conn = v.AncestryChanged:Connect(function()
-					if v.Parent ~= Player.Character then
+					-- Accessories intentionally leave the dying Character during hat
+					-- reanimation. Keep tracking them while they remain alive in Workspace
+					-- so the rebuilt hat map can continue driving them after respawn.
+					if not v:IsDescendantOf(workspace) then
 						local i = table.find(CharHats, v)
 						if i then table.remove(CharHats, i) end
 					end
@@ -5553,9 +5556,20 @@ function HatReanimator.Start()
 		end)
 		currentping = Player:GetNetworkPing()
 		table.clear(BaseParts)
-		table.clear(CharHats)
+		-- Do not discard hats that were dropped into Workspace by the intentional
+		-- death step of reanimation. Keep valid live Accessories and remove only
+		-- destroyed/out-of-world instances; new character accessories are added below.
+		for i = #CharHats, 1, -1 do
+			local hat = CharHats[i]
+			local handle = hat and hat:FindFirstChild("Handle")
+			if not hat or not hat:IsA("Accessory") or not handle
+				or not handle:IsA("BasePart") or not hat:IsDescendantOf(workspace) then
+				table.remove(CharHats, i)
+			end
+		end
 		table.clear(CharTools)
 		ResetHatRefs()
+		HatReanimator.RebuildRequired = true
 		character.DescendantAdded:Connect(CharOnDesc)
 		for _,v in character:GetDescendants() do
 			CharOnDesc(v)
