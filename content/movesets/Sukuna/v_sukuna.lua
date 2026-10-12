@@ -54,9 +54,15 @@ AddModule(function()
             hints = {"white domain", "expension slashes", "expansion slashes"},
             hiddenHeight = 0,
         },
+        [18908729586] = {
+            key = "cleaveSlash",
+            label = "Sukuna Cleave Slash",
+            hints = {"18908729586", "cleave slash", "slash effect"},
+            hiddenHeight = 0,
+        },
     }
 
-    local EFFECT_IDS = {101090904148116, 100475161263482, 97087028126781}
+    local EFFECT_IDS = {101090904148116, 100475161263482, 97087028126781, 18908729586}
     -- Strict catalog allowlist: only these known accessory IDs are accepted.
     -- 18445594182 is the active Domain/Shrine asset; 18726352770 is retained as
     -- an allowed legacy asset ID but is not used as the Domain target.
@@ -69,6 +75,7 @@ AddModule(function()
         [124144353587446] = true,
         [100475161263482] = true,
         [97087028126781] = true,
+        [18908729586] = true,
     }
     local function isAllowedAssetId(id)
         return ALLOWED_ASSET_IDS[tonumber(id)] == true
