@@ -59,10 +59,14 @@ AddModule(function()
   s.Volume = 1
   s.RollOffMaxDistance = 100
   s.Parent = parent or root or workspace
-  -- Play immediately; preload failure must not suppress the sound.
-  s:Play()
+  -- Preload off-thread, then play only after Roblox reports the asset ready.
   task.spawn(function()
-   pcall(function() game:GetService("ContentProvider"):PreloadAsync({s}) end)
+   local ok = pcall(function() game:GetService("ContentProvider"):PreloadAsync({s}) end)
+   if ok and s.Parent then
+    pcall(function() s:Play() end)
+   else
+    pcall(function() Util.Notify("Sukuna sound could not load: " .. name) end)
+   end
   end)
   Debris:AddItem(s, 30)
   return s
@@ -92,15 +96,9 @@ AddModule(function()
   local fileName = animationFiles[name]
   local ok, track = false, nil
   if fileName then
-   -- AssetEnsure downloads asynchronously; wait for the cache file before parsing it.
+   -- Match the dog moveset: read the already-cached .anim directly and fail
+   -- fast if the asset is not ready, rather than freezing input for 12 seconds.
    local assetPath = getAssetPath(fileName)
-   local deadline = os.clock() + 12
-   while os.clock() < deadline do
-    local exists = false
-    pcall(function() exists = isfile(assetPath) end)
-    if exists then break end
-    task.wait(0.15)
-   end
    local exists = false
    pcall(function() exists = isfile(assetPath) end)
    if exists then
