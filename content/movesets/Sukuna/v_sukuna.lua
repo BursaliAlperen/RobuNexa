@@ -846,7 +846,7 @@ AddModule(function()
             finger.CanCollide = false
             finger.CanTouch = false
             finger.CastShadow = false
-            finger.CFrame = CFrame.new(pos) * CFrame.Angles(0, 0, math.rad(18))
+            finger.CFrame = CFrame.new(pos) * CFrame.Angles(0, 0, math.rad(108))
             finger.Parent = fingerFolder
 
             local light = Instance.new("PointLight")
@@ -880,28 +880,28 @@ AddModule(function()
                     if spin then spin:Disconnect() end
                     return
                 end
-                finger.CFrame = CFrame.new(pos) * CFrame.Angles(0, os.clock() * 1.45, math.rad(18))
+                finger.CFrame = CFrame.new(pos) * CFrame.Angles(0, os.clock() * 1.45, math.rad(108))
             end)
             table.insert(connections, spin)
 
             table.insert(connections, prompt.Triggered:Connect(function(player)
                 if player ~= game:GetService("Players").LocalPlayer or not finger.Parent then return end
-                if not fingerEquipped then
-                    announceFinger("[Sukuna] First equip the Cursed Finger accessory (ID 18762839664).")
-                    return
-                end
-
+                -- Finger pickups are cosmetic collectibles and don't require an avatar accessory.
                 fingersFound += 1
                 local collectedAt = finger.Position
                 finger:Destroy()
                 announceFinger(string.format("[Sukuna] CURSED FINGER FOUND  %d/%d", fingersFound, count))
                 playFingerFoundCutscene(collectedAt)
                 task.spawn(function()
+                    if laughAnimationTrack then
+                        pcall(function() laughAnimationTrack:Stop(0.05); laughAnimationTrack:Destroy() end)
+                        laughAnimationTrack = nil
+                    end
                     local track = playBundledAnimation("Sukuna/Sukuna Laugh.rbxm", "laugh", false)
                     if track then
                         laughAnimationTrack = track
                     else
-                        notify("Parmak bulundu; Laugh modeli yüklenemedi. İndirme/model yükleme hatası kontrol edilmeli.")
+                        notify("Parmak bulundu; Laugh animasyonu bu executor/model yükleyicisinde açılamadı.")
                     end
                 end)
 
