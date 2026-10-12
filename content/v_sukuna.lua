@@ -41,7 +41,11 @@ AddModule(function()
 
     local EFFECT_IDS = {100475161263482, 97087028126781}
     local activeFigure, root
-    local hud, domainButton, cleaveButton
+    local hud, domainButton, cleaveButton, dismantleButton
+    local inventoryTool
+    local domainStartedAt = 0
+    local cutsceneActive = false
+    local savedCameraType, savedCameraSubject, savedCameraCFrame
     local connections = {}
     local domainEnabled = false
     local cleaveUntil = 0
@@ -295,10 +299,17 @@ AddModule(function()
         local fast = os.clock() < cleaveUntil
         local rate = fast and 7.5 or 1.8
 
-        -- Keep the Shrine model and Fuga accessory away from the visible domain.
-        -- The live accessory handles themselves move through NAM's hat-reanimation map.
-        setHatWorldCFrame(18726352770,
-            hiddenCenter * CFrame.new(0, TARGETS[18726352770].hiddenHeight, 0))
+        -- The Shrine itself rises slowly from below ground while Domain is active.
+        if domainEnabled then
+            local rise = math.clamp((os.clock() - domainStartedAt) / 2.6, 0, 1)
+            local eased = rise * rise * (3 - 2 * rise)
+            local shrinePosition = root.Position + root.CFrame.LookVector * -22 + Vector3.new(0, -18 + eased * 24, 0)
+            setHatWorldCFrame(18726352770,
+                CFrame.new(shrinePosition) * root.CFrame.Rotation * CFrame.Angles(0, math.rad(180), 0))
+        else
+            setHatWorldCFrame(18726352770,
+                hiddenCenter * CFrame.new(0, TARGETS[18726352770].hiddenHeight, 0))
+        end
         setHatWorldCFrame(124144353587446,
             hiddenCenter * CFrame.new(0, TARGETS[124144353587446].hiddenHeight, 0))
 
@@ -332,6 +343,45 @@ AddModule(function()
         end
     end
 
+    local function playDomainCutscene()
+        if cutsceneActive or not root then return end
+        local camera = workspace.CurrentCamera
+        if not camera then return end
+        cutsceneActive = true
+        savedCameraType, savedCameraSubject, savedCameraCFrame = camera.CameraType, camera.CameraSubject, camera.CFrame
+        camera.CameraType = Enum.CameraType.Scriptable
+        local focus = root.Position + Vector3.new(0, 3, 0)
+        camera.CFrame = CFrame.lookAt(focus + root.CFrame.LookVector * -18 + Vector3.new(0, 7, 0), focus)
+        local target = CFrame.lookAt(focus + root.CFrame.LookVector * -10 + Vector3.new(0, 4, 0), focus)
+        game:GetService("TweenService"):Create(camera, TweenInfo.new(1.15, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut), {CFrame = target}):Play()
+        task.delay(2.5, function()
+            if not cutsceneActive then return end
+            local currentCamera = workspace.CurrentCamera
+            if currentCamera then
+                currentCamera.CameraType = savedCameraType or Enum.CameraType.Custom
+                currentCamera.CameraSubject = savedCameraSubject
+            end
+            cutsceneActive = false
+        end)
+    end
+
+    local function createInventoryTool()
+        local player = game:GetService("Players").LocalPlayer
+        local backpack = player and player:FindFirstChildOfClass("Backpack")
+        if not backpack then return end
+        local old = backpack:FindFirstChild("Sukuna")
+        if old then old:Destroy() end
+        inventoryTool = Instance.new("Tool")
+        inventoryTool.Name = "Sukuna"
+        inventoryTool.ToolTip = "Click to toggle Malevolent Shrine"
+        inventoryTool.RequiresHandle = false
+        inventoryTool.CanBeDropped = false
+        inventoryTool.Activated:Connect(function()
+            if domainButton then domainButton:Activate() end
+        end)
+        inventoryTool.Parent = backpack
+    end
+
     local function createHUD()
         local player = game:GetService("Players").LocalPlayer
         local playerGui = player and player:FindFirstChildOfClass("PlayerGui")
@@ -359,7 +409,7 @@ AddModule(function()
         panel.Name = "AbilityButtons"
         panel.AnchorPoint = Vector2.new(1, 1)
         panel.Position = UDim2.new(1, -10, 1, -112)
-        panel.Size = UDim2.fromOffset(152, 40)
+        panel.Size = UDim2.fromOffset(236, 40)
         panel.BackgroundTransparency = 1
         panel.Parent = hud
 
@@ -398,6 +448,7 @@ AddModule(function()
 
         domainButton = makeButton("DomainButton", "DOMAIN", 1)
         cleaveButton = makeButton("CleaveButton", "CLEAVE", 2)
+        dismantleButton = makeButton("DismantleButton", "DISMANTLE", 3)
 
         table.insert(connections, domainButton.Activated:Connect(function()
             if not activeFigure or not activeFigure.Parent then return end
@@ -409,7 +460,9 @@ AddModule(function()
             end
             domainEnabled = not domainEnabled
             if domainEnabled then
-                notify("Domain açıldı: Shrine gizli, uzaktaki slash aksesuarları sürekli hareket ediyor.")
+                domainStartedAt = os.clock()
+                playDomainCutscene()
+                notify("Malevolent Shrine açıldı!")
             else
                 notify("Domain kapatıldı.")
             end
@@ -417,6 +470,17 @@ AddModule(function()
             refreshButtons()
         end))
 
+        table.insert(connections, dismantleButton.Activated:Connect(function()
+            if not activeFigure or not activeFigure.Parent then return end
+            refreshAccessories()
+            if not (presentIds[100475161263482] or presentIds[97087028126781]) then
+                notify("Dismantle için slash aksesuarlarından biri takılı olmalı.")
+                return
+            end
+            cleaveUntil = os.clock() + 1.6
+            applyAccessoryPositions()
+            refreshButtons()
+        end))
         table.insert(connections, cleaveButton.Activated:Connect(function()
             if not activeFigure or not activeFigure.Parent then return end
             refreshAccessories()
@@ -455,6 +519,7 @@ AddModule(function()
         ensureHatOverrides()
         applyAccessoryPositions()
         createHUD()
+        createInventoryTool()
     end
 
     m.Update = function(dt, figure)
@@ -478,6 +543,16 @@ AddModule(function()
     m.Destroy = function()
         domainEnabled = false
         cleaveUntil = 0
+        if inventoryTool then pcall(function() inventoryTool:Destroy() end); inventoryTool = nil end
+        if cutsceneActive then
+            local camera = workspace.CurrentCamera
+            if camera then
+                camera.CameraType = savedCameraType or Enum.CameraType.Custom
+                camera.CameraSubject = savedCameraSubject
+                if savedCameraCFrame then camera.CFrame = savedCameraCFrame end
+            end
+            cutsceneActive = false
+        end
 
         if HatReanimator then
             local list = HatReanimator.HatCFrameOverride
@@ -503,7 +578,7 @@ AddModule(function()
         local old = playerGui and playerGui:FindFirstChild("SukunaAbilityHUD")
         if old then old:Destroy() end
 
-        domainButton, cleaveButton = nil, nil
+        domainButton, cleaveButton, dismantleButton = nil, nil, nil
         activeFigure, root = nil, nil
         accessoryInstances, presentIds, overrideById = {}, {}, {}
         savedWantAllHats = nil
