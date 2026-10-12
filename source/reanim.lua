@@ -133,17 +133,14 @@ do
 	end
 end
 
--- Preserve the native protected-call functions before wrapping them.
--- Referencing the locally shadowed pcall/xpcall here would recurse until stack overflow,
--- causing Reanimate.Start to fail and the UI to return to "Running: NONE".
-local nativePcall, nativeXpcall = pcall, xpcall
+-- WILL THIS FIX CRASHES IDK ????????
 local pcall = function(func, ...)
-	return nativePcall(function(...)
+	return pcall(function(...)
 		return func(...)
 	end, ...)
 end
 local xpcall = function(func, ...)
-	return nativeXpcall(function(...)
+	return xpcall(function(...)
 		return func(...)
 	end, ...)
 end
@@ -2742,27 +2739,7 @@ local Reanimate = {
 	ShouldRotationType = function(self)
 		if self.Camera:IsMouseLocked() and not self.Camera.Scriptable and self.Character then
 			local hum = self.Character:FindFirstChildOfClass("Humanoid")
-	-- IsGrounded() is not a standard Roblox BasePart method and may be nil in some executors.
-	-- Use it only when available, then fall back to Humanoid.FloorMaterial / a short raycast.
-	local function IsGroundedPart(part)
-		if not part or not part:IsA("BasePart") then return false end
-		local customOk, customResult = pcall(function()
-			return part:IsGrounded()
-		end)
-		if customOk and type(customResult) == "boolean" then return customResult end
-		local model = part:FindFirstAncestorOfClass("Model")
-		local humanoid = model and model:FindFirstChildOfClass("Humanoid")
-		if humanoid and humanoid.RootPart == part then
-			return humanoid.FloorMaterial ~= Enum.Material.Air
-		end
-		local params = RaycastParams.new()
-		params.FilterType = Enum.RaycastFilterType.Exclude
-		params.FilterDescendantsInstances = {model or part}
-		params.IgnoreWater = true
-		local distance = math.max(part.Size.Y * 0.5 + 0.2, 0.75)
-		return workspace:Raycast(part.Position, Vector3.new(0, -distance, 0), params) ~= nil
-	end
-			if hum and hum.AutoRotate and hum.RootPart and not IsGroundedPart(hum.RootPart) then
+			if hum and hum.AutoRotate and hum.RootPart and not hum.RootPart:IsGrounded() then
 				local state = hum:GetState().Name
 				if table.find({"Running", "Jumping", "Freefall", "Landed", "Climbing"}, state) then
 					return true
@@ -3304,7 +3281,7 @@ Reanimate.CreateCharacter = function(InitCFrame)
 	Reanimate.Camera.CFrame, Reanimate.Camera.Focus = Camera.CFrame, Camera.Focus
 	Reanimate.Camera:OnReset()
 	RC = CreateHumanoidCharacter()
-	RC.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
+	RC.ModelStreamingMode = "Persistent"
 	Player.ReplicationFocus = workspace
 	local ltmparts = Reanimate.CharacterLTMs
 	table.clear(ltmparts)
@@ -3410,7 +3387,7 @@ Reanimate.CreateCharacter = function(InitCFrame)
 		local RCHumanoidState = RCHumanoid:GetState().Name
 		local gravaff = not not table.find(fallingStates, RCHumanoidState)
 		if gravaff then
-			if Reanimate.ScaleGravity and not IsGroundedPart(RCRootPart) then
+			if Reanimate.ScaleGravity and not RCRootPart:IsGrounded() then
 				RCRootPart.AssemblyLinearVelocity += Vector3.new(0, -workspace.Gravity * (scale - 1) * 0.25 * dt, 0)
 			end
 		end
@@ -3827,32 +3804,6 @@ function LimbReanimator.Config(parent)
 	end))
 end
 function LimbReanimator.Start()
-	-- Resolve the live character before building joints or reading limb CFrames.
-	local character = Player.Character or Player.CharacterAdded:Wait()
-	local humanoid = character:WaitForChild("Humanoid", 10)
-	local rootPart = character:WaitForChild("HumanoidRootPart", 10)
-	local torso = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
-	if not torso then
-		torso = character:WaitForChild("Torso", 3) or character:WaitForChild("UpperTorso", 3)
-	end
-	if not humanoid or not rootPart or not torso then
-		error("[NAM Reanimate] Limb startup aborted: Humanoid, HumanoidRootPart, or Torso/UpperTorso did not load within the timeout.", 0)
-	end
-	local requiredLimbs = {"Head", "Left Arm", "Right Arm", "Left Leg", "Right Leg"}
-	for _, limbName in ipairs(requiredLimbs) do
-		if not character:FindFirstChild(limbName) then
-			-- R15 uses segmented limbs; the limb map module handles rig-specific mapping.
-			local r15Name = ({
-				["Left Arm"] = "LeftUpperArm",
-				["Right Arm"] = "RightUpperArm",
-				["Left Leg"] = "LeftUpperLeg",
-				["Right Leg"] = "RightUpperLeg",
-			})[limbName] or limbName
-			if not character:WaitForChild(r15Name, 5) then
-				error("[NAM Reanimate] Limb startup aborted: missing character part " .. r15Name, 0)
-			end
-		end
-	end
 	local LimbNames = {"Head", "Torso", "Left Arm", "Right Arm", "Left Leg", "Right Leg"}
 	local rootposition = Vector3.new(
 		math.random(-65536, 65536),
@@ -3903,19 +3854,7 @@ function LimbReanimator.Start()
 		end
 	end
 
-	local modulePath = "NAMReanim/BuiltinModules/d_limbmap.lua"
-	local moduleOk, LimbMapping = pcall(function()
-		assert(type(readfile) == "function", "executor readfile is unavailable")
-		assert(type(loadstring) == "function", "executor loadstring is unavailable")
-		local source = readfile(modulePath)
-		assert(type(source) == "string" and #source > 0, "module file is empty or unreadable: " .. modulePath)
-		local loader, compileError = loadstring(source)
-		assert(type(loader) == "function", "module compile failed: " .. tostring(compileError))
-		return loader()
-	end)
-	if not moduleOk or type(LimbMapping) ~= "table" then
-		error("[NAM Reanimate] Failed to load limb map module: " .. tostring(LimbMapping), 0)
-	end
+	local LimbMapping = loadstring(readfile("NAMReanim/BuiltinModules/d_limbmap.lua"))()
 
 	local FakeTools = {}
 	local function CreateFakeTool()
@@ -3948,33 +3887,6 @@ function LimbReanimator.Start()
 	-- These accessories may not exist in the player's HumanoidDescription, so they
 	-- must be restored from the observed instance instead of fetched from the catalog.
 	local PersistentAccessoryTemplates = {}
-	local function IsNeckAccessory(accessory)
-		if not accessory or not accessory:IsA("Accessory") then return false end
-		local ok, accessoryType = pcall(function() return accessory.AccessoryType end)
-		if ok and accessoryType == Enum.AccessoryType.Neck then return true end
-
-		-- Some layered/custom neck items are tagged as Unknown or Other.
-		-- Their attachment names are a more reliable fallback than the item name.
-		local handle = accessory:FindFirstChild("Handle")
-		if handle then
-			for _, descendant in ipairs(handle:GetDescendants()) do
-				if descendant:IsA("Attachment") then
-					local attachmentName = string.lower(descendant.Name)
-					if attachmentName == "neckattachment"
-						or attachmentName == "neckrigattachment" then
-						return true
-					end
-				end
-			end
-		end
-
-		local name = string.lower(accessory.Name or "")
-		return name:find("neck", 1, true) ~= nil
-			or name:find("necklace", 1, true) ~= nil
-			or name:find("choker", 1, true) ~= nil
-			or name:find("collar", 1, true) ~= nil
-		or name:find("chain", 1, true) ~= nil
-	end
 	local function PersistentAccessoryKey(accessory)
 		if not accessory or not accessory:IsA("Accessory") then return nil end
 		local mesh, texture = GetHatMeshAndTexture(accessory)
@@ -4131,7 +4043,7 @@ function LimbReanimator.Start()
 		end
 	end
 	local lastspawn = 0
-	local function OnCharacterAdded(character)
+	local CharConn = Player.CharacterAdded:Connect(function(character)
 		local camcfr = Camera.CFrame
 		RunService.PreRender:Once(function()
 			RunService.PreAnimation:Wait()
@@ -4148,29 +4060,20 @@ function LimbReanimator.Start()
 			task.spawn(CharOnDesc, v)
 		end
 		local humanoid = character:WaitForChild("Humanoid", 5)
-		if humanoid then
-			local stupid = humanoid:FindFirstChildWhichIsA("Animator")
-			if stupid then
-				stupid:Destroy()
-			end
+		local stupid = humanoid:FindFirstChildWhichIsA("Animator")
+		if stupid then
+			stupid:Destroy()
 		end
 		if not Reanimate.UseLoadAnimationHook then
-			local stupid = character:FindFirstChild("Animate")
-			while not stupid and character.Parent do
+			stupid = character:FindFirstChild("Animate")
+			while not stupid do
 				character.ChildAdded:Wait()
 				stupid = character:FindFirstChild("Animate")
 			end
-			if stupid then stupid:Destroy() end
+			stupid:Destroy()
 		end
-	end
-	local CharConn = Player.CharacterAdded:Connect(OnCharacterAdded)
-	-- Do not wait for a future respawn when the player already has a character.
-	-- That wait caused startup to time out after the startup-kill was removed.
-	if Player.Character then
-		OnCharacterAdded(Player.Character)
-	else
-		Player.CharacterAdded:Wait()
-	end
+	end)
+	Player.CharacterAdded:Wait()
 	Reanimate.CreateCharacter(InitCFrame)
 
 	local lastrep = 0
@@ -4264,7 +4167,7 @@ function LimbReanimator.Start()
 						flingtarget = nil
 					end
 				end
-				if not IsGroundedPart(RootPart) then
+				if not RootPart:IsGrounded() then
 					if flingtarget then
 						if LimbReanimator.UseNaNFling then
 							RootPart.CFrame = CFrame.new(flingcf.Position + Vector3.new(0, 0, math.random(0, 1) * 0.005)) * CFrame.Angles(0, os.clock() * 15, 0)
@@ -4567,30 +4470,6 @@ HatReanimator.GetHatMap = function() end
 HatReanimator.GetHatCFrameMeshAndTexture = function() end
 HatReanimator.GetAttachmentCFrame = function() end
 function HatReanimator.Start()
-	-- Wait for the avatar's core parts before calculating attachment CFrames.
-	local character = Player.Character or Player.CharacterAdded:Wait()
-	local humanoid = character:WaitForChild("Humanoid", 10)
-	local rootPart = character:WaitForChild("HumanoidRootPart", 10)
-	local head = character:WaitForChild("Head", 10)
-	local torso = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
-	if not torso then
-		torso = character:WaitForChild("Torso", 3) or character:WaitForChild("UpperTorso", 3)
-	end
-	if not humanoid or not rootPart or not head or not torso then
-		error("[NAM Reanimate] Hat startup aborted: Humanoid, HumanoidRootPart, Head, or Torso/UpperTorso did not load within the timeout.", 0)
-	end
-	-- Give avatar accessories a bounded chance to finish loading; do not wait forever.
-	if type(Player.HasAppearanceLoaded) == "function" then
-		local appearanceStarted = os.clock()
-		while not Player:HasAppearanceLoaded() and os.clock() - appearanceStarted < 5 do
-			task.wait(0.1)
-		end
-	end
-	for _, accessory in ipairs(character:GetChildren()) do
-		if accessory:IsA("Accessory") then
-			accessory:WaitForChild("Handle", 3)
-		end
-	end
 	local LimbNames = {"Head", "Torso", "Left Arm", "Right Arm", "Left Leg", "Right Leg"}
 
 	local Attachments = {
@@ -4615,22 +4494,7 @@ function HatReanimator.Start()
 		FaceCenterAttachment = {"Head", CFrame.new(0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)},
 	}
 
-	local modulePath = "NAMReanim/BuiltinModules/d_hatsmap.lua"
-	local moduleOk, HatMeshDatabase, HatNameDatabase, HatKnownAccessoriesDatabase = pcall(function()
-		assert(type(readfile) == "function", "executor readfile is unavailable")
-		assert(type(loadstring) == "function", "executor loadstring is unavailable")
-		local source = readfile(modulePath)
-		assert(type(source) == "string" and #source > 0, "module file is empty or unreadable: " .. modulePath)
-		local loader, compileError = loadstring(source)
-		assert(type(loader) == "function", "module compile failed: " .. tostring(compileError))
-		return loader()
-	end)
-	if not moduleOk then
-		error("[NAM Reanimate] Failed to load hat map module: " .. tostring(HatMeshDatabase), 0)
-	end
-	if type(HatMeshDatabase) ~= "table" or type(HatNameDatabase) ~= "table" or type(HatKnownAccessoriesDatabase) ~= "table" then
-		error("[NAM Reanimate] Hat map module returned invalid data; expected three tables.", 0)
-	end
+	local HatMeshDatabase, HatNameDatabase, HatKnownAccessoriesDatabase = loadstring(readfile("NAMReanim/BuiltinModules/d_hatsmap.lua"))()
 
 	local function GetTools()
 		local tools = {}
@@ -5328,7 +5192,7 @@ function HatReanimator.Start()
 		local lastcf = handle:GetAttribute("_NAM_LastPosition")
 		local claimtime = handle:GetAttribute("_NAM_ClaimTime")
 		if typeof(lastcf) ~= "CFrame" then lastcf = handle.CFrame end
-		if not IsGroundedPart(handle) and IsNetworkOwner(handle) then
+		if not handle:IsGrounded() and IsNetworkOwner(handle) then
 			local newpos = newcf.Position
 			local lastpos = lastcf.Position
 			local vel = (newpos - lastpos) / dt
@@ -5418,20 +5282,7 @@ function HatReanimator.Start()
 				if not v.Disabled then v.Disabled = true end
 			end)
 		elseif v:IsA("Accessory") and v.Parent == Player.Character then
-			-- Cache neck accessories before the reanimation transition, but never
-			-- enlist them as physics hats: they must stay attached to the avatar.
 			CachePersistentAccessory(v)
-			if IsNeckAccessory(v) then
-				local existingIndex = table.find(CharHats, v)
-				if existingIndex then table.remove(CharHats, existingIndex) end
-				local handle = v:FindFirstChild("Handle")
-				if handle and handle:IsA("BasePart") then
-					handle.CanCollide = false
-					handle.CanTouch = false
-					handle.CanQuery = false
-				end
-				return
-			end
 			if not table.find(CharHats, v) then
 				table.insert(CharHats, v)
 				local conn = nil
@@ -5838,7 +5689,18 @@ function HatReanimator.Start()
 		end)
 		currentping = Player:GetNetworkPing()
 		table.clear(BaseParts)
-		table.clear(CharHats)
+		-- Do not discard hats that were dropped into Workspace by the intentional
+		-- death step of reanimation. Keep valid live Accessories and remove only
+		-- destroyed/out-of-world instances; new character accessories are added below.
+		for i = #CharHats, 1, -1 do
+			local hat = CharHats[i]
+			local handle = hat and hat:FindFirstChild("Handle")
+			if not hat or not hat:IsA("Accessory") or not handle
+				or not handle:IsA("BasePart")
+				or (hat.Parent ~= nil and not hat:IsDescendantOf(workspace)) then
+				table.remove(CharHats, i)
+			end
+		end
 		table.clear(CharTools)
 		ResetHatRefs()
 		HatReanimator.RebuildRequired = true
@@ -5863,8 +5725,6 @@ function HatReanimator.Start()
 		CurrentCharacter = nil
 		local Humanoid = character:WaitForChild("Humanoid", 10)
 		if not Humanoid then return end
-		-- Restore accessories excluded from the hat-physics pool after a respawn.
-		RestorePersistentAccessories(character, Humanoid)
 		if not Reanimate.UseLoadAnimationHook then
 			local stupid = character:FindFirstChild("Animate")
 			if stupid then
@@ -5891,6 +5751,14 @@ function HatReanimator.Start()
 		end
 		local RootPart = character:WaitForChild("HumanoidRootPart", 10)
 		if not RootPart then return end
+		-- Avatar-exported accessories are often injected locally and are absent from
+		-- HumanoidDescription. Give the game's normal appearance a moment to load,
+		-- then restore only cached accessories whose original instances were destroyed.
+		task.delay(3.5, function()
+			if Player.Character == character and character:IsDescendantOf(workspace) then
+				RestorePersistentAccessories(character, Humanoid)
+			end
+		end)
 		local RootPosition = Vector3.new(RootPart.Position.X, FallenPartsDestroyHeight, RootPart.Position.Z)
 		if ReanimCharacter then
 			local root = ReanimCharacter:FindFirstChild("HumanoidRootPart")
@@ -5955,7 +5823,7 @@ function HatReanimator.Start()
 				end
 			end
 			if flingtarget then
-				if not IsGroundedPart(RootPart) then
+				if not RootPart:IsGrounded() then
 					if LimbReanimator.UseNaNFling then
 						RootPart.CFrame = CFrame.new(flingcf.Position + Vector3.new(0, 0, math.random(0, 1) * 0.005)) * CFrame.Angles(0, os.clock() * 15, 0)
 						RootPart.Velocity, RootPart.RotVelocity = Vector3.zero, Vector3.zero
@@ -6091,20 +5959,12 @@ function HatReanimator.Start()
 			end
 			return
 		end
-		-- The classic hat-separation step deliberately kills the live humanoid.
-		-- Only run that destructive step when the user explicitly enabled Permadeath;
-		-- otherwise it causes a repeated CharacterAdded/death loop.
-		if perma then
-			replicatesignal(Humanoid.ServerBreakJoints)
-			Humanoid.EvaluateStateMachine = true
-			Humanoid.BreakJointsOnDeath = true
-			Humanoid.Health = 0
-			Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
-			Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
-		else
-			Humanoid.BreakJointsOnDeath = false
-			Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-		end
+		replicatesignal(Humanoid.ServerBreakJoints)
+		Humanoid.EvaluateStateMachine = true
+		Humanoid.BreakJointsOnDeath = true
+		Humanoid.Health = 0
+		Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+		Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
 		readystate = 3
 		HatReanimator.Status.ReanimState = "Reanimate State: 3"
 		IsRespawning = false
@@ -6177,9 +6037,9 @@ function HatReanimator.Start()
 		local h = Player.Character:FindFirstChildOfClass("Humanoid")
 		if h and h.RootPart then
 			InitCFrame = h.RootPart.CFrame
-			-- Do not kill the live character during startup. The reanimation state
-			-- machine owns its one controlled transition; doing it here as well can
-			-- trigger CharacterAdded before initialization and create a respawn loop.
+			pcall(function() Player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Dead) end)
+			pcall(function() Player.Character.Humanoid.Health = 0 end)
+			pcall(replicatesignal, Player.Character.Humanoid.ServerBreakJoints)
 			--pcall(replicatesignal, Player.ConnectDiedSignalBackend)
 			Player.Character.DescendantAdded:Connect(CharOnDesc)
 			for _,v in Player.Character:GetDescendants() do
@@ -6573,7 +6433,7 @@ _G_NAM.Fling = function(part)
 			end
 		end
 		local hum = part:FindFirstChildOfClass("Humanoid")
-		if hum and hum.RootPart and not hum.IsGroundedPart(RootPart) then
+		if hum and hum.RootPart and not hum.RootPart:IsGrounded() then
 			return ReanimateFling(part)
 		end
 	end
@@ -6627,48 +6487,37 @@ do
 			ReanimateText.Text = "Starting: " .. Reanimate.Current.Name
 
 			local selected = Reanimate.Current
+			local startFinished = false
 			local startError = nil
-			local startReturned = false
 			task.spawn(function()
-				local ok, err
-				if type(selected) ~= "table" or type(selected.Start) ~= "function" then
-					ok = false
-					err = "Selected reanimator has no callable Start function."
-				else
-					ok, err = xpcall(function()
-						selected.Start()
-					end, function(message)
-						local trace = (debug and debug.traceback) and debug.traceback(tostring(message), 2) or tostring(message)
-						return trace
-					end)
-				end
+				local ok, err = xpcall(selected.Start, debug.traceback)
 				if not ok then
 					startError = tostring(err)
-					warn("[NAM Reanimate] Start failed:\n" .. startError)
+					warn("[NAM Reanimate] Start failed:\\n" .. startError)
 					Reanimate.Stopping = true
 					Reanimate.Starting = false
 				end
-				startReturned = true
+				startFinished = true
 			end)
 
 			local startedAt = os.clock()
-			while Reanimate.Starting and not startError and os.clock() - startedAt < 30 do
+			while Reanimate.Starting and not startFinished and os.clock() - startedAt < 30 do
 				task.wait(0.1)
 			end
 
-			if startError or Reanimate.Starting then
-				local reason = startError or "Startup timed out after 30 seconds while the reanimator was still initializing."
-				warn("[NAM Reanimate] " .. reason)
+			if startError or (Reanimate.Starting and not startFinished) then
+				if not startError then
+					startError = "Startup timed out after 30 seconds. Check the executor console for the first error."
+					warn("[NAM Reanimate] " .. startError)
+				end
 				Reanimate.Stopping = true
 				Reanimate.Starting = false
 				Reanimate.Current = nil
 				HumanoidLASetHookState(false)
-				ReanimateText.Text = "Startup failed: " .. string.sub(reason:gsub("[%r\n]+", " "), 1, 90)
+				ReanimateText.Text = "Running: NONE (startup failed)"
 				ReanimateStartButtonText.Text = "Reanimate"
 			else
-				if selected then
-					selected.Running = true
-				end
+				Reanimate.Current.Running = true
 				task.wait(1)
 				ReanimateStartButtonText.Text = "Deanimate"
 			end
@@ -8409,7 +8258,7 @@ end)
 UI.CreateText(ReadmePage, "NAM README & loadstring", 24, Enum.TextXAlignment.Center)
 UI.CreateText(ReadmePage, "Usage and loadstring are in the NAM repository README.", 14, Enum.TextXAlignment.Center)
 UI.CreateButton(ReadmePage, "Copy loadstring", 20).Activated:Connect(function()
-	pcall(setclipboard, 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/source/reanim.lua"))()')
+	pcall(setclipboard, 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/c6769fb025b6026604eade9a4e74a9339d5b31b0/source/reanim.lua"))()')
 	Util.Notify("Loadstring copied!")
 end)
 task.wait()
