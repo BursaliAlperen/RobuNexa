@@ -800,8 +800,13 @@ AddModule(function()
     end
 
     local function createFingerSearch()
-        -- Executor-created parts are local-only. These are decorative collectibles,
-        -- placed on actual ground around the player rather than floating in the sky.
+        -- If the game's server-owned world is installed, it already creates shared
+        -- collectibles for everyone. Don't duplicate them with local-only executor parts.
+        if workspace:FindFirstChild("SukunaFingerWorld") then
+            if fingerFolder then fingerFolder:Destroy(); fingerFolder = nil end
+            return
+        end
+        -- Executor-created parts are local-only. These are a fallback for solo visuals.
         if fingerFolder then fingerFolder:Destroy() end
         fingerFolder = Instance.new("Folder")
         fingerFolder.Name = "SukunaFingerSearch_Local"
