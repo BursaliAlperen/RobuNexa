@@ -42,6 +42,37 @@ AddModule(function()
 	local buttons = {}
 	local updateFlightConnection
 	local FLIGHT_SPEED = 55
+	local SOUND_IDS = {
+		Infinity = "rbxassetid://74292212867322",
+		RedExplosion = "rbxassetid://126359419769568",
+		RedAfterTeleport = "rbxassetid://131267451700580",
+		Maximum = "rbxassetid://75091144779701",
+		HollowPurple = "rbxassetid://120658131553736",
+		Footsteps = "rbxassetid://127420585104486",
+	}
+	local footstepSound
+	local function playSound(id, looped, volume)
+		if not root or not root.Parent then return nil end
+		local sound = Instance.new("Sound")
+		sound.Name = "GojoAbilitySound"
+		sound.SoundId = id
+		sound.Looped = looped == true
+		sound.Volume = volume or 1
+		sound.RollOffMaxDistance = 90
+		sound.Parent = root
+		sound:Play()
+		if not sound.Looped then
+			game:GetService("Debris"):AddItem(sound, 15)
+		end
+		return sound
+	end
+	local function stopFootsteps()
+		if footstepSound then
+			footstepSound:Stop()
+			footstepSound:Destroy()
+			footstepSound = nil
+		end
+	end
 
 	local function notify(message)
 		pcall(function() Util.Notify("Gojo: " .. message) end)
@@ -104,6 +135,7 @@ AddModule(function()
 		local old = activeFigure and activeFigure:FindFirstChild("GojoInfinityVisual")
 		if old then old:Destroy() end
 		if infinityEnabled and activeFigure then
+			playSound(SOUND_IDS.Infinity, false, 0.8)
 			local visual = Instance.new("Part")
 			visual.Name = "GojoInfinityVisual"
 			visual.Shape = Enum.PartType.Ball
@@ -186,6 +218,7 @@ AddModule(function()
 		if name == "Infinity" then toggleInfinity(); return end
 		if name == "Flight" then toggleFlight(); return end
 		if name == "Red" then
+			playSound(SOUND_IDS.RedExplosion, false, 1)
 			local target = nearestOtherPlayer()
 			local targetRoot = target and target.Character and target.Character:FindFirstChild("HumanoidRootPart")
 			if targetRoot and root then
@@ -196,12 +229,17 @@ AddModule(function()
 				local ray = workspace:Raycast(targetRoot.Position, desired.Position - targetRoot.Position, rayParams)
 				if not ray then
 					root.CFrame = CFrame.lookAt(desired.Position, targetRoot.Position)
+					playSound(SOUND_IDS.RedAfterTeleport, false, 1)
 				else
 					notify("Hedefin arkasında güvenli nokta yok.")
 				end
 			else
 				notify("Yakında hedef oyuncu bulunamadı.")
 			end
+		end
+		if name == "Purple" then
+			playSound(SOUND_IDS.Maximum, false, 1)
+			task.delay(0.35, function() if root and root.Parent then playSound(SOUND_IDS.HollowPurple, false, 1) end end)
 		end
 		playAnimation(name, false)
 		notify(name .. " animasyonu oynatılıyor (dosya mevcutsa).")
@@ -263,7 +301,15 @@ AddModule(function()
 		activeFigure = figure
 		humanoid = figure:FindFirstChildOfClass("Humanoid")
 		root = figure:FindFirstChild("HumanoidRootPart")
-		if flightEnabled then return end
+		if flightEnabled then stopFootsteps(); return end
+		local moving = humanoid and humanoid.MoveDirection.Magnitude > 0.05 and humanoid.FloorMaterial ~= Enum.Material.Air
+		if moving then
+			if not footstepSound or not footstepSound.Parent then
+				footstepSound = playSound(SOUND_IDS.Footsteps, true, 0.55)
+			end
+		elseif footstepSound then
+			stopFootsteps()
+		end
 		local wanted
 		if humanoid and humanoid.Jump then
 			wanted = "Jump"
@@ -281,6 +327,7 @@ AddModule(function()
 
 	m.Destroy = function(figure: Model?)
 		stopFlight()
+		stopFootsteps()
 		stopAnimation()
 		if activeFigure then
 			local visual = activeFigure:FindFirstChild("GojoInfinityVisual")
