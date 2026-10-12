@@ -1318,6 +1318,8 @@ AddModule(function()
             else
                 wanted = "Jump"
             end
+        elseif humanoid and (humanoid.Jump or state == Enum.HumanoidStateType.Jumping) then
+            wanted = "Jump"
         elseif humanoid and (humanoid.MoveDirection.Magnitude > 0.05 or horizontalSpeed > 1.25) then
             -- No separate Sukuna Run.rbxm is present yet; use the valid Walk clip
             -- for sprinting instead of requesting a missing file and breaking movement.
