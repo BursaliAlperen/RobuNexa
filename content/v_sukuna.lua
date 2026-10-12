@@ -276,12 +276,14 @@ AddModule(function()
 
  m.Config = function(parent: GuiBase2d)
   local panel=Instance.new("Frame"); panel.Name="SukunaControls"; panel.BackgroundTransparency=1
-  panel.Size=UDim2.new(1,0,0,42); panel.Parent=parent
-  local layout=Instance.new("UIListLayout"); layout.FillDirection=Enum.FillDirection.Horizontal
-  layout.HorizontalAlignment=Enum.HorizontalAlignment.Left; layout.VerticalAlignment=Enum.VerticalAlignment.Center
-  layout.Padding=UDim.new(0,5); layout.Parent=panel
+  panel.AnchorPoint=Vector2.new(1,0); panel.Position=UDim2.new(1,-8,0,8)
+  panel.Size=UDim2.new(0,310,0,78); panel.Parent=parent
+  local layout=Instance.new("UIGridLayout"); layout.FillDirection=Enum.FillDirection.Horizontal
+  layout.HorizontalAlignment=Enum.HorizontalAlignment.Right; layout.VerticalAlignment=Enum.VerticalAlignment.Top
+  layout.SortOrder=Enum.SortOrder.LayoutOrder; layout.FillDirectionMaxCells=3
+  layout.CellSize=UDim2.new(0,100,0,34); layout.CellPadding=UDim2.new(0,5,0,5); layout.Parent=panel
   for _,name in ipairs({"Awaken","Shrine","Furnance","WorldCut","Rush"}) do
-   local button=Instance.new("TextButton"); button.Name=name.."Button"; button.Size=UDim2.new(0,100,0,34)
+   local button=Instance.new("TextButton"); button.Name=name.."Button"; button.Size=UDim2.new(0,100,0,34); button.LayoutOrder=({Awaken=1,Shrine=2,Furnance=3,WorldCut=4,Rush=5})[name] or 99
    button.BackgroundColor3=Color3.fromRGB(90,22,32); button.BorderSizePixel=0
    button.Text=abilityNames[name].." ["..keys[name].."]"; button.TextColor3=Color3.new(1,1,1)
    button.TextSize=12; button.Font=Enum.Font.GothamBold; button.TextWrapped=true; button.Parent=panel
