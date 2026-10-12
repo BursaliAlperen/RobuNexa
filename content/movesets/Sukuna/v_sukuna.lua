@@ -628,8 +628,8 @@ AddModule(function()
                 local remaining = math.max(0, (abilityReadyAt[name] or 0) - os.clock())
                 local coolingDown = remaining > 0
                 button.Text = coolingDown
-                    and string.format("%s\\n%.1fs", LABELS[name], remaining)
-                    or (LABELS[name] .. "\\n" .. KEYBINDS[name].Name)
+                    and string.format("%s\n%.1fs", LABELS[name], remaining)
+                    or (LABELS[name] .. "\n" .. KEYBINDS[name].Name)
                 -- A cooling-down skill is visibly grey and cannot be pressed.
                 button.BackgroundColor3 = coolingDown
                     and Color3.fromRGB(105, 105, 105)
