@@ -9,7 +9,7 @@ NAM — maintained and rebranded by mamalalanam.
 Original-source and third-party notices are preserved in the README.
 ]]
 
-local NAMVersion = "1.0.18 BETA"
+local NAMVersion = "1.0.19 BETA"
 if _G.NAMLoaded or _G["U" .. "hhhhhhLoaded"] then
 	warn("[NAM] v" .. NAMVersion .. " did not start: v" .. tostring(_G.NAMVersion or "older/unknown") .. " is already active. Leave and rejoin to apply the update.")
 	return
@@ -300,72 +300,6 @@ UIMainFrame.BackgroundTransparency = 1
 UIMainFrame.BorderSizePixel = 0
 UIMainFrame.ZIndex = 2147483647
 
-local function ContainsSukunaIdentity(...)
-	for index = 1, select("#", ...) do
-		local value = select(index, ...)
-		if value ~= nil and string.find(string.lower(tostring(value)), "sukuna", 1, true) then
-			return true
-		end
-	end
-	return false
-end
-
-local function IsSukunaModule(module, fileName, source)
-	if ContainsSukunaIdentity(fileName, source) then
-		return true
-	end
-	if type(module) ~= "table" then
-		return false
-	end
-	return ContainsSukunaIdentity(
-		module.Name,
-		module.Description,
-		module.InternalName,
-		module.Id,
-		module.ModuleName,
-		module.FileName,
-		module.Filename
-	)
-end
-
-local function ContainsSukunaData(value, seen)
-	if type(value) == "string" then
-		return ContainsSukunaIdentity(value)
-	end
-	if type(value) ~= "table" then
-		return false
-	end
-	seen = seen or {}
-	if seen[value] then return false end
-	seen[value] = true
-	for key, item in pairs(value) do
-		if ContainsSukunaData(key, seen) or ContainsSukunaData(item, seen) then
-			return true
-		end
-	end
-	return false
-end
-
-local function PurgeSukunaCache(folder, onRemove)
-	local ok, cachedFiles = pcall(listfiles, folder)
-	if not ok or type(cachedFiles) ~= "table" then return end
-	for _, cachedPath in ipairs(cachedFiles) do
-		local fileName = string.match(cachedPath, "([^/\\\\]+)$") or cachedPath
-		local removeFile = ContainsSukunaIdentity(fileName, cachedPath)
-		if not removeFile then
-			local isFileOk, exists = pcall(isfile, cachedPath)
-			if isFileOk and exists then
-				local readOk, cachedText = pcall(readfile, cachedPath)
-				removeFile = readOk and type(cachedText) == "string" and ContainsSukunaIdentity(cachedText)
-			end
-		end
-		if removeFile then
-			pcall(delfile, cachedPath)
-			if onRemove then pcall(onRemove, fileName) end
-		end
-	end
-end
-
 local SaveData = {}
 do
 	pcall(makefolder, "NAMReanim")
@@ -377,17 +311,13 @@ do
 		if legacySaveOk and legacySave then pcall(writefile, SaveDataFilename, legacySave) end
 	end
 	pcall(makefolder, "NAMReanim/Modules")
-	-- Remove stale copies before importing legacy modules or loading any modules.
-	PurgeSukunaCache("NAMReanim/Modules")
-	PurgeSukunaCache("NAMReanim/BuiltinModules")
-	PurgeSukunaCache(LegacyRoot .. "/Modules")
 	local legacyModulesOk, legacyModules = pcall(listfiles, LegacyRoot .. "/Modules")
 	if legacyModulesOk and type(legacyModules) == "table" then
 		for _, legacyPath in legacyModules do
 			local moduleName = string.match(legacyPath, "([^/]+)$")
 			if moduleName and isfile(legacyPath) and not isfile("NAMReanim/Modules/" .. moduleName) then
 				local moduleOk, moduleData = pcall(readfile, legacyPath)
-				if moduleOk and moduleData and not IsSukunaModule(nil, moduleName, moduleData) then
+				if moduleOk and moduleData then
 					pcall(writefile, "NAMReanim/Modules/" .. moduleName, moduleData)
 				end
 			end
@@ -398,16 +328,6 @@ do
 		s, data = pcall(HttpService.JSONDecode, HttpService, data)
 		if s and data then
 			SaveData = data
-			for _, field in ipairs({"ContentHash", "ModuleConfigs", "FavoriteDances"}) do
-				local records = SaveData[field]
-				if type(records) == "table" then
-					for key, value in pairs(records) do
-						if ContainsSukunaData(key) or ContainsSukunaData(value) then
-							records[key] = nil
-						end
-					end
-				end
-			end
 		else
 			pcall(writefile, SaveDataFilename, "{}")
 		end
@@ -7573,10 +7493,6 @@ local function GetModuleHash(m)
 end
 local function AddMoveset(m, moduleFileName, moduleSource)
 	if type(m) == "table" then
-		-- Reject renamed copies by identity fields, originating filename and full source.
-		if IsSukunaModule(m, moduleFileName, moduleSource) then
-			return
-		end
 		if not m.Name then return end
 		if not m.Description then return end
 		if not m.Config then return end
@@ -8208,22 +8124,6 @@ local function ForceModuleReload(force)
 	InitLogsText.Text = "Init Logs -- This is where you check what happened."
 	ClearModules()
 
-	-- Purge old files and saved identifiers before any module is reloaded.
-	for _, folder in ipairs({"NAMReanim/Modules/", "NAMReanim/BuiltinModules/", "UhhhhhhReanim/Modules/"}) do
-		PurgeSukunaCache(folder, function(fileName)
-			InitLogsText.Text ..= "\n[LOG] Removed legacy Sukuna cache: " .. fileName
-		end)
-	end
-	for _, field in ipairs({"ContentHash", "ModuleConfigs", "FavoriteDances"}) do
-		local records = SaveData[field]
-		if type(records) == "table" then
-			for key, value in pairs(records) do
-				if ContainsSukunaData(key) or ContainsSukunaData(value) then
-					records[key] = nil
-				end
-			end
-		end
-	end
 	Util.Notify("Loading...")
 	InitLogsText.Text ..= "\n[LOG] Checking SHA1 hashes..."
 	-- Gojo and Sukuna are built-in movesets on desktop and mobile.
@@ -8241,9 +8141,7 @@ local function ForceModuleReload(force)
 			if s and resp then
 				for _,file in resp do
 					if file.name and file.sha then
-						if ContainsSukunaIdentity(file.name) then
-							SaveData.ContentHash[file.name] = nil
-						elseif SaveData.ContentHash[file.name] ~= file.sha then
+						if SaveData.ContentHash[file.name] ~= file.sha then
 							SaveData.ContentHash[file.name] = file.sha
 							if table.find(filesofbuiltins, file.name) then
 								local path = "NAMReanim/BuiltinModules/" .. file.name
@@ -8300,8 +8198,8 @@ local function ForceModuleReload(force)
 		if s and a then exist = true end
 		if wasold then exist = false end
 		if force then exist = false end
-		-- Always fetch Gojo from GitHub; never let a stale local module replace it.
-		if x == "v_gojo.lua" then exist = false end
+		-- Always fetch Gojo and Sukuna from GitHub so stale local copies cannot override fixes.
+		if x == "v_gojo.lua" or x == "v_sukuna.lua" then exist = false end
 		local data = nil
 		if exist then
 			InitLogsText.Text ..= "\n[LOG] Reading local VANILLA " .. x .. "..."
@@ -8328,11 +8226,6 @@ local function ForceModuleReload(force)
 		end
 		if type(data) ~= "string" or #data == 0 then
 			InitLogsText.Text ..= "\n[ERROR] Skipping VANILLA " .. x .. ": no valid module source is available."
-			continue
-		end
-		if IsSukunaModule(nil, x, data) then
-			InitLogsText.Text ..= "\n[WARN] Skipping VANILLA " .. x .. ": Sukuna identity found in its filename or source."
-			pcall(delfile, path)
 			continue
 		end
 		task.wait()
@@ -8364,11 +8257,6 @@ local function ForceModuleReload(force)
 			xpcall(function()
 				InitLogsText.Text ..= "\n[LOG] Reading local USER " .. x .. "..."
 				local data = readfile(path)
-				if IsSukunaModule(nil, x, data) then
-					InitLogsText.Text ..= "\n[LOG] Removing USER module containing Sukuna identity: " .. x
-					pcall(delfile, path)
-					return
-				end
 				InitLogsText.Text ..= "\n[LOG] Loadstringing USER " .. x .. "..."
 				local func, comperr = loadstring(data, "NAM :: " .. x)
 				if func then
