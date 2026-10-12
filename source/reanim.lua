@@ -7042,17 +7042,30 @@ do
 	AnimLib.Animator = Animator
 end
 local function AssetGetPathFromFilename(filename)
-	local filetype = "Unknown/"
+	local filetype = "Unknown"
 	if filename:sub(-4, -1) == ".mp3" then
-		filetype = "Sounds/"
+		filetype = "Sounds"
 	elseif filename:sub(-5, -1) == ".anim" then
-		filetype = "Anims/"
+		filetype = "Anims"
 	elseif filename:sub(-4, -1) == ".png" then
-		filetype = "Images/"
+		filetype = "Images"
 	elseif filename:sub(-4, -1) == ".rbxm" then
-		filetype = "Models/"
+		filetype = "Models"
 	end
-	return "NAMReanim/Content/" .. filetype .. filename
+
+	-- Moved assets use paths such as Gojo/HollowPurple.anim. Create every
+	-- nested cache directory before writefile/getcustomasset tries to use it.
+	local base = "NAMReanim/Content/" .. filetype
+	pcall(makefolder, "NAMReanim")
+	pcall(makefolder, "NAMReanim/Content")
+	pcall(makefolder, base)
+	local parts = string.split(filename, "/")
+	local folder = base
+	for i = 1, #parts - 1 do
+		folder = folder .. "/" .. parts[i]
+		pcall(makefolder, folder)
+	end
+	return base .. "/" .. filename
 end
 local _Assetdownloading = {}
 local function AssetDownload(filename)
