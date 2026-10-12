@@ -40,12 +40,16 @@ AddModule(function()
     }
 
     local EFFECT_IDS = {100475161263482, 97087028126781}
+    local FINGER_ID = 18762839664
     local activeFigure, root
     local hud, domainButton, cleaveButton, dismantleButton
     local inventoryTool
     local domainStartedAt = 0
     local cutsceneActive = false
     local savedCameraType, savedCameraSubject, savedCameraCFrame
+    local fingerFolder
+    local fingersFound = 0
+    local fingerEquipped = false
     local connections = {}
     local domainEnabled = false
     local cleaveUntil = 0
@@ -189,6 +193,32 @@ AddModule(function()
             end
         end
 
+        -- The Finger catalog item is expected to remain equipped on the character.
+        fingerEquipped = false
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                local okDescription, description = pcall(function() return humanoid:GetAppliedDescription() end)
+                if okDescription and description then
+                    local okList, list = pcall(function() return description:GetAccessories(true) end)
+                    if okList and type(list) == "table" then
+                        for _, entry in ipairs(list) do
+                            local id
+                            pcall(function() id = tonumber(entry.AssetId) end)
+                            if id == FINGER_ID then fingerEquipped = true; break end
+                        end
+                    end
+                end
+            end
+            if not fingerEquipped then
+                for _, child in ipairs(character:GetChildren()) do
+                    if child:IsA("Accessory") and tonumber(child:GetAttribute("AssetId")) == FINGER_ID then
+                        fingerEquipped = true
+                        break
+                    end
+                end
+            end
+        end
         accessoryInstances = nextInstances
         presentIds = nextPresent
         local matched = {}
@@ -382,6 +412,70 @@ AddModule(function()
         inventoryTool.Parent = backpack
     end
 
+    local function announceFinger(text)
+        pcall(function()
+            game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", {
+                Text = text,
+                Color = Color3.fromRGB(255, 60, 70),
+                Font = Enum.Font.GothamBold,
+                TextSize = 18,
+            })
+        end)
+    end
+
+    local function createFingerSearch()
+        -- Local prototype: true shared world pickups require server-side code in the experience.
+        if fingerFolder then fingerFolder:Destroy() end
+        fingerFolder = Instance.new("Folder")
+        fingerFolder.Name = "SukunaFingerSearch_Local"
+        fingerFolder.Parent = workspace
+        fingersFound = 0
+        local base = root and root.Position or Vector3.new(0, 10, 0)
+        local rng = Random.new()
+        for i = 1, 11 do
+            local pos = base + Vector3.new(rng:NextInteger(-420, 420), rng:NextInteger(1, 20), rng:NextInteger(-420, 420))
+            local finger = Instance.new("Part")
+            finger.Name = "SukunaFinger_" .. i
+            finger.Size = Vector3.new(0.35, 1.1, 0.35)
+            finger.Material = Enum.Material.Neon
+            finger.Color = Color3.fromRGB(122, 20, 34)
+            finger.Anchored = true
+            finger.CanCollide = false
+            finger.CanTouch = false
+            finger.CFrame = CFrame.new(pos)
+            finger.Parent = fingerFolder
+            local light = Instance.new("PointLight")
+            light.Color = finger.Color
+            light.Range = 10
+            light.Brightness = 1.2
+            light.Parent = finger
+            local prompt = Instance.new("ProximityPrompt")
+            prompt.ActionText = "Collect"
+            prompt.ObjectText = "Sukuna Finger " .. i .. "/11"
+            prompt.HoldDuration = 0.4
+            prompt.MaxActivationDistance = 10
+            prompt.Parent = finger
+            local spin = game:GetService("RunService").RenderStepped:Connect(function()
+                if not finger.Parent then spin:Disconnect(); return end
+                finger.CFrame = CFrame.new(pos) * CFrame.Angles(0, os.clock() * 1.7, math.rad(12))
+            end)
+            table.insert(connections, spin)
+            table.insert(connections, prompt.Triggered:Connect(function(player)
+                if player ~= game:GetService("Players").LocalPlayer or not finger.Parent then return end
+                if not fingerEquipped then
+                    announceFinger("[Sukuna] Equip Finger accessory (ID 18762839664) before collecting fingers.")
+                    return
+                end
+                fingersFound += 1
+                finger:Destroy()
+                announceFinger(string.format("[Sukuna] Finger collected: %d/11", fingersFound))
+                if fingersFound == 11 then
+                    announceFinger("[Sukuna] All 11 fingers found. The King of Curses awakens.")
+                end
+            end))
+        end
+    end
+
     local function createHUD()
         local player = game:GetService("Players").LocalPlayer
         local playerGui = player and player:FindFirstChildOfClass("PlayerGui")
@@ -520,6 +614,7 @@ AddModule(function()
         applyAccessoryPositions()
         createHUD()
         createInventoryTool()
+        createFingerSearch()
     end
 
     m.Update = function(dt, figure)
@@ -544,6 +639,7 @@ AddModule(function()
         domainEnabled = false
         cleaveUntil = 0
         if inventoryTool then pcall(function() inventoryTool:Destroy() end); inventoryTool = nil end
+        if fingerFolder then fingerFolder:Destroy(); fingerFolder = nil end
         if cutsceneActive then
             local camera = workspace.CurrentCamera
             if camera then
