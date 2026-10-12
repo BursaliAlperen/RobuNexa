@@ -8014,99 +8014,11 @@ local function AddDance(m)
 		end))
 	end
 end
--- Combine Gojo and Sukuna into one selectable moveset entry.
--- Only one child module runs at a time so their animation tracks/HUDs do not fight.
-local CombinedGojoModule, CombinedSukunaModule
-local GojoQueuedForCombined = false
-
-local function CreateGojoSukunaModule(gojo, sukuna)
-	local combined = {
-		ModuleType = "MOVESET",
-		Name = "Gojo + Sukuna",
-		InternalName = "GojoSukunaCombined",
-		Description = "Combined moveset. Choose Gojo or Sukuna in Configuration; only the selected form runs.",
-		Assets = {},
-	}
-	for _, sourceModule in ipairs({gojo, sukuna}) do
-		for _, asset in ipairs(sourceModule.Assets or {}) do
-			if not table.find(combined.Assets, asset) then
-				table.insert(combined.Assets, asset)
-			end
-		end
-	end
-
-	local requestedMode = "Gojo"
-	local activeMode, activeChild, activeFigure
-	local modeLabel
-
-	local function childFor(mode)
-		return mode == "Sukuna" and sukuna or gojo
-	end
-
-	combined.Config = function(parent)
-		UI.CreateText(parent, "Active form: Gojo / Sukuna. Switching forms restarts the selected moveset on the current rig.", 13, Enum.TextXAlignment.Left)
-		local button, label = UI.CreateButton(parent, "Active form: " .. requestedMode .. " (tap to switch)", 20)
-		modeLabel = label
-		button.Activated:Connect(function()
-			requestedMode = requestedMode == "Gojo" and "Sukuna" or "Gojo"
-			if modeLabel then
-				modeLabel.Text = "Active form: " .. requestedMode .. " (tap to switch)"
-			end
-		end)
-	end
-
-	combined.Init = function(figure)
-		activeFigure = figure
-		activeMode = requestedMode
-		activeChild = childFor(activeMode)
-		activeChild.Init(figure)
-	end
-
-	combined.Update = function(dt, figure)
-		activeFigure = figure or activeFigure
-		if not activeFigure then return end
-		if requestedMode ~= activeMode then
-			if activeChild and activeChild.Destroy then
-				pcall(activeChild.Destroy, activeFigure)
-			end
-			activeMode = requestedMode
-			activeChild = childFor(activeMode)
-			activeChild.Init(activeFigure)
-		end
-		if activeChild and activeChild.Update then
-			activeChild.Update(dt, activeFigure)
-		end
-	end
-
-	combined.Destroy = function(figure)
-		local target = figure or activeFigure
-		-- Both modules' Destroy methods are idempotent cleanup paths for their own HUDs.
-		pcall(gojo.Destroy, target)
-		pcall(sukuna.Destroy, target)
-		activeChild, activeFigure, activeMode = nil, nil, nil
-	end
-
-	return combined
-end
-
 local function AddModule(func, moduleFileName, moduleSource)
 	GiveFunctionsToFunction(func)
 	local m = func()
 	if m and type(m) == "table" then
 		if m.ModuleType == "MOVESET" then
-			if moduleFileName == "movesets/Gojo/module.lua" then
-				CombinedGojoModule = m
-				GojoQueuedForCombined = true
-				return false
-			elseif moduleFileName == "movesets/Sukuna/v_sukuna.lua" then
-				CombinedSukunaModule = m
-				if CombinedGojoModule then
-					local combined = CreateGojoSukunaModule(CombinedGojoModule, CombinedSukunaModule)
-					CombinedGojoModule, CombinedSukunaModule = nil, nil
-					return AddMoveset(combined, "movesets/GojoSukuna/module.lua", moduleSource)
-				end
-				return AddMoveset(m, moduleFileName, moduleSource)
-			end
 			return AddMoveset(m, moduleFileName, moduleSource)
 		elseif m.ModuleType == "DANCE" then
 			AddDance(m)
@@ -8565,8 +8477,6 @@ local function getgithubraw(path)
 	return nil
 end
 local function ForceModuleReload(force)
-	CombinedGojoModule, CombinedSukunaModule = nil, nil
-	GojoQueuedForCombined = false
 	IsNAMFullyLoaded = false
 	InitLogsText.Text = "Init Logs -- This is where you check what happened."
 	ClearModules()
@@ -8706,12 +8616,10 @@ local function ForceModuleReload(force)
 				error("Module source did not return a table.")
 			end
 			local movesetsAdded = AddModules(moduleList, x, data)
-			if string.find(x, "Gojo", 1, true) and movesetsAdded == 0 and GojoQueuedForCombined then
-				InitLogsText.Text ..= "\n[LOG] Gojo loaded and queued for the combined Gojo + Sukuna entry."
-			elseif string.find(x, "Gojo", 1, true) and movesetsAdded == 0 then
+			if string.find(x, "Gojo", 1, true) and movesetsAdded == 0 then
 				error(x .. " loaded, but no moveset reached AddMoveset; Gojo was not registered.")
 			elseif string.find(x, "Gojo", 1, true) then
-				InitLogsText.Text ..= "\n[LOG] Gojo + Sukuna combined moveset registered."
+				InitLogsText.Text ..= "\n[LOG] Gojo reached AddMoveset and was registered."
 			elseif string.find(x, "Sukuna", 1, true) then
 				if movesetsAdded == 0 then
 					error(x .. " downloaded but registered zero movesets.")
@@ -8722,14 +8630,6 @@ local function ForceModuleReload(force)
 			InitLogsText.Text ..= "\n[ERROR] Failed to load VANILLA " .. x .. ": See traceback below."
 			InitLogsText.Text ..= "\n[ERROR] " .. table.concat(string.split(debug.traceback("VANILLA " .. x .. ": " .. msg), "\n"), "\n[ERROR] ")
 		end)
-	end
-	-- If the Sukuna module failed to download, keep Gojo available rather than hiding both.
-	if CombinedGojoModule then
-		local gojoOnly = CombinedGojoModule
-		CombinedGojoModule = nil
-		if AddMoveset(gojoOnly, "movesets/Gojo/module.lua", nil) then
-			InitLogsText.Text ..= "\n[WARN] Sukuna could not be loaded; registered Gojo as a fallback."
-		end
 	end
 	InitLogsText.Text ..= "\n[LOG] Loading user modules..."
 	for _,path in listfiles("NAMReanim/Modules/") do
