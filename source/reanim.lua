@@ -8140,7 +8140,7 @@ local function ForceModuleReload(force)
 	-- Gojo and Sukuna are built-in movesets on desktop and mobile.
 	local filesofbuiltins = {"movesets/Gojo/module.lua", "movesets/Sukuna/v_sukuna.lua", "movesets/MoveSet1/module.lua", "movesets/MoveSet2/module.lua", "movesets/Dog/module.lua", "dances/BuiltIn1/module.lua", "dances/BuiltIn2/module.lua", "systems/d_limbmap.lua", "systems/d_hatsmap.lua"}
 	local filesofbuiltins_m = {"movesets/Gojo/module.lua", "movesets/Sukuna/v_sukuna.lua", "movesets/MoveSet1/module.lua", "movesets/MoveSet2/module.lua", "movesets/Dog/module.lua", "dances/BuiltIn1/module.lua", "dances/BuiltIn2/module.lua"}
-	local filesofbuiltins_d = {"d_limbmap.lua", "d_hatsmap.lua"}
+	local filesofbuiltins_d = {"systems/d_limbmap.lua", "systems/d_hatsmap.lua"}
 	SaveData.ContentHash = SaveData.ContentHash or {}
 	xpcall(function()
 		local s, resp = pcall(request, {
