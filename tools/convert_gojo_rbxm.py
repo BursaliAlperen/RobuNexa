@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import struct
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
