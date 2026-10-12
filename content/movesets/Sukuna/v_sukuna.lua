@@ -1350,10 +1350,11 @@ AddModule(function()
                 string.lower(wanted),
                 wanted ~= "Jump"
             )
-        elseif wanted ~= "Jump" and (not walkAnimationTrack or not walkAnimationTrack.IsPlaying) then
-            -- Recover if a looping movement track unexpectedly stopped.
+        elseif not walkAnimationTrack or (wanted ~= "Jump" and not walkAnimationTrack.IsPlaying) then
+            -- Retry if the asset was still downloading; recover looping tracks,
+            -- but never restart a completed one-shot jump every frame.
             if walkAnimationTrack then pcall(function() walkAnimationTrack:Destroy() end) end
-            walkAnimationTrack = playBundledAnimation(filename, string.lower(wanted), true)
+            walkAnimationTrack = playBundledAnimation(filename, string.lower(wanted), wanted ~= "Jump")
         end
     end
 
