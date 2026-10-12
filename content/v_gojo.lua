@@ -15,6 +15,7 @@ AddModule(function()
 	-- The Gojo .rbxm files are model assets, not files AnimLib.Track.fromfile can parse directly.
 	m.Assets = {
 		"GojoIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoIdle.anim",
+		"Sokamona.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Sokamona.anim",
 		"GojoWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoWalk.anim",
 		"GojoJump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoJump.anim",
 		"GojoLapseBlue.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoLapseBlue.anim",
@@ -23,6 +24,7 @@ AddModule(function()
 		"HollowPurple.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/HollowPurple.anim",
 	}
 	local animationFiles = {
+		Sokamona = "Sokamona.anim",
 		Idle = "GojoIdle.anim",
 		Walk = "GojoWalk.anim",
 		Run = "GojoWalk.anim",
@@ -33,7 +35,8 @@ AddModule(function()
 	}
 	local abilityNames = { "Blue", "Red", "Purple", "Infinity", "Flight" }
 	local activeFigure, humanoid, root
-	local activeAnimator, activeName, startedAt
+	local activeAnimator, activeName, startedAt, activeDuration
+	local introPlaying = false
 	local flightEnabled = false
 	local infinityEnabled = false
 	local originalAutoRotate, originalWalkSpeed
@@ -51,6 +54,7 @@ AddModule(function()
 		Maximum = "rbxassetid://75091144779701",
 		HollowPurple = "rbxassetid://120658131553736",
 		Footsteps = "rbxassetid://127420585104486",
+		Sokamona = "rbxassetid://138159090575293",
 	}
 	local footstepSound
 	local function playSound(id, looped, volume)
@@ -119,6 +123,7 @@ AddModule(function()
 		end
 		activeAnimator = nil
 		activeName = nil
+		activeDuration = nil
 	end
 
 	local function playAnimation(name, looped)
@@ -144,6 +149,10 @@ AddModule(function()
 		activeAnimator.looped = looped ~= false
 		activeName = name
 		startedAt = os.clock()
+		activeDuration = 0
+		for _, keyframe in ipairs(track.Keyframes) do
+			if type(keyframe.Time) == "number" and keyframe.Time > activeDuration then activeDuration = keyframe.Time end
+		end
 		return true
 	end
 
@@ -456,6 +465,7 @@ AddModule(function()
 	m.Init = function(figure: Model)
 		stopFlight()
 		stopAnimation()
+		introPlaying = false
 		if activeFigure then
 			local oldVisual = activeFigure:FindFirstChild("GojoInfinityVisual")
 			if oldVisual then oldVisual:Destroy() end
@@ -466,6 +476,9 @@ AddModule(function()
 		originalWalkSpeed = humanoid and humanoid.WalkSpeed or 16
 		infinityEnabled = false
 		createRuntimeControls()
+		-- Play Gojo Awakened intro once when this moveset starts, then return to Gojo idle.
+		introPlaying = playAnimation("Sokamona", false)
+		if introPlaying then playSound(SOUND_IDS.Sokamona, false, 1) end
 	end
 
 	m.Update = function(dt: number, figure: Model)
@@ -473,6 +486,14 @@ AddModule(function()
 		humanoid = figure:FindFirstChildOfClass("Humanoid")
 		root = resolveRoot(figure)
 		if flightEnabled then stopFootsteps(); return end
+		if introPlaying then
+			if activeAnimator and startedAt then activeAnimator:Step(os.clock() - startedAt) end
+			if not activeAnimator or not activeDuration or os.clock() - startedAt >= activeDuration then
+				introPlaying = false
+				playAnimation("Idle", true)
+			end
+			return
+		end
 		local moving = humanoid and humanoid.MoveDirection.Magnitude > 0.05 and humanoid.FloorMaterial ~= Enum.Material.Air
 		if moving then
 			if not footstepSound or not footstepSound.Parent then
@@ -512,6 +533,7 @@ AddModule(function()
 		local hud = playerGui and playerGui:FindFirstChild("GojoAbilityHUD")
 		if hud then hud:Destroy() end
 		table.clear(buttons)
+		introPlaying = false
 		activeFigure, humanoid, root = nil, nil, nil
 	end
 	return m
