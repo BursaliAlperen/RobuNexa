@@ -2,7 +2,8 @@
 -- Uses equipped catalog accessories as HatReanimator targets with eased transitions.
 -- Fuuga projectile/aura are local visual prototypes; shared visibility requires server replication.
 local modules = {}
-local function AddModule(fn) table.insert(modules, fn()) end
+-- Keep factories intact: NAM's loader injects its API before invoking each factory.
+local function AddModule(fn) table.insert(modules, fn) end
 
 AddModule(function()
     local m = {}
