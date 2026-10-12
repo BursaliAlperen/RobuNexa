@@ -78,8 +78,6 @@ AddModule(function()
     local accessoryInstances = {}
     local presentIds = {}
     local overrideById = {}
-    local accessoryLoadRetryAt = {}
-    local accessoryLoadInFlight = {}
     local lastHatCFrames = {}
     local scaledMeshes = {}
     local fuugaBusy = false
@@ -197,86 +195,36 @@ AddModule(function()
             if not candidateName then candidateName = descriptionEntry.Name end
         end)
         if candidateName and character then
+            local wanted = string.lower(tostring(candidateName))
             for _, child in ipairs(character:GetChildren()) do
-                if child:IsA("Accessory") and child.Name == candidateName then
+                if child:IsA("Accessory") and string.lower(child.Name) == wanted then
                     return child
                 end
             end
-        end
-        return nil
-    end
-
-    local function findAccessoryInAsset(container)
-        if not container then return nil end
-        if container:IsA("Accessory") then return container end
-        for _, descendant in ipairs(container:GetDescendants()) do
-            if descendant:IsA("Accessory") then return descendant end
-        end
-        return nil
-    end
-
-    local function hasTargetAccessory(character, id)
-        if not character then return false end
-        for _, child in ipairs(character:GetChildren()) do
-            if child:IsA("Accessory") then
-                local attrId = tonumber(child:GetAttribute("AssetId"))
-                    or tonumber(child:GetAttribute("_RobuNexaSukunaAssetId"))
-                if attrId == id then return true end
-                local descriptionId = tonumber(child:GetAttribute("OriginalAssetId"))
-                if descriptionId == id then return true end
-            end
-        end
-        return false
-    end
-
-    -- These visual hats must actually exist on the local avatar before HatReanimator
-    -- can map them. Animation playback alone cannot create a hat override.
-    local function ensureTargetAccessory(id, character, humanoid)
-        if not character or not humanoid or hasTargetAccessory(character, id) then return end
-        local now = os.clock()
-        if accessoryLoadInFlight[id] or now < (accessoryLoadRetryAt[id] or 0) then return end
-        accessoryLoadInFlight[id] = true
-        accessoryLoadRetryAt[id] = now + 8
-        task.spawn(function()
-            local loaded
-            local ok, result = pcall(function()
-                return game:GetObjects("rbxassetid://" .. tostring(id))
-            end)
-            if ok and type(result) == "table" then loaded = result end
-            local attached = false
-            if loaded and character == getLocalCharacter() and character.Parent then
-                for _, asset in ipairs(loaded) do
-                    local sourceAccessory = findAccessoryInAsset(asset)
-                    if sourceAccessory and not hasTargetAccessory(character, id) then
-                        local accessory
-                        local cloneOk, clone = pcall(function() return sourceAccessory:Clone() end)
-                        if cloneOk then accessory = clone end
-                        if accessory then
-                            accessory:SetAttribute("AssetId", id)
-                            accessory:SetAttribute("_RobuNexaSukunaAssetId", id)
-                            accessory:SetAttribute("_RobuNexaSukunaSpawned", true)
-                            local addOk = pcall(function() humanoid:AddAccessory(accessory) end)
-                            if not addOk then
-                                pcall(function() accessory.Parent = character end)
+            -- Some avatar pipelines rename applied accessories. Compare case-insensitively
+            -- and use target-specific name hints before leaving an equipped hat unmatched.
+            for id, target in pairs(TARGETS) do
+                local matchesEntry = false
+                for _, hint in ipairs(target.hints) do
+                    if string.find(wanted, hint, 1, true) then matchesEntry = true; break end
+                end
+                if matchesEntry then
+                    for _, child in ipairs(character:GetChildren()) do
+                        if child:IsA("Accessory") then
+                            local childName = string.lower(child.Name)
+                            for _, hint in ipairs(target.hints) do
+                                if string.find(childName, hint, 1, true) then return child end
                             end
-                            attached = accessory.Parent == character
                         end
                     end
-                    pcall(function() asset:Destroy() end)
                 end
-            elseif loaded then
-                for _, asset in ipairs(loaded) do pcall(function() asset:Destroy() end) end
             end
-            accessoryLoadInFlight[id] = nil
-            if attached then
-                accessoryLoadRetryAt[id] = 0
-                if HatReanimator then HatReanimator.RebuildRequired = true end
-            else
-                notify("Aksesuar yüklenemedi (" .. tostring(id) .. "). Avatar aksesuarı yüklemeyi engelliyor olabilir.")
-            end
-        end)
+        end
+        return nil
     end
 
+    -- Use only accessories already equipped on the player's character.
+    -- Never fetch catalog assets or create replacement accessories from this moveset.
     local function refreshAccessories()
         local character = getLocalCharacter()
         local nextInstances, nextPresent = {}, {}
@@ -330,14 +278,6 @@ AddModule(function()
                         nextPresent[attrId] = true
                         nextInstances[attrId] = child
                     end
-                end
-            end
-
-            -- Load missing effect accessories into the current character. This runs again
-            -- after respawn, so a fresh character can rebuild the HatReanimator map.
-            for id in pairs(TARGETS) do
-                if not nextInstances[id] then
-                    ensureTargetAccessory(id, character, humanoid)
                 end
             end
 
@@ -404,9 +344,9 @@ AddModule(function()
             if #matched == 4 then
                 notify("4/4 Sukuna accessories detected; Hat Reanimation targets are being prepared.")
             elseif #matched > 0 then
-                notify(string.format("%d/4 accessories detected; loading the missing catalog accessories.", #matched))
+                notify(string.format("%d/4 equipped Sukuna accessories matched.", #matched))
             else
-                notify("0/4 accessories detected; attempting to load the Sukuna catalog accessories automatically.")
+                notify("0/4 equipped Sukuna accessories matched. Check the accessory names in your avatar.")
             end
         end
     end
@@ -1247,8 +1187,6 @@ AddModule(function()
         cleaveUntil = 0
         accessoryCheckAccumulator = 0
         lastAccessorySignature = nil
-        accessoryLoadRetryAt = {}
-        accessoryLoadInFlight = {}
         accessoryInstances = {}
         presentIds = {}
         overrideById = {}
