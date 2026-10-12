@@ -404,9 +404,9 @@ AddModule(function()
             if #matched == 4 then
                 notify("4/4 Sukuna accessories detected; Hat Reanimation targets are being prepared.")
             elseif #matched > 0 then
-                notify(string.format("%d/4 accessories detected. Add the remaining Sukuna accessories.", #matched))
+                notify(string.format("%d/4 accessories detected; loading the missing catalog accessories.", #matched))
             else
-                notify("0/4 accessories detected. Equip the four catalog accessories first.")
+                notify("0/4 accessories detected; attempting to load the Sukuna catalog accessories automatically.")
             end
         end
     end
@@ -1247,6 +1247,8 @@ AddModule(function()
         cleaveUntil = 0
         accessoryCheckAccumulator = 0
         lastAccessorySignature = nil
+        accessoryLoadRetryAt = {}
+        accessoryLoadInFlight = {}
         accessoryInstances = {}
         presentIds = {}
         overrideById = {}
