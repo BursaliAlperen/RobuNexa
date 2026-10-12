@@ -37,6 +37,7 @@ AddModule(function()
 	local activeFigure, humanoid, root
 	local activeAnimator, activeName, startedAt, activeDuration
 	local introPlaying = false
+	local actionPlaying = false
 	local flightEnabled = false
 	local infinityEnabled = false
 	local originalAutoRotate, originalWalkSpeed
@@ -124,6 +125,7 @@ AddModule(function()
 		activeAnimator = nil
 		activeName = nil
 		activeDuration = nil
+		actionPlaying = false
 	end
 
 	local function playAnimation(name, looped)
@@ -350,7 +352,8 @@ AddModule(function()
 			playSound(SOUND_IDS.Maximum, false, 1)
 			task.delay(0.35, function() if root and root.Parent then playSound(SOUND_IDS.HollowPurple, false, 1) end end)
 		end
-		playAnimation(name, false)
+		local animationStarted = playAnimation(name, false)
+		actionPlaying = animationStarted
 		beginCooldown(name)
 		notify(name .. " kullanıldı.")
 	end
@@ -490,6 +493,17 @@ AddModule(function()
 			if activeAnimator and startedAt then activeAnimator:Step(os.clock() - startedAt) end
 			if not activeAnimator or not activeDuration or os.clock() - startedAt >= activeDuration then
 				introPlaying = false
+				playAnimation("Idle", true)
+			end
+			return
+		end
+		-- Keep ability/awakening animations alive for their full keyframe duration.
+		-- Without this lock, the movement-state loop replaces Purple/Red/Blue with
+		-- Idle on the very next frame, making the animation appear not to play.
+		if actionPlaying then
+			if activeAnimator and startedAt then activeAnimator:Step(os.clock() - startedAt) end
+			if not activeAnimator or not activeDuration or os.clock() - startedAt >= activeDuration then
+				actionPlaying = false
 				playAnimation("Idle", true)
 			end
 			return
