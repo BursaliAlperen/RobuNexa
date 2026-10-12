@@ -3976,7 +3976,6 @@ function LimbReanimator.Start()
 		rightleg = true,
 		leftupperarm = true,
 		leftlowerarm = true,
-		righthupperarm = true,
 		rightupperarm = true,
 		rightlowerarm = true,
 		leftupperleg = true,
