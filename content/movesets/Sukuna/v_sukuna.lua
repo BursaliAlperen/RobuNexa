@@ -14,7 +14,6 @@ AddModule(function()
     -- These are NAM AnimLib binary .anim files, not .rbxm models.
     m.Assets = {
         "Sukuna/Cleave.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Cleave.anim",
-        "Sukuna/DomainCombo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/DomainCombo.anim",
         "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
         "Sukuna/Walk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Walk.anim",
     }
@@ -807,7 +806,9 @@ AddModule(function()
             abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
             playSkillAnimation()
-            playBundledAnimation("Sukuna/DomainCombo.anim", isCombo and "combo" or "dismantle", false)
+            -- Keep each animation independent. These files are optional until uploaded;
+            -- playBundledAnimation reports a missing file without blocking the whole moveset.
+            playBundledAnimation(isCombo and "Sukuna/Combo.anim" or "Sukuna/Dismantle.anim", isCombo and "combo" or "dismantle", false)
             showTargetMarker(targetPosition, isCombo and ("Combo " .. name:sub(-1)) or ("Dismantle " .. name:sub(-1)))
             -- Combo variants produce three staggered local slash pulses without chat output.
             if isCombo then
