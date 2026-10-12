@@ -3887,6 +3887,15 @@ function LimbReanimator.Start()
 	-- These accessories may not exist in the player's HumanoidDescription, so they
 	-- must be restored from the observed instance instead of fetched from the catalog.
 	local PersistentAccessoryTemplates = {}
+	local function IsNeckAccessory(accessory)
+		if not accessory or not accessory:IsA("Accessory") then return false end
+		local ok, accessoryType = pcall(function() return accessory.AccessoryType end)
+		if ok and accessoryType == Enum.AccessoryType.Neck then return true end
+		local name = string.lower(accessory.Name or "")
+		return name:find("necklace", 1, true) ~= nil
+			or name:find("choker", 1, true) ~= nil
+			or name:find("necklace", 1, true) ~= nil
+	end
 	local function PersistentAccessoryKey(accessory)
 		if not accessory or not accessory:IsA("Accessory") then return nil end
 		local mesh, texture = GetHatMeshAndTexture(accessory)
@@ -5282,6 +5291,12 @@ function HatReanimator.Start()
 				if not v.Disabled then v.Disabled = true end
 			end)
 		elseif v:IsA("Accessory") and v.Parent == Player.Character then
+			-- Cache neck accessories before the reanimation transition, but never
+			-- enlist them as physics hats: doing so can detach/destroy necklaces.
+			CachePersistentAccessory(v)
+			if IsNeckAccessory(v) then
+				return
+			end
 			if not table.find(CharHats, v) then
 				table.insert(CharHats, v)
 				local conn = nil
@@ -5713,6 +5728,8 @@ function HatReanimator.Start()
 		CurrentCharacter = nil
 		local Humanoid = character:WaitForChild("Humanoid", 10)
 		if not Humanoid then return end
+		-- Restore accessories excluded from the hat-physics pool after a respawn.
+		RestorePersistentAccessories(character, Humanoid)
 		if not Reanimate.UseLoadAnimationHook then
 			local stupid = character:FindFirstChild("Animate")
 			if stupid then
@@ -5939,12 +5956,20 @@ function HatReanimator.Start()
 			end
 			return
 		end
-		replicatesignal(Humanoid.ServerBreakJoints)
-		Humanoid.EvaluateStateMachine = true
-		Humanoid.BreakJointsOnDeath = true
-		Humanoid.Health = 0
-		Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
-		Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+		-- The classic hat-separation step deliberately kills the live humanoid.
+		-- Only run that destructive step when the user explicitly enabled Permadeath;
+		-- otherwise it causes a repeated CharacterAdded/death loop.
+		if perma then
+			replicatesignal(Humanoid.ServerBreakJoints)
+			Humanoid.EvaluateStateMachine = true
+			Humanoid.BreakJointsOnDeath = true
+			Humanoid.Health = 0
+			Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+			Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+		else
+			Humanoid.BreakJointsOnDeath = false
+			Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+		end
 		readystate = 3
 		HatReanimator.Status.ReanimState = "Reanimate State: 3"
 		IsRespawning = false
