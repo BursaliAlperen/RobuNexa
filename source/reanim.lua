@@ -7451,8 +7451,14 @@ local function GetModuleHash(m)
 end
 local function AddMoveset(m)
 	if type(m) == "table" then
-		-- Hard block legacy Sukuna modules (including cached/user-installed copies).
-		local moduleIdentity = string.lower(tostring(m.Name or "") .. " " .. tostring(m.Description or "") .. " " .. tostring(m.InternalName or ""))
+		-- Strictly exclude Sukuna from every module source before creating a UI row.
+		local moduleIdentity = string.lower(
+			tostring(m.Name or "") .. " " ..
+			tostring(m.Description or "") .. " " ..
+			tostring(m.InternalName or "") .. " " ..
+			tostring(m.Id or "") .. " " ..
+			tostring(m.ModuleName or "")
+		)
 		if string.find(moduleIdentity, "sukuna", 1, true) then
 			return
 		end
