@@ -1016,26 +1016,9 @@ AddModule(function()
             return
         end
 
-        local function chatMessage(message)
-            return -- Chat output intentionally disabled.
-            local sent = false
-            pcall(function()
-                local channels = TextChatService:FindFirstChild("TextChannels")
-                local channel = channels and (channels:FindFirstChild("RBXGeneral") or channels:GetChildren()[1])
-                if channel and channel.SendAsync then
-                    channel:SendAsync("[SUKUNA] " .. message)
-                    sent = true
-                end
-            end)
-            if not sent then
-                pcall(function()
-                    game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", {
-                        Text = "[SUKUNA] " .. message,
-                        Color = Color3.fromRGB(255, 70, 90),
-                        Font = Enum.Font.GothamBold,
-                    })
-                end)
-            end
+        -- Intentionally silent: chat output is disabled to avoid polluting public chat.
+        local function chatMessage(_message)
+            return nil
         end
 
         local function getRootPosition()
