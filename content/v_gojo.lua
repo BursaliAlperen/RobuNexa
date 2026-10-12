@@ -99,15 +99,26 @@ AddModule(function()
 	end
 
 	local function stopAnimation()
-		activeAnimator = nil
-		activeName = nil
+		-- Clear both AnimLib pose transforms and any Roblox Animator tracks left
+		-- behind by the previously equipped moveset (notably the dog idle).
 		if activeFigure then
-			for _, joint in ipairs(activeFigure:GetDescendants()) do
-				if joint:IsA("Motor6D") then
-					pcall(function() joint.Transform = CFrame.identity end)
+			for _, item in ipairs(activeFigure:GetDescendants()) do
+				if item:IsA("Animator") then
+					pcall(function()
+						for _, track in ipairs(item:GetPlayingAnimationTracks()) do
+							track:Stop(0)
+						end
+					end)
+				elseif item:IsA("Motor6D") then
+					pcall(function() item.Transform = CFrame.identity end)
 				end
 			end
 		end
+		if activeAnimator then
+			pcall(function() if activeAnimator.Stop then activeAnimator:Stop() end end)
+		end
+		activeAnimator = nil
+		activeName = nil
 	end
 
 	local function playAnimation(name, looped)
@@ -362,13 +373,13 @@ AddModule(function()
 		local panel = Instance.new("Frame")
 		panel.Name = "AbilityButtons"
 		panel.AnchorPoint = Vector2.new(1, 1)
-		panel.Position = UDim2.new(1, -18, 1, -142)
-		panel.Size = UDim2.fromOffset(168, 108)
+		panel.Position = UDim2.new(1, -10, 1, -112)
+		panel.Size = UDim2.fromOffset(110, 72)
 		panel.BackgroundTransparency = 1
 		panel.Parent = screen
 		local grid = Instance.new("UIGridLayout")
-		grid.CellSize = UDim2.fromOffset(48, 48)
-		grid.CellPadding = UDim2.fromOffset(7, 5)
+		grid.CellSize = UDim2.fromOffset(34, 34)
+		grid.CellPadding = UDim2.fromOffset(4, 4)
 		grid.FillDirectionMaxCells = 3
 		grid.HorizontalAlignment = Enum.HorizontalAlignment.Right
 		grid.VerticalAlignment = Enum.VerticalAlignment.Bottom
@@ -378,13 +389,13 @@ AddModule(function()
 			local button = Instance.new("TextButton")
 			button.Name = name .. "Button"
 			button.LayoutOrder = index
-			button.Size = UDim2.fromOffset(48, 48)
-			button.BackgroundColor3 = Color3.fromRGB(22, 30, 48)
-			button.BackgroundTransparency = 0.08
+			button.Size = UDim2.fromOffset(34, 34)
+			button.BackgroundColor3 = Color3.fromRGB(25, 27, 31)
+			button.BackgroundTransparency = 0.18
 			button.BorderSizePixel = 0
-			button.Text = name == "Purple" and "PURP" or (name == "Infinity" and "∞" or name)
-			button.TextColor3 = Color3.fromRGB(235, 245, 255)
-			button.TextSize = 10
+			button.Text = name == "Blue" and "BLU" or name == "Red" and "RED" or name == "Purple" and "PUR" or name == "Infinity" and "∞" or "FLY"
+			button.TextColor3 = Color3.fromRGB(245, 245, 245)
+			button.TextSize = 8
 			button.TextWrapped = true
 			button.Font = Enum.Font.GothamBold
 			button.AutoButtonColor = true
@@ -393,9 +404,9 @@ AddModule(function()
 			corner.CornerRadius = UDim.new(1, 0)
 			corner.Parent = button
 			local stroke = Instance.new("UIStroke")
-			stroke.Color = Color3.fromRGB(80, 175, 255)
-			stroke.Thickness = 1.2
-			stroke.Transparency = 0.2
+			stroke.Color = Color3.fromRGB(185, 190, 200)
+			stroke.Thickness = 0.7
+			stroke.Transparency = 0.48
 			stroke.Parent = button
 			buttons[name] = button
 			table.insert(guiConnections, button.Activated:Connect(function()
@@ -406,23 +417,24 @@ AddModule(function()
 		for _, control in ipairs({ {name = "Ascend", text = "▲", value = 1}, {name = "Descend", text = "▼", value = -1} }) do
 			local touch = Instance.new("TextButton")
 			touch.Name = control.name .. "Button"
-			touch.Size = UDim2.fromOffset(42, 42)
-			touch.Position = control.value > 0 and UDim2.new(0, 8, 0, 8) or UDim2.new(0, 8, 0, 56)
+			touch.Size = UDim2.fromOffset(30, 30)
+			touch.Position = control.value > 0 and UDim2.new(0, 8, 1, -78) or UDim2.new(0, 8, 1, -42)
 			touch.AnchorPoint = Vector2.new(0, 0)
-			touch.BackgroundColor3 = Color3.fromRGB(22, 30, 48)
-			touch.BackgroundTransparency = 0.08
+			touch.BackgroundColor3 = Color3.fromRGB(25, 27, 31)
+			touch.BackgroundTransparency = 0.18
 			touch.BorderSizePixel = 0
 			touch.Text = control.text
 			touch.TextColor3 = Color3.fromRGB(235, 245, 255)
-			touch.TextSize = 18
+			touch.TextSize = 13
 			touch.Font = Enum.Font.GothamBold
 			touch.Parent = screen
 			local corner = Instance.new("UICorner")
 			corner.CornerRadius = UDim.new(1, 0)
 			corner.Parent = touch
 			local stroke = Instance.new("UIStroke")
-			stroke.Color = Color3.fromRGB(80, 175, 255)
-			stroke.Thickness = 1.2
+			stroke.Color = Color3.fromRGB(185, 190, 200)
+			stroke.Thickness = 0.7
+			stroke.Transparency = 0.48
 			stroke.Parent = touch
 			table.insert(guiConnections, touch.InputBegan:Connect(function(input)
 				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
