@@ -32,5 +32,7 @@ jobs:
             echo "No converted animation changes."
           else
             git commit -m "Convert Gojo movement RBXM assets to AnimLib animations"
+            # Other direct GitHub edits can land while conversion runs; rebase before pushing.
+            git pull --rebase origin main
             git push
           fi
