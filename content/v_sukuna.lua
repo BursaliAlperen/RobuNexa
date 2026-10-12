@@ -117,9 +117,14 @@ AddModule(function()
   end
   if not ok or not track or not track.Keyframes or #track.Keyframes == 0 then
    pcall(function() Util.Notify("Sukuna animation missing: " .. name) end)
-   return
+   return 0
   end
-  if not ok or not track or not track.Keyframes or #track.Keyframes == 0 then return end
+  local lastTime = 0
+  for _, keyframe in ipairs(track.Keyframes) do
+   local t = tonumber(keyframe.Time) or 0
+   if t > lastTime then lastTime = t end
+  end
+  local duration = lastTime / math.max(0.1, speed or 1)
   activeTrack = track
   animationStartedAt = os.clock()
   activeAnimator = AnimLib.Animator.new()
@@ -131,15 +136,11 @@ AddModule(function()
   -- Release the animation controller after one-shot tracks so locomotion
   -- does not stay frozen on the last keyframe.
   if looped ~= true then
-   local lastTime = 0
-   for _, keyframe in ipairs(track.Keyframes) do
-    local t = tonumber(keyframe.Time) or 0
-    if t > lastTime then lastTime = t end
-   end
-   task.delay(math.max(0.2, lastTime / math.max(0.1, speed or 1) + 0.15), function()
+   task.delay(math.max(0.2, duration + 0.15), function()
     if activeAnimName == name and activeTrack == track then stopAnimation() end
    end)
   end
+  return duration
  end
  local function cloneEffect(name, parentFolder, targetCF, seconds)
   local template = findDeep(parentFolder or effects, name)
@@ -189,10 +190,11 @@ AddModule(function()
    remember(decal, 45)
   end
   if humanoid then humanoid.WalkSpeed = 0 end
-  playAnimation("Awaken", 1.1, false)
-  task.delay(13, function()
+  local duration = playAnimation("Awaken", 1.1, false) or 0
+  -- Match the lockout to the actual animation length instead of a fixed 13s.
+  task.delay(math.max(1.5, duration + 0.3), function()
    if humanoid and humanoid.Parent then humanoid.WalkSpeed = originalSpeed or 16 end
-   stopAnimation()
+   if activeAnimName == "Awaken" then stopAnimation() end
    setBusy(false)
   end)
  end
@@ -309,18 +311,16 @@ AddModule(function()
   startupLaughUntil = os.clock() + 2.6
   if humanoid then
    humanoid.WalkSpeed = 0
-   task.delay(2.6, function()
-    if humanoid and humanoid.Parent and activeFigure == figure then
-     humanoid.WalkSpeed = originalSpeed or 16
-    end
-   end)
   end
   task.defer(function()
    if activeFigure == figure then
     sound("Laugh")
-    playAnimation("Awaken", 1.1, false)
-    task.delay(2.6, function()
-     if activeFigure == figure and activeAnimName == "Awaken" then stopAnimation() end
+    local duration = playAnimation("Awaken", 1.1, false) or 0
+    task.delay(math.max(1.5, duration + 0.25), function()
+     if activeFigure == figure then
+      if activeAnimName == "Awaken" then stopAnimation() end
+      if humanoid and humanoid.Parent then humanoid.WalkSpeed = originalSpeed or 16 end
+     end
     end)
    end
   end)
