@@ -16,6 +16,9 @@ AddModule(function()
         "Sukuna/Combo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Combo.anim",
         "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
         "Sukuna/Walk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Walk.anim",
+        "Sukuna/SukunaIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaIdle.anim",
+        "Sukuna/Jump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Jump.anim",
+        "Sukuna/Fall.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Fall.anim",
     }
 
     local TARGETS = {
@@ -106,6 +109,7 @@ AddModule(function()
     local fuugaAnimationTrack
     local laughAnimationTrack
     local walkAnimationTrack
+    local movementAnimationName
     local fuugaProjectile
     local fuugaAuraInstances = {}
     local STATUS_INTERVAL = 1.25
@@ -1279,25 +1283,73 @@ AddModule(function()
 
     local function updateWalkAnimation()
         if not activeFigure or not activeFigure.Parent then
-            if walkAnimationTrack then pcall(function() walkAnimationTrack:Stop(0.1); walkAnimationTrack:Destroy() end); walkAnimationTrack = nil end
+            if walkAnimationTrack then
+                pcall(function() walkAnimationTrack:Stop(0.1); walkAnimationTrack:Destroy() end)
+                walkAnimationTrack = nil
+            end
+            movementAnimationName = nil
             return
         end
-        local humanoid = activeFigure:FindFirstChildOfClass("Humanoid")
-        local moving = humanoid and humanoid.MoveDirection.Magnitude > 0.05
-        if not moving and root and root.Parent then
-            local velocity = root.AssemblyLinearVelocity
-            moving = Vector3.new(velocity.X, 0, velocity.Z).Magnitude > 1.25
-        end
-        -- The intro laugh has priority; begin walking once it finishes.
-        if laughAnimationTrack and laughAnimationTrack.IsPlaying then moving = false end
-        if moving then
-            if not walkAnimationTrack or not walkAnimationTrack.IsPlaying then
-                if walkAnimationTrack then pcall(function() walkAnimationTrack:Stop(0.05); walkAnimationTrack:Destroy() end) end
-                walkAnimationTrack = playBundledAnimation("Sukuna/Walk.anim", "walk", true)
+
+        -- The intro laugh has priority; clear the movement pose while it plays.
+        if laughAnimationTrack and laughAnimationTrack.IsPlaying then
+            if walkAnimationTrack then
+                pcall(function() walkAnimationTrack:Stop(0.08); walkAnimationTrack:Destroy() end)
+                walkAnimationTrack = nil
             end
-        elseif walkAnimationTrack then
-            pcall(function() walkAnimationTrack:Stop(0.12); walkAnimationTrack:Destroy() end)
-            walkAnimationTrack = nil
+            movementAnimationName = nil
+            return
+        end
+
+        local humanoid = activeFigure:FindFirstChildOfClass("Humanoid")
+        local state = humanoid and humanoid:GetState()
+        local airborne = humanoid and humanoid.FloorMaterial == Enum.Material.Air
+        local verticalSpeed = root and root.Parent and root.AssemblyLinearVelocity.Y or 0
+        local horizontalSpeed = 0
+        if root and root.Parent then
+            local velocity = root.AssemblyLinearVelocity
+            horizontalSpeed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
+        end
+
+        local wanted
+        if airborne then
+            if state == Enum.HumanoidStateType.Freefall or verticalSpeed < -1.5 then
+                wanted = "Fall"
+            else
+                wanted = "Jump"
+            end
+        elseif humanoid and (humanoid.MoveDirection.Magnitude > 0.05 or horizontalSpeed > 1.25) then
+            -- No separate Sukuna Run.rbxm is present yet; use the valid Walk clip
+            -- for sprinting instead of requesting a missing file and breaking movement.
+            wanted = humanoid.WalkSpeed >= 20 and "Run" or "Walk"
+        else
+            wanted = "Idle"
+        end
+
+        local filename
+        if wanted == "Run" or wanted == "Walk" then
+            filename = "Sukuna/Walk.anim"
+        elseif wanted == "Idle" then
+            filename = "Sukuna/SukunaIdle.anim"
+        else
+            filename = "Sukuna/" .. wanted .. ".anim"
+        end
+
+        if wanted ~= movementAnimationName then
+            if walkAnimationTrack then
+                pcall(function() walkAnimationTrack:Stop(0.08); walkAnimationTrack:Destroy() end)
+                walkAnimationTrack = nil
+            end
+            movementAnimationName = wanted
+            walkAnimationTrack = playBundledAnimation(
+                filename,
+                string.lower(wanted),
+                wanted ~= "Jump"
+            )
+        elseif wanted ~= "Jump" and (not walkAnimationTrack or not walkAnimationTrack.IsPlaying) then
+            -- Recover if a looping movement track unexpectedly stopped.
+            if walkAnimationTrack then pcall(function() walkAnimationTrack:Destroy() end) end
+            walkAnimationTrack = playBundledAnimation(filename, string.lower(wanted), true)
         end
     end
 
@@ -1330,6 +1382,7 @@ AddModule(function()
         if fuugaAnimationTrack then pcall(function() fuugaAnimationTrack:Stop(0.1); fuugaAnimationTrack:Destroy() end); fuugaAnimationTrack = nil end
         if laughAnimationTrack then pcall(function() laughAnimationTrack:Stop(0.1); laughAnimationTrack:Destroy() end); laughAnimationTrack = nil end
         if walkAnimationTrack then pcall(function() walkAnimationTrack:Stop(0.1); walkAnimationTrack:Destroy() end); walkAnimationTrack = nil end
+        movementAnimationName = nil
         if fuugaProjectile then pcall(function() fuugaProjectile:Destroy() end); fuugaProjectile = nil end
         for _, aura in ipairs(fuugaAuraInstances) do pcall(function() aura:Destroy() end) end
         table.clear(fuugaAuraInstances)
