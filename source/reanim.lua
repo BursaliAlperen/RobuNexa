@@ -8511,7 +8511,7 @@ local function ForceModuleReload(force)
 	RefreshKeybinds()
 	-- Show only actionable failures in Init Logs; successful initialization chatter is hidden.
 	local failureLines = {}
-	for line in InitLogsText.Text:gmatch("[^\\n]+") do
+	for line in InitLogsText.Text:gmatch("[^\n]+") do
 		local upper = line:upper()
 		if upper:find("[ERROR]", 1, true)
 			or upper:find("[WARN]", 1, true)
@@ -8523,9 +8523,9 @@ local function ForceModuleReload(force)
 	end
 	InitLogsText.Text = "Init Logs — failures only"
 	if #failureLines == 0 then
-		InitLogsText.Text ..= "\\nNo failures or warnings were reported."
+		InitLogsText.Text ..= "\nNo failures or warnings were reported."
 	else
-		InitLogsText.Text ..= "\\n" .. table.concat(failureLines, "\\n")
+		InitLogsText.Text ..= "\n" .. table.concat(failureLines, "\n")
 	end
 	if string.find(InitLogsText.Text, "[ERROR]", 1, true) then
 		InitLogsText.Text ..= "\n[WARN] Init finished with errors; review the log above."
