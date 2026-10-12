@@ -572,6 +572,25 @@ AddModule(function()
         end
         setHatWorldCFrame(101090904148116, accessoryFrame)
 
+        -- The supplied 18908729586 accessory is the actual slash visual.
+        -- Keep it 5,000 studs away between attacks; show five brief pulses
+        -- at the selected target over 1.5 seconds for Combo.
+        local slashFrame = CFrame.new(0, 0, -5000)
+        if slashBurstTarget and t < slashBurstUntil and root and root.Parent then
+            local elapsed = math.max(0, t - slashBurstStartedAt)
+            local pulseIndex = math.floor(elapsed / 0.3)
+            local pulsePhase = elapsed % 0.3
+            if pulseIndex < slashBurstCount and pulsePhase < 0.19 then
+                local side = (pulseIndex % 2 == 0) and -1 or 1
+                local pos = slashBurstTarget + Vector3.new(side * (1.5 + pulseIndex * 0.45), 1.5 + (pulseIndex % 3) * 0.45, 0)
+                slashFrame = root.CFrame:ToObjectSpace(CFrame.new(pos) * CFrame.Angles(0, 0, math.rad((pulseIndex % 2 == 0) and -35 or 35)))
+            end
+        else
+            slashBurstTarget = nil
+            slashBurstCount = 0
+        end
+        setHatWorldCFrame(18908729586, slashFrame)
+
         if active then
             local pulse = math.sin(t * rate)
             local dismantleTarget = abilityTargets.Dismantle
@@ -803,6 +822,10 @@ AddModule(function()
             cleaveAccessoryStartedAt = now
             cleaveAccessoryUntil = now + 0.72
             comboAccessoryUntil = 0
+            slashBurstStartedAt = now
+            slashBurstUntil = now + 0.3
+            slashBurstCount = 1
+            slashBurstTarget = targetPosition
             playSkillAnimation()
             showTargetMarker(targetPosition, "Cleave")
             chatAbilityMessage("Cleave!")
@@ -815,6 +838,10 @@ AddModule(function()
                 comboAccessoryStartedAt = now
                 comboAccessoryUntil = now + 1.45
                 cleaveAccessoryUntil = 0
+                slashBurstStartedAt = now
+                slashBurstUntil = now + 1.5
+                slashBurstCount = 5
+                slashBurstTarget = targetPosition
             end
             abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
@@ -1256,6 +1283,10 @@ AddModule(function()
         cleaveAccessoryUntil = 0
         comboAccessoryStartedAt = 0
         comboAccessoryUntil = 0
+        slashBurstUntil = 0
+        slashBurstStartedAt = 0
+        slashBurstCount = 0
+        slashBurstTarget = nil
         accessoryCheckAccumulator = 0
         lastAccessorySignature = nil
         accessoryInstances = {}
