@@ -4,9 +4,9 @@ This NAM moveset keeps Cleave as the primary skill and adds three Dismantle butt
 
 ## Separate animation files
 
-The former Cleave animation has been renamed to `Combo.anim` and is used by all three Combo buttons. Dismantle remains a separate optional animation.
+The former Cleave animation has been renamed to `Cleave.anim` and is used by all three Combo buttons. Dismantle remains a separate optional animation.
 
-- `content/animations/Sukuna/Combo.anim` — the former Cleave animation, used by all three Combo buttons.
+- `content/animations/Sukuna/Combo.anim` — the newly uploaded Kai animation, used by all three Combo buttons.
 - `content/animations/Sukuna/Dismantle.anim` — separate Dismantle animation file.
 
 The binary animation file is now present at `content/animations/Sukuna/Combo.anim`. Dismantle remains optional; if its file is absent, the moveset still loads but Dismantle custom animation will not play.
@@ -28,7 +28,7 @@ The binary animation file is now present at `content/animations/Sukuna/Combo.ani
 | Combo 2 | G | 4.5 s |
 | Combo 3 | H | 4.5 s |
 
-Each Dismantle and Combo button has its own cooldown timestamp. Combo variants use the former Cleave animation through `Combo.anim` and trigger three staggered local slash-effect pulses. On mobile, the seven skills appear as circular buttons on the right.
+Each Dismantle and Combo button has its own cooldown timestamp. Combo variants use the former Cleave animation through `Cleave.anim` and trigger three staggered local slash-effect pulses. On mobile, the seven skills appear as circular buttons on the right.
 
 - **Domain** and **Fuuga** are disabled; their buttons are not shown.
 - No chat announcements or finger-pickup chat system is started.
