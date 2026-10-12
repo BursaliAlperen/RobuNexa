@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "content/*.rbxm"
+      - "content/models/**/*.rbxm"
       - "tools/convert_gojo_rbxm.py"
       - ".github/workflows/convert-gojo-animations.yml"
   workflow_dispatch:
@@ -21,16 +21,16 @@ jobs:
           python-version: "3.11"
       - name: Install RBXM parser
         run: python -m pip install "git+https://github.com/Ghosteined/rbxm_parser.git"
-      - name: Convert root-level animation RBXMs
+      - name: Convert Gojo and movement KeyframeSequences
         run: python tools/convert_gojo_rbxm.py
-      - name: Commit converted animations
+      - name: Commit converted animation files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A content
+          git add -A content/animations/Gojo
           if git diff --cached --quiet; then
             echo "No converted animation changes."
           else
-            git commit -m "Convert movement and Gojo RBXM animations to AnimLib format"
+            git commit -m "Convert Gojo movement RBXM assets to AnimLib animations"
             git push
           fi
