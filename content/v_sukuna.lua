@@ -18,7 +18,6 @@ AddModule(function()
   "SukunaOpen.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaOpen.anim",
   "SukunaWorldCut.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaWorldCut.anim",
   "SukunaRush.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaRush.anim",
-  "SukunaCamera.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaCamera.anim",
  }
  local player = game:GetService("Players").LocalPlayer
  local UIS = game:GetService("UserInputService")
@@ -90,37 +89,19 @@ AddModule(function()
  end
  local animationFiles = {Awaken="SukunaAwaken.anim", Shrine="SukunaShrine.anim", Open="SukunaOpen.anim", WorldCut="SukunaWorldCut.anim", Rush="SukunaRush.anim"}
  local function playAnimation(name, speed, looped)
-  if not activeFigure then return end
-  local sequence = anims and anims:FindFirstChild(name, true)
-  stopAnimation()
+  if not activeFigure then return 0 end
   local fileName = animationFiles[name]
-  local ok, track = false, nil
-  if fileName then
-   -- User-triggered dog animations usually have time to download before play;
-   -- Sukuna's startup animation runs immediately after Init, so allow the async
-   -- asset cache a short window without blocking the reanimation update loop.
-   local assetPath = getAssetPath(fileName)
-   local deadline = os.clock() + 8
-   local exists = false
-   repeat
-    pcall(function() exists = isfile(assetPath) end)
-    if exists then break end
-    task.wait(0.1)
-   until os.clock() >= deadline
-   if exists then
-    ok, track = pcall(function() return AnimLib.Track.fromfile(assetPath) end)
-   else
-    ok, track = false, "asset cache timeout: " .. fileName
-   end
-   if not ok then
-    pcall(function() Util.Notify("Sukuna animation load error (" .. name .. "): " .. tostring(track)) end)
-   end
+  if not fileName then
+   pcall(function() Util.Notify("Sukuna animation mapping missing: " .. tostring(name)) end)
+   return 0
   end
-  if (not ok or not track) and sequence and sequence:IsA("KeyframeSequence") then
-   ok, track = pcall(function() return AnimLib.Track.frominstance(sequence) end)
-  end
+  -- Use the same local .anim parser pattern as the working dog moveset.
+  -- NAM's movement manager downloads m.Assets before calling Init.
+  stopAnimation()
+  local path = getAssetPath(fileName)
+  local ok, track = pcall(function() return AnimLib.Track.fromfile(path) end)
   if not ok or not track or not track.Keyframes or #track.Keyframes == 0 then
-   pcall(function() Util.Notify("Sukuna animation missing: " .. name) end)
+   pcall(function() Util.Notify("Sukuna animation file missing/invalid: " .. fileName .. ". Re-equip Sukuna after assets finish downloading.") end)
    return 0
   end
   local lastTime = 0
@@ -137,8 +118,6 @@ AddModule(function()
   activeAnimator.looped = looped == true
   activeAnimator.speed = speed or 1
   activeAnimName = name
-  -- Release the animation controller after one-shot tracks so locomotion
-  -- does not stay frozen on the last keyframe.
   if looped ~= true then
    task.delay(math.max(0.2, duration + 0.15), function()
     if activeAnimName == name and activeTrack == track then stopAnimation() end
