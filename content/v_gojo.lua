@@ -231,7 +231,7 @@ AddModule(function()
 			button.Active = false
 			button.AutoButtonColor = false
 			button.BackgroundColor3 = Color3.fromRGB(55, 60, 75)
-			button.Text = (name == "Purple" and "PURP" or (name == "Infinity" and "∞" or name)) .. "\\n" .. string.format("%.1f s", remaining)
+			button.Text = (name == "Purple" and "PURP" or (name == "Infinity" and "∞" or name)) .. "\n" .. string.format("%.1f s", remaining)
 		else
 			button.Active = true
 			button.AutoButtonColor = true
