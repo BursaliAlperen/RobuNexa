@@ -7781,8 +7781,10 @@ task.spawn(function()
 				CurrentMovementStyle = MovementStyles[MovementStyleIndex]
 				SetOverrideMovesetMusic(nil)
 				if ReanimCharacter:GetAttribute("MovementInit") then
-					Reanimate.CreateCharacter()
-					ReanimCharacter = Reanimate.Character
+					-- Switching movesets should reinitialize the module on the existing rig,
+					-- not destroy/recreate the reanimated character.
+					ReanimCharacter:SetAttribute("MovementInit", nil)
+					ReanimCharacter:SetAttribute("MovesetInternalName", nil)
 				end
 			end
 			if CurrentMovementStyle then
