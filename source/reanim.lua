@@ -9,7 +9,7 @@ NAM — maintained and rebranded by mamalalanam.
 Original-source and third-party notices are preserved in the README.
 ]]
 
-local NAMVersion = "1.0.25 BETA"
+local NAMVersion = "1.0.26 BETA"
 if _G.NAMLoaded or _G["U" .. "hhhhhhLoaded"] then
 	warn("[NAM] v" .. NAMVersion .. " did not start: v" .. tostring(_G.NAMVersion or "older/unknown") .. " is already active. Leave and rejoin to apply the update.")
 	return
