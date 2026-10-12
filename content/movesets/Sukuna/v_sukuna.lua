@@ -264,44 +264,47 @@ AddModule(function()
     end
 
     local function ensureHatOverrides()
-        if not HatReanimator or type(HatReanimator.GetHatMap) ~= "function" then
-            return
-        end
-        local okMap, map = pcall(function() return HatReanimator.GetHatMap() end)
-        if not okMap or type(map) ~= "table" then return end
+        if not HatReanimator then return end
         if type(HatReanimator.HatCFrameOverride) ~= "table" then
             HatReanimator.HatCFrameOverride = {}
         end
 
         local added = false
         for id, accessory in pairs(accessoryInstances) do
-            local target = TARGETS[id]
-            if target and accessory and accessory.Parent then
-                local mapEntry = findMapEntry(accessory, map)
-                if mapEntry then
-                    local override = overrideById[id]
-                    if not override
-                        or override.Name ~= mapEntry.Name
-                        or override.MeshId ~= mapEntry.MeshId
-                        or override.TextureId ~= mapEntry.TextureId then
-                        override = {
-                            Name = mapEntry.Name,
-                            MeshId = mapEntry.MeshId,
-                            TextureId = mapEntry.TextureId,
-                            C0 = CFrame.identity,
-                            C1 = CFrame.identity,
-                        }
-                        overrideById[id] = override
+            if accessory and accessory.Parent then
+                local handle = accessory:FindFirstChild("Handle")
+                local meshId, textureId
+                if handle then
+                    local mesh = handle:FindFirstChildOfClass("SpecialMesh")
+                    if mesh then
+                        meshId = mesh.MeshId
+                        textureId = mesh.TextureId
+                    elseif handle:IsA("MeshPart") then
+                        meshId = handle.MeshId
+                        textureId = handle.TextureId
                     end
-                    if not table.find(HatReanimator.HatCFrameOverride, override) then
-                        table.insert(HatReanimator.HatCFrameOverride, override)
-                        added = true
-                    end
+                end
+
+                local override = overrideById[id]
+                if not override or override.Name ~= accessory.Name
+                    or override.MeshId ~= meshId or override.TextureId ~= textureId then
+                    override = {
+                        Name = accessory.Name,
+                        MeshId = meshId,
+                        TextureId = textureId,
+                        C0 = CFrame.identity,
+                        C1 = CFrame.identity,
+                    }
+                    overrideById[id] = override
+                end
+
+                if not table.find(HatReanimator.HatCFrameOverride, override) then
+                    table.insert(HatReanimator.HatCFrameOverride, override)
+                    added = true
                 end
             end
         end
         if added then
-            -- NAM's mapper checks HatCFrameOverride when rebuilding its map.
             HatReanimator.RebuildRequired = true
         end
     end
