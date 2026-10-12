@@ -3807,6 +3807,32 @@ function LimbReanimator.Config(parent)
 	end))
 end
 function LimbReanimator.Start()
+	-- Resolve the live character before building joints or reading limb CFrames.
+	local character = Player.Character or Player.CharacterAdded:Wait()
+	local humanoid = character:WaitForChild("Humanoid", 10)
+	local rootPart = character:WaitForChild("HumanoidRootPart", 10)
+	local torso = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
+	if not torso then
+		torso = character:WaitForChild("Torso", 3) or character:WaitForChild("UpperTorso", 3)
+	end
+	if not humanoid or not rootPart or not torso then
+		error("[NAM Reanimate] Limb startup aborted: Humanoid, HumanoidRootPart, or Torso/UpperTorso did not load within the timeout.", 0)
+	end
+	local requiredLimbs = {"Head", "Left Arm", "Right Arm", "Left Leg", "Right Leg"}
+	for _, limbName in ipairs(requiredLimbs) do
+		if not character:FindFirstChild(limbName) then
+			-- R15 uses segmented limbs; the limb map module handles rig-specific mapping.
+			local r15Name = ({
+				["Left Arm"] = "LeftUpperArm",
+				["Right Arm"] = "RightUpperArm",
+				["Left Leg"] = "LeftUpperLeg",
+				["Right Leg"] = "RightUpperLeg",
+			})[limbName] or limbName
+			if not character:WaitForChild(r15Name, 5) then
+				error("[NAM Reanimate] Limb startup aborted: missing character part " .. r15Name, 0)
+			end
+		end
+	end
 	local LimbNames = {"Head", "Torso", "Left Arm", "Right Arm", "Left Leg", "Right Leg"}
 	local rootposition = Vector3.new(
 		math.random(-65536, 65536),
@@ -3857,7 +3883,19 @@ function LimbReanimator.Start()
 		end
 	end
 
-	local LimbMapping = loadstring(readfile("NAMReanim/BuiltinModules/d_limbmap.lua"))()
+	local modulePath = "NAMReanim/BuiltinModules/d_limbmap.lua"
+	local moduleOk, LimbMapping = pcall(function()
+		assert(type(readfile) == "function", "executor readfile is unavailable")
+		assert(type(loadstring) == "function", "executor loadstring is unavailable")
+		local source = readfile(modulePath)
+		assert(type(source) == "string" and #source > 0, "module file is empty or unreadable: " .. modulePath)
+		local loader, compileError = loadstring(source)
+		assert(type(loader) == "function", "module compile failed: " .. tostring(compileError))
+		return loader()
+	end)
+	if not moduleOk or type(LimbMapping) ~= "table" then
+		error("[NAM Reanimate] Failed to load limb map module: " .. tostring(LimbMapping), 0)
+	end
 
 	local FakeTools = {}
 	local function CreateFakeTool()
@@ -4509,6 +4547,30 @@ HatReanimator.GetHatMap = function() end
 HatReanimator.GetHatCFrameMeshAndTexture = function() end
 HatReanimator.GetAttachmentCFrame = function() end
 function HatReanimator.Start()
+	-- Wait for the avatar's core parts before calculating attachment CFrames.
+	local character = Player.Character or Player.CharacterAdded:Wait()
+	local humanoid = character:WaitForChild("Humanoid", 10)
+	local rootPart = character:WaitForChild("HumanoidRootPart", 10)
+	local head = character:WaitForChild("Head", 10)
+	local torso = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
+	if not torso then
+		torso = character:WaitForChild("Torso", 3) or character:WaitForChild("UpperTorso", 3)
+	end
+	if not humanoid or not rootPart or not head or not torso then
+		error("[NAM Reanimate] Hat startup aborted: Humanoid, HumanoidRootPart, Head, or Torso/UpperTorso did not load within the timeout.", 0)
+	end
+	-- Give avatar accessories a bounded chance to finish loading; do not wait forever.
+	if type(Player.HasAppearanceLoaded) == "function" then
+		local appearanceStarted = os.clock()
+		while not Player:HasAppearanceLoaded() and os.clock() - appearanceStarted < 5 do
+			task.wait(0.1)
+		end
+	end
+	for _, accessory in ipairs(character:GetChildren()) do
+		if accessory:IsA("Accessory") then
+			accessory:WaitForChild("Handle", 3)
+		end
+	end
 	local LimbNames = {"Head", "Torso", "Left Arm", "Right Arm", "Left Leg", "Right Leg"}
 
 	local Attachments = {
@@ -4533,7 +4595,22 @@ function HatReanimator.Start()
 		FaceCenterAttachment = {"Head", CFrame.new(0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)},
 	}
 
-	local HatMeshDatabase, HatNameDatabase, HatKnownAccessoriesDatabase = loadstring(readfile("NAMReanim/BuiltinModules/d_hatsmap.lua"))()
+	local modulePath = "NAMReanim/BuiltinModules/d_hatsmap.lua"
+	local moduleOk, HatMeshDatabase, HatNameDatabase, HatKnownAccessoriesDatabase = pcall(function()
+		assert(type(readfile) == "function", "executor readfile is unavailable")
+		assert(type(loadstring) == "function", "executor loadstring is unavailable")
+		local source = readfile(modulePath)
+		assert(type(source) == "string" and #source > 0, "module file is empty or unreadable: " .. modulePath)
+		local loader, compileError = loadstring(source)
+		assert(type(loader) == "function", "module compile failed: " .. tostring(compileError))
+		return loader()
+	end)
+	if not moduleOk then
+		error("[NAM Reanimate] Failed to load hat map module: " .. tostring(HatMeshDatabase), 0)
+	end
+	if type(HatMeshDatabase) ~= "table" or type(HatNameDatabase) ~= "table" or type(HatKnownAccessoriesDatabase) ~= "table" then
+		error("[NAM Reanimate] Hat map module returned invalid data; expected three tables.", 0)
+	end
 
 	local function GetTools()
 		local tools = {}
@@ -6533,7 +6610,15 @@ do
 			local startFinished = false
 			local startError = nil
 			task.spawn(function()
-				local ok, err = xpcall(selected.Start, debug.traceback)
+				local ok, err
+				if type(selected) ~= "table" or type(selected.Start) ~= "function" then
+					ok = false
+					err = "Selected reanimator has no callable Start function."
+				else
+					ok, err = xpcall(function()
+						selected.Start()
+					end, debug.traceback)
+				end
 				if not ok then
 					startError = tostring(err)
 					warn("[NAM Reanimate] Start failed:\\n" .. startError)
