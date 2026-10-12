@@ -107,13 +107,13 @@ AddModule(function()
         if not activeFigure or not activeFigure.Parent then return false end
         local path = AssetGetPathFromFilename(filename)
         if not isfile or not isfile(path) then
-            notify("Animasyon dosyası bulunamadı: " .. filename)
+            notify("Animation file not found: " .. filename)
             return false
         end
 
         local okTrack, track = pcall(function() return AnimLib.Track.fromfile(path) end)
         if not okTrack or not track or type(track.Keyframes) ~= "table" or #track.Keyframes == 0 then
-            notify("Geçersiz .anim dosyası: " .. filename)
+            notify("Invalid .anim file: " .. filename)
             return false
         end
 
@@ -729,7 +729,7 @@ AddModule(function()
 
     local function activateSukunaAbility(name, targetPosition)
         if not activeFigure or not activeFigure.Parent or not root or not root.Parent then
-            notify("Moveset henüz hazır değil; Hat Reanimation rig'i bekleniyor.")
+            notify("Moveset is not ready yet; waiting for the Hat Reanimation rig.")
             return
         end
         local now = os.clock()
@@ -753,7 +753,7 @@ AddModule(function()
                 chatAbilityMessage("Domain Expansion: Malevolent Shrine!")
             else
                 abilityTargets.Domain = nil
-                chatAbilityMessage("Malevolent Shrine kapatıldı.")
+                chatAbilityMessage("Malevolent Shrine deactivated.")
             end
         elseif name == "Cleave" then
             cleaveUntil = now + 1.2
@@ -797,7 +797,7 @@ AddModule(function()
     local function createSkillControls()
         local player = game:GetService("Players").LocalPlayer
         local playerGui = player and (player:FindFirstChildOfClass("PlayerGui") or player:WaitForChild("PlayerGui", 5))
-        if not playerGui then notify("Skill UI kurulamadı: PlayerGui yok."); return end
+        if not playerGui then notify("Could not create the skill UI: PlayerGui is missing."); return end
         local old = playerGui:FindFirstChild("SukunaAbilityHUD")
         if old then old:Destroy() end
         local backpack = player:FindFirstChildOfClass("Backpack")
@@ -871,7 +871,7 @@ AddModule(function()
                 end
             end
         end))
-        notify("Skill kontrolleri hazır: Z Domain, X Cleave, C Dismantle, V Fuuga. Mobilde sağdaki dairesel tuşları kullan.")
+        notify("Skill controls ready: Z = Domain, X = Cleave, C = Dismantle, V = Fuuga. On mobile, use the circular buttons on the right.")
     end
 
     local function announceFinger(text)
@@ -917,7 +917,7 @@ AddModule(function()
         local player = Players.LocalPlayer
         local character = player and player.Character
         if not character then
-            notify("Parmak bulunamadı: Sukuna parmak aksesuarını karakterine tak.")
+            notify("Finger accessory not found. Equip the Sukuna Finger accessory on your character.")
             return
         end
 
@@ -958,13 +958,13 @@ AddModule(function()
             end
         end
         if not accessory then
-            notify("Sukuna parmak aksesuarını takman gerekiyor; sahte Part oluşturulmadı.")
+            notify("Equip the Sukuna Finger accessory. No fake Part was created.")
             return
         end
 
         local handle = accessory:FindFirstChild("Handle")
         if not handle or not handle:IsA("BasePart") then
-            notify("Parmak aksesuarında Handle bulunamadı.")
+            notify("The finger accessory has no Handle.")
             return
         end
 
@@ -1042,7 +1042,7 @@ AddModule(function()
         local meshId, textureId = getMeshTexture()
         local hatOverride
         if not HatReanimator or type(HatReanimator.HatCFrameOverride) ~= "table" then
-            notify("Hat Reanimation bulunamadı; aksesuarı dünyaya sabitleyemiyorum.")
+            notify("Hat Reanimation was not found; the accessory cannot be anchored in the world.")
             return
         end
         if HatReanimator and type(HatReanimator.HatCFrameOverride) == "table" then
@@ -1063,8 +1063,8 @@ AddModule(function()
         if not prompt then
             prompt = Instance.new("ProximityPrompt")
             prompt.Name = "SukunaFingerPrompt"
-            prompt.ActionText = "Parmağı Topla"
-            prompt.ObjectText = "Sukuna'nın Parmağı"
+            prompt.ActionText = "Collect Finger"
+            prompt.ObjectText = "Sukuna Finger"
             prompt.HoldDuration = 0.4
             prompt.MaxActivationDistance = 10
             prompt.RequiresLineOfSight = false
@@ -1088,7 +1088,7 @@ AddModule(function()
         label.TextStrokeTransparency = 0.2
         label.Font = Enum.Font.GothamBold
         label.TextScaled = true
-        label.Text = "☯ SUKUNA PARMAĞI"
+        label.Text = "☯ SUKUNA FINGER"
         label.Parent = marker
         local corner = Instance.new("UICorner")
         corner.CornerRadius = UDim.new(0, 8)
@@ -1099,7 +1099,7 @@ AddModule(function()
         if not spawnPosition then
             marker:Destroy()
             prompt.Enabled = false
-            notify("Parmak için güvenli ve görünür bir yer bulunamadı. Biraz açık alana geç.")
+            notify("Could not find a safe, visible spot for the finger. Move to a more open area.")
             return
         end
 
@@ -1136,7 +1136,7 @@ AddModule(function()
                 if not activeFigure or not activeFigure.Parent or not accessory.Parent then return end
                 local newPosition = findSmartPosition()
                 if not newPosition then
-                    chatMessage("Parmak şu an güvenli bir konum bulamadı; yeniden dene.")
+                    chatMessage("Could not find a safe location for the finger. Try again.")
                     nextSpawnPending = false
                     prompt.Enabled = true
                     collected = false
@@ -1148,8 +1148,8 @@ AddModule(function()
                 nextSpawnPending = false
                 prompt.Enabled = true
                 marker.Enabled = true
-                chatMessage("Parmak haritanın başka bir noktasında yeniden ortaya çıktı!")
-                notify("Sukuna parmağı yeni bir noktada belirdi.")
+                chatMessage("The finger has reappeared at another location on the map!")
+                notify("The Sukuna Finger has appeared at a new location.")
             end)
         end
 
@@ -1162,7 +1162,7 @@ AddModule(function()
             marker.Enabled = false
             fingersFound += 1
             local collectedAt = spawnPosition
-            chatMessage(string.format("Sukuna parmağı toplandı! (%d)  •  8 saniye sonra başka yerde belirecek.", fingersFound))
+            chatMessage(string.format("Sukuna Finger collected! (%d) • It will reappear somewhere else in 8 seconds.", fingersFound))
             announceFinger(string.format("[Sukuna] PARMAK TOPLANDI  •  %d", fingersFound))
             playFingerFoundCutscene(collectedAt)
             task.spawn(function()
@@ -1175,7 +1175,7 @@ AddModule(function()
             end)
             moveToNewSpot()
         end))
-        chatMessage("Sukuna parmağı yakın çevrede, açık ve ulaşılabilir bir noktaya yerleştirildi. İşaretçiyi takip et.")
+        chatMessage("The Sukuna Finger has been placed nearby in an open, accessible spot. Follow the marker.")
     end
 
     m.Config = function(parent) end
@@ -1215,7 +1215,7 @@ AddModule(function()
                 end
                 task.wait(0.6)
             end
-            notify("Sukuna Laugh animasyonu yüklenemedi; modelde KeyframeSequence/Animation kontrol edilmeli.")
+            notify("Sukuna Laugh animation failed to load; check the model's KeyframeSequence/Animation.")
         end)
     end
 
