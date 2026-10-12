@@ -8509,29 +8509,12 @@ local function ForceModuleReload(force)
 	end
 	InitLogsText.Text ..= "\n[LOG] Refreshing Dance keybinds..."
 	RefreshKeybinds()
-	-- Show only actionable failures in Init Logs; successful initialization chatter is hidden.
-	local failureLines = {}
-	for line in InitLogsText.Text:gmatch("[^\n]+") do
-		local upper = line:upper()
-		if upper:find("[ERROR]", 1, true)
-			or upper:find("[WARN]", 1, true)
-			or upper:find("FAILED", 1, true)
-			or upper:find("COMPILE FAILED", 1, true)
-			or upper:find("ERR ", 1, true) then
-			table.insert(failureLines, line)
-		end
-	end
-	InitLogsText.Text = "Init Logs — failures only"
-	if #failureLines == 0 then
-		InitLogsText.Text ..= "\nNo failures or warnings were reported."
+	if string.find(InitLogsText.Text, "[ERROR]", 1, true) then
+		InitLogsText.Text ..= "\n[WARN] Init finished with errors; review the log above."
+		Util.Notify("Init finished with errors; check Init Logs")
 	else
-		InitLogsText.Text ..= "\n" .. table.concat(failureLines, "\n")
-	end
-	if #failureLines > 0 then
-		InitLogsText.Text ..= "\n[WARN] Init finished with failures/warnings; review the entries above."
-		Util.Notify("Init finished with failures; check Init Logs")
-	else
-		Util.Notify("Init complete; no failures or warnings")
+		InitLogsText.Text ..= "\n[LOG] Init complete!"
+		Util.Notify("Init complete")
 	end
 	IsNAMFullyLoaded = true
 	if not Reanimate.Character then return end
