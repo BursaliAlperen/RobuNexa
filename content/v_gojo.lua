@@ -76,6 +76,24 @@ AddModule(function()
 		end
 	end
 
+	-- Hat-reanimation figures do not always expose HumanoidRootPart/PrimaryPart.
+	-- Resolve a real part from the reanimated figure so Infinity and flight can attach.
+	local function resolveRoot(figure)
+		if not figure then return nil end
+		local rootPart = figure:FindFirstChild("HumanoidRootPart")
+			or figure.PrimaryPart
+			or figure:FindFirstChild("Torso")
+			or figure:FindFirstChild("UpperTorso")
+			or figure:FindFirstChild("Head")
+		if rootPart and rootPart:IsA("BasePart") then return rootPart end
+		for _, item in ipairs(figure:GetDescendants()) do
+			if item:IsA("BasePart") then return item end
+		end
+		return nil
+	end
+
+	local verticalFlightInput = 0
+
 	local function notify(message)
 		pcall(function() Util.Notify("Gojo: " .. message) end)
 	end
@@ -193,7 +211,8 @@ AddModule(function()
 			notify("Uçuş kapatıldı.")
 			return
 		end
-		if not root or not humanoid then notify("Karakter hazır değil."); return end
+		root = resolveRoot(activeFigure)
+		if not root then notify("Hat reanimation karakterinde bağlanılabilir parça bulunamadı."); return end
 		flightEnabled = true
 		originalAutoRotate = humanoid.AutoRotate
 		humanoid.AutoRotate = false
@@ -215,18 +234,24 @@ AddModule(function()
 			local camera = workspace.CurrentCamera
 			if not camera then return end
 			local input = game:GetService("UserInputService")
-			local direction = Vector3.zero
-			if input:IsKeyDown(Enum.KeyCode.W) then direction += camera.CFrame.LookVector end
-			if input:IsKeyDown(Enum.KeyCode.S) then direction -= camera.CFrame.LookVector end
-			if input:IsKeyDown(Enum.KeyCode.D) then direction += camera.CFrame.RightVector end
-			if input:IsKeyDown(Enum.KeyCode.A) then direction -= camera.CFrame.RightVector end
-			if input:IsKeyDown(Enum.KeyCode.Space) then direction += Vector3.yAxis end
-			if input:IsKeyDown(Enum.KeyCode.LeftControl) then direction -= Vector3.yAxis end
+			-- Humanoid.MoveDirection follows keyboard, controller and mobile thumbstick.
+			-- Camera-relative fallback is used if the hat rig has no working Humanoid.
+			local direction = humanoid and humanoid.MoveDirection or Vector3.zero
+			if direction.Magnitude < 0.05 then
+				if input:IsKeyDown(Enum.KeyCode.W) then direction += camera.CFrame.LookVector end
+				if input:IsKeyDown(Enum.KeyCode.S) then direction -= camera.CFrame.LookVector end
+				if input:IsKeyDown(Enum.KeyCode.D) then direction += camera.CFrame.RightVector end
+				if input:IsKeyDown(Enum.KeyCode.A) then direction -= camera.CFrame.RightVector end
+			end
+			local vertical = verticalFlightInput
+			if input:IsKeyDown(Enum.KeyCode.Space) then vertical = 1 end
+			if input:IsKeyDown(Enum.KeyCode.LeftControl) then vertical = -1 end
+			direction = Vector3.new(direction.X, 0, direction.Z) + Vector3.yAxis * vertical
 			flightVelocity.Velocity = direction.Magnitude > 0 and direction.Unit * FLIGHT_SPEED or Vector3.zero
-			flightGyro.CFrame = camera.CFrame
+			flightGyro.CFrame = CFrame.lookAt(root.Position, root.Position + camera.CFrame.LookVector)
 		end)
 		if buttons.Flight then buttons.Flight.Text = "Flight: ON" end
-		notify("Uçuş açıldı. WASD + Space/Ctrl.")
+		notify("Uçuş açıldı. Hareket çubuğu/WASD + yukarı-aşağı kontrolleri.")
 	end
 
 	local function refreshAbilityButton(name)
@@ -375,6 +400,39 @@ AddModule(function()
 				useAbility(name)
 			end))
 		end
+		-- Touch-friendly vertical flight controls; hold to ascend/descend.
+		for _, control in ipairs({ {name = "Ascend", text = "▲", value = 1}, {name = "Descend", text = "▼", value = -1} }) do
+			local touch = Instance.new("TextButton")
+			touch.Name = control.name .. "Button"
+			touch.Size = UDim2.fromOffset(42, 42)
+			touch.Position = control.value > 0 and UDim2.new(0, 8, 0, 8) or UDim2.new(0, 8, 0, 56)
+			touch.AnchorPoint = Vector2.new(0, 0)
+			touch.BackgroundColor3 = Color3.fromRGB(22, 30, 48)
+			touch.BackgroundTransparency = 0.08
+			touch.BorderSizePixel = 0
+			touch.Text = control.text
+			touch.TextColor3 = Color3.fromRGB(235, 245, 255)
+			touch.TextSize = 18
+			touch.Font = Enum.Font.GothamBold
+			touch.Parent = screen
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(1, 0)
+			corner.Parent = touch
+			local stroke = Instance.new("UIStroke")
+			stroke.Color = Color3.fromRGB(80, 175, 255)
+			stroke.Thickness = 1.2
+			stroke.Parent = touch
+			table.insert(guiConnections, touch.InputBegan:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+					verticalFlightInput = control.value
+				end
+			end))
+			table.insert(guiConnections, touch.InputEnded:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+					if verticalFlightInput == control.value then verticalFlightInput = 0 end
+				end
+			end))
+		end
 	end
 
 	m.Init = function(figure: Model)
@@ -386,7 +444,7 @@ AddModule(function()
 		end
 		activeFigure = figure
 		humanoid = figure:FindFirstChildOfClass("Humanoid")
-		root = figure:FindFirstChild("HumanoidRootPart")
+		root = resolveRoot(figure)
 		originalWalkSpeed = humanoid and humanoid.WalkSpeed or 16
 		infinityEnabled = false
 		createRuntimeControls()
@@ -395,7 +453,7 @@ AddModule(function()
 	m.Update = function(dt: number, figure: Model)
 		activeFigure = figure
 		humanoid = figure:FindFirstChildOfClass("Humanoid")
-		root = figure:FindFirstChild("HumanoidRootPart")
+		root = resolveRoot(figure)
 		if flightEnabled then stopFootsteps(); return end
 		local moving = humanoid and humanoid.MoveDirection.Magnitude > 0.05 and humanoid.FloorMaterial ~= Enum.Material.Air
 		if moving then
