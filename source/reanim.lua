@@ -8227,8 +8227,8 @@ local function ForceModuleReload(force)
 	Util.Notify("Loading...")
 	InitLogsText.Text ..= "\n[LOG] Checking SHA1 hashes..."
 	-- Gojo is a built-in moveset on desktop and mobile. Sukuna is intentionally excluded.
-	local filesofbuiltins = {"v_gojo.lua", "v_moveset1.lua", "v_moveset2.lua", "v_dance1.lua", "v_dance2.lua", "d_limbmap.lua", "d_hatsmap.lua"}
-	local filesofbuiltins_m = {"v_gojo.lua", "v_moveset1.lua", "v_moveset2.lua", "v_dance1.lua", "v_dance2.lua"}
+	local filesofbuiltins = {"v_gojo.lua", "v_mafiaboss.lua", "v_moveset1.lua", "v_moveset2.lua", "v_dance1.lua", "v_dance2.lua", "d_limbmap.lua", "d_hatsmap.lua"}
+	local filesofbuiltins_m = {"v_gojo.lua", "v_mafiaboss.lua", "v_moveset1.lua", "v_moveset2.lua", "v_dance1.lua", "v_dance2.lua"}
 	local filesofbuiltins_d = {"d_limbmap.lua", "d_hatsmap.lua"}
 	SaveData.ContentHash = SaveData.ContentHash or {}
 	xpcall(function()
