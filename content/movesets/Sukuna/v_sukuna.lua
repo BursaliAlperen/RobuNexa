@@ -624,15 +624,32 @@ AddModule(function()
         end
     end
 
+    local KEYBINDS = {
+        Cleave = Enum.KeyCode.X,
+        Dismantle = Enum.KeyCode.C,
+        Combo = Enum.KeyCode.Z,
+    }
+    local LABELS = {
+        Cleave = "CLEAVE",
+        Dismantle = "DISMANTLE",
+        Combo = "COMBO",
+    }
+    local SKILL_ORDER = {"Cleave", "Dismantle", "Combo"}
+
     local function refreshButtons()
+        if type(skillButtons) ~= "table" or type(abilityReadyAt) ~= "table" then
+            return
+        end
+
         for name, button in pairs(skillButtons) do
-            if button and button.Parent then
+            local keyCode = KEYBINDS[name]
+            local label = LABELS[name]
+            if keyCode and label and button and button.Parent then
                 local remaining = math.max(0, (abilityReadyAt[name] or 0) - os.clock())
                 local coolingDown = remaining > 0
                 button.Text = coolingDown
-                    and string.format("%s\n%.1fs", LABELS[name], remaining)
-                    or (LABELS[name] .. "\n" .. KEYBINDS[name].Name)
-                -- A cooling-down skill is visibly grey and cannot be pressed.
+                    and string.format("%s\\n%.1fs", label, remaining)
+                    or (label .. "\\n" .. keyCode.Name)
                 button.BackgroundColor3 = coolingDown
                     and Color3.fromRGB(105, 105, 105)
                     or Color3.fromRGB(43, 22, 30)
@@ -912,17 +929,6 @@ AddModule(function()
     end
     activateAbility = activateSukunaAbility
 
-    local KEYBINDS = {
-        Cleave = Enum.KeyCode.X,
-        Dismantle = Enum.KeyCode.C,
-        Combo = Enum.KeyCode.Z,
-    }
-    local LABELS = {
-        Cleave = "CLEAVE",
-        Dismantle = "DISMANTLE",
-        Combo = "COMBO",
-    }
-    local SKILL_ORDER = {"Cleave", "Dismantle", "Combo"}
     local function createSkillControls()
         local player = game:GetService("Players").LocalPlayer
         local playerGui = player and (player:FindFirstChildOfClass("PlayerGui") or player:WaitForChild("PlayerGui", 5))
