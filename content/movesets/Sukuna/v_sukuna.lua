@@ -7,6 +7,7 @@ local function AddModule(fn) table.insert(modules, fn) end
 
 AddModule(function()
     local m = {}
+    local UserInputService = game:GetService("UserInputService")
     m.ModuleType = "MOVESET"
     m.Name = "Sukuna"
     m.Description = "Malevolent Shrine, Cleave, Dismantle, and Fuuga Flame Arrow."
