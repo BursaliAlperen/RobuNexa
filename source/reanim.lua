@@ -8127,8 +8127,8 @@ local function ForceModuleReload(force)
 	Util.Notify("Loading...")
 	InitLogsText.Text ..= "\n[LOG] Checking SHA1 hashes..."
 	-- Gojo and Sukuna are built-in movesets on desktop and mobile.
-	local filesofbuiltins = {"v_gojo.lua", "v_sukuna.lua", "v_mafiaboss.lua", "v_moveset1.lua", "v_moveset2.lua", "v_dance1.lua", "v_dance2.lua", "d_limbmap.lua", "d_hatsmap.lua"}
-	local filesofbuiltins_m = {"v_gojo.lua", "v_sukuna.lua", "v_mafiaboss.lua", "v_moveset1.lua", "v_moveset2.lua", "v_dance1.lua", "v_dance2.lua"}
+	local filesofbuiltins = {"v_gojo.lua", "movesets/Sukuna/v_sukuna.lua", "v_moveset1.lua", "v_moveset2.lua", "v_dance1.lua", "v_dance2.lua", "d_limbmap.lua", "d_hatsmap.lua"}
+	local filesofbuiltins_m = {"v_gojo.lua", "movesets/Sukuna/v_sukuna.lua", "v_moveset1.lua", "v_moveset2.lua", "v_dance1.lua", "v_dance2.lua"}
 	local filesofbuiltins_d = {"d_limbmap.lua", "d_hatsmap.lua"}
 	SaveData.ContentHash = SaveData.ContentHash or {}
 	xpcall(function()
@@ -8173,6 +8173,12 @@ local function ForceModuleReload(force)
 	InitLogsText.Text ..= "\n[LOG] Loading maps..."
 	for _,x in filesofbuiltins_d do
 		local path = "NAMReanim/BuiltinModules/" .. x
+		local folder = "NAMReanim/BuiltinModules"
+		local segments = string.split(x, "/")
+		for i = 1, #segments - 1 do
+			folder ..= "/" .. segments[i]
+			pcall(makefolder, folder)
+		end
 		local exist = false
 		local s, a = pcall(isfile, path)
 		if s and a then exist = true end
@@ -8199,7 +8205,7 @@ local function ForceModuleReload(force)
 		if wasold then exist = false end
 		if force then exist = false end
 		-- Always fetch Gojo and Sukuna from GitHub so stale local copies cannot override fixes.
-		if x == "v_gojo.lua" or x == "v_sukuna.lua" then exist = false end
+		if x == "v_gojo.lua" or x == "movesets/Sukuna/v_sukuna.lua" then exist = false end
 		local data = nil
 		if exist then
 			InitLogsText.Text ..= "\n[LOG] Reading local VANILLA " .. x .. "..."
