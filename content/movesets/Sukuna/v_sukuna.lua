@@ -23,10 +23,10 @@ AddModule(function()
     }
 
     local TARGETS = {
-        [18726352770] = {
+        [18445594182] = {
             key = "shrine",
             label = "Malevolent Shrine",
-            hints = {"malevolent shrine"},
+            hints = {"malevolent shrine", "domain expansion"},
             hiddenHeight = 0,
         },
         [124144353587446] = {
@@ -128,7 +128,7 @@ AddModule(function()
         local startedAt = os.clock()
         local stopped = false
         local stepConnection
-        local controller = {IsPlaying = true}
+        local controller = {IsPlaying = true, Duration = duration}
         function controller:Stop(fadeTime)
             if stopped then return end
             stopped = true
@@ -384,7 +384,7 @@ AddModule(function()
 
         local added = false
         for id, accessory in pairs(accessoryInstances) do
-            if id == 18726352770 then scaleShrineAccessory(accessory) end
+            if id == 18445594182 then scaleShrineAccessory(accessory) end
             if accessory and accessory.Parent then
                 local handle = accessory:FindFirstChild("Handle")
                 local meshId, textureId
@@ -436,12 +436,12 @@ AddModule(function()
             end
         end
         local saved = scaledMeshes[handle]
-        if saved and saved.factor ~= 1.75 then
+        if saved and saved.factor ~= 4 then
             pcall(function()
-                if saved.kind == "mesh" then saved.instance.Scale = saved.original * 1.75
-                elseif saved.kind == "part" then saved.instance.Size = saved.original * 1.75 end
+                if saved.kind == "mesh" then saved.instance.Scale = saved.original * 4
+                elseif saved.kind == "part" then saved.instance.Size = saved.original * 4 end
             end)
-            saved.factor = 1.75
+            saved.factor = 4
             if HatReanimator then HatReanimator.RebuildRequired = true end
         end
     end
@@ -502,15 +502,15 @@ AddModule(function()
 
         -- The Shrine itself rises slowly from below ground while Domain is active.
         if domainEnabled then
-            local rise = math.clamp((os.clock() - domainStartedAt) / 2.6, 0, 1)
+            local rise = math.clamp((os.clock() - domainStartedAt) / 1.1, 0, 1)
             local eased = rise * rise * (3 - 2 * rise)
-            local target = abilityTargets.Domain or (root.Position + root.CFrame.LookVector * -22)
-            local shrinePosition = target + Vector3.new(0, -8 + eased * 14, 0)
-            setHatWorldCFrame(18726352770,
-                root.CFrame:ToObjectSpace(CFrame.new(shrinePosition) * root.CFrame.Rotation * CFrame.Angles(0, math.rad(180), 0)))
+            -- The 4x domain accessory sits directly above the user's reanimated character.
+            local shrineOffset = CFrame.new(0, 6 + eased * 1.5, 0)
+                * CFrame.Angles(0, math.rad(180), 0)
+            setHatWorldCFrame(18445594182, shrineOffset)
         else
-            setHatWorldCFrame(18726352770,
-                hiddenCenter * CFrame.new(0, TARGETS[18726352770].hiddenHeight, 0))
+            setHatWorldCFrame(18445594182,
+                hiddenCenter * CFrame.new(0, TARGETS[18445594182].hiddenHeight, 0))
         end
         if abilityTargets.Fuuga and fuugaBusy then
             setHatWorldCFrame(124144353587446, root.CFrame:ToObjectSpace(CFrame.new(abilityTargets.Fuuga + Vector3.new(0, 3, 0))))
@@ -571,7 +571,7 @@ AddModule(function()
         task.spawn(function()
             local first = playBundledAnimation("Sukuna/DomainCombo.anim", "combo", false)
             if first then
-                local timeout = os.clock() + 1.8
+                local timeout = os.clock() + math.max((first.Duration or 0) + 1.25, 15)
                 while first.IsPlaying and os.clock() < timeout and cutsceneActive do
                     task.wait(0.05)
                 end
@@ -580,12 +580,21 @@ AddModule(function()
             if cutsceneActive then
                 local second = playBundledAnimation("Sukuna/MalevolentShrine.anim", "domain", false)
                 if second then
-                    local timeout = os.clock() + 2.8
+                    local timeout = os.clock() + math.max((second.Duration or 0) + 1.25, 15)
                     while second.IsPlaying and os.clock() < timeout and cutsceneActive do
                         task.wait(0.05)
                     end
                     pcall(function() second:Stop(0.1); second:Destroy() end)
                 end
+            end
+            if cutsceneActive then
+                local currentCamera = workspace.CurrentCamera
+                if currentCamera then
+                    currentCamera.CameraType = savedCameraType or Enum.CameraType.Custom
+                    currentCamera.CameraSubject = savedCameraSubject
+                    if savedCameraCFrame then currentCamera.CFrame = savedCameraCFrame end
+                end
+                cutsceneActive = false
             end
         end)
         task.delay(1.05, function()
@@ -596,16 +605,6 @@ AddModule(function()
                     CFrame = CFrame.lookAt(targetPosition + Vector3.new(0, 9, 14), targetPosition)
                 }):Play()
             end
-        end)
-        task.delay(4.8, function()
-            if not cutsceneActive then return end
-            local currentCamera = workspace.CurrentCamera
-            if currentCamera then
-                currentCamera.CameraType = savedCameraType or Enum.CameraType.Custom
-                currentCamera.CameraSubject = savedCameraSubject
-                if savedCameraCFrame then currentCamera.CFrame = savedCameraCFrame end
-            end
-            cutsceneActive = false
         end)
     end
 
@@ -747,7 +746,7 @@ AddModule(function()
                 domainStartedAt = now
                 -- Place the Shrine and slash accessories around the chosen target;
                 -- unused effects remain far below the map until activated.
-                setHatWorldCFrame(18726352770, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0)) * root.CFrame.Rotation))
+                setHatWorldCFrame(18445594182, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0)) * root.CFrame.Rotation))
                 setHatWorldCFrame(124144353587446, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 5, 0)) * root.CFrame.Rotation))
                 setHatWorldCFrame(100475161263482, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(-5, 2, 0))))
                 setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(5, 2, 0))))
