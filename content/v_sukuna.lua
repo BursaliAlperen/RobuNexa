@@ -1,6 +1,7 @@
--- RobuNexa / NAM - Sukuna Domain + Cleave visual module.
--- Local visual effects only: no animation tracks, damage, hitboxes, or Shrine model.
--- The Shrine itself intentionally stays invisible; red slashes run while Domain is active.
+-- RobuNexa / NAM - Sukuna accessory-driven Domain and Cleave.
+-- All four catalog accessories are handled by HatReanimator overrides so their
+-- existing accessory geometry is what moves. No Shrine model or animation assets
+-- are spawned by this module.
 local modules = {}
 local function AddModule(fn) table.insert(modules, fn()) end
 
@@ -8,105 +9,324 @@ AddModule(function()
     local m = {}
     m.ModuleType = "MOVESET"
     m.Name = "Sukuna"
-    m.Description = "Malevolent Shrine (invisible) and continuous Cleave slash visuals."
+    m.Description = "Malevolent Shrine (hidden) and accessory-based continuous slash effects."
     m.Assets = {}
 
-    local REQUIRED_IDS = {
-        [97087028126781] = true,
-        [100475161263482] = true,
-        [124144353587446] = true,
-        [18726352770] = true,
+    local TARGETS = {
+        [18726352770] = {
+            key = "shrine",
+            label = "Malevolent Shrine",
+            hints = {"malevolent shrine"},
+            hiddenHeight = 3600,
+        },
+        [124144353587446] = {
+            key = "furnace",
+            label = "Fuga Furnace",
+            hints = {"fuga furnace"},
+            hiddenHeight = 4000,
+        },
+        [100475161263482] = {
+            key = "cleaveAura",
+            label = "Cleave and Dismantle Aura",
+            hints = {"cleave and dismantle", "dismantle animated aura"},
+            hiddenHeight = 3200,
+        },
+        [97087028126781] = {
+            key = "whiteSlashes",
+            label = "White Domain Slashes",
+            hints = {"white domain", "expension slashes", "expansion slashes"},
+            hiddenHeight = 3400,
+        },
     }
 
-    local activeFigure, root, playerGui
+    local EFFECT_IDS = {100475161263482, 97087028126781}
+    local activeFigure, root
     local hud, domainButton, cleaveButton
     local connections = {}
     local domainEnabled = false
     local cleaveUntil = 0
-    local slashAccumulator = 0
-    local slashFolder
-    local lastAccessorySignature
-    local ACCESSORY_CHECK_INTERVAL = 1.5
+    local savedWantAllHats = nil
     local accessoryCheckAccumulator = 0
-    local accessoriesReady = false
+    local lastAccessorySignature = nil
+    local accessoryInstances = {}
+    local presentIds = {}
+    local overrideById = {}
+    local STATUS_INTERVAL = 1.25
 
     local function notify(message)
         pcall(function() Util.Notify("Sukuna: " .. message) end)
     end
 
-    local function resolveRoot(character)
-        if not character then return nil end
-        local part = character:FindFirstChild("HumanoidRootPart")
-            or character.PrimaryPart
-            or character:FindFirstChild("Torso")
-            or character:FindFirstChild("UpperTorso")
-            or character:FindFirstChild("Head")
+    local function resolveRoot(figure)
+        if not figure then return nil end
+        local part = figure:FindFirstChild("HumanoidRootPart")
+            or figure.PrimaryPart
+            or figure:FindFirstChild("Torso")
+            or figure:FindFirstChild("UpperTorso")
+            or figure:FindFirstChild("Head")
         return part and part:IsA("BasePart") and part or nil
     end
 
-    local function equippedIds(character)
-        local found = {}
-        if not character or not character:IsA("Model") then return found end
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            local ok, description = pcall(function() return humanoid:GetAppliedDescription() end)
-            if ok and description then
-                local okAccessories, list = pcall(function() return description:GetAccessories(true) end)
-                if okAccessories and type(list) == "table" then
-                    for _, info in ipairs(list) do
-                        local id = tonumber(info.AssetId)
-                        if id then found[id] = true end
-                    end
+    local function getLocalCharacter()
+        local players = game:GetService("Players")
+        local player = players.LocalPlayer
+        return player and player.Character
+    end
+
+    local function tryAccessoryInstance(descriptionEntry, character)
+        local candidate
+        pcall(function()
+            if descriptionEntry.GetAppliedInstance then
+                candidate = descriptionEntry:GetAppliedInstance()
+            end
+        end)
+        if not candidate then
+            pcall(function() candidate = descriptionEntry.Instance end)
+        end
+        if candidate and candidate:IsA("Accessory") then
+            if candidate.Parent == character or candidate:IsDescendantOf(character) then
+                return candidate
+            end
+        end
+
+        local candidateName
+        pcall(function()
+            if candidate then candidateName = candidate.Name end
+        end)
+        pcall(function()
+            if not candidateName then candidateName = descriptionEntry.Name end
+        end)
+        if candidateName and character then
+            for _, child in ipairs(character:GetChildren()) do
+                if child:IsA("Accessory") and child.Name == candidateName then
+                    return child
                 end
-                for _, propertyName in ipairs({
-                    "HatAccessory", "HairAccessory", "FaceAccessory", "NeckAccessory",
-                    "ShouldersAccessory", "FrontAccessory", "BackAccessory", "WaistAccessory",
-                }) do
-                    local okValue, value = pcall(function() return description[propertyName] end)
-                    if okValue and type(value) == "string" then
-                        for token in string.gmatch(value, "%d+") do
-                            local id = tonumber(token)
-                            if id then found[id] = true end
+            end
+        end
+        return nil
+    end
+
+    local function refreshAccessories()
+        local character = getLocalCharacter()
+        local nextInstances, nextPresent = {}, {}
+
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                local okDescription, description = pcall(function()
+                    return humanoid:GetAppliedDescription()
+                end)
+                if okDescription and description then
+                    local okList, list = pcall(function()
+                        return description:GetAccessories(true)
+                    end)
+                    if okList and type(list) == "table" then
+                        for _, entry in ipairs(list) do
+                            local id
+                            pcall(function() id = tonumber(entry.AssetId) end)
+                            if id and TARGETS[id] then
+                                nextPresent[id] = true
+                                local accessory = tryAccessoryInstance(entry, character)
+                                if accessory then nextInstances[id] = accessory end
+                            end
+                        end
+                    end
+                    -- Legacy accessory ID lists, for clients whose GetAccessories result
+                    -- does not return applied-instance references.
+                    for _, propertyName in ipairs({
+                        "HatAccessory", "HairAccessory", "FaceAccessory",
+                        "NeckAccessory", "ShouldersAccessory", "FrontAccessory",
+                        "BackAccessory", "WaistAccessory",
+                    }) do
+                        local okValue, value = pcall(function()
+                            return description[propertyName]
+                        end)
+                        if okValue and type(value) == "string" then
+                            for token in string.gmatch(value, "%d+") do
+                                local id = tonumber(token)
+                                if id and TARGETS[id] then nextPresent[id] = true end
+                            end
                         end
                     end
                 end
             end
-        end
-        for _, child in ipairs(character:GetChildren()) do
-            if child:IsA("Accessory") then
-                local id = tonumber(child:GetAttribute("AssetId"))
-                if id then found[id] = true end
+
+            for _, child in ipairs(character:GetChildren()) do
+                if child:IsA("Accessory") then
+                    local attrId = tonumber(child:GetAttribute("AssetId"))
+                    if attrId and TARGETS[attrId] then
+                        nextPresent[attrId] = true
+                        nextInstances[attrId] = child
+                    end
+                end
+            end
+
+            -- Name-based fallback only applies to the known catalog items.
+            local used = {}
+            for id, target in pairs(TARGETS) do
+                if not nextInstances[id] then
+                    for _, child in ipairs(character:GetChildren()) do
+                        if child:IsA("Accessory") and not used[child] then
+                            local lowerName = string.lower(child.Name)
+                            for _, hint in ipairs(target.hints) do
+                                if string.find(lowerName, hint, 1, true) then
+                                    nextInstances[id] = child
+                                    nextPresent[id] = true
+                                    used[child] = true
+                                    break
+                                end
+                            end
+                        end
+                        if nextInstances[id] then break end
+                    end
+                else
+                    used[nextInstances[id]] = true
+                end
             end
         end
-        return found
-    end
 
-    local function updateAccessoryStatus()
-        local found = equippedIds(activeFigure)
+        accessoryInstances = nextInstances
+        presentIds = nextPresent
         local matched = {}
-        for id in pairs(REQUIRED_IDS) do
-            if found[id] then table.insert(matched, tostring(id)) end
+        for id in pairs(TARGETS) do
+            if presentIds[id] then table.insert(matched, tostring(id)) end
         end
         table.sort(matched)
         local signature = table.concat(matched, ",")
-        accessoriesReady = #matched > 0
         if signature ~= lastAccessorySignature then
             lastAccessorySignature = signature
-            if #matched > 0 then
-                notify(string.format("Aksesuar algılandı: %d/4 (%s)", #matched, signature))
+            if #matched == 4 then
+                notify("4/4 Sukuna accessories detected; Hat Reanimation targets are being prepared.")
+            elseif #matched > 0 then
+                notify(string.format("%d/4 accessories detected. Add the remaining Sukuna accessories.", #matched))
             else
-                notify("Verdiğin 4 aksesuardan hiçbiri algılanmadı.")
+                notify("0/4 accessories detected. Equip the four catalog accessories first.")
             end
         end
-        return accessoriesReady
+    end
+
+    local function findMapEntry(accessory, map)
+        if not accessory or type(map) ~= "table" then return nil end
+        for _, entry in ipairs(map) do
+            if entry.Name == accessory.Name then return entry end
+        end
+        local lowerName = string.lower(accessory.Name)
+        for _, entry in ipairs(map) do
+            local mapName = string.lower(tostring(entry.Name or ""))
+            for _, target in pairs(TARGETS) do
+                local accessoryLooksRight = false
+                for _, hint in ipairs(target.hints) do
+                    if string.find(lowerName, hint, 1, true) then
+                        accessoryLooksRight = true
+                        break
+                    end
+                end
+                if accessoryLooksRight and mapName == lowerName then
+                    return entry
+                end
+            end
+        end
+        return nil
+    end
+
+    local function ensureHatOverrides()
+        if not HatReanimator or type(HatReanimator.GetHatMap) ~= "function" then
+            return
+        end
+        local okMap, map = pcall(function() return HatReanimator.GetHatMap() end)
+        if not okMap or type(map) ~= "table" then return end
+        if type(HatReanimator.HatCFrameOverride) ~= "table" then
+            HatReanimator.HatCFrameOverride = {}
+        end
+
+        local added = false
+        for id, accessory in pairs(accessoryInstances) do
+            local target = TARGETS[id]
+            if target and accessory and accessory.Parent then
+                local mapEntry = findMapEntry(accessory, map)
+                if mapEntry then
+                    local override = overrideById[id]
+                    if not override
+                        or override.Name ~= mapEntry.Name
+                        or override.MeshId ~= mapEntry.MeshId
+                        or override.TextureId ~= mapEntry.TextureId then
+                        override = {
+                            Name = mapEntry.Name,
+                            MeshId = mapEntry.MeshId,
+                            TextureId = mapEntry.TextureId,
+                            C0 = CFrame.identity,
+                            C1 = CFrame.identity,
+                        }
+                        overrideById[id] = override
+                    end
+                    if not table.find(HatReanimator.HatCFrameOverride, override) then
+                        table.insert(HatReanimator.HatCFrameOverride, override)
+                        added = true
+                    end
+                end
+            end
+        end
+        if added then
+            -- NAM's mapper checks HatCFrameOverride when rebuilding its map.
+            HatReanimator.RebuildRequired = true
+        end
+    end
+
+    local function setHatWorldCFrame(id, targetCFrame)
+        local override = overrideById[id]
+        if override then
+            override.C0 = targetCFrame
+            override.C1 = CFrame.identity
+        end
+    end
+
+    local function effectCenter()
+        if not root then return CFrame.new(0, 500, 0) end
+        -- The actual accessory meshes are deliberately staged far from Sukuna.
+        return root.CFrame * CFrame.new(0, 4, -320)
+    end
+
+    local function applyAccessoryPositions()
+        if not root or not root.Parent then return end
+        local t = os.clock()
+        local center = effectCenter()
+        local hiddenCenter = root.CFrame * CFrame.new(0, 0, -320)
+        local active = domainEnabled or os.clock() < cleaveUntil
+        local fast = os.clock() < cleaveUntil
+        local rate = fast and 7.5 or 1.8
+
+        -- Keep the Shrine model and Fuga accessory away from the visible domain.
+        -- The live accessory handles themselves move through NAM's hat-reanimation map.
+        setHatWorldCFrame(18726352770,
+            hiddenCenter * CFrame.new(0, TARGETS[18726352770].hiddenHeight, 0))
+        setHatWorldCFrame(124144353587446,
+            hiddenCenter * CFrame.new(0, TARGETS[124144353587446].hiddenHeight, 0))
+
+        if active then
+            local pulse = math.sin(t * rate)
+            local sweep = math.cos(t * rate * 1.13)
+            setHatWorldCFrame(100475161263482,
+                center * CFrame.new(pulse * (fast and 8 or 3), 1.5 + math.abs(pulse) * 2, sweep * (fast and 8 or 3))
+                    * CFrame.Angles(math.rad(pulse * 10), t * (fast and 3.5 or 0.45), math.rad(sweep * 8)))
+            setHatWorldCFrame(97087028126781,
+                center * CFrame.new(sweep * (fast and 12 or 5), 4 + pulse * 2, pulse * (fast and 12 or 5))
+                    * CFrame.Angles(math.rad(sweep * 18), t * (fast and 8 or 1.1), math.rad(pulse * 15)))
+        else
+            setHatWorldCFrame(100475161263482,
+                hiddenCenter * CFrame.new(0, TARGETS[100475161263482].hiddenHeight, 0))
+            setHatWorldCFrame(97087028126781,
+                hiddenCenter * CFrame.new(0, TARGETS[97087028126781].hiddenHeight, 0))
+        end
     end
 
     local function refreshButtons()
         if domainButton then
             domainButton.Text = domainEnabled and "DOMAIN ON" or "DOMAIN"
-            domainButton.BackgroundColor3 = domainEnabled and Color3.fromRGB(126, 24, 31) or Color3.fromRGB(35, 27, 31)
+            domainButton.BackgroundColor3 = domainEnabled
+                and Color3.fromRGB(126, 24, 31) or Color3.fromRGB(35, 27, 31)
         end
         if cleaveButton then
+            cleaveButton.Text = os.clock() < cleaveUntil and "CLEAVE *" or "CLEAVE"
             cleaveButton.BackgroundColor3 = os.clock() < cleaveUntil
                 and Color3.fromRGB(150, 35, 40) or Color3.fromRGB(35, 27, 31)
         end
@@ -114,13 +334,12 @@ AddModule(function()
 
     local function createHUD()
         local player = game:GetService("Players").LocalPlayer
-        playerGui = player and player:FindFirstChildOfClass("PlayerGui")
+        local playerGui = player and player:FindFirstChildOfClass("PlayerGui")
         if not playerGui then
             task.spawn(function()
                 for _ = 1, 24 do
                     task.wait(0.25)
-                    playerGui = player and player:FindFirstChildOfClass("PlayerGui")
-                    if playerGui then createHUD(); return end
+                    if activeFigure then createHUD(); return end
                 end
             end)
             return
@@ -128,6 +347,7 @@ AddModule(function()
         local old = playerGui:FindFirstChild("SukunaAbilityHUD")
         if old then old:Destroy() end
         table.clear(connections)
+
         hud = Instance.new("ScreenGui")
         hud.Name = "SukunaAbilityHUD"
         hud.ResetOnSpawn = false
@@ -178,76 +398,38 @@ AddModule(function()
 
         domainButton = makeButton("DomainButton", "DOMAIN", 1)
         cleaveButton = makeButton("CleaveButton", "CLEAVE", 2)
+
         table.insert(connections, domainButton.Activated:Connect(function()
             if not activeFigure or not activeFigure.Parent then return end
-            if not updateAccessoryStatus() then
-                notify("Domain için verdiğin 4 aksesuardan en az biri takılı olmalı.")
+            refreshAccessories()
+            local slashEquipped = presentIds[100475161263482] or presentIds[97087028126781]
+            if not slashEquipped then
+                notify("Domain için Cleave Aura veya White Domain Slashes aksesuarı takılı olmalı.")
                 return
             end
             domainEnabled = not domainEnabled
             if domainEnabled then
-                notify("Malevolent Shrine açıldı. Shrine görünmez; slash efektleri sürekli çalışır.")
+                notify("Domain açıldı: Shrine gizli, uzaktaki slash aksesuarları sürekli hareket ediyor.")
             else
                 notify("Domain kapatıldı.")
             end
+            applyAccessoryPositions()
             refreshButtons()
         end))
+
         table.insert(connections, cleaveButton.Activated:Connect(function()
             if not activeFigure or not activeFigure.Parent then return end
-            if not updateAccessoryStatus() then
-                notify("Cleave için verdiğin 4 aksesuardan en az biri takılı olmalı.")
+            refreshAccessories()
+            local slashEquipped = presentIds[100475161263482] or presentIds[97087028126781]
+            if not slashEquipped then
+                notify("Cleave için Cleave Aura veya White Domain Slashes aksesuarı takılı olmalı.")
                 return
             end
             cleaveUntil = os.clock() + 2.5
-            slashAccumulator = 0
+            applyAccessoryPositions()
             refreshButtons()
         end))
         refreshButtons()
-    end
-
-    local function clearSlashFolder()
-        if slashFolder then slashFolder:Destroy(); slashFolder = nil end
-    end
-
-    local function spawnSlash()
-        if not root or not root.Parent then return end
-        if not slashFolder or not slashFolder.Parent then
-            slashFolder = Instance.new("Folder")
-            slashFolder.Name = "SukunaLocalSlashEffects"
-            slashFolder.Parent = workspace
-        end
-
-        -- Red-black curved-looking slash streak, placed around the player rather
-        -- than at the accessory geometry's distant location.
-        local angle = math.random() * math.pi * 2
-        local radius = math.random(5, 13)
-        local height = math.random(0, 7) - 2
-        local center = root.Position + Vector3.new(math.cos(angle) * radius, height, math.sin(angle) * radius)
-        local tangent = Vector3.new(-math.sin(angle), math.random(-20, 20) / 100, math.cos(angle))
-        if tangent.Magnitude < 0.1 then tangent = Vector3.xAxis end
-        local length = math.random(5, 10)
-        local part = Instance.new("Part")
-        part.Name = "CleaveSlash"
-        part.Anchored = true
-        part.CanCollide = false
-        part.CanTouch = false
-        part.CanQuery = false
-        part.CastShadow = false
-        part.Material = Enum.Material.Neon
-        part.Color = math.random(1, 3) == 1 and Color3.fromRGB(255, 45, 50) or Color3.fromRGB(135, 8, 20)
-        part.Transparency = 0.05
-        part.Size = Vector3.new(length, 0.07, 0.12)
-        part.CFrame = CFrame.lookAt(center, center + tangent) * CFrame.Angles(0, 0, math.rad(math.random(-35, 35)))
-        part.Parent = slashFolder
-
-        local tweenService = game:GetService("TweenService")
-        local tween = tweenService:Create(part, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = Vector3.new(length * 1.35, 0.015, 0.035),
-            Transparency = 1,
-            CFrame = part.CFrame * CFrame.new(0, 0.45, 0),
-        })
-        tween:Play()
-        game:GetService("Debris"):AddItem(part, 0.3)
     end
 
     m.Config = function(parent) end
@@ -257,11 +439,21 @@ AddModule(function()
         root = resolveRoot(figure)
         domainEnabled = false
         cleaveUntil = 0
-        slashAccumulator = 0
         accessoryCheckAccumulator = 0
         lastAccessorySignature = nil
-        clearSlashFolder()
-        updateAccessoryStatus()
+        accessoryInstances = {}
+        presentIds = {}
+        overrideById = {}
+
+        if HatReanimator then
+            savedWantAllHats = HatReanimator.IWantAllHats
+            HatReanimator.IWantAllHats = true
+            HatReanimator.RebuildRequired = true
+        end
+
+        refreshAccessories()
+        ensureHatOverrides()
+        applyAccessoryPositions()
         createHUD()
     end
 
@@ -270,42 +462,51 @@ AddModule(function()
         root = resolveRoot(activeFigure)
         if not root then return end
 
-        accessoryCheckAccumulator += math.max(0, dt or 0)
-        if accessoryCheckAccumulator >= ACCESSORY_CHECK_INTERVAL then
+        accessoryCheckAccumulator += math.max(0, tonumber(dt) or 0)
+        if accessoryCheckAccumulator >= STATUS_INTERVAL then
             accessoryCheckAccumulator = 0
-            updateAccessoryStatus()
+            refreshAccessories()
+            ensureHatOverrides()
         end
 
-        local cleaveActive = os.clock() < cleaveUntil
-        if not domainEnabled and not cleaveActive then return end
-
-        -- Domain produces persistent slash visuals. Cleave uses the same effect
-        -- burst at a higher rate for a short duration.
-        slashAccumulator += math.max(0, dt or 0)
-        local interval = cleaveActive and 0.055 or 0.13
-        local spawned = 0
-        while slashAccumulator >= interval and spawned < 4 do
-            slashAccumulator -= interval
-            spawnSlash()
-            spawned += 1
-        end
-        if not cleaveActive and not domainEnabled then slashAccumulator = 0 end
+        -- Re-add our overrides if NAM cleared the override table during a rig reload.
+        ensureHatOverrides()
+        applyAccessoryPositions()
         refreshButtons()
     end
 
     m.Destroy = function()
         domainEnabled = false
         cleaveUntil = 0
-        clearSlashFolder()
-        for _, connection in ipairs(connections) do pcall(function() connection:Disconnect() end) end
+
+        if HatReanimator then
+            local list = HatReanimator.HatCFrameOverride
+            if type(list) == "table" then
+                for _, override in pairs(overrideById) do
+                    local index = table.find(list, override)
+                    if index then table.remove(list, index) end
+                end
+            end
+            if savedWantAllHats ~= nil then
+                HatReanimator.IWantAllHats = savedWantAllHats
+            end
+            HatReanimator.RebuildRequired = true
+        end
+
+        for _, connection in ipairs(connections) do
+            pcall(function() connection:Disconnect() end)
+        end
         table.clear(connections)
         if hud then hud:Destroy(); hud = nil end
         local player = game:GetService("Players").LocalPlayer
-        local gui = player and player:FindFirstChildOfClass("PlayerGui")
-        local old = gui and gui:FindFirstChild("SukunaAbilityHUD")
+        local playerGui = player and player:FindFirstChildOfClass("PlayerGui")
+        local old = playerGui and playerGui:FindFirstChild("SukunaAbilityHUD")
         if old then old:Destroy() end
+
         domainButton, cleaveButton = nil, nil
-        activeFigure, root, playerGui = nil, nil, nil
+        activeFigure, root = nil, nil
+        accessoryInstances, presentIds, overrideById = {}, {}, {}
+        savedWantAllHats = nil
         lastAccessorySignature = nil
     end
 
