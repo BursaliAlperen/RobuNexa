@@ -26,7 +26,7 @@ jobs:
           cd /tmp/rbx-dom
           cargo build --release -p rbx_util
           mkdir -p "$GITHUB_WORKSPACE/target/release"
-          cp target/release/rbx_util "$GITHUB_WORKSPACE/target/release/rbx_util"
+          cp target/release/rbx-util "$GITHUB_WORKSPACE/target/release/rbx_util"
       - name: Extract real KeyframeSequence data
         run: python3 tools/extract_sukuna_anims.py
       - name: Commit generated .anim files
