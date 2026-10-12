@@ -213,7 +213,7 @@ AddModule(function()
 			humanoid.PlatformStand = false
 			if originalAutoRotate ~= nil then humanoid.AutoRotate = originalAutoRotate end
 		end
-		if buttons.Flight then buttons.Flight.Text = "Flight" end
+		if buttons.Flight then buttons.Flight.Text = "FLY" end
 	end
 
 	local function toggleFlight()
@@ -263,8 +263,12 @@ AddModule(function()
 			flightVelocity.Velocity = direction.Magnitude > 0 and direction.Unit * FLIGHT_SPEED or Vector3.zero
 			flightGyro.CFrame = CFrame.lookAt(root.Position, root.Position + camera.CFrame.LookVector)
 		end)
-		if buttons.Flight then buttons.Flight.Text = "Flight: ON" end
+		if buttons.Flight then buttons.Flight.Text = "FLY+" end
 		notify("Uçuş açıldı. Hareket çubuğu/WASD + yukarı-aşağı kontrolleri.")
+	end
+
+	local function abilityLabel(name)
+		return name == "Blue" and "BLU" or name == "Red" and "RED" or name == "Purple" and "PUR" or name == "Infinity" and "∞" or "FLY"
 	end
 
 	local function refreshAbilityButton(name)
@@ -275,12 +279,12 @@ AddModule(function()
 			button.Active = false
 			button.AutoButtonColor = false
 			button.BackgroundColor3 = Color3.fromRGB(55, 60, 75)
-			button.Text = (name == "Purple" and "PURP" or (name == "Infinity" and "∞" or name)) .. "\n" .. string.format("%.1f s", remaining)
+			button.Text = abilityLabel(name) .. "\n" .. string.format("%.0f", remaining)
 		else
 			button.Active = true
 			button.AutoButtonColor = true
 			button.BackgroundColor3 = (name == "Infinity" and infinityEnabled) and Color3.fromRGB(28, 105, 150) or (name == "Flight" and flightEnabled) and Color3.fromRGB(28, 105, 150) or Color3.fromRGB(22, 30, 48)
-			button.Text = name == "Purple" and "PURP" or (name == "Infinity" and "∞" or name == "Flight" and (flightEnabled and "FLY ON" or "FLIGHT") or name)
+			button.Text = name == "Flight" and (flightEnabled and "FLY+" or "FLY") or abilityLabel(name)
 		end
 	end
 
