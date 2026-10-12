@@ -648,8 +648,8 @@ AddModule(function()
                 local remaining = math.max(0, (abilityReadyAt[name] or 0) - os.clock())
                 local coolingDown = remaining > 0
                 button.Text = coolingDown
-                    and string.format("%s\\n%.1fs", label, remaining)
-                    or (label .. "\\n" .. keyCode.Name)
+                    and string.format("%s\n%.1fs", label, remaining)
+                    or (label .. "\n" .. keyCode.Name)
                 button.BackgroundColor3 = coolingDown
                     and Color3.fromRGB(105, 105, 105)
                     or Color3.fromRGB(43, 22, 30)
