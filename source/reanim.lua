@@ -6988,8 +6988,19 @@ local function AssetGetPathFromFilename(filename)
 	return base .. "/" .. filename
 end
 local _Assetdownloading = {}
+local function GetRepoAssetPath(filename)
+	local lower = string.lower(filename)
+	if lower:sub(1, 11) == "animations/" or lower:sub(1, 7) == "sounds/" or lower:sub(1, 7) == "models/" or lower:sub(1, 7) == "images/" then
+		return filename
+	end
+	if lower:sub(-5) == ".anim" then return "animations/" .. filename end
+	if lower:sub(-4) == ".mp3" then return "sounds/" .. filename end
+	if lower:sub(-5) == ".rbxm" then return "models/" .. filename end
+	if lower:sub(-4) == ".png" then return "images/" .. filename end
+	return filename
+end
 local function AssetDownload(filename)
-	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. filename
+	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. GetRepoAssetPath(filename)
 	local split = string.split(filename, "@")
 	if #split > 1 then
 		filename = table.remove(split, 1)
@@ -8127,8 +8138,8 @@ local function ForceModuleReload(force)
 	Util.Notify("Loading...")
 	InitLogsText.Text ..= "\n[LOG] Checking SHA1 hashes..."
 	-- Gojo and Sukuna are built-in movesets on desktop and mobile.
-	local filesofbuiltins = {"v_gojo.lua", "movesets/Sukuna/v_sukuna.lua", "v_moveset1.lua", "v_moveset2.lua", "v_dance1.lua", "v_dance2.lua", "d_limbmap.lua", "d_hatsmap.lua"}
-	local filesofbuiltins_m = {"v_gojo.lua", "movesets/Sukuna/v_sukuna.lua", "v_moveset1.lua", "v_moveset2.lua", "v_dance1.lua", "v_dance2.lua"}
+	local filesofbuiltins = {"movesets/Gojo/module.lua", "movesets/Sukuna/v_sukuna.lua", "movesets/MoveSet1/module.lua", "movesets/MoveSet2/module.lua", "movesets/Dog/module.lua", "dances/BuiltIn1/module.lua", "dances/BuiltIn2/module.lua", "systems/d_limbmap.lua", "systems/d_hatsmap.lua"}
+	local filesofbuiltins_m = {"movesets/Gojo/module.lua", "movesets/Sukuna/v_sukuna.lua", "movesets/MoveSet1/module.lua", "movesets/MoveSet2/module.lua", "movesets/Dog/module.lua", "dances/BuiltIn1/module.lua", "dances/BuiltIn2/module.lua"}
 	local filesofbuiltins_d = {"d_limbmap.lua", "d_hatsmap.lua"}
 	SaveData.ContentHash = SaveData.ContentHash or {}
 	xpcall(function()
@@ -8205,7 +8216,7 @@ local function ForceModuleReload(force)
 		if wasold then exist = false end
 		if force then exist = false end
 		-- Always fetch Gojo and Sukuna from GitHub so stale local copies cannot override fixes.
-		if x == "v_gojo.lua" or x == "movesets/Sukuna/v_sukuna.lua" then exist = false end
+		if x == "movesets/Gojo/module.lua" or x == "movesets/Sukuna/v_sukuna.lua" then exist = false end
 		local data = nil
 		if exist then
 			InitLogsText.Text ..= "\n[LOG] Reading local VANILLA " .. x .. "..."
