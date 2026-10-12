@@ -127,7 +127,10 @@ AddModule(function()
  end
  local function cloneEffect(name, parentFolder, targetCF, seconds)
   local template = findDeep(parentFolder or effects, name)
-  if not template then return nil end
+  if not template then
+   pcall(function() Util.Notify("Sukuna VFX template not found: " .. tostring(name)) end)
+   return nil
+  end
   local obj = template:Clone()
   obj.Parent = workspace
   if obj:IsA("Model") then
@@ -313,8 +316,22 @@ AddModule(function()
   effects.Name="SukunaEffectsRuntime"
   local function importModel(fileName)
    local assetPath=getAssetPath(fileName)
-   local loadedOk, loaded=pcall(function() return game:GetObjects(getcustomasset(assetPath)) end)
-   if loadedOk and loaded and loaded[1] then loaded[1].Parent=effects end
+   local existsOk, exists=pcall(isfile, assetPath)
+   if not existsOk or not exists then
+    pcall(function() Util.Notify("Sukuna VFX file missing: " .. fileName) end)
+    return
+   end
+   local assetOk, assetUri=pcall(getcustomasset, assetPath)
+   if not assetOk or not assetUri or assetUri == "" then
+    pcall(function() Util.Notify("Sukuna could not register VFX asset: " .. fileName) end)
+    return
+   end
+   local loadedOk, loaded=pcall(function() return game:GetObjects(assetUri) end)
+   if loadedOk and loaded and loaded[1] then
+    loaded[1].Parent=effects
+   else
+    pcall(function() Util.Notify("Sukuna could not import VFX model: " .. fileName) end)
+   end
   end
   importModel("SukunaDomain.rbxm")
   importModel("SukunaFurnance.rbxm")
