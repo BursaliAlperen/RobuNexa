@@ -50,7 +50,7 @@ local SOURCES = {
     KRYPTON = "https://raw.githubusercontent.com/KadeTheExploiter/Krypton/main/Module.luau",
     GELATEK = "https://raw.githubusercontent.com/Gelatekussy/GelatekReanimate/main/Main.lua",
     GELATEK_EDIT = "https://raw.githubusercontent.com/InfinityNess/GelatekReanimateEdit/main/Main.lua",
-    CATWARE_LEGACY = "https://raw.githubusercontent.com/StrokeThePea/CatwareReanimate/main/src/Source.lua",
+    CATWARE_LEGACY = "https://raw.githubusercontent.com/Gelatekussy/CatwareReanimate/main/src/Source.lua",
 }
 
 local function loadRemote(url, label)
