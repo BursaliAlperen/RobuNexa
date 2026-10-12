@@ -17,7 +17,9 @@ AddModule(function()
 		"Gojo/GojoIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoIdle.anim",
 		"Gojo/Sokamona.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/Sokamona.anim",
 		"Gojo/GojoWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoWalk.anim",
+		"Gojo/GojoRun.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoRun.anim",
 		"Gojo/GojoJump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoJump.anim",
+		"Gojo/GojoFall.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoFall.anim",
 		"Gojo/GojoLapseBlue.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoLapseBlue.anim",
 		"Gojo/CursedTechniqueRed.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/CursedTechniqueRed.anim",
 		"Gojo/RedReversal.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/RedReversal.anim",
@@ -27,8 +29,9 @@ AddModule(function()
 		Sokamona = "Gojo/Sokamona.anim",
 		Idle = "Gojo/GojoIdle.anim",
 		Walk = "Gojo/GojoWalk.anim",
-		Run = "Gojo/GojoWalk.anim",
+		Run = "Gojo/GojoRun.anim",
 		Jump = "Gojo/GojoJump.anim",
+		Fall = "Gojo/GojoFall.anim",
 		Blue = "Gojo/GojoLapseBlue.anim",
 		Red = "Gojo/CursedTechniqueRed.anim",
 		Purple = "Gojo/HollowPurple.anim",
@@ -539,7 +542,17 @@ AddModule(function()
 			stopFootsteps()
 		end
 		local wanted
-		if humanoid and humanoid.Jump then
+		local state = humanoid and humanoid:GetState()
+		local airborne = humanoid and humanoid.FloorMaterial == Enum.Material.Air
+		local verticalSpeed = root and root.AssemblyLinearVelocity.Y or 0
+		if airborne then
+			-- Use the actual falling clip once upward momentum has ended.
+			if state == Enum.HumanoidStateType.Freefall or verticalSpeed < -1.5 then
+				wanted = "Fall"
+			else
+				wanted = "Jump"
+			end
+		elseif humanoid and (humanoid.Jump or state == Enum.HumanoidStateType.Jumping) then
 			wanted = "Jump"
 		elseif humanoid and humanoid.MoveDirection.Magnitude > 0.05 then
 			wanted = humanoid.WalkSpeed >= 20 and "Run" or "Walk"
