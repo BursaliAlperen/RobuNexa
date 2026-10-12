@@ -116,11 +116,6 @@ AddModule(function()
             return false
         end
 
-        if laughAnimationTrack and type(laughAnimationTrack.Stop) == "function" then
-            pcall(function() laughAnimationTrack:Stop() end)
-            laughAnimationTrack = nil
-        end
-
         local animator = AnimLib.Animator.new()
         animator.rig = activeFigure
         animator.track = track
@@ -132,10 +127,11 @@ AddModule(function()
         local startedAt = os.clock()
         local stopped = false
         local stepConnection
-        local controller = {}
-        function controller:Stop()
+        local controller = {IsPlaying = true}
+        function controller:Stop(fadeTime)
             if stopped then return end
             stopped = true
+            self.IsPlaying = false
             if stepConnection then stepConnection:Disconnect(); stepConnection = nil end
             if activeFigure and activeFigure.Parent then
                 for _, item in ipairs(activeFigure:GetDescendants()) do
@@ -144,6 +140,9 @@ AddModule(function()
                     end
                 end
             end
+        end
+        function controller:Destroy()
+            self:Stop()
         end
         stepConnection = game:GetService("RunService").RenderStepped:Connect(function()
             if stopped or not activeFigure or not activeFigure.Parent then
@@ -467,7 +466,7 @@ AddModule(function()
         local t = os.clock()
         -- Keep accessories close to the rig; inactive targets are hidden just below the floor.
         local center = root.CFrame * CFrame.new(0, 2, -5)
-        local hiddenCenter = root.CFrame * CFrame.new(0, -28, 0)
+        local hiddenCenter = root.CFrame * CFrame.new(0, -5000, 0)
         local active = domainEnabled or os.clock() < cleaveUntil
         local fast = os.clock() < cleaveUntil
         local rate = fast and 7.5 or 1.8
@@ -672,6 +671,88 @@ AddModule(function()
         end)
     end
 
+    local function chatAbilityMessage(message)
+        local sent = false
+        pcall(function()
+            local service = game:GetService("TextChatService")
+            local channels = service:FindFirstChild("TextChannels")
+            local channel = channels and (channels:FindFirstChild("RBXGeneral") or channels:GetChildren()[1])
+            if channel and channel.SendAsync then
+                channel:SendAsync("[SUKUNA] " .. message)
+                sent = true
+            end
+        end)
+        if not sent then
+            pcall(function()
+                game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", {
+                    Text = "[SUKUNA] " .. message,
+                    Color = Color3.fromRGB(255, 65, 85),
+                    Font = Enum.Font.GothamBold,
+                })
+            end)
+        end
+    end
+
+    local function activateSukunaAbility(name, targetPosition)
+        if not activeFigure or not activeFigure.Parent or not root or not root.Parent then
+            notify("Moveset henüz hazır değil; Hat Reanimation rig'i bekleniyor.")
+            return
+        end
+        local now = os.clock()
+        if now < (abilityReadyAt[name] or 0) then return end
+        abilityReadyAt[name] = now + (abilityCooldowns[name] or 2)
+        targetPosition = typeof(targetPosition) == "Vector3" and targetPosition
+            or (root.Position + root.CFrame.LookVector * 32)
+
+        if name == "Domain" then
+            domainEnabled = not domainEnabled
+            if domainEnabled then
+                domainStartedAt = now
+                -- Place the Shrine and slash accessories around the chosen target;
+                -- unused effects remain far below the map until activated.
+                setHatWorldCFrame(18726352770, CFrame.new(targetPosition + Vector3.new(0, 2, 0)) * root.CFrame.Rotation)
+                setHatWorldCFrame(124144353587446, CFrame.new(targetPosition + Vector3.new(0, 5, 0)) * root.CFrame.Rotation)
+                setHatWorldCFrame(100475161263482, CFrame.new(targetPosition + Vector3.new(-5, 2, 0)))
+                setHatWorldCFrame(97087028126781, CFrame.new(targetPosition + Vector3.new(5, 2, 0)))
+                playDomainCutscene(targetPosition)
+                playBundledAnimation("Sukuna/DomainCombo.anim", "combo", false)
+                task.delay(1.8, function()
+                    if activeFigure and activeFigure.Parent and domainEnabled then
+                        playBundledAnimation("Sukuna/MalevolentShrine.anim", "domain", false)
+                    end
+                end)
+                chatAbilityMessage("Domain Expansion: Malevolent Shrine!")
+            else
+                chatAbilityMessage("Malevolent Shrine kapatıldı.")
+            end
+        elseif name == "Cleave" then
+            cleaveUntil = now + 1.2
+            setHatWorldCFrame(100475161263482, CFrame.new(targetPosition + Vector3.new(0, 2, 0)))
+            playSkillAnimation()
+            playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
+            showTargetMarker(targetPosition, "Cleave")
+            chatAbilityMessage("Cleave!")
+        elseif name == "Dismantle" then
+            cleaveUntil = now + 1.2
+            setHatWorldCFrame(97087028126781, CFrame.new(targetPosition + Vector3.new(0, 2, 0)))
+            playSkillAnimation()
+            playBundledAnimation("Sukuna/DomainCombo.anim", "dismantle", false)
+            showTargetMarker(targetPosition, "Dismantle")
+            chatAbilityMessage("Dismantle!")
+        elseif name == "Fuuga" then
+            fuugaBusy = true
+            setHatWorldCFrame(124144353587446, CFrame.new(targetPosition + Vector3.new(0, 3, 0)))
+            playBundledAnimation("Sukuna/FlameArrow.anim", "flame", false)
+            showTargetMarker(targetPosition, "Fuuga / Flame Arrow")
+            chatAbilityMessage("Fuuga: Flame Arrow!")
+            task.delay(1.5, function() fuugaBusy = false end)
+        else
+            notify("Bilinmeyen yetenek: " .. tostring(name))
+        end
+        refreshButtons()
+    end
+    activateAbility = activateSukunaAbility
+
     local KEYBINDS = {Domain = Enum.KeyCode.Z, Cleave = Enum.KeyCode.X, Dismantle = Enum.KeyCode.C, Fuuga = Enum.KeyCode.V}
     local LABELS = {Domain = "DOMAIN", Cleave = "CLEAVE", Dismantle = "DISM.", Fuuga = "FUUGA"}
     local function createSkillControls()
@@ -853,8 +934,8 @@ AddModule(function()
             pcall(function()
                 local channels = TextChatService:FindFirstChild("TextChannels")
                 local channel = channels and (channels:FindFirstChild("RBXGeneral") or channels:GetChildren()[1])
-                if channel and channel.DisplaySystemMessage then
-                    channel:DisplaySystemMessage("[SUKUNA] " .. message)
+                if channel and channel.SendAsync then
+                    channel:SendAsync("[SUKUNA] " .. message)
                     sent = true
                 end
             end)
