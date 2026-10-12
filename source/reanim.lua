@@ -1114,7 +1114,7 @@ do
 	AWindowContent.ClipsDescendants = true
 	AWindowContent.ZIndex = 0
 	
-	ReanimPage = Util.Instance("Frame", AWindowContent)
+	ReanimPage = Util.Instance("ScrollingFrame", AWindowContent)
 	ReanimPage.AnchorPoint = Vector2.new(0, 0)
 	ReanimPage.Position = UDim2.new(0, 0, 0, 0)
 	ReanimPage.Size = UDim2.new(0, 120, 1, 0)
@@ -1125,6 +1125,10 @@ do
 	ReanimPage.Visible = true
 	ReanimPage.ZIndex = 0
 	ReanimPage.ClipsDescendants = true
+	ReanimPage.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	ReanimPage.CanvasSize = UDim2.new(0, 0, 0, 0)
+	ReanimPage.ScrollingDirection = Enum.ScrollingDirection.Y
+	ReanimPage.ScrollBarThickness = 2
 	AddToRenderStep(function(t)
 		ReanimPage.BorderColor3 = GetUIColor(t)
 		ReanimPage.BackgroundColor3 = GetUIBGColor(t)
@@ -1132,7 +1136,7 @@ do
 	local UIList = Util.Instance("UIListLayout", ReanimPage)
 	UIList.FillDirection = Enum.FillDirection.Vertical
 	UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	UIList.VerticalAlignment = Enum.VerticalAlignment.Bottom
+	UIList.VerticalAlignment = Enum.VerticalAlignment.Top
 	UIList.Padding = UDim.new(0, 5)
 	UIList.SortOrder = Enum.SortOrder.LayoutOrder
 	
