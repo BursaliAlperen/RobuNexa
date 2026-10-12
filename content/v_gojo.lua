@@ -14,17 +14,22 @@ AddModule(function()
 	-- Map Gojo movement slots to real .anim files already present in this repository.
 	-- The Gojo .rbxm files are model assets, not files AnimLib.Track.fromfile can parse directly.
 	m.Assets = {
-		"GojoIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/IDLEDOGSMOOTH.anim",
-		"GojoWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/KDRV3Walk.anim",
-		"GojoRun.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/DOGRUN.anim",
-		"GojoJump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/JUMPDOG.anim",
+		"GojoIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoIdle.anim",
+		"GojoWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoWalk.anim",
+		"GojoJump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoJump.anim",
+		"GojoLapseBlue.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoLapseBlue.anim",
+		"CursedTechniqueRed.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/CursedTechniqueRed.anim",
+		"RedReversal.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/RedReversal.anim",
+		"HollowPurple.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/HollowPurple.anim",
 	}
 	local animationFiles = {
 		Idle = "GojoIdle.anim",
 		Walk = "GojoWalk.anim",
-		Run = "GojoRun.anim",
+		Run = "GojoWalk.anim",
 		Jump = "GojoJump.anim",
-		-- Ability animation files will be mapped after the Gojo .rbxm sequences are converted.
+		Blue = "GojoLapseBlue.anim",
+		Red = "CursedTechniqueRed.anim",
+		Purple = "HollowPurple.anim",
 	}
 	local abilityNames = { "Blue", "Red", "Purple", "Infinity", "Flight" }
 	local activeFigure, humanoid, root
