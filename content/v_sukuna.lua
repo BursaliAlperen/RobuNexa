@@ -3,8 +3,6 @@
 -- Shrine and slash effects are client-side visuals only; no damage/remotes are fired.
 local modules = {}
 
-AddModule = function() end -- replaced below; keeps this file standalone-safe
-
 local function AddModule(fn)
     table.insert(modules, fn())
 end
