@@ -25,6 +25,73 @@ local function announce(message)
     end)
 end
 
+-- Local finger markers: every finger gets a clear overhead label and live distance.
+-- This is a client-side overlay, so it is tailored to the current player and does not
+-- interfere with the server-owned collectible objects.
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local marked = {}
+local fingerWorld = Workspace:WaitForChild("SukunaFingerWorld", 30)
+
+local function addFingerMarker(part)
+    if not part:IsA("BasePart") or not part.Name:match("^SukunaFinger_%d+$") or marked[part] then
+        return
+    end
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "MySukunaFingerMarker"
+    billboard.Adornee = part
+    billboard.Size = UDim2.fromOffset(145, 42)
+    billboard.StudsOffsetWorldSpace = Vector3.new(0, 2.3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.MaxDistance = 350
+    billboard.Parent = player:WaitForChild("PlayerGui")
+
+    local label = Instance.new("TextLabel")
+    label.Name = "MarkerText"
+    label.Size = UDim2.fromScale(1, 1)
+    label.BackgroundColor3 = Color3.fromRGB(35, 4, 12)
+    label.BackgroundTransparency = 0.18
+    label.TextColor3 = Color3.fromRGB(255, 75, 92)
+    label.TextStrokeTransparency = 0.25
+    label.Font = Enum.Font.GothamBold
+    label.TextScaled = true
+    label.Text = "☯  PARMAK"
+    label.Parent = billboard
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = label
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 35, 65)
+    stroke.Thickness = 1.5
+    stroke.Parent = label
+    marked[part] = {gui = billboard, label = label}
+    part.Destroying:Connect(function()
+        local entry = marked[part]
+        if entry and entry.gui then entry.gui:Destroy() end
+        marked[part] = nil
+    end)
+end
+
+if fingerWorld then
+    for _, part in ipairs(fingerWorld:GetChildren()) do addFingerMarker(part) end
+    fingerWorld.ChildAdded:Connect(addFingerMarker)
+end
+
+RunService.RenderStepped:Connect(function()
+    local character = player.Character
+    local root = character and (character:FindFirstChild("HumanoidRootPart") or character.PrimaryPart)
+    for part, entry in pairs(marked) do
+        if not part.Parent or not entry.gui.Parent then
+            if entry.gui then entry.gui:Destroy() end
+            marked[part] = nil
+        elseif root and root:IsA("BasePart") then
+            local distance = math.floor((root.Position - part.Position).Magnitude + 0.5)
+            entry.label.Text = ("☯  PARMAK  •  %d studs"):format(distance)
+        end
+    end
+end)
+
 local function playLaugh()
     local template = ReplicatedStorage:FindFirstChild("SukunaLaughAnimation")
     if not template or not template:IsA("Animation") or template.AnimationId == "" then
