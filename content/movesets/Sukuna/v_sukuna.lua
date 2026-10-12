@@ -544,6 +544,28 @@ AddModule(function()
         game:GetService("TweenService"):Create(camera, TweenInfo.new(0.85, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut), {
             CFrame = CFrame.lookAt(focus + root.CFrame.LookVector * -7 + Vector3.new(0, 3, 0), focus)
         }):Play()
+        -- Two-clip sequence: Combo intro, then Domain Expansion. Both clips are
+        -- loaded from the bundled Roblox models; no placeholder asset IDs.
+        task.spawn(function()
+            local first = playBundledAnimation("Sukuna/Combo.rbxm", "combo", false)
+            if first then
+                local timeout = os.clock() + 1.8
+                while first.IsPlaying and os.clock() < timeout and cutsceneActive do
+                    task.wait(0.05)
+                end
+                pcall(function() first:Stop(0.08); first:Destroy() end)
+            end
+            if cutsceneActive then
+                local second = playBundledAnimation("Sukuna/Domain Expansion: Malevolent Shrine.rbxm", "domain", false)
+                if second then
+                    local timeout = os.clock() + 2.8
+                    while second.IsPlaying and os.clock() < timeout and cutsceneActive do
+                        task.wait(0.05)
+                    end
+                    pcall(function() second:Stop(0.1); second:Destroy() end)
+                end
+            end
+        end)
         task.delay(1.05, function()
             if not cutsceneActive or not targetPosition then return end
             local currentCamera = workspace.CurrentCamera
@@ -553,7 +575,7 @@ AddModule(function()
                 }):Play()
             end
         end)
-        task.delay(2.6, function()
+        task.delay(4.8, function()
             if not cutsceneActive then return end
             local currentCamera = workspace.CurrentCamera
             if currentCamera then
@@ -1003,11 +1025,11 @@ AddModule(function()
             if domainEnabled then domainStartedAt = os.clock(); notify("Malevolent Shrine açıldı.") else notify("Domain kapatıldı.") end
             applyAccessoryPositions()
         elseif name == "Cleave" then
-            playSkillAnimation(nil)
+            playBundledAnimation("Sukuna/Cleave.rbxm", "cleave", false)
             cleaveUntil = os.clock() + 2.5
             applyAccessoryPositions()
         elseif name == "Dismantle" then
-            playSkillAnimation(nil)
+            playBundledAnimation("Sukuna/Cleave.rbxm", "cleave", false)
             cleaveUntil = os.clock() + 1.6
             applyAccessoryPositions()
         elseif name == "Fuuga" then
