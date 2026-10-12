@@ -5282,7 +5282,6 @@ function HatReanimator.Start()
 				if not v.Disabled then v.Disabled = true end
 			end)
 		elseif v:IsA("Accessory") and v.Parent == Player.Character then
-			CachePersistentAccessory(v)
 			if not table.find(CharHats, v) then
 				table.insert(CharHats, v)
 				local conn = nil
@@ -5689,18 +5688,7 @@ function HatReanimator.Start()
 		end)
 		currentping = Player:GetNetworkPing()
 		table.clear(BaseParts)
-		-- Do not discard hats that were dropped into Workspace by the intentional
-		-- death step of reanimation. Keep valid live Accessories and remove only
-		-- destroyed/out-of-world instances; new character accessories are added below.
-		for i = #CharHats, 1, -1 do
-			local hat = CharHats[i]
-			local handle = hat and hat:FindFirstChild("Handle")
-			if not hat or not hat:IsA("Accessory") or not handle
-				or not handle:IsA("BasePart")
-				or (hat.Parent ~= nil and not hat:IsDescendantOf(workspace)) then
-				table.remove(CharHats, i)
-			end
-		end
+		table.clear(CharHats)
 		table.clear(CharTools)
 		ResetHatRefs()
 		HatReanimator.RebuildRequired = true
@@ -5751,14 +5739,6 @@ function HatReanimator.Start()
 		end
 		local RootPart = character:WaitForChild("HumanoidRootPart", 10)
 		if not RootPart then return end
-		-- Avatar-exported accessories are often injected locally and are absent from
-		-- HumanoidDescription. Give the game's normal appearance a moment to load,
-		-- then restore only cached accessories whose original instances were destroyed.
-		task.delay(3.5, function()
-			if Player.Character == character and character:IsDescendantOf(workspace) then
-				RestorePersistentAccessories(character, Humanoid)
-			end
-		end)
 		local RootPosition = Vector3.new(RootPart.Position.X, FallenPartsDestroyHeight, RootPart.Position.Z)
 		if ReanimCharacter then
 			local root = ReanimCharacter:FindFirstChild("HumanoidRootPart")
