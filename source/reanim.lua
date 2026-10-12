@@ -3304,7 +3304,7 @@ Reanimate.CreateCharacter = function(InitCFrame)
 	Reanimate.Camera.CFrame, Reanimate.Camera.Focus = Camera.CFrame, Camera.Focus
 	Reanimate.Camera:OnReset()
 	RC = CreateHumanoidCharacter()
-	RC.ModelStreamingMode = "Persistent"
+	RC.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
 	Player.ReplicationFocus = workspace
 	local ltmparts = Reanimate.CharacterLTMs
 	table.clear(ltmparts)
