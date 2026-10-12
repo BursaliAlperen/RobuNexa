@@ -656,24 +656,11 @@ AddModule(function()
         end
         setHatWorldCFrame(101090904148116, accessoryFrame)
 
-        -- The supplied 18908729586 accessory is the actual slash visual.
-        -- Keep it 5,000 studs away between attacks; show five brief pulses
-        -- at the selected target over 1.5 seconds for Combo.
-        local slashFrame = CFrame.new(0, 0, -5000)
-        if slashBurstTarget and t < slashBurstUntil and root and root.Parent then
-            local elapsed = math.max(0, t - slashBurstStartedAt)
-            local pulseIndex = math.floor(elapsed / 0.3)
-            local pulsePhase = elapsed % 0.3
-            if pulseIndex < slashBurstCount and pulsePhase < 0.19 then
-                local side = (pulseIndex % 2 == 0) and -1 or 1
-                local pos = slashBurstTarget + Vector3.new(side * (1.5 + pulseIndex * 0.45), 1.5 + (pulseIndex % 3) * 0.45, 0)
-                slashFrame = root.CFrame:ToObjectSpace(CFrame.new(pos) * CFrame.Angles(0, 0, math.rad((pulseIndex % 2 == 0) and -35 or 35)))
-            end
-        else
-            slashBurstTarget = nil
-            slashBurstCount = 0
-        end
-        setHatWorldCFrame(18908729586, slashFrame)
+        -- Do not render the equipped red ring/slash accessory: it was the red
+        -- circle appearing at the target when attacks fired. Keep it hidden always.
+        slashBurstTarget = nil
+        slashBurstCount = 0
+        setHatWorldCFrame(18908729586, CFrame.new(0, 0, -5000))
 
         if active then
             local pulse = math.sin(t * rate)
@@ -814,7 +801,11 @@ AddModule(function()
         return ray.Origin + ray.Direction * 80
     end
 
-    local function playSkillAnimation(animationId)
+    -- Reliable visible attack motion independent of the bundled .anim parser.
+    -- Cleave.anim and Combo.anim currently have the same Git blob SHA, so they
+    -- are byte-for-byte identical and cannot provide distinct attack clips.
+    local attackMotionConnection
+    local function playSkillAnimation(animationId, variant)
         local humanoid = activeFigure and activeFigure:FindFirstChildOfClass("Humanoid")
         if not humanoid then return end
         if animationId then
@@ -831,26 +822,48 @@ AddModule(function()
             end)
             return
         end
-        -- Local procedural arm swing for Cleave/Dismantle; works without inventing an animation asset ID.
-        local shoulder
+        -- Drive Motor6D.Transform directly for a visible R6/R15 arm attack.
+        -- This avoids C0 tweens being overwritten by the reanimation animation loop.
+        if attackMotionConnection then attackMotionConnection:Disconnect(); attackMotionConnection = nil end
+        local joints = {}
         for _, descendant in ipairs(activeFigure:GetDescendants()) do
-            if descendant:IsA("Motor6D") and (descendant.Name == "Right Shoulder" or descendant.Name == "RightShoulder") then
-                shoulder = descendant
-                break
+            if descendant:IsA("Motor6D") then
+                local n = string.lower(descendant.Name)
+                if n == "right shoulder" or n == "rightshoulder" or n == "rightshoulder" then
+                    table.insert(joints, {motor = descendant, side = 1, base = descendant.Transform})
+                elseif n == "left shoulder" or n == "leftshoulder" then
+                    table.insert(joints, {motor = descendant, side = -1, base = descendant.Transform})
+                elseif n == "waist" or n == "rootjoint" or n == "root" then
+                    table.insert(joints, {motor = descendant, side = 0, base = descendant.Transform})
+                end
             end
         end
-        if not shoulder then return end
-        local original = shoulder.C0
-        local tweenService = game:GetService("TweenService")
-        local swing = tweenService:Create(shoulder, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            C0 = original * CFrame.Angles(math.rad(-85), math.rad(10), math.rad(35))
-        })
-        swing:Play()
-        task.delay(0.13, function()
-            if shoulder and shoulder.Parent then
-                tweenService:Create(shoulder, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
-                    C0 = original
-                }):Play()
+        if #joints == 0 then return end
+        local started = os.clock()
+        local duration = variant == "combo" and 0.78 or 0.46
+        attackMotionConnection = RunService.RenderStepped:Connect(function()
+            if not activeFigure or not activeFigure.Parent then
+                if attackMotionConnection then attackMotionConnection:Disconnect(); attackMotionConnection = nil end
+                return
+            end
+            local elapsed = os.clock() - started
+            local phase = math.clamp(elapsed / duration, 0, 1)
+            local envelope = math.sin(math.pi * phase)
+            local hit = variant == "combo" and math.sin(phase * math.pi * 6) or math.sin(phase * math.pi)
+            for _, entry in ipairs(joints) do
+                local motor = entry.motor
+                if motor and motor.Parent then
+                    local angle = entry.side == 0 and math.rad(-10 * envelope) or math.rad((entry.side == 1 and -95 or 32) * hit)
+                    local roll = entry.side == 1 and math.rad(variant == "combo" and 38 or 48) * envelope or 0
+                    motor.Transform = entry.base * CFrame.Angles(angle, 0, roll)
+                end
+            end
+            if phase >= 1 then
+                for _, entry in ipairs(joints) do
+                    if entry.motor and entry.motor.Parent then entry.motor.Transform = entry.base end
+                end
+                attackMotionConnection:Disconnect()
+                attackMotionConnection = nil
             end
         end)
     end
@@ -901,11 +914,8 @@ AddModule(function()
             slashBurstUntil = now + 0.3
             slashBurstCount = 1
             slashBurstTarget = targetPosition
-            local cleaveTrack = playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
-            if not cleaveTrack then
-                notify("Cleave animation failed to load; using fallback arm swing.")
-                playSkillAnimation()
-            end
+            -- Use the local attack motion until Cleave.anim is replaced with a distinct, verified clip.
+            playSkillAnimation(nil, "cleave")
             chatAbilityMessage("Cleave!")
             task.delay(1.35, function()
                 if abilityTargets.Cleave == targetPosition then abilityTargets.Cleave = nil end
@@ -923,17 +933,9 @@ AddModule(function()
             end
             abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
-            -- Combo must use its converted .anim clip; the procedural shoulder swing
-            -- can override the clip on the same Motor6D, so only use it as a fallback.
-            if isCombo then
-                local comboTrack = playBundledAnimation("Sukuna/Combo.anim", "combo", false)
-                if not comboTrack then
-                    notify("Combo animation failed to load; using fallback arm swing.")
-                    playSkillAnimation()
-                end
-            else
-                playSkillAnimation()
-            end
+            -- The current Combo.anim and Cleave.anim are byte-identical; use a
+            -- distinct multi-hit motion for Combo rather than replaying the same clip.
+            playSkillAnimation(nil, isCombo and "combo" or "dismantle")
             -- Combo produces three staggered local slash pulses without chat output.
             if isCombo then
                 for hit = 1, 3 do
@@ -1502,6 +1504,7 @@ AddModule(function()
         if laughAnimationTrack then pcall(function() laughAnimationTrack:Stop(0.1); laughAnimationTrack:Destroy() end); laughAnimationTrack = nil end
         if actionAnimationTrack then pcall(function() actionAnimationTrack:Stop(0.05); actionAnimationTrack:Destroy() end); actionAnimationTrack = nil end
         if walkAnimationTrack then pcall(function() walkAnimationTrack:Stop(0.1); walkAnimationTrack:Destroy() end); walkAnimationTrack = nil end
+        if attackMotionConnection then pcall(function() attackMotionConnection:Disconnect() end); attackMotionConnection = nil end
         movementAnimationName = nil
         if fuugaProjectile then pcall(function() fuugaProjectile:Destroy() end); fuugaProjectile = nil end
         for _, aura in ipairs(fuugaAuraInstances) do pcall(function() aura:Destroy() end) end
