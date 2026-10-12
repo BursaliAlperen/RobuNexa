@@ -24,7 +24,7 @@ AddModule(function()
  local Lighting = game:GetService("Lighting")
  local Debris = game:GetService("Debris")
  local activeFigure, root, humanoid, bundle, anims, effects
- local activeTrack, activeAnimator, activeAnimName
+ local activeTrack, activeAnimator, activeAnimName, animationStartedAt
  local inputConn, updateConn
  local originalSpeed, originalFov, originalClock
  local spawned = {}
@@ -78,6 +78,7 @@ AddModule(function()
   local ok, track = pcall(function() return AnimLib.Track.frominstance(sequence) end)
   if not ok or not track or not track.Keyframes or #track.Keyframes == 0 then return end
   activeTrack = track
+  animationStartedAt = os.clock()
   activeAnimator = AnimLib.Animator.new()
   activeAnimator.rig = activeFigure
   activeAnimator.track = track
@@ -263,7 +264,7 @@ AddModule(function()
  end
  m.Update = function(dt: number, figure: Model)
   activeFigure=figure
-  if activeAnimator and activeTrack then activeAnimator:Step(dt) end
+  if activeAnimator and activeTrack then activeAnimator:Step(os.clock() - (animationStartedAt or os.clock())) end
  end
  m.Destroy = function(figure: Model?)
   if inputConn then inputConn:Disconnect(); inputConn=nil end
