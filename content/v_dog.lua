@@ -11,11 +11,11 @@ AddModule(function()
 	m.Name = "dog"
 	m.Description = "Dog movement pack with local Sleep, Sit and Dance animations."
 	m.Assets = {
-		"DANCEDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/DANCEDAWG.anim",
-		"DOGRUN.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/DOGRUN.anim",
-		"JUMPDOG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/JUMPDOG.anim",
-		"SITDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/SITDAWG.anim",
-		"Sleepp.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/Sleepp.anim",
+		"Dog/DANCEDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/DANCEDAWG.anim",
+		"Dog/DOGRUN.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/DOGRUN.anim",
+		"Dog/JUMPDOG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/JUMPDOG.anim",
+		"Dog/SITDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/SITDAWG.anim",
+		"Dog/Sleepp.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/Sleepp.anim",
 	}
 	local animationFiles = { Sleep = "Dog/Sleepp.anim", Sit = "Dog/SITDAWG.anim", Dance = "Dog/DANCEDAWG.anim", Run = "Dog/DOGRUN.anim", Jump = "Dog/JUMPDOG.anim" }
 	local activeFigure
