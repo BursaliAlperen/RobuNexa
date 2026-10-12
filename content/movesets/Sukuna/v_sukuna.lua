@@ -57,7 +57,7 @@ AddModule(function()
     }
 
     local EFFECT_IDS = {101090904148116, 100475161263482, 97087028126781}
-    -- Strict catalog allowlist: only these seven supplied accessory IDs are accepted.
+    -- Strict catalog allowlist: only these known accessory IDs are accepted.
     -- 18445594182 is the active Domain/Shrine asset; 18726352770 is retained as
     -- an allowed legacy asset ID but is not used as the Domain target.
     local ALLOWED_ASSET_IDS = {
@@ -375,10 +375,10 @@ AddModule(function()
         local signature = table.concat(matched, ",")
         if signature ~= lastAccessorySignature then
             lastAccessorySignature = signature
-            if #matched == 4 then
-                notify("4/4 Sukuna accessories detected; Hat Reanimation targets are being prepared.")
+            if #matched == 5 then
+                notify("5/5 Sukuna accessories detected; Hat Reanimation targets are being prepared.")
             elseif #matched > 0 then
-                notify(string.format("%d/4 equipped Sukuna accessories matched.", #matched))
+                notify(string.format("%d/5 equipped Sukuna accessories matched.", #matched))
             else
                 notify("0/4 equipped Sukuna accessories matched. Check the accessory names in your avatar.")
             end
