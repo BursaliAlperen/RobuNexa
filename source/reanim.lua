@@ -8216,7 +8216,7 @@ local function ForceModuleReload(force)
 		if wasold then exist = false end
 		if force then exist = false end
 		-- Always fetch Gojo and Sukuna from GitHub so stale local copies cannot override fixes.
-		if x == "movesets/Gojo/module.lua" or x == "movesets/Sukuna/v_sukuna.lua" then exist = false end
+		if string.find(x, "/", 1, true) then exist = false end
 		local data = nil
 		if exist then
 			InitLogsText.Text ..= "\n[LOG] Reading local VANILLA " .. x .. "..."
