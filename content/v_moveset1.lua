@@ -1656,21 +1656,21 @@ AddModule(function()
 	m.Name = "dog"
 	m.Description = "Dog movement pack: Sleep, Sit, Dance and a Walk/Run toggle. Moving cancels emotes."
 	m.Assets = {
-		"DANCEDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/DANCEDAWG.anim",
-		"DOGRUN.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/DOGRUN.anim",
-		"JUMPDOG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/JUMPDOG.anim",
-		"SITDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SITDAWG.anim",
-		"Sleepp.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Sleepp.anim",
-		"IDLEDOGSMOOTH.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/IDLEDOGSMOOTH.anim",
+		"DANCEDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/DANCEDAWG.anim",
+		"DOGRUN.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/DOGRUN.anim",
+		"JUMPDOG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/JUMPDOG.anim",
+		"SITDAWG.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/SITDAWG.anim",
+		"Sleepp.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/Sleepp.anim",
+		"IDLEDOGSMOOTH.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Dog/IDLEDOGSMOOTH.anim",
 	}
 	local animationFiles = {
-		Idle = "IDLEDOGSMOOTH.anim",
-		Sleep = "Sleepp.anim",
-		Sit = "SITDAWG.anim",
-		Dance = "DANCEDAWG.anim",
-		Run = "DOGRUN.anim",
-		Walk = "DOGRUN.anim",
-		Jump = "JUMPDOG.anim",
+		Idle = "Dog/IDLEDOGSMOOTH.anim",
+		Sleep = "Dog/Sleepp.anim",
+		Sit = "Dog/SITDAWG.anim",
+		Dance = "Dog/DANCEDAWG.anim",
+		Run = "Dog/DOGRUN.anim",
+		Walk = "Dog/DOGRUN.anim",
+		Jump = "Dog/JUMPDOG.anim",
 	}
 	local actions = {
 		{ key = "Sleep", title = "Sleep", input = Enum.KeyCode.Z, position = UDim2.new(1, -190, 0, 65) },

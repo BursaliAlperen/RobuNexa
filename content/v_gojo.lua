@@ -14,24 +14,24 @@ AddModule(function()
 	-- Map Gojo movement slots to real .anim files already present in this repository.
 	-- The Gojo .rbxm files are model assets, not files AnimLib.Track.fromfile can parse directly.
 	m.Assets = {
-		"GojoIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoIdle.anim",
-		"Sokamona.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Sokamona.anim",
-		"GojoWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoWalk.anim",
-		"GojoJump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoJump.anim",
-		"GojoLapseBlue.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoLapseBlue.anim",
-		"CursedTechniqueRed.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/CursedTechniqueRed.anim",
-		"RedReversal.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/RedReversal.anim",
-		"HollowPurple.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/HollowPurple.anim",
+		"GojoIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoIdle.anim",
+		"Sokamona.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/Sokamona.anim",
+		"GojoWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoWalk.anim",
+		"GojoJump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoJump.anim",
+		"GojoLapseBlue.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/GojoLapseBlue.anim",
+		"CursedTechniqueRed.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/CursedTechniqueRed.anim",
+		"RedReversal.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/RedReversal.anim",
+		"HollowPurple.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/Gojo/HollowPurple.anim",
 	}
 	local animationFiles = {
-		Sokamona = "Sokamona.anim",
-		Idle = "GojoIdle.anim",
-		Walk = "GojoWalk.anim",
-		Run = "GojoWalk.anim",
-		Jump = "GojoJump.anim",
-		Blue = "GojoLapseBlue.anim",
-		Red = "CursedTechniqueRed.anim",
-		Purple = "HollowPurple.anim",
+		Sokamona = "Gojo/Sokamona.anim",
+		Idle = "Gojo/GojoIdle.anim",
+		Walk = "Gojo/GojoWalk.anim",
+		Run = "Gojo/GojoWalk.anim",
+		Jump = "Gojo/GojoJump.anim",
+		Blue = "Gojo/GojoLapseBlue.anim",
+		Red = "Gojo/CursedTechniqueRed.anim",
+		Purple = "Gojo/HollowPurple.anim",
 	}
 	local abilityNames = { "Blue", "Red", "Purple", "Infinity", "Flight" }
 	local activeFigure, humanoid, root
