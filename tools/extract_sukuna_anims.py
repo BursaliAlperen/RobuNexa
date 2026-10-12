@@ -93,6 +93,9 @@ def main():
     for source_name, preferred, output_name in ASSETS:
         source = CONTENT / source_name
         if not source.is_file():
+            if output_name == "Cleave.anim" and (OUT / output_name).is_file():
+                print(f"Source {source_name} has been cleaned up; keeping existing converted {output_name}.")
+                continue
             raise SystemExit(f"Missing source model: {source}")
         converted = converted_dir / (source.stem + ".rbxmx")
         subprocess.run([str(ROOT / "target/release/rbx_util"), "convert", str(source), str(converted)], cwd=ROOT, check=True)
@@ -112,8 +115,9 @@ def main():
         output.write_bytes(binary)
         print(f"Extracted {source_name} [{sequence_name(chosen)}]: {count} keyframes -> {output.relative_to(ROOT)} ({len(binary)} bytes)")
         total += 1
-    if total != len(ASSETS):
-        raise SystemExit(f"Only extracted {total}/{len(ASSETS)} animations")
+    if total == 0:
+        print("No source RBXM files remain; existing converted .anim files were preserved.")
+        return
     print(f"Successfully extracted {total} valid NAM AnimLib .anim binary files.")
 
 if __name__ == "__main__":
