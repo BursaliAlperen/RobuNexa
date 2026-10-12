@@ -1,21 +1,37 @@
 #!/usr/bin/env python3
-"""Convert root-level animation RBXM files to NAM AnimLib .anim files.
+"""Convert the Gojo/movement RBXM KeyframeSequences into NAM AnimLib .anim files.
 
-Known Gojo movement/skill clips are written to content/Gojo so the module's
-raw URLs and AssetGetPathFromFilename paths match. Other root-level RBXMs that
-contain a KeyframeSequence are exported to content/animations/.
+Inputs live in content/models (not the content root). Outputs are placed in
+content/animations/Gojo because source/reanim.lua downloads .anim files from
+that repository directory.
 """
 from __future__ import annotations
 
-import re
 import struct
 from pathlib import Path
 
 from rbxm_parser import parse_rbxm_bytes
 
-CONTENT = Path("content")
-GOJO_OUT = CONTENT / "Gojo"
-OTHER_OUT = CONTENT / "animations"
+ROOT = Path(__file__).resolve().parents[1]
+CONTENT = ROOT / "content"
+OUT = CONTENT / "animations" / "Gojo"
+
+# Exact repository paths -> stable output names.
+SOURCES = {
+    "models/Gojo/Gojo Idle.rbxm": "GojoIdle.anim",
+    "models/Gojo/Gojo Walk.rbxm": "GojoWalk.anim",
+    "models/Gojo/Gojo Run.rbxm": "GojoRun.anim",
+    "models/Run.rbxm": "GojoRun.anim",
+    "models/Gojo/Run.rbxm": "GojoRun.anim",
+    "models/Jump.rbxm": "GojoJump.anim",
+    "models/Gojo/Gojo Jump.rbxm": "GojoJump.anim",
+    "models/Fall.rbxm": "GojoFall.anim",
+    "models/Gojo/Gojo Fall.rbxm": "GojoFall.anim",
+    "models/Gojo/Gojo Lapse Blue.rbxm": "GojoLapseBlue.anim",
+    "models/Gojo/Cursed Technique Red.rbxm": "CursedTechniqueRed.anim",
+    "models/Gojo/Red Reversal.rbxm": "RedReversal.anim",
+    "models/Gojo/Hollow Purple.rbxm": "HollowPurple.anim",
+}
 
 EASING_STYLE = {
     0: "Linear", 1: "Sine", 2: "Back", 3: "Quad", 4: "Quart",
@@ -24,34 +40,11 @@ EASING_STYLE = {
 }
 EASING_DIRECTION = {0: "In", 1: "Out", 2: "InOut"}
 
-# normalized source stem -> target filename in content/Gojo/
-GOJO_NAMES = {
-    "gojoidle": "GojoIdle.anim", "idle": "GojoIdle.anim",
-    "gojowalk": "GojoWalk.anim", "walk": "GojoWalk.anim",
-    "gojorun": "GojoRun.anim", "run": "GojoRun.anim",
-    "gojosprint": "GojoRun.anim", "sprint": "GojoRun.anim",
-    "gojojump": "GojoJump.anim", "jump": "GojoJump.anim",
-    "gojofall": "GojoFall.anim", "fall": "GojoFall.anim",
-    "freefall": "GojoFall.anim", "gojofreefall": "GojoFall.anim",
-    "gojolapseblue": "GojoLapseBlue.anim", "lapseblue": "GojoLapseBlue.anim",
-    "cursedtechniquered": "CursedTechniqueRed.anim",
-    "redreversal": "RedReversal.anim",
-    "hollowpurple": "HollowPurple.anim",
-    "sokamona": "Sokamona.anim",
-}
-
 
 def descendants(node):
     for child in getattr(node, "children", []):
         yield child
         yield from descendants(child)
-
-
-def normalized_stem(path: Path) -> str:
-    stem = re.sub(r"[^a-z0-9]", "", path.stem.lower())
-    if stem.endswith("animation"):
-        stem = stem[:-9]
-    return stem
 
 
 def u16_string(value: str) -> bytes:
@@ -77,13 +70,18 @@ def convert(data: bytes, source_name: str) -> bytes:
     for root in model.tree:
         if root.class_name == "KeyframeSequence":
             sequences.append(root)
-        sequences.extend(x for x in descendants(root) if x.class_name == "KeyframeSequence")
+        sequences.extend(
+            item for item in descendants(root)
+            if item.class_name == "KeyframeSequence"
+        )
     if not sequences:
         raise ValueError(f"{source_name}: no KeyframeSequence found in RBXM")
 
     sequence = max(
         sequences,
-        key=lambda item: len([child for child in item.children if child.class_name == "Keyframe"]),
+        key=lambda item: len([
+            child for child in item.children if child.class_name == "Keyframe"
+        ]),
     )
     keyframes = sorted(
         (item for item in sequence.children if item.class_name == "Keyframe"),
@@ -112,51 +110,36 @@ def convert(data: bytes, source_name: str) -> bytes:
     return bytes(out)
 
 
-def target_for(source: Path) -> Path:
-    stem = normalized_stem(source)
-    gojo_name = GOJO_NAMES.get(stem)
-    if gojo_name:
-        return GOJO_OUT / gojo_name
-    safe_name = re.sub(r"[^A-Za-z0-9_-]+", "", source.stem).strip("_-") or "Animation"
-    return OTHER_OUT / f"{safe_name}.anim"
-
-
 def main():
-    CONTENT.mkdir(parents=True, exist_ok=True)
-    sources = sorted(CONTENT.glob("*.rbxm"), key=lambda p: (0 if p.stem.lower().startswith("gojo") else 1, p.name.lower()))
-    if not sources:
-        print("No root-level content/*.rbxm files found; nothing to convert.")
-        return
-
-    written_targets = set()
+    OUT.mkdir(parents=True, exist_ok=True)
+    converted = 0
+    missing = []
     failures = []
-    for source in sources:
-        target = target_for(source)
-        # Prefer explicitly Gojo-named files over generic Run/Walk/Jump/Fall
-        # aliases when both versions are present in the same repository.
-        if target in written_targets:
-            print(f"SKIP {source}: {target} already supplied by a higher-priority source")
+    for relative, output_name in SOURCES.items():
+        source = CONTENT / relative
+        if not source.is_file():
+            missing.append(relative)
             continue
         try:
             result = convert(source.read_bytes(), source.name)
             if len(result) < 16:
                 raise ValueError("converted data unexpectedly small")
-            target.parent.mkdir(parents=True, exist_ok=True)
+            target = OUT / output_name
             target.write_bytes(result)
-            written_targets.add(target)
-            print(f"{source} -> {target} ({len(result)} bytes)")
+            converted += 1
+            print(f"{source.relative_to(ROOT)} -> {target.relative_to(ROOT)} ({len(result)} bytes)")
         except Exception as exc:
-            # RBXM files may also be models/accessories. Do not abort all
-            # animation conversion because one file has no KeyframeSequence.
-            failures.append(f"{source.name}: {exc}")
-            print(f"SKIP {source.name}: {exc}")
+            failures.append(f"{relative}: {exc}")
+            print(f"ERROR {relative}: {exc}")
 
-    if not written_targets:
-        raise RuntimeError("No RBXM animations were converted. Check that uploaded files contain KeyframeSequence instances.")
+    if missing:
+        print("Optional/missing source RBXM files:")
+        for path in missing:
+            print(f"  - {path}")
     if failures:
-        print("Files skipped (not animation sequences or invalid RBXM):")
-        for failure in failures:
-            print(f"  - {failure}")
+        raise RuntimeError("Some RBXM files could not be converted: " + "; ".join(failures))
+    if not converted:
+        raise RuntimeError("No Gojo/movement RBXM files were found under content/models.")
 
 
 if __name__ == "__main__":
