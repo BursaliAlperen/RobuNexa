@@ -22,33 +22,40 @@ AddModule(function()
             key = "shrine",
             label = "Malevolent Shrine",
             hints = {"malevolent shrine"},
-            hiddenHeight = 3600,
+            hiddenHeight = 0,
         },
         [124144353587446] = {
             key = "furnace",
             label = "Fuga Furnace",
             hints = {"fuga furnace"},
-            hiddenHeight = 4000,
+            hiddenHeight = 0,
         },
         [100475161263482] = {
             key = "cleaveAura",
             label = "Cleave and Dismantle Aura",
             hints = {"cleave and dismantle", "dismantle animated aura"},
-            hiddenHeight = 3200,
+            hiddenHeight = 0,
         },
         [97087028126781] = {
             key = "whiteSlashes",
             label = "White Domain Slashes",
             hints = {"white domain", "expension slashes", "expansion slashes"},
-            hiddenHeight = 3400,
+            hiddenHeight = 0,
         },
     }
 
     local EFFECT_IDS = {100475161263482, 97087028126781}
     local FINGER_ID = 18762839664
     local activeFigure, root
-    local hud, domainButton, cleaveButton, dismantleButton, fuugaButton
+    local hud
+    local abilityTools = {}
+    local equippedAbilityTool
     local inventoryTool
+    local activateAbility
+    local abilityCooldowns = {Domain = 12, Cleave = 3, Dismantle = 2.5, Fuuga = 8}
+    local abilityReadyAt = {}
+    local targetMarker
+    local fuugaTargetPosition
     local domainStartedAt = 0
     local cutsceneActive = false
     local savedCameraType, savedCameraSubject, savedCameraCFrame
@@ -380,15 +387,15 @@ AddModule(function()
 
     local function effectCenter()
         if not root then return CFrame.new(0, 500, 0) end
-        -- The actual accessory meshes are deliberately staged far from Sukuna.
-        return root.CFrame * CFrame.new(0, 4, -320)
+        return root.CFrame * CFrame.new(0, 2, -5)
     end
 
     local function applyAccessoryPositions()
         if not root or not root.Parent then return end
         local t = os.clock()
-        local center = root.CFrame * CFrame.new(0, 4, -22)
-        local hiddenCenter = root.CFrame * CFrame.new(0, 0, -320)
+        -- Keep accessories close to the rig; inactive targets are hidden just below the floor.
+        local center = root.CFrame * CFrame.new(0, 2, -5)
+        local hiddenCenter = root.CFrame * CFrame.new(0, -28, 0)
         local active = domainEnabled or os.clock() < cleaveUntil
         local fast = os.clock() < cleaveUntil
         local rate = fast and 7.5 or 1.8
@@ -415,10 +422,10 @@ AddModule(function()
             local pulse = math.sin(t * rate)
             local sweep = math.cos(t * rate * 1.13)
             setHatWorldCFrame(100475161263482,
-                center * CFrame.new(pulse * (fast and 8 or 3), 1.5 + math.abs(pulse) * 2, sweep * (fast and 8 or 3))
+                center * CFrame.new(pulse * (fast and 2.8 or 1.4), 1 + math.abs(pulse) * 1.2, sweep * (fast and 2.8 or 1.4))
                     * CFrame.Angles(math.rad(pulse * 10), t * (fast and 3.5 or 0.45), math.rad(sweep * 8)))
             setHatWorldCFrame(97087028126781,
-                center * CFrame.new(sweep * (fast and 12 or 5), 4 + pulse * 2, pulse * (fast and 12 or 5))
+                center * CFrame.new(sweep * (fast and 3.5 or 1.8), 2.5 + pulse, pulse * (fast and 3.5 or 1.8))
                     * CFrame.Angles(math.rad(sweep * 18), t * (fast and 8 or 1.1), math.rad(pulse * 15)))
         else
             setHatWorldCFrame(100475161263482,
@@ -429,19 +436,17 @@ AddModule(function()
     end
 
     local function refreshButtons()
-        if domainButton then
-            domainButton.Text = domainEnabled and "DOMAIN ON" or "DOMAIN"
-            domainButton.BackgroundColor3 = domainEnabled
-                and Color3.fromRGB(126, 24, 31) or Color3.fromRGB(35, 27, 31)
-        end
-        if cleaveButton then
-            cleaveButton.Text = os.clock() < cleaveUntil and "CLEAVE *" or "CLEAVE"
-            cleaveButton.BackgroundColor3 = os.clock() < cleaveUntil
-                and Color3.fromRGB(150, 35, 40) or Color3.fromRGB(35, 27, 31)
+        -- Ability cooldown state is reflected in each inventory Tool tooltip.
+        for name, tool in pairs(abilityTools) do
+            if tool and tool.Parent then
+                local remaining = math.max(0, (abilityReadyAt[name] or 0) - os.clock())
+                tool.ToolTip = remaining > 0 and string.format("%s cooldown: %.1fs", name, remaining)
+                    or ("Click/tap a map location to cast " .. name)
+            end
         end
     end
 
-    local function playDomainCutscene()
+    local function playDomainCutscene(targetPosition)
         if cutsceneActive or not root then return end
         local camera = workspace.CurrentCamera
         if not camera then return end
@@ -449,35 +454,139 @@ AddModule(function()
         savedCameraType, savedCameraSubject, savedCameraCFrame = camera.CameraType, camera.CameraSubject, camera.CFrame
         camera.CameraType = Enum.CameraType.Scriptable
         local focus = root.Position + Vector3.new(0, 3, 0)
-        camera.CFrame = CFrame.lookAt(focus + root.CFrame.LookVector * -18 + Vector3.new(0, 7, 0), focus)
-        local target = CFrame.lookAt(focus + root.CFrame.LookVector * -10 + Vector3.new(0, 4, 0), focus)
-        game:GetService("TweenService"):Create(camera, TweenInfo.new(1.15, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut), {CFrame = target}):Play()
-        task.delay(2.5, function()
+        camera.CFrame = CFrame.lookAt(focus + root.CFrame.LookVector * -12 + Vector3.new(0, 5, 0), focus)
+        game:GetService("TweenService"):Create(camera, TweenInfo.new(0.85, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut), {
+            CFrame = CFrame.lookAt(focus + root.CFrame.LookVector * -7 + Vector3.new(0, 3, 0), focus)
+        }):Play()
+        task.delay(1.05, function()
+            if not cutsceneActive or not targetPosition then return end
+            local currentCamera = workspace.CurrentCamera
+            if currentCamera then
+                game:GetService("TweenService"):Create(currentCamera, TweenInfo.new(0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+                    CFrame = CFrame.lookAt(targetPosition + Vector3.new(0, 9, 14), targetPosition)
+                }):Play()
+            end
+        end)
+        task.delay(2.6, function()
             if not cutsceneActive then return end
             local currentCamera = workspace.CurrentCamera
             if currentCamera then
                 currentCamera.CameraType = savedCameraType or Enum.CameraType.Custom
                 currentCamera.CameraSubject = savedCameraSubject
+                if savedCameraCFrame then currentCamera.CFrame = savedCameraCFrame end
             end
             cutsceneActive = false
         end)
     end
 
+    local function getClickedWorldPosition()
+        local player = game:GetService("Players").LocalPlayer
+        local camera = workspace.CurrentCamera
+        local mouse = player and player:GetMouse()
+        local position
+        pcall(function() if mouse and mouse.Hit then position = mouse.Hit.Position end end)
+        if position and camera and (position - camera.CFrame.Position).Magnitude < 1500 then return position end
+        if camera then
+            local viewport = camera.ViewportSize
+            local ray = camera:ViewportPointToRay(viewport.X * 0.5, viewport.Y * 0.5)
+            local params = RaycastParams.new()
+            params.FilterType = Enum.RaycastFilterType.Exclude
+            params.FilterDescendantsInstances = {activeFigure, getLocalCharacter(), targetMarker}
+            local result = workspace:Raycast(ray.Origin, ray.Direction * 700, params)
+            if result then return result.Position end
+            return ray.Origin + ray.Direction * 80
+        end
+        return root and (root.Position + root.CFrame.LookVector * 24) or Vector3.new(0, 5, 0)
+    end
+
+    local function showTargetMarker(position, abilityName)
+        if targetMarker then targetMarker:Destroy() end
+        local folder = Instance.new("Folder")
+        folder.Name = "SukunaTargetMarker_Local"
+        folder.Parent = workspace
+        targetMarker = folder
+        local ring = Instance.new("Part")
+        ring.Name = "TargetRing"
+        ring.Shape = Enum.PartType.Cylinder
+        ring.Size = Vector3.new(0.16, 5, 5)
+        ring.Material = Enum.Material.Neon
+        ring.Color = Color3.fromRGB(195, 30, 50)
+        ring.Transparency = 0.12
+        ring.Anchored = true
+        ring.CanCollide, ring.CanTouch, ring.CanQuery = false, false, false
+        ring.CFrame = CFrame.new(position + Vector3.new(0, 0.12, 0)) * CFrame.Angles(0, 0, math.rad(90))
+        ring.Parent = folder
+        local finger = Instance.new("Part")
+        finger.Name = "ClientFingerMarker"
+        finger.Size = Vector3.new(0.32, 1.3, 0.32)
+        finger.Material = Enum.Material.Neon
+        finger.Color = Color3.fromRGB(255, 45, 68)
+        finger.Anchored = true
+        finger.CanCollide, finger.CanTouch, finger.CanQuery = false, false, false
+        finger.CFrame = CFrame.new(position + Vector3.new(0, 1.15, 0)) * CFrame.Angles(0, 0, math.rad(18))
+        finger.Parent = folder
+        local light = Instance.new("PointLight")
+        light.Color, light.Range, light.Brightness = finger.Color, 12, 2
+        light.Parent = finger
+        task.delay(2.8, function()
+            if targetMarker == folder then targetMarker = nil end
+            if folder.Parent then folder:Destroy() end
+        end)
+        notify(abilityName .. ": hedef client tarafında işaretlendi.")
+    end
+
+    local function playSkillAnimation(animationId)
+        local humanoid = activeFigure and activeFigure:FindFirstChildOfClass("Humanoid")
+        if not humanoid then return end
+        pcall(function()
+            local animator = humanoid:FindFirstChildOfClass("Animator")
+            if not animator then animator = Instance.new("Animator"); animator.Parent = humanoid end
+            local animation = Instance.new("Animation")
+            animation.AnimationId = "rbxassetid://" .. tostring(animationId)
+            local track = animator:LoadAnimation(animation)
+            track.Priority = Enum.AnimationPriority.Action
+            track:Play(0.1, 1, 1)
+            game:GetService("Debris"):AddItem(animation, 8)
+            task.delay(6, function() pcall(function() track:Stop(0.15); track:Destroy() end) end)
+        end)
+    end
+
     local function createInventoryTool()
         local player = game:GetService("Players").LocalPlayer
-        local backpack = player and player:FindFirstChildOfClass("Backpack")
-        if not backpack then return end
-        local old = backpack:FindFirstChild("Sukuna")
-        if old then old:Destroy() end
-        inventoryTool = Instance.new("Tool")
-        inventoryTool.Name = "Sukuna"
-        inventoryTool.ToolTip = "Click to toggle Malevolent Shrine"
-        inventoryTool.RequiresHandle = false
-        inventoryTool.CanBeDropped = false
-        inventoryTool.Activated:Connect(function()
-            if domainButton then domainButton:Activate() end
-        end)
-        inventoryTool.Parent = backpack
+        local backpack = player and (player:FindFirstChildOfClass("Backpack") or player:WaitForChild("Backpack", 5))
+        if not backpack then notify("Backpack yok; skill Tool'ları oluşturulamadı."); return end
+        for _, name in ipairs({"Sukuna", "Domain", "Cleave", "Dismantle", "Fuuga"}) do
+            local old = backpack:FindFirstChild(name)
+            if old then old:Destroy() end
+            local characterTool = player.Character and player.Character:FindFirstChild(name)
+            if characterTool and characterTool:IsA("Tool") then characterTool:Destroy() end
+        end
+        for _, name in ipairs({"Domain", "Cleave", "Dismantle", "Fuuga"}) do
+            local tool = Instance.new("Tool")
+            tool.Name = name
+            tool.ToolTip = "Click/tap a map location to cast " .. name
+            tool.RequiresHandle = false
+            tool.CanBeDropped = false
+            abilityTools[name] = tool
+            table.insert(connections, tool.Equipped:Connect(function()
+                equippedAbilityTool = name
+                notify(name .. " hazır. Haritada hedefe tıkla.")
+            end))
+            table.insert(connections, tool.Unequipped:Connect(function()
+                if equippedAbilityTool == name then equippedAbilityTool = nil end
+            end))
+            table.insert(connections, tool.Activated:Connect(function()
+                if activateAbility then activateAbility(name, getClickedWorldPosition()) end
+            end))
+            tool.Parent = backpack
+        end
+        table.insert(connections, UserInputService.InputBegan:Connect(function(input, processed)
+            if processed or not equippedAbilityTool or not activateAbility then return end
+            if input.UserInputType == Enum.UserInputType.MouseButton2 then
+                activateAbility(equippedAbilityTool, getClickedWorldPosition())
+            end
+        end))
+        notify("Skill Tool'ları hazır: Domain, Cleave, Dismantle, Fuuga. Aksesuarlar yakına sabitlendi.")
     end
 
     local function announceFinger(text)
@@ -567,7 +676,9 @@ AddModule(function()
         local character = getLocalCharacter()
         local hand = activeFigure:FindFirstChild("RightHand") or activeFigure:FindFirstChild("Right Arm")
             or activeFigure:FindFirstChild("RightLowerArm") or root
-        local forward = root.CFrame.LookVector
+        local targetPosition = fuugaTargetPosition
+        local forward = targetPosition and (targetPosition - root.Position).Magnitude > 2
+            and (targetPosition - root.Position).Unit or root.CFrame.LookVector
         local position = (hand and hand:IsA("BasePart") and hand.Position or root.Position)
             + forward * 1.4 + Vector3.new(0, 0.25, 0)
         local started = os.clock()
@@ -706,128 +817,50 @@ AddModule(function()
         end)
     end
 
-    local function createHUD()
-        local player = game:GetService("Players").LocalPlayer
-        local playerGui = player and player:FindFirstChildOfClass("PlayerGui")
-        if not playerGui then
-            task.spawn(function()
-                for _ = 1, 24 do
-                    task.wait(0.25)
-                    if activeFigure then createHUD(); return end
-                end
-            end)
+    activateAbility = function(name, targetPosition)
+        if not activeFigure or not activeFigure.Parent or not root then
+            notify("Reanimation karakteri hazır değil.")
             return
         end
-        local old = playerGui:FindFirstChild("SukunaAbilityHUD")
-        if old then old:Destroy() end
-        table.clear(connections)
-
-        hud = Instance.new("ScreenGui")
-        hud.Name = "SukunaAbilityHUD"
-        hud.ResetOnSpawn = false
-        hud.IgnoreGuiInset = true
-        hud.DisplayOrder = 50
-        hud.Parent = playerGui
-
-        local panel = Instance.new("Frame")
-        panel.Name = "AbilityButtons"
-        panel.AnchorPoint = Vector2.new(1, 1)
-        panel.Position = UDim2.new(1, -10, 1, -112)
-        panel.Size = UDim2.fromOffset(314, 40)
-        panel.BackgroundTransparency = 1
-        panel.Parent = hud
-
-        local layout = Instance.new("UIListLayout")
-        layout.FillDirection = Enum.FillDirection.Horizontal
-        layout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-        layout.VerticalAlignment = Enum.VerticalAlignment.Center
-        layout.Padding = UDim.new(0, 6)
-        layout.Parent = panel
-
-        local function makeButton(name, text, order)
-            local button = Instance.new("TextButton")
-            button.Name = name
-            button.LayoutOrder = order
-            button.Size = UDim2.fromOffset(72, 36)
-            button.BackgroundColor3 = Color3.fromRGB(35, 27, 31)
-            button.BackgroundTransparency = 0.08
-            button.BorderSizePixel = 0
-            button.Text = text
-            button.TextColor3 = Color3.fromRGB(255, 242, 242)
-            button.TextSize = 10
-            button.Font = Enum.Font.GothamBold
-            button.TextWrapped = true
-            button.AutoButtonColor = true
-            button.Parent = panel
-            local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0, 8)
-            corner.Parent = button
-            local stroke = Instance.new("UIStroke")
-            stroke.Color = Color3.fromRGB(210, 74, 80)
-            stroke.Thickness = 1
-            stroke.Transparency = 0.2
-            stroke.Parent = button
-            return button
+        local now = os.clock()
+        local readyAt = abilityReadyAt[name] or 0
+        if now < readyAt then
+            notify(string.format("%s cooldown: %.1f saniye", name, readyAt - now))
+            return
         end
-
-        domainButton = makeButton("DomainButton", "DOMAIN", 1)
-        cleaveButton = makeButton("CleaveButton", "CLEAVE", 2)
-        dismantleButton = makeButton("DismantleButton", "DISMANTLE", 3)
-        fuugaButton = makeButton("FuugaButton", "FUUGA", 4)
-
-        table.insert(connections, fuugaButton.Activated:Connect(function()
-            if not activeFigure or not activeFigure.Parent or fuugaBusy then return end
-            refreshAccessories()
-            if not presentIds[124144353587446] then
-                notify("Fuuga için Fuga Furnace aksesuarını tak.")
-                return
-            end
-            launchFuuga()
-        end))
-
-        table.insert(connections, domainButton.Activated:Connect(function()
-            if not activeFigure or not activeFigure.Parent then return end
-            refreshAccessories()
-            local slashEquipped = presentIds[100475161263482] or presentIds[97087028126781]
-            if not slashEquipped then
-                notify("Domain için Cleave Aura veya White Domain Slashes aksesuarı takılı olmalı.")
-                return
-            end
+        refreshAccessories()
+        local slashEquipped = presentIds[100475161263482] or presentIds[97087028126781]
+        if name == "Domain" and not slashEquipped then
+            notify("Domain için Cleave Aura veya White Domain Slashes aksesuarı tak.")
+            return
+        elseif (name == "Cleave" or name == "Dismantle") and not slashEquipped then
+            notify(name .. " için slash aksesuarlarından biri takılı olmalı.")
+            return
+        elseif name == "Fuuga" and not presentIds[124144353587446] then
+            notify("Fuuga için Fuga Furnace aksesuarını tak.")
+            return
+        end
+        targetPosition = targetPosition or (root.Position + root.CFrame.LookVector * 24)
+        showTargetMarker(targetPosition, name)
+        playDomainCutscene(targetPosition)
+        abilityReadyAt[name] = now + (abilityCooldowns[name] or 3)
+        if name == "Domain" then
             domainEnabled = not domainEnabled
-            if domainEnabled then
-                domainStartedAt = os.clock()
-                playDomainCutscene()
-                notify("Malevolent Shrine açıldı!")
-            else
-                notify("Domain kapatıldı.")
-            end
+            if domainEnabled then domainStartedAt = os.clock(); notify("Malevolent Shrine açıldı.") else notify("Domain kapatıldı.") end
             applyAccessoryPositions()
-            refreshButtons()
-        end))
-
-        table.insert(connections, dismantleButton.Activated:Connect(function()
-            if not activeFigure or not activeFigure.Parent then return end
-            refreshAccessories()
-            if not (presentIds[100475161263482] or presentIds[97087028126781]) then
-                notify("Dismantle için slash aksesuarlarından biri takılı olmalı.")
-                return
-            end
-            cleaveUntil = os.clock() + 1.6
-            applyAccessoryPositions()
-            refreshButtons()
-        end))
-        table.insert(connections, cleaveButton.Activated:Connect(function()
-            if not activeFigure or not activeFigure.Parent then return end
-            refreshAccessories()
-            local slashEquipped = presentIds[100475161263482] or presentIds[97087028126781]
-            if not slashEquipped then
-                notify("Cleave için Cleave Aura veya White Domain Slashes aksesuarı takılı olmalı.")
-                return
-            end
+        elseif name == "Cleave" then
+            playSkillAnimation(131873641508713)
             cleaveUntil = os.clock() + 2.5
             applyAccessoryPositions()
-            refreshButtons()
-        end))
+        elseif name == "Dismantle" then
+            playSkillAnimation(131873641508713)
+            cleaveUntil = os.clock() + 1.6
+            applyAccessoryPositions()
+        elseif name == "Fuuga" then
+            fuugaTargetPosition = targetPosition
+            playSkillAnimation(131873641508713)
+            launchFuuga()
+        end
         refreshButtons()
     end
 
@@ -854,7 +887,6 @@ AddModule(function()
         refreshAccessories()
         ensureHatOverrides()
         applyAccessoryPositions()
-        createHUD()
         createInventoryTool()
         createFingerSearch()
     end
@@ -929,8 +961,23 @@ AddModule(function()
         local playerGui = player and player:FindFirstChildOfClass("PlayerGui")
         local old = playerGui and playerGui:FindFirstChild("SukunaAbilityHUD")
         if old then old:Destroy() end
+        local backpack = player and player:FindFirstChildOfClass("Backpack")
+        if backpack then
+            for _, name in ipairs({"Domain", "Cleave", "Dismantle", "Fuuga"}) do
+                local tool = backpack:FindFirstChild(name)
+                if tool then tool:Destroy() end
+            end
+        end
+        if player and player.Character then
+            for _, name in ipairs({"Domain", "Cleave", "Dismantle", "Fuuga"}) do
+                local tool = player.Character:FindFirstChild(name)
+                if tool and tool:IsA("Tool") then tool:Destroy() end
+            end
+        end
 
-        domainButton, cleaveButton, dismantleButton, fuugaButton = nil, nil, nil, nil
+        abilityTools = {}
+        equippedAbilityTool = nil
+        if targetMarker then targetMarker:Destroy(); targetMarker = nil end
         activeFigure, root = nil, nil
         accessoryInstances, presentIds, overrideById = {}, {}, {}
         lastHatCFrames = {}
