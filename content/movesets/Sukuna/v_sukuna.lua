@@ -13,7 +13,7 @@ AddModule(function()
     -- Match Gojo's asset loader contract: logical local path @ raw GitHub URL.
     -- These are NAM AnimLib binary .anim files, not .rbxm models.
     m.Assets = {
-        "Sukuna/Cleave.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Cleave.anim",
+        "Sukuna/Combo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Combo.anim",
         "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
         "Sukuna/Walk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Walk.anim",
     }
@@ -795,7 +795,6 @@ AddModule(function()
             cleaveUntil = now + 1.2
             setHatWorldCFrame(101090904148116, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
             playSkillAnimation()
-            playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
             showTargetMarker(targetPosition, "Cleave")
             chatAbilityMessage("Cleave!")
             task.delay(1.35, function()
@@ -806,9 +805,13 @@ AddModule(function()
             abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
             playSkillAnimation()
-            -- Keep each animation independent. These files are optional until uploaded;
-            -- playBundledAnimation reports a missing file without blocking the whole moveset.
-            playBundledAnimation(isCombo and "Sukuna/Combo.anim" or "Sukuna/Dismantle.anim", isCombo and "combo" or "dismantle", false)
+            -- Combo uses the former Cleave animation, renamed to Combo.anim.
+            -- Dismantle remains separate and optional until its own file is supplied.
+            if isCombo then
+                playBundledAnimation("Sukuna/Combo.anim", "combo", false)
+            else
+                playBundledAnimation("Sukuna/Dismantle.anim", "dismantle", false)
+            end
             showTargetMarker(targetPosition, isCombo and ("Combo " .. name:sub(-1)) or ("Dismantle " .. name:sub(-1)))
             -- Combo variants produce three staggered local slash pulses without chat output.
             if isCombo then
