@@ -137,6 +137,11 @@ AddModule(function()
             notify("Hat reanimation karakteri bulunamadı.")
             return
         end
+        local equippedCount = checkAccessories(figure)
+        if equippedCount < 1 then
+            notify("Domain için verdiğin 4 aksesuar ID'sinden en az biri karakterde takılı olmalı.")
+            return
+        end
         clearDomain()
         domainGeneration += 1
         local generation = domainGeneration
