@@ -9,8 +9,8 @@ end
 AddModule(function()
 	local m = {}
 	m.ModuleType = "MOVESET"
-	m.Name = "gojo"
-	m.Description = "Gojo moveset scaffold: Blue, Red, Hollow Purple, Infinity and Flight."
+	m.Name = "Gojo"
+	m.Description = "Gojo moveset: Lapse Blue, Red Reversal, Hollow Purple, Infinity and Flight."
 	m.Assets = {
 		"GojoIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoIdle.anim",
 		"GojoWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoWalk.anim",
