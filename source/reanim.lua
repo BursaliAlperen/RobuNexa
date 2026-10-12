@@ -296,6 +296,72 @@ UIMainFrame.BackgroundTransparency = 1
 UIMainFrame.BorderSizePixel = 0
 UIMainFrame.ZIndex = 2147483647
 
+local function ContainsSukunaIdentity(...)
+	for index = 1, select("#", ...) do
+		local value = select(index, ...)
+		if value ~= nil and string.find(string.lower(tostring(value)), "sukuna", 1, true) then
+			return true
+		end
+	end
+	return false
+end
+
+local function IsSukunaModule(module, fileName, source)
+	if ContainsSukunaIdentity(fileName, source) then
+		return true
+	end
+	if type(module) ~= "table" then
+		return false
+	end
+	return ContainsSukunaIdentity(
+		module.Name,
+		module.Description,
+		module.InternalName,
+		module.Id,
+		module.ModuleName,
+		module.FileName,
+		module.Filename
+	)
+end
+
+local function ContainsSukunaData(value, seen)
+	if type(value) == "string" then
+		return ContainsSukunaIdentity(value)
+	end
+	if type(value) ~= "table" then
+		return false
+	end
+	seen = seen or {}
+	if seen[value] then return false end
+	seen[value] = true
+	for key, item in pairs(value) do
+		if ContainsSukunaData(key, seen) or ContainsSukunaData(item, seen) then
+			return true
+		end
+	end
+	return false
+end
+
+local function PurgeSukunaCache(folder, onRemove)
+	local ok, cachedFiles = pcall(listfiles, folder)
+	if not ok or type(cachedFiles) ~= "table" then return end
+	for _, cachedPath in ipairs(cachedFiles) do
+		local fileName = string.match(cachedPath, "([^/\\\\]+)$") or cachedPath
+		local removeFile = ContainsSukunaIdentity(fileName, cachedPath)
+		if not removeFile then
+			local isFileOk, exists = pcall(isfile, cachedPath)
+			if isFileOk and exists then
+				local readOk, cachedText = pcall(readfile, cachedPath)
+				removeFile = readOk and type(cachedText) == "string" and ContainsSukunaIdentity(cachedText)
+			end
+		end
+		if removeFile then
+			pcall(delfile, cachedPath)
+			if onRemove then pcall(onRemove, fileName) end
+		end
+	end
+end
+
 local SaveData = {}
 do
 	pcall(makefolder, "NAMReanim")
@@ -307,13 +373,19 @@ do
 		if legacySaveOk and legacySave then pcall(writefile, SaveDataFilename, legacySave) end
 	end
 	pcall(makefolder, "NAMReanim/Modules")
+	-- Remove stale copies before importing legacy modules or loading any modules.
+	PurgeSukunaCache("NAMReanim/Modules")
+	PurgeSukunaCache("NAMReanim/BuiltinModules")
+	PurgeSukunaCache(LegacyRoot .. "/Modules")
 	local legacyModulesOk, legacyModules = pcall(listfiles, LegacyRoot .. "/Modules")
 	if legacyModulesOk and type(legacyModules) == "table" then
 		for _, legacyPath in legacyModules do
 			local moduleName = string.match(legacyPath, "([^/]+)$")
 			if moduleName and isfile(legacyPath) and not isfile("NAMReanim/Modules/" .. moduleName) then
 				local moduleOk, moduleData = pcall(readfile, legacyPath)
-				if moduleOk and moduleData then pcall(writefile, "NAMReanim/Modules/" .. moduleName, moduleData) end
+				if moduleOk and moduleData and not IsSukunaModule(nil, moduleName, moduleData) then
+					pcall(writefile, "NAMReanim/Modules/" .. moduleName, moduleData)
+				end
 			end
 		end
 	end
@@ -322,6 +394,16 @@ do
 		s, data = pcall(HttpService.JSONDecode, HttpService, data)
 		if s and data then
 			SaveData = data
+			for _, field in ipairs({"ContentHash", "ModuleConfigs", "FavoriteDances"}) do
+				local records = SaveData[field]
+				if type(records) == "table" then
+					for key, value in pairs(records) do
+						if ContainsSukunaData(key) or ContainsSukunaData(value) then
+							records[key] = nil
+						end
+					end
+				end
+			end
 		else
 			pcall(writefile, SaveDataFilename, "{}")
 		end
@@ -7449,17 +7531,10 @@ local function GetModuleHash(m)
 	m.Hash = str
 	return str
 end
-local function AddMoveset(m)
+local function AddMoveset(m, moduleFileName, moduleSource)
 	if type(m) == "table" then
-		-- Strictly exclude Sukuna from every module source before creating a UI row.
-		local moduleIdentity = string.lower(
-			tostring(m.Name or "") .. " " ..
-			tostring(m.Description or "") .. " " ..
-			tostring(m.InternalName or "") .. " " ..
-			tostring(m.Id or "") .. " " ..
-			tostring(m.ModuleName or "")
-		)
-		if string.find(moduleIdentity, "sukuna", 1, true) then
+		-- Reject renamed copies by identity fields, originating filename and full source.
+		if IsSukunaModule(m, moduleFileName, moduleSource) then
 			return
 		end
 		if not m.Name then return end
@@ -7537,6 +7612,7 @@ local function AddMoveset(m)
 				page.Interactable = true
 			end)
 		end))
+		return true
 	end
 end
 if type(SaveData.FavoriteDances) ~= "table" then
@@ -7641,12 +7717,12 @@ local function AddDance(m)
 		end))
 	end
 end
-local function AddModule(func)
+local function AddModule(func, moduleFileName, moduleSource)
 	GiveFunctionsToFunction(func)
 	local m = func()
 	if m and type(m) == "table" then
 		if m.ModuleType == "MOVESET" then
-			AddMoveset(m)
+			return AddMoveset(m, moduleFileName, moduleSource)
 		elseif m.ModuleType == "DANCE" then
 			AddDance(m)
 		else
@@ -7656,13 +7732,17 @@ local function AddModule(func)
 		error("Module return value is not a table. Got " .. typeof(m) .. " instead.")
 	end
 end
-local function AddModules(list)
+local function AddModules(list, moduleFileName, moduleSource)
+	local addedMovesets = 0
 	if type(list) == "table" then
 		for i=1, #list do
-			AddModule(list[i])
+			if AddModule(list[i], moduleFileName, moduleSource) then
+				addedMovesets += 1
+			end
 			task.wait()
 		end
 	end
+	return addedMovesets
 end
 task.spawn(function()
 	local function SaveConfig(m)
@@ -8102,31 +8182,19 @@ local function ForceModuleReload(force)
 	InitLogsText.Text = "Init Logs -- This is where you check what happened."
 	ClearModules()
 
-	-- Purge legacy Sukuna module caches before every refresh/reload.
-	-- This handles old user modules and builtin files left by previous versions.
-	for _, folder in ipairs({"NAMReanim/Modules/", "NAMReanim/BuiltinModules/"}) do
-		local ok, cachedFiles = pcall(listfiles, folder)
-		if ok and type(cachedFiles) == "table" then
-			for _, cachedPath in ipairs(cachedFiles) do
-				local fileName = string.lower(string.match(cachedPath, "([^/\\\\]+)$") or cachedPath)
-				local removeFile = string.find(fileName, "sukuna", 1, true) ~= nil
-				if not removeFile and isfile(cachedPath) then
-					local readOk, cachedText = pcall(readfile, cachedPath)
-					if readOk and type(cachedText) == "string" then
-						removeFile = string.find(string.lower(cachedText), "sukuna", 1, true) ~= nil
-					end
-				end
-				if removeFile then
-					pcall(delfile, cachedPath)
-					InitLogsText.Text ..= "\n[LOG] Removed legacy Sukuna cache: " .. fileName
-				end
-			end
-		end
+	-- Purge old files and saved identifiers before any module is reloaded.
+	for _, folder in ipairs({"NAMReanim/Modules/", "NAMReanim/BuiltinModules/", "UhhhhhhReanim/Modules/"}) do
+		PurgeSukunaCache(folder, function(fileName)
+			InitLogsText.Text ..= "\n[LOG] Removed legacy Sukuna cache: " .. fileName
+		end)
 	end
-	if type(SaveData.ContentHash) == "table" then
-		for key in pairs(SaveData.ContentHash) do
-			if string.find(string.lower(tostring(key)), "sukuna", 1, true) then
-				SaveData.ContentHash[key] = nil
+	for _, field in ipairs({"ContentHash", "ModuleConfigs", "FavoriteDances"}) do
+		local records = SaveData[field]
+		if type(records) == "table" then
+			for key, value in pairs(records) do
+				if ContainsSukunaData(key) or ContainsSukunaData(value) then
+					records[key] = nil
+				end
 			end
 		end
 	end
@@ -8147,7 +8215,9 @@ local function ForceModuleReload(force)
 			if s and resp then
 				for _,file in resp do
 					if file.name and file.sha then
-						if SaveData.ContentHash[file.name] ~= file.sha then
+						if ContainsSukunaIdentity(file.name) then
+							SaveData.ContentHash[file.name] = nil
+						elseif SaveData.ContentHash[file.name] ~= file.sha then
 							SaveData.ContentHash[file.name] = file.sha
 							if table.find(filesofbuiltins, file.name) then
 								local path = "NAMReanim/BuiltinModules/" .. file.name
@@ -8204,30 +8274,57 @@ local function ForceModuleReload(force)
 		if s and a then exist = true end
 		if wasold then exist = false end
 		if force then exist = false end
-		local data = ""
+		-- Always fetch Gojo from GitHub; never let a stale local module replace it.
+		if x == "v_gojo.lua" then exist = false end
+		local data = nil
 		if exist then
 			InitLogsText.Text ..= "\n[LOG] Reading local VANILLA " .. x .. "..."
-			data = readfile(path)
+			local readOk, localData = pcall(readfile, path)
+			if readOk and type(localData) == "string" and #localData > 0 then
+				data = localData
+			else
+				InitLogsText.Text ..= "\n[WARN] Could not read cached VANILLA " .. x .. "; downloading a fresh copy."
+			end
 			task.wait()
 		else
 			InitLogsText.Text ..= "\n[LOG] Downloading VANILLA " .. x .. "..."
 			local content = getgithubraw(x)
-			if content then
-				pcall(writefile, path, content)
+			if type(content) == "string" and #content > 0 then
 				data = content
+				local writeOk, writeErr = pcall(writefile, path, content)
+				if not writeOk then
+					InitLogsText.Text ..= "\n[WARN] Could not cache VANILLA " .. x .. ": " .. tostring(writeErr)
+				end
 			else
-				InitLogsText.Text ..= "\n[ERROR] Failed to load VANILLA " .. x .. ": Download failed."
+				InitLogsText.Text ..= "\n[ERROR] Failed to load VANILLA " .. x .. ": GitHub download failed or returned an empty response."
 				SaveData.ContentHash[x] = nil
 			end
+		end
+		if type(data) ~= "string" or #data == 0 then
+			InitLogsText.Text ..= "\n[ERROR] Skipping VANILLA " .. x .. ": no valid module source is available."
+			continue
+		end
+		if IsSukunaModule(nil, x, data) then
+			InitLogsText.Text ..= "\n[WARN] Skipping VANILLA " .. x .. ": Sukuna identity found in its filename or source."
+			pcall(delfile, path)
+			continue
 		end
 		task.wait()
 		InitLogsText.Text ..= "\n[LOG] Loadstringing VANILLA " .. x .. "..."
 		xpcall(function()
 			local func, comperr = loadstring(data, "NAM :: VANILLA " .. x)
-			if func then
-				AddModules(func())
-			elseif comperr then
+			if not func then
 				error("COMPILE FAILED: " .. comperr)
+			end
+			local moduleList = func()
+			if type(moduleList) ~= "table" then
+				error("Module source did not return a table.")
+			end
+			local movesetsAdded = AddModules(moduleList, x, data)
+			if x == "v_gojo.lua" and movesetsAdded == 0 then
+				error("v_gojo.lua loaded, but no moveset reached AddMoveset; Gojo was not registered.")
+			elseif x == "v_gojo.lua" then
+				InitLogsText.Text ..= "\n[LOG] Gojo reached AddMoveset and was registered."
 			end
 		end, function(msg)
 			InitLogsText.Text ..= "\n[ERROR] Failed to load VANILLA " .. x .. ": See traceback below."
@@ -8237,14 +8334,23 @@ local function ForceModuleReload(force)
 	InitLogsText.Text ..= "\n[LOG] Loading user modules..."
 	for _,path in listfiles("NAMReanim/Modules/") do
 		if isfile(path) then
-			local x = path:sub(23)
+			local x = string.match(path, "([^/\\\\]+)$") or path
 			xpcall(function()
 				InitLogsText.Text ..= "\n[LOG] Reading local USER " .. x .. "..."
 				local data = readfile(path)
+				if IsSukunaModule(nil, x, data) then
+					InitLogsText.Text ..= "\n[LOG] Removing USER module containing Sukuna identity: " .. x
+					pcall(delfile, path)
+					return
+				end
 				InitLogsText.Text ..= "\n[LOG] Loadstringing USER " .. x .. "..."
 				local func, comperr = loadstring(data, "NAM :: " .. x)
 				if func then
-					AddModules(func())
+					local moduleList = func()
+					if type(moduleList) ~= "table" then
+						error("Module source did not return a table.")
+					end
+					AddModules(moduleList, x, data)
 				elseif comperr then
 					error("COMPILE FAILED: " .. comperr)
 				end
@@ -8256,8 +8362,13 @@ local function ForceModuleReload(force)
 	end
 	InitLogsText.Text ..= "\n[LOG] Refreshing Dance keybinds..."
 	RefreshKeybinds()
-	InitLogsText.Text ..= "\n[LOG] Init complete!"
-	Util.Notify("Init complete" .. (InitLogsText.Text:find("ERROR") and ", there may be errors" or ""))
+	if string.find(InitLogsText.Text, "[ERROR]", 1, true) then
+		InitLogsText.Text ..= "\n[WARN] Init finished with errors; review the log above."
+		Util.Notify("Init finished with errors; check Init Logs")
+	else
+		InitLogsText.Text ..= "\n[LOG] Init complete!"
+		Util.Notify("Init complete")
+	end
 	IsNAMFullyLoaded = true
 	if not Reanimate.Character then return end
 	Reanimate.CreateCharacter()
