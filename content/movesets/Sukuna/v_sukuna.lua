@@ -14,7 +14,10 @@ AddModule(function()
     m.Assets = {
         "Sukuna/Cleave.rbxm",
         "Sukuna/FlameArrow.rbxm",
-        "Sukuna/sukunadomain.rbxm",
+        "Sukuna/Domain Expansion: Malevolent Shrine.rbxm",
+        "Sukuna/Sukuna Laugh.rbxm",
+        "Sukuna/Walk.rbxm",
+        "Sukuna/Combo.rbxm",
     }
 
     local TARGETS = {
@@ -73,6 +76,7 @@ AddModule(function()
     local scaledMeshes = {}
     local fuugaBusy = false
     local fuugaAnimationTrack
+    local laughAnimationTrack
     local fuugaProjectile
     local fuugaAuraInstances = {}
     local STATUS_INTERVAL = 1.25
@@ -89,6 +93,89 @@ AddModule(function()
             or figure:FindFirstChild("UpperTorso")
             or figure:FindFirstChild("Head")
         return part and part:IsA("BasePart") and part or nil
+    end
+
+    -- Load a KeyframeSequence/Animation stored inside a downloaded .rbxm model.
+    -- This keeps the source assets in GitHub and avoids inventing animation IDs.
+    local function playBundledAnimation(filename, preferredName, looped)
+        if not activeFigure or not activeFigure.Parent then return false end
+        local humanoid = activeFigure:FindFirstChildOfClass("Humanoid")
+        if not humanoid then return false end
+
+        local path = AssetGetPathFromFilename(filename)
+        if not isfile or not isfile(path) then return false end
+
+        local okLoad, objects = pcall(function()
+            local assetUri = getcustomasset(path)
+            return game:GetObjects(assetUri)
+        end)
+        if not okLoad or type(objects) ~= "table" then
+            -- Some executors expose local model loading through InsertService instead.
+            okLoad, objects = pcall(function()
+                return {game:GetService("InsertService"):LoadLocalAsset(path)}
+            end)
+        end
+        if not okLoad or type(objects) ~= "table" then return false end
+
+        local selected
+        local wanted = string.lower(preferredName or "")
+        for _, object in ipairs(objects) do
+            for _, item in ipairs(object:GetDescendants()) do
+                if item:IsA("KeyframeSequence") or item:IsA("Animation") then
+                    if string.find(string.lower(item.Name), wanted, 1, true) then
+                        selected = item
+                        break
+                    elseif not selected then
+                        selected = item
+                    end
+                end
+            end
+            if selected and string.find(string.lower(selected.Name), wanted, 1, true) then break end
+        end
+        if not selected then
+            for _, object in ipairs(objects) do pcall(function() object:Destroy() end) end
+            return false
+        end
+
+        local animation = Instance.new("Animation")
+        animation.Name = "SukunaBundled_" .. tostring(preferredName or "Animation")
+        if selected:IsA("Animation") and selected.AnimationId ~= "" then
+            animation.AnimationId = selected.AnimationId
+        elseif selected:IsA("KeyframeSequence") then
+            local okId, contentId = pcall(function()
+                return game:GetService("KeyframeSequenceProvider"):RegisterKeyframeSequence(selected)
+            end)
+            if not okId or not contentId then
+                animation:Destroy()
+                for _, object in ipairs(objects) do pcall(function() object:Destroy() end) end
+                return false
+            end
+            animation.AnimationId = contentId
+        else
+            animation:Destroy()
+            for _, object in ipairs(objects) do pcall(function() object:Destroy() end) end
+            return false
+        end
+
+        local animator = humanoid:FindFirstChildOfClass("Animator")
+        if not animator then
+            animator = Instance.new("Animator")
+            animator.Parent = humanoid
+        end
+        local okTrack, track = pcall(function() return animator:LoadAnimation(animation) end)
+        if not okTrack or not track then
+            animation:Destroy()
+            for _, object in ipairs(objects) do pcall(function() object:Destroy() end) end
+            return false
+        end
+        track.Priority = Enum.AnimationPriority.Action
+        track.Looped = looped == true
+        track:Play(0.12, 1, 1)
+        task.delay(12, function()
+            for _, object in ipairs(objects) do pcall(function() object:Destroy() end) end
+            pcall(function() animation:Destroy() end)
+        end)
+        return track
     end
 
     local function getLocalCharacter()
@@ -955,6 +1042,20 @@ AddModule(function()
         applyAccessoryPositions()
         createSkillControls()
         createFingerSearch()
+
+        -- Laugh is the one-shot intro as soon as the reanimated figure is ready.
+        task.spawn(function()
+            for attempt = 1, 10 do
+                if not activeFigure or not activeFigure.Parent then return end
+                local track = playBundledAnimation("Sukuna/Sukuna Laugh.rbxm", "laugh", false)
+                if track then
+                    laughAnimationTrack = track
+                    return
+                end
+                task.wait(0.6)
+            end
+            notify("Sukuna Laugh animasyonu yüklenemedi; modelde KeyframeSequence/Animation kontrol edilmeli.")
+        end)
     end
 
     m.Update = function(dt, figure)
@@ -980,6 +1081,7 @@ AddModule(function()
         cleaveUntil = 0
         fuugaBusy = false
         if fuugaAnimationTrack then pcall(function() fuugaAnimationTrack:Stop(0.1); fuugaAnimationTrack:Destroy() end); fuugaAnimationTrack = nil end
+        if laughAnimationTrack then pcall(function() laughAnimationTrack:Stop(0.1); laughAnimationTrack:Destroy() end); laughAnimationTrack = nil end
         if fuugaProjectile then pcall(function() fuugaProjectile:Destroy() end); fuugaProjectile = nil end
         for _, aura in ipairs(fuugaAuraInstances) do pcall(function() aura:Destroy() end) end
         table.clear(fuugaAuraInstances)
