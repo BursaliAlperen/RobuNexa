@@ -63,6 +63,9 @@ AddModule(function()
     local cutsceneActive = false
     local savedCameraType, savedCameraSubject, savedCameraCFrame
     local fingerFolder
+    local fingerMarker
+    local fingerPrompt
+    local fingerOverride
     local fingersFound = 0
     local fingerEquipped = false
     local connections = {}
@@ -893,6 +896,11 @@ AddModule(function()
 
         local meshId, textureId = getMeshTexture()
         local hatOverride
+        if not HatReanimator or type(HatReanimator.HatCFrameOverride) ~= "table" then
+            marker = nil
+            notify("Hat Reanimation bulunamadı; aksesuarı dünyaya sabitleyemiyorum.")
+            return
+        end
         if HatReanimator and type(HatReanimator.HatCFrameOverride) == "table" then
             hatOverride = {
                 Name = accessory.Name,
@@ -903,6 +911,7 @@ AddModule(function()
                 RepRootPart = root,
             }
             table.insert(HatReanimator.HatCFrameOverride, hatOverride)
+            fingerOverride = hatOverride
             HatReanimator.RebuildRequired = true
         end
 
@@ -919,6 +928,8 @@ AddModule(function()
         end
 
         local marker = Instance.new("BillboardGui")
+        fingerMarker = marker
+        fingerPrompt = prompt
         marker.Name = "SukunaFingerMarker"
         marker.Adornee = handle
         marker.Size = UDim2.fromOffset(150, 40)
@@ -1020,8 +1031,6 @@ AddModule(function()
             end)
             moveToNewSpot()
         end)
-        table.insert(connections, marker)
-        table.insert(connections, prompt)
         chatMessage("Sukuna parmağı yakın çevrede, açık ve ulaşılabilir bir noktaya yerleştirildi. İşaretçiyi takip et.")
     end
 
@@ -1104,6 +1113,15 @@ AddModule(function()
         scaledMeshes = {}
         if inventoryTool then pcall(function() inventoryTool:Destroy() end); inventoryTool = nil end
         if fingerFolder then fingerFolder:Destroy(); fingerFolder = nil end
+        if fingerMarker then pcall(function() fingerMarker:Destroy() end); fingerMarker = nil end
+        if fingerPrompt and fingerPrompt.Parent then pcall(function() fingerPrompt:Destroy() end) end
+        fingerPrompt = nil
+        if HatReanimator and fingerOverride and type(HatReanimator.HatCFrameOverride) == "table" then
+            local index = table.find(HatReanimator.HatCFrameOverride, fingerOverride)
+            if index then table.remove(HatReanimator.HatCFrameOverride, index) end
+            HatReanimator.RebuildRequired = true
+        end
+        fingerOverride = nil
         if cutsceneActive then
             local camera = workspace.CurrentCamera
             if camera then
