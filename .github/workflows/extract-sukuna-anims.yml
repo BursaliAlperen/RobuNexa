@@ -13,6 +13,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: extract-sukuna-anims-main
+  cancel-in-progress: true
+
 jobs:
   extract:
     runs-on: ubuntu-latest
@@ -34,11 +38,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin main
           git add content/animations/Sukuna/*.anim
           if git diff --cached --quiet; then
             echo "No animation changes to commit."
           else
             git commit -m "Extract Sukuna KeyframeSequences as real anim files"
+            # Commit the generated files before rebasing so they are not left untracked.
+            git pull --rebase origin main
             git push
           fi
