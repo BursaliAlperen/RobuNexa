@@ -178,41 +178,61 @@ AddModule(function()
 		return best
 	end
 
+	local function clearInfinityProtection()
+		if not activeFigure then return end
+		for _, name in ipairs({ "GojoInfinityVisual", "GojoInfinityProtection" }) do
+			local item = activeFigure:FindFirstChild(name)
+			if item then item:Destroy() end
+		end
+	end
+
 	local function toggleInfinity()
 		if not activeFigure or not activeFigure.Parent or not root or not root.Parent then
 			notify("Infinity açılamadı: reanimate karakteri hazır değil.")
 			return
 		end
-		local old = activeFigure:FindFirstChild("GojoInfinityVisual")
-		if old then old:Destroy() end
+
 		infinityEnabled = not infinityEnabled
+		clearInfinityProtection()
+
 		if infinityEnabled then
 			playSound(SOUND_IDS.Infinity, false, 0.8)
-			local visual = Instance.new("Part")
-			visual.Name = "GojoInfinityVisual"
-			visual.Shape = Enum.PartType.Ball
-			visual.Size = Vector3.new(7, 7, 7)
-			visual.Material = Enum.Material.ForceField
-			visual.Color = Color3.fromRGB(90, 190, 255)
-			visual.Transparency = 0.72
-			visual.Anchored = false
-			visual.CanCollide = false
-			visual.CanTouch = false
-			visual.CanQuery = false
-			visual.Massless = true
-			visual.CFrame = root.CFrame
-			visual.Parent = activeFigure
+
+			-- Invisible protective ForceField: unlike the old decorative blue sphere,
+			-- this can protect against damage scripts that honor Roblox ForceFields.
+			local protection = Instance.new("ForceField")
+			protection.Name = "GojoInfinityProtection"
+			protection.Visible = false
+			protection.Parent = activeFigure
+
+			-- Keep a fully invisible spherical boundary; it has no collision so it
+			-- cannot trap the reanimated rig or interfere with normal movement.
+			local barrier = Instance.new("Part")
+			barrier.Name = "GojoInfinityVisual"
+			barrier.Shape = Enum.PartType.Ball
+			barrier.Size = Vector3.new(8, 8, 8)
+			barrier.Transparency = 1
+			barrier.Anchored = false
+			barrier.CanCollide = false
+			barrier.CanTouch = false
+			barrier.CanQuery = false
+			barrier.CastShadow = false
+			barrier.Massless = true
+			barrier.CFrame = root.CFrame
+			barrier.Parent = activeFigure
+
 			local weld = Instance.new("WeldConstraint")
 			weld.Name = "GojoInfinityWeld"
 			weld.Part0 = root
-			weld.Part1 = visual
-			weld.Parent = visual
+			weld.Part1 = barrier
+			weld.Parent = barrier
 		end
+
 		if buttons.Infinity then
 			buttons.Infinity.Text = "∞"
 			buttons.Infinity.BackgroundColor3 = infinityEnabled and Color3.fromRGB(28, 105, 150) or Color3.fromRGB(22, 30, 48)
 		end
-		notify(infinityEnabled and "Infinity etkinleştirildi." or "Infinity kapatıldı.")
+		notify(infinityEnabled and "Infinity: görünmez koruma açıldı." or "Infinity kapatıldı.")
 	end
 
 	local function stopFlight()
@@ -470,8 +490,10 @@ AddModule(function()
 		stopAnimation()
 		introPlaying = false
 		if activeFigure then
-			local oldVisual = activeFigure:FindFirstChild("GojoInfinityVisual")
-			if oldVisual then oldVisual:Destroy() end
+			for _, name in ipairs({ "GojoInfinityVisual", "GojoInfinityProtection" }) do
+				local oldProtection = activeFigure:FindFirstChild(name)
+				if oldProtection then oldProtection:Destroy() end
+			end
 		end
 		activeFigure = figure
 		humanoid = figure:FindFirstChildOfClass("Humanoid")
@@ -536,8 +558,10 @@ AddModule(function()
 		stopFootsteps()
 		stopAnimation()
 		if activeFigure then
-			local visual = activeFigure:FindFirstChild("GojoInfinityVisual")
-			if visual then visual:Destroy() end
+			for _, name in ipairs({ "GojoInfinityVisual", "GojoInfinityProtection" }) do
+				local item = activeFigure:FindFirstChild(name)
+				if item then item:Destroy() end
+			end
 		end
 		infinityEnabled = false
 		for _, connection in ipairs(guiConnections) do pcall(function() connection:Disconnect() end) end
