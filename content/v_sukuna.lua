@@ -27,7 +27,7 @@ AddModule(function()
  local Lighting = game:GetService("Lighting")
  local Debris = game:GetService("Debris")
  local activeFigure, root, humanoid, anims, effects
- local activeTrack, activeAnimator, activeAnimName, animationStartedAt
+ local activeTrack, activeAnimator, activeAnimName, animationStartedAt, activeAnimSpeed
  local inputConn, updateConn
  local originalSpeed, originalFov, originalClock
  local spawned = {}
@@ -116,7 +116,7 @@ AddModule(function()
   activeAnimator.rig = activeFigure
   activeAnimator.track = track
   activeAnimator.looped = looped == true
-  activeAnimator.speed = speed or 1
+  activeAnimSpeed = math.max(0.1, speed or 1)
   activeAnimName = name
   if looped ~= true then
    task.delay(math.max(0.2, duration + 0.15), function()
@@ -445,8 +445,14 @@ AddModule(function()
  m.Update = function(dt: number, figure: Model)
   activeFigure=figure
   if activeAnimator and activeTrack then
-   local ok = pcall(function() activeAnimator:Step(os.clock() - (animationStartedAt or os.clock())) end)
-   if not ok then stopAnimation() end
+   local ok, err = pcall(function()
+    local elapsed = os.clock() - (animationStartedAt or os.clock())
+    activeAnimator:Step(elapsed * (activeAnimSpeed or 1))
+   end)
+   if not ok then
+    pcall(function() Util.Notify("Sukuna Animator:Step error: " .. tostring(err)) end)
+    stopAnimation()
+   end
   else
    applyLinkedSwordLocomotion(dt, figure)
   end
