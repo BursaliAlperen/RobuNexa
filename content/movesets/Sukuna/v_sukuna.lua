@@ -779,57 +779,157 @@ AddModule(function()
         end)
     end
 
+    local function playFingerFoundCutscene(fingerPosition)
+        -- This is a local presentation cutscene; the game server must own shared state.
+        local camera = workspace.CurrentCamera
+        if not camera or cutsceneActive then return end
+        local oldType, oldSubject, oldCFrame = camera.CameraType, camera.CameraSubject, camera.CFrame
+        local focus = fingerPosition + Vector3.new(0, 1.5, 0)
+        camera.CameraType = Enum.CameraType.Scriptable
+        camera.CFrame = CFrame.lookAt(focus + Vector3.new(0, 5, 10), focus)
+        local tween = game:GetService("TweenService"):Create(camera,
+            TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+            {CFrame = CFrame.lookAt(focus + Vector3.new(0, 2.6, 5), focus)})
+        tween:Play()
+        task.delay(1.15, function()
+            if not camera or not camera.Parent then return end
+            camera.CameraType = oldType or Enum.CameraType.Custom
+            camera.CameraSubject = oldSubject
+            if oldCFrame then camera.CFrame = oldCFrame end
+        end)
+    end
+
     local function createFingerSearch()
-        -- Local prototype: true shared world pickups require server-side code in the experience.
+        -- Executor-created parts are local-only. These are decorative collectibles,
+        -- placed on actual ground around the player rather than floating in the sky.
         if fingerFolder then fingerFolder:Destroy() end
         fingerFolder = Instance.new("Folder")
         fingerFolder.Name = "SukunaFingerSearch_Local"
         fingerFolder.Parent = workspace
         fingersFound = 0
-        local base = root and root.Position or Vector3.new(0, 10, 0)
+
+        local character = getLocalCharacter()
+        local base = root and root.Position or (character and character:GetPivot().Position) or Vector3.new(0, 10, 0)
+        local ignore = {fingerFolder}
+        if character then table.insert(ignore, character) end
+        if activeFigure then table.insert(ignore, activeFigure) end
+        local rayParams = RaycastParams.new()
+        rayParams.FilterType = Enum.RaycastFilterType.Exclude
+        rayParams.FilterDescendantsInstances = ignore
+        rayParams.IgnoreWater = true
+
+        local count = 11
         local rng = Random.new()
-        for i = 1, 11 do
-            local pos = base + Vector3.new(rng:NextInteger(-420, 420), rng:NextInteger(1, 20), rng:NextInteger(-420, 420))
+        local placed = 0
+        for i = 1, count do
+            local angle = ((i - 1) / count) * math.pi * 2 + rng:NextNumber(-0.16, 0.16)
+            local radius = 55 + ((i * 37) % 105) + rng:NextInteger(-10, 10)
+            local horizontal = Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
+            local castOrigin = base + horizontal + Vector3.new(0, 240, 0)
+            local result = workspace:Raycast(castOrigin, Vector3.new(0, -700, 0), rayParams)
+            local pos
+            if result and result.Position then
+                pos = result.Position + Vector3.new(0, 2.2, 0)
+            else
+                -- Avoid putting collectibles hundreds of studs in the air if terrain
+                -- is missing; keep them near the player's current level instead.
+                pos = base + horizontal + Vector3.new(0, 3, 0)
+            end
+
             local finger = Instance.new("Part")
             finger.Name = "SukunaFinger_" .. i
-            finger.Size = Vector3.new(0.35, 1.1, 0.35)
+            finger.Shape = Enum.PartType.Cylinder
+            finger.Size = Vector3.new(0.38, 1.15, 0.38)
             finger.Material = Enum.Material.Neon
             finger.Color = Color3.fromRGB(122, 20, 34)
             finger.Anchored = true
             finger.CanCollide = false
             finger.CanTouch = false
-            finger.CFrame = CFrame.new(pos)
+            finger.CastShadow = false
+            finger.CFrame = CFrame.new(pos) * CFrame.Angles(0, 0, math.rad(18))
             finger.Parent = fingerFolder
+
             local light = Instance.new("PointLight")
-            light.Color = finger.Color
-            light.Range = 10
-            light.Brightness = 1.2
+            light.Color = Color3.fromRGB(255, 35, 66)
+            light.Range = 13
+            light.Brightness = 1.5
             light.Parent = finger
+
+            local particles = Instance.new("ParticleEmitter")
+            particles.Name = "CurseAura"
+            particles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+            particles.Color = ColorSequence.new(Color3.fromRGB(255, 45, 72), Color3.fromRGB(75, 0, 12))
+            particles.LightEmission = 0.7
+            particles.Rate = 5
+            particles.Lifetime = NumberRange.new(0.45, 0.9)
+            particles.Speed = NumberRange.new(0.2, 0.8)
+            particles.SpreadAngle = Vector2.new(180, 180)
+            particles.Parent = finger
+
             local prompt = Instance.new("ProximityPrompt")
-            prompt.ActionText = "Collect"
-            prompt.ObjectText = "Sukuna Finger " .. i .. "/11"
-            prompt.HoldDuration = 0.4
-            prompt.MaxActivationDistance = 10
+            prompt.ActionText = "Collect Finger"
+            prompt.ObjectText = "Cursed Finger  " .. i .. "/11"
+            prompt.HoldDuration = 0.35
+            prompt.MaxActivationDistance = 11
+            prompt.RequiresLineOfSight = false
             prompt.Parent = finger
-            local spin = game:GetService("RunService").RenderStepped:Connect(function()
-                if not finger.Parent then spin:Disconnect(); return end
-                finger.CFrame = CFrame.new(pos) * CFrame.Angles(0, os.clock() * 1.7, math.rad(12))
+
+            local spin
+            spin = game:GetService("RunService").RenderStepped:Connect(function()
+                if not finger.Parent then
+                    if spin then spin:Disconnect() end
+                    return
+                end
+                finger.CFrame = CFrame.new(pos) * CFrame.Angles(0, os.clock() * 1.45, math.rad(18))
             end)
             table.insert(connections, spin)
+
             table.insert(connections, prompt.Triggered:Connect(function(player)
                 if player ~= game:GetService("Players").LocalPlayer or not finger.Parent then return end
                 if not fingerEquipped then
-                    announceFinger("[Sukuna] Equip Finger accessory (ID 18762839664) before collecting fingers.")
+                    announceFinger("[Sukuna] First equip the Cursed Finger accessory (ID 18762839664).")
                     return
                 end
+
                 fingersFound += 1
+                local collectedAt = finger.Position
                 finger:Destroy()
-                announceFinger(string.format("[Sukuna] Finger collected: %d/11", fingersFound))
-                if fingersFound == 11 then
-                    announceFinger("[Sukuna] All 11 fingers found. The King of Curses awakens.")
+                announceFinger(string.format("[Sukuna] CURSED FINGER FOUND  %d/%d", fingersFound, count))
+                playFingerFoundCutscene(collectedAt)
+                task.spawn(function()
+                    local track = playBundledAnimation("Sukuna/Sukuna Laugh.rbxm", "laugh", false)
+                    if track then
+                        laughAnimationTrack = track
+                    else
+                        notify("Parmak bulundu; Laugh modeli yüklenemedi. İndirme/model yükleme hatası kontrol edilmeli.")
+                    end
+                end)
+
+                if fingersFound == count then
+                    announceFinger("[Sukuna] ALL FINGERS FOUND — THE KING OF CURSES AWAKENS.")
+                    -- Atmosphere-only climax: no player is killed or forced to respawn.
+                    local finalCamera = workspace.CurrentCamera
+                    if finalCamera and not cutsceneActive then
+                        local oldType, oldSubject, oldCFrame = finalCamera.CameraType, finalCamera.CameraSubject, finalCamera.CFrame
+                        local focus = root and root.Position or collectedAt
+                        finalCamera.CameraType = Enum.CameraType.Scriptable
+                        finalCamera.CFrame = CFrame.lookAt(focus + Vector3.new(0, 8, 18), focus)
+                        game:GetService("TweenService"):Create(finalCamera,
+                            TweenInfo.new(1.2, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut),
+                            {CFrame = CFrame.lookAt(focus + Vector3.new(0, 4, 9), focus)}):Play()
+                        task.delay(2.1, function()
+                            if finalCamera and finalCamera.Parent then
+                                finalCamera.CameraType = oldType or Enum.CameraType.Custom
+                                finalCamera.CameraSubject = oldSubject
+                                if oldCFrame then finalCamera.CFrame = oldCFrame end
+                            end
+                        end)
+                    end
                 end
             end))
+            placed += 1
         end
+        notify(string.format("%d cursed fingers placed around nearby ground.", placed))
     end
 
     local function launchFuuga()
