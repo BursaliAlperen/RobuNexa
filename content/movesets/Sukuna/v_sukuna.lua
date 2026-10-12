@@ -258,7 +258,7 @@ AddModule(function()
                         for _, entry in ipairs(list) do
                             local id
                             pcall(function() id = tonumber(entry.AssetId) end)
-                            if id and TARGETS[id] then
+                            if id and isAllowedAssetId(id) and TARGETS[id] then
                                 nextPresent[id] = true
                                 local accessory = tryAccessoryInstance(entry, character)
                                 if accessory then nextInstances[id] = accessory end
@@ -278,7 +278,7 @@ AddModule(function()
                         if okValue and type(value) == "string" then
                             for token in string.gmatch(value, "%d+") do
                                 local id = tonumber(token)
-                                if id and TARGETS[id] then nextPresent[id] = true end
+                                if id and isAllowedAssetId(id) and TARGETS[id] then nextPresent[id] = true end
                             end
                         end
                     end
@@ -289,7 +289,7 @@ AddModule(function()
                 if child:IsA("Accessory") then
                     local attrId = tonumber(child:GetAttribute("AssetId"))
                         or tonumber(child:GetAttribute("_RobuNexaSukunaAssetId"))
-                    if attrId and TARGETS[attrId] then
+                    if attrId and isAllowedAssetId(attrId) and TARGETS[attrId] then
                         nextPresent[attrId] = true
                         nextInstances[attrId] = child
                     end
@@ -342,7 +342,8 @@ AddModule(function()
                     if child:IsA("Accessory") and (
                         tonumber(child:GetAttribute("AssetId")) == FINGER_ID
                         or tonumber(child:GetAttribute("_RobuNexaSukunaAssetId")) == FINGER_ID
-                        or string.find(string.lower(child.Name), "finger", 1, true) ~= nil
+                        or string.lower(child.Name) == "sukuna's finger"
+                        or string.lower(child.Name) == "sukuna finger"
                     ) then
                         fingerEquipped = true
                         break
@@ -947,8 +948,8 @@ AddModule(function()
                 or tonumber(item:GetAttribute("_RobuNexaSukunaAssetId"))
             if itemAssetId == FINGER_ID and isAllowedAssetId(itemAssetId) then return true end
             local itemName = string.lower(item.Name)
-            return string.find(itemName, "finger", 1, true) ~= nil
-                or string.find(itemName, "sukuna", 1, true) ~= nil
+            return itemName == "sukuna's finger"
+                or itemName == "sukuna finger"
         end
 
         local accessory
