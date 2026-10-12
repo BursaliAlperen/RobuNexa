@@ -7,7 +7,7 @@
 Uyumlu Roblox istemci ortamında çalıştırılacak komut:
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/c6769fb025b6026604eade9a4e74a9339d5b31b0/source/reanim.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/c85ce6cb8be91ce3a8ba6f94e5f07d3ccbaa5a69/source/reanim.lua"))()
 ```
 
 > Bu bağlantı Gojo kaydı ve Moveset callback düzeltmelerini içeren commit’e sabitlenmiştir; `main` raw CDN önbelleğinin eski dosya döndürmesini önler. Script, dosya sistemi ve ağ erişimi sağlayan uyumlu bir istemci ortamı gerektirir. Yalnızca güvendiğiniz kodları çalıştırın.
