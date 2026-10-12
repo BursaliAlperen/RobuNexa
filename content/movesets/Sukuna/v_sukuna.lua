@@ -1,7 +1,6 @@
 -- RobuNexa / NAM - Sukuna accessory-driven Domain and Cleave.
--- All four catalog accessories are handled by HatReanimator overrides so their
--- existing accessory geometry is what moves. No Shrine model or animation assets
--- are spawned by this module.
+-- Uses equipped catalog accessories as HatReanimator targets with eased transitions.
+-- Fuuga projectile/aura are local visual prototypes; shared visibility requires server replication.
 local modules = {}
 local function AddModule(fn) table.insert(modules, fn()) end
 
@@ -9,7 +8,7 @@ AddModule(function()
     local m = {}
     m.ModuleType = "MOVESET"
     m.Name = "Sukuna"
-    m.Description = "Malevolent Shrine (hidden) and accessory-based continuous slash effects."
+    m.Description = "Malevolent Shrine, Cleave, Dismantle, and Fuuga Flame Arrow."
     m.Assets = {}
 
     local TARGETS = {
@@ -42,7 +41,7 @@ AddModule(function()
     local EFFECT_IDS = {100475161263482, 97087028126781}
     local FINGER_ID = 18762839664
     local activeFigure, root
-    local hud, domainButton, cleaveButton, dismantleButton
+    local hud, domainButton, cleaveButton, dismantleButton, fuugaButton
     local inventoryTool
     local domainStartedAt = 0
     local cutsceneActive = false
@@ -59,6 +58,12 @@ AddModule(function()
     local accessoryInstances = {}
     local presentIds = {}
     local overrideById = {}
+    local lastHatCFrames = {}
+    local scaledMeshes = {}
+    local fuugaBusy = false
+    local fuugaAnimationTrack
+    local fuugaProjectile
+    local fuugaAuraInstances = {}
     local STATUS_INTERVAL = 1.25
 
     local function notify(message)
@@ -271,6 +276,7 @@ AddModule(function()
 
         local added = false
         for id, accessory in pairs(accessoryInstances) do
+            if id == 18726352770 then scaleShrineAccessory(accessory) end
             if accessory and accessory.Parent then
                 local handle = accessory:FindFirstChild("Handle")
                 local meshId, textureId
@@ -309,12 +315,30 @@ AddModule(function()
         end
     end
 
+    local function scaleShrineAccessory(accessory)
+        if not accessory then return end
+        local handle = accessory:FindFirstChild("Handle")
+        if not handle or not handle:IsA("BasePart") then return end
+        if not scaledMeshes[handle] then
+            local mesh = handle:FindFirstChildOfClass("SpecialMesh")
+            if mesh then
+                scaledMeshes[handle] = {instance = mesh, kind = "mesh", original = mesh.Scale}
+                mesh.Scale = mesh.Scale * 1.75
+            elseif handle:IsA("MeshPart") then
+                scaledMeshes[handle] = {instance = handle, kind = "part", original = handle.Size}
+                handle.Size = handle.Size * 1.75
+            end
+        end
+    end
+
     local function setHatWorldCFrame(id, targetCFrame)
         local override = overrideById[id]
-        if override then
-            override.C0 = targetCFrame
-            override.C1 = CFrame.identity
-        end
+        if not override then return end
+        local previous = lastHatCFrames[id] or override.C0 or targetCFrame
+        local eased = previous:Lerp(targetCFrame, 0.18)
+        lastHatCFrames[id] = eased
+        override.C0 = eased
+        override.C1 = CFrame.identity
     end
 
     local function effectCenter()
@@ -479,6 +503,166 @@ AddModule(function()
         end
     end
 
+    local function launchFuuga()
+        if fuugaBusy or not activeFigure or not root then return end
+        fuugaBusy = true
+        refreshButtons()
+        local humanoid = activeFigure:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            pcall(function()
+                if fuugaAnimationTrack then fuugaAnimationTrack:Stop(0.1); fuugaAnimationTrack:Destroy() end
+                local animator = humanoid:FindFirstChildOfClass("Animator")
+                if not animator then animator = Instance.new("Animator"); animator.Parent = humanoid end
+                local animation = Instance.new("Animation")
+                animation.AnimationId = "rbxassetid://131873641508713"
+                fuugaAnimationTrack = animator:LoadAnimation(animation)
+                fuugaAnimationTrack.Priority = Enum.AnimationPriority.Action
+                fuugaAnimationTrack:Play(0.12, 1, 1)
+                game:GetService("Debris"):AddItem(animation, 8)
+            end)
+        end
+
+        local players = game:GetService("Players")
+        local character = getLocalCharacter()
+        local hand = activeFigure:FindFirstChild("RightHand") or activeFigure:FindFirstChild("Right Arm")
+            or activeFigure:FindFirstChild("RightLowerArm") or root
+        local forward = root.CFrame.LookVector
+        local position = (hand and hand:IsA("BasePart") and hand.Position or root.Position)
+            + forward * 1.4 + Vector3.new(0, 0.25, 0)
+        local started = os.clock()
+        local hitCharacter
+        local projectileFolder = Instance.new("Folder")
+        projectileFolder.Name = "SukunaFuuga_LocalVisual"
+        projectileFolder.Parent = workspace
+        fuugaProjectile = projectileFolder
+
+        local arrow = Instance.new("Part")
+        arrow.Name = "FuugaFlameArrow"
+        arrow.Shape = Enum.PartType.Cylinder
+        arrow.Size = Vector3.new(0.22, 2.8, 0.22)
+        arrow.Material = Enum.Material.Neon
+        arrow.Color = Color3.fromRGB(255, 92, 18)
+        arrow.Anchored = true
+        arrow.CanCollide = false
+        arrow.CanTouch = false
+        arrow.CastShadow = false
+        arrow.Parent = projectileFolder
+
+        local arrowHead = Instance.new("WedgePart")
+        arrowHead.Name = "FlameArrowHead"
+        arrowHead.Size = Vector3.new(0.65, 0.6, 0.65)
+        arrowHead.Material = Enum.Material.Neon
+        arrowHead.Color = Color3.fromRGB(255, 205, 68)
+        arrowHead.Anchored = true
+        arrowHead.CanCollide = false
+        arrowHead.CanTouch = false
+        arrowHead.CastShadow = false
+        arrowHead.Parent = projectileFolder
+
+        local light = Instance.new("PointLight")
+        light.Color = Color3.fromRGB(255, 85, 16)
+        light.Brightness = 3
+        light.Range = 13
+        light.Parent = arrow
+        local flame = Instance.new("ParticleEmitter")
+        flame.Name = "FuugaTrail"
+        flame.Texture = "rbxasset://textures/particles/fire_main.dds"
+        flame.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 235, 116)),
+            ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 96, 12)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 18, 8)),
+        })
+        flame.LightEmission = 0.9
+        flame.Rate = 75
+        flame.Lifetime = NumberRange.new(0.18, 0.42)
+        flame.Speed = NumberRange.new(0.4, 2.2)
+        flame.SpreadAngle = Vector2.new(25, 25)
+        flame.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.8), NumberSequenceKeypoint.new(1, 0)})
+        flame.Parent = arrow
+
+        local function placeArrow(pos)
+            local cf = CFrame.lookAt(pos, pos + forward)
+            arrow.CFrame = cf * CFrame.Angles(math.rad(90), 0, 0)
+            arrowHead.CFrame = cf * CFrame.new(0, 0, -1.45)
+        end
+        placeArrow(position)
+
+        task.spawn(function()
+            local runService = game:GetService("RunService")
+            while projectileFolder.Parent and os.clock() - started < 3.2 do
+                local dt = runService.RenderStepped:Wait()
+                if not root or not root.Parent then break end
+                local nextPosition = position + forward * (115 * math.min(dt, 0.05))
+                local rayParams = RaycastParams.new()
+                rayParams.FilterType = Enum.RaycastFilterType.Exclude
+                rayParams.FilterDescendantsInstances = {activeFigure, projectileFolder, character}
+                local hit = workspace:Raycast(position, nextPosition - position, rayParams)
+                if hit then
+                    local model = hit.Instance:FindFirstAncestorOfClass("Model")
+                    local player = model and players:GetPlayerFromCharacter(model)
+                    if player and player ~= players.LocalPlayer then
+                        hitCharacter = model
+                        position = hit.Position
+                        break
+                    elseif hit.Instance.CanCollide then
+                        position = hit.Position
+                        break
+                    end
+                end
+                position = nextPosition
+                placeArrow(position)
+            end
+
+            if hitCharacter and hitCharacter.Parent then
+                local targetRoot = hitCharacter:FindFirstChild("HumanoidRootPart")
+                    or hitCharacter:FindFirstChild("Torso") or hitCharacter:FindFirstChild("UpperTorso")
+                if targetRoot and targetRoot:IsA("BasePart") then
+                    local aura = Instance.new("Attachment")
+                    aura.Name = "SukunaFuugaFlameAura_Local"
+                    aura.Parent = targetRoot
+                    table.insert(fuugaAuraInstances, aura)
+                    local fire = Instance.new("ParticleEmitter")
+                    fire.Name = "AnimatedFlameAura"
+                    fire.Texture = "rbxasset://textures/particles/fire_main.dds"
+                    fire.Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 241, 130)),
+                        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 105, 12)),
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(128, 12, 4)),
+                    })
+                    fire.LightEmission = 0.85
+                    fire.Rate = 110
+                    fire.Lifetime = NumberRange.new(0.35, 0.85)
+                    fire.Speed = NumberRange.new(1, 4)
+                    fire.SpreadAngle = Vector2.new(180, 180)
+                    fire.RotSpeed = NumberRange.new(-180, 180)
+                    fire.Size = NumberSequence.new({
+                        NumberSequenceKeypoint.new(0, 1.25),
+                        NumberSequenceKeypoint.new(0.55, 0.85),
+                        NumberSequenceKeypoint.new(1, 0),
+                    })
+                    fire.Parent = aura
+                    local glow = Instance.new("PointLight")
+                    glow.Color = Color3.fromRGB(255, 84, 12)
+                    glow.Brightness = 2
+                    glow.Range = 12
+                    glow.Parent = aura
+                    task.delay(5, function()
+                        if aura and aura.Parent then
+                            for _, descendant in ipairs(aura:GetDescendants()) do
+                                if descendant:IsA("ParticleEmitter") then descendant.Enabled = false end
+                            end
+                            task.wait(0.8)
+                            if aura then aura:Destroy() end
+                        end
+                    end)
+                end
+            end
+            if projectileFolder then projectileFolder:Destroy() end
+            if fuugaProjectile == projectileFolder then fuugaProjectile = nil end
+            task.delay(1.1, function() fuugaBusy = false; refreshButtons() end)
+        end)
+    end
+
     local function createHUD()
         local player = game:GetService("Players").LocalPlayer
         local playerGui = player and player:FindFirstChildOfClass("PlayerGui")
@@ -506,7 +690,7 @@ AddModule(function()
         panel.Name = "AbilityButtons"
         panel.AnchorPoint = Vector2.new(1, 1)
         panel.Position = UDim2.new(1, -10, 1, -112)
-        panel.Size = UDim2.fromOffset(236, 40)
+        panel.Size = UDim2.fromOffset(314, 40)
         panel.BackgroundTransparency = 1
         panel.Parent = hud
 
@@ -546,6 +730,17 @@ AddModule(function()
         domainButton = makeButton("DomainButton", "DOMAIN", 1)
         cleaveButton = makeButton("CleaveButton", "CLEAVE", 2)
         dismantleButton = makeButton("DismantleButton", "DISMANTLE", 3)
+        fuugaButton = makeButton("FuugaButton", "FUUGA", 4)
+
+        table.insert(connections, fuugaButton.Activated:Connect(function()
+            if not activeFigure or not activeFigure.Parent or fuugaBusy then return end
+            refreshAccessories()
+            if not presentIds[124144353587446] then
+                notify("Fuuga için Fuga Furnace aksesuarını tak.")
+                return
+            end
+            launchFuuga()
+        end))
 
         table.insert(connections, domainButton.Activated:Connect(function()
             if not activeFigure or not activeFigure.Parent then return end
@@ -677,7 +872,7 @@ AddModule(function()
         local old = playerGui and playerGui:FindFirstChild("SukunaAbilityHUD")
         if old then old:Destroy() end
 
-        domainButton, cleaveButton, dismantleButton = nil, nil, nil
+        domainButton, cleaveButton, dismantleButton, fuugaButton = nil, nil, nil, nil
         activeFigure, root = nil, nil
         accessoryInstances, presentIds, overrideById = {}, {}, {}
         savedWantAllHats = nil
