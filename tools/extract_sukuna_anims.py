@@ -9,16 +9,9 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTENT = ROOT / "content"
 OUT = CONTENT / "animations" / "Sukuna"
 ASSETS = [
-    ("models/Sukuna/Sukuna Laugh.rbxm", "laugh", "SukunaLaugh.anim"),
-    ("models/Sukuna/Combo.rbxm", "combo", "DomainCombo.anim"),
-    ("models/Sukuna/Domain Expansion: Malevolent Shrine.rbxm", "domain", "MalevolentShrine.anim"),
-    ("models/Sukuna/Cleave.rbxm", "cleave", "Cleave.anim"),
-    # Prefer the user's newer movement clips in content/animations/Sukuna.
-    ("animations/Sukuna/Sukuna Walk.rbxm", "walk", "Walk.anim"),
-    ("animations/Sukuna/Sukuna idle.rbxm", "idle", "SukunaIdle.anim"),
-    ("animations/Sukuna/Jump.rbxm", "jump", "Jump.anim"),
-    ("animations/Sukuna/Fall.rbxm", "fall", "Fall.anim"),
-    ("models/Sukuna/FlameArrow.rbxm", "flame", "FlameArrow.anim"),
+    # The user's latest Cleave animation source. Converted to the NAM AnimLib
+    # binary format by the repository workflow; never copy/rename raw RBXM bytes.
+    ("animations/Sukuna/Kai.rbxm", "cleave", "Cleave.anim"),
 ]
 STYLE = {0: "Linear", 1: "Constant", 2: "Elastic", 3: "Cubic", 4: "Bounce",
          5: "Sine", 6: "Exponential", 7: "Quad", 8: "Quart", 9: "Quint",
