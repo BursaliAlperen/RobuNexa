@@ -9,11 +9,14 @@ NAM — maintained and rebranded by mamalalanam.
 Original-source and third-party notices are preserved in the README.
 ]]
 
-if _G.NAMLoaded or _G["U" .. "hhhhhhLoaded"] then return end
+local NAMVersion = "1.0.17 BETA"
+if _G.NAMLoaded or _G["U" .. "hhhhhhLoaded"] then
+	warn("[NAM] v" .. NAMVersion .. " did not start: v" .. tostring(_G.NAMVersion or "older/unknown") .. " is already active. Leave and rejoin to apply the update.")
+	return
+end
 _G.NAMLoaded = true
 _G["U" .. "hhhhhhLoaded"] = true
-
-local NAMVersion = "1.0.16 BETA"
+_G.NAMVersion = NAMVersion
 
 local Debris = cloneref(game:GetService("Debris"))
 local CoreGui = cloneref(game:GetService("CoreGui"))
@@ -70,6 +73,7 @@ do
 		Util.Notify("Executor not supported. " .. msg)
 		_G.NAMLoaded = nil
 		_G["U" .. "hhhhhhLoaded"] = nil
+		_G.NAMVersion = nil
 		error("fatal error cant start")
 	end
 	local function ismissing(func)
