@@ -96,13 +96,19 @@ AddModule(function()
 		if not activeFigure then return false end
 		local filename = animationFiles[name]
 		if not filename then return false end
+		-- Clear the previous moveset pose first. If Gojo's own track fails to load,
+		-- never leave the old dog moveset idle pose stuck on the rig.
+		stopAnimation()
 		local path = AssetGetPathFromFilename(filename)
 		local ok, track = pcall(function() return AnimLib.Track.fromfile(path) end)
 		if not ok or not track or not track.Keyframes or #track.Keyframes == 0 then
-			notify(filename .. " bulunamadı; .rbxm animasyonları eklendikten sonra bağlanacak.")
+			if name == "Idle" then
+				notify("GojoIdle.anim yüklenemedi; köpek idle animasyonu artık tutulmayacak.")
+			else
+				notify(filename .. " yüklenemedi; animasyon dosyasını kontrol et.")
+			end
 			return false
 		end
-		stopAnimation()
 		activeAnimator = AnimLib.Animator.new()
 		activeAnimator.rig = activeFigure
 		activeAnimator.track = track
