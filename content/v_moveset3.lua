@@ -11,9 +11,9 @@ local modules = {}
 table.insert(modules, function()
     local m = {}
     m.ModuleType = "MOVESET"
-    m.Name = "Sukuna"
-    m.InternalName = "SUKUNA"
-    m.Description = "Sukuna moveset\nZ - Dismantle\nX - Rush\nC - Fuuga\nV - Laugh"
+    m.Name = "Sukuna (Audio Only - Legacy)"
+    m.InternalName = "SUKUNA_AUDIO_LEGACY"
+    m.Description = "Legacy audio-only test moveset. Use the full Sukuna moveset for animations and VFX.\nZ - Dismantle\nX - Rush\nC - Fuuga\nV - Laugh"
     m.Assets = {}
 
     local figure
