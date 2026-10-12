@@ -487,9 +487,11 @@ AddModule(function()
     local function applyAccessoryPositions()
         if not root or not root.Parent then return end
         local t = os.clock()
-        -- Keep accessories close to the rig; inactive targets are hidden just below the floor.
+        -- Keep every inactive Sukuna effect accessory 5,000 studs away from the rig.
+        -- These overrides use rig-local CFrames, so this is a local-space offset.
+        -- The Sukuna Finger is handled separately and is intentionally excluded.
         local center = root.CFrame * CFrame.new(0, 2, -5)
-        local hiddenCenter = root.CFrame * CFrame.new(0, -5000, 0)
+        local hiddenCenter = CFrame.new(0, 0, -5000)
         local active = domainEnabled or os.clock() < cleaveUntil
         local fast = os.clock() < cleaveUntil
         local rate = fast and 7.5 or 1.8
