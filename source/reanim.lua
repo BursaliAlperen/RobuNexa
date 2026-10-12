@@ -3803,6 +3803,85 @@ function LimbReanimator.Config(parent)
 		dinit.Value = LimbReanimator.InitMode + 1
 	end))
 end
+-- Keep a local in-memory copy of accessories inserted by avatar/export tools.
+-- These accessories may not exist in the player's HumanoidDescription, so they
+-- must be restored from the observed instance instead of fetched from the catalog.
+local PersistentAccessoryTemplates = {}
+local function PersistentAccessoryKey(accessory)
+	if not accessory or not accessory:IsA("Accessory") then return nil end
+	local mesh, texture = GetHatMeshAndTexture(accessory)
+	local name = string.lower(accessory.Name or "")
+	if mesh and texture then
+		return "mesh:" .. tostring(mesh) .. "|texture:" .. tostring(texture) .. "|name:" .. name
+	end
+	return "name:" .. name
+end
+local function CachePersistentAccessory(accessory)
+	local key = PersistentAccessoryKey(accessory)
+	if not key then return end
+	local handle = accessory:FindFirstChild("Handle")
+	if not handle or not handle:IsA("BasePart") then return end
+	local entry = PersistentAccessoryTemplates[key]
+	if not entry then
+		local oldArchivable = accessory.Archivable
+		local ok, template = pcall(function()
+			accessory.Archivable = true
+			return accessory:Clone()
+		end)
+		pcall(function() accessory.Archivable = oldArchivable end)
+		if not ok or not template then return end
+		template.Parent = nil
+		entry = {Template = template, LiveInstances = {}}
+		PersistentAccessoryTemplates[key] = entry
+	end
+	entry.LiveInstances[accessory] = true
+end
+local function RestorePersistentAccessories(character, humanoid)
+	if not character or not humanoid or not character.Parent then return end
+	local restored = 0
+	for key, entry in pairs(PersistentAccessoryTemplates) do
+		local alreadyOnCharacter = false
+		for _, child in ipairs(character:GetChildren()) do
+			if child:IsA("Accessory") and PersistentAccessoryKey(child) == key then
+				alreadyOnCharacter = true
+				break
+			end
+		end
+		if not alreadyOnCharacter then
+			-- If the original accessory is still alive in Workspace, Hat Reanimation
+			-- can keep using that exact instance; only recreate truly lost accessories.
+			local originalStillAlive = false
+			for instance in pairs(entry.LiveInstances) do
+				if instance and instance.Parent and instance:IsDescendantOf(workspace) then
+					originalStillAlive = true
+				else
+					entry.LiveInstances[instance] = nil
+				end
+			end
+			if not originalStillAlive and entry.Template then
+				local ok, clone = pcall(function() return entry.Template:Clone() end)
+				if ok and clone then
+					clone.Name = entry.Template.Name
+					local handle = clone:FindFirstChild("Handle")
+					local oldWeld = handle and handle:FindFirstChild("AccessoryWeld")
+					if oldWeld then pcall(function() oldWeld:Destroy() end) end
+					local added = pcall(function() humanoid:AddAccessory(clone) end)
+					if not added or clone.Parent ~= character then
+						clone.Parent = character
+					end
+					entry.LiveInstances[clone] = true
+					restored += 1
+				end
+			end
+		end
+	end
+	if restored > 0 then
+		HatReanimator.RebuildRequired = true
+		HatReanimator.Status.ReanimState = ("Restored %d cached accessory(s) after respawn."):format(restored)
+	end
+end
+
+
 function LimbReanimator.Start()
 	local LimbNames = {"Head", "Torso", "Left Arm", "Right Arm", "Left Leg", "Right Leg"}
 	local rootposition = Vector3.new(
@@ -3883,83 +3962,6 @@ function LimbReanimator.Start()
 
 	local BaseParts = {}
 	local UnknownMotor6Ds = {}
-	-- Keep a local in-memory copy of accessories inserted by avatar/export tools.
-	-- These accessories may not exist in the player's HumanoidDescription, so they
-	-- must be restored from the observed instance instead of fetched from the catalog.
-	local PersistentAccessoryTemplates = {}
-	local function PersistentAccessoryKey(accessory)
-		if not accessory or not accessory:IsA("Accessory") then return nil end
-		local mesh, texture = GetHatMeshAndTexture(accessory)
-		local name = string.lower(accessory.Name or "")
-		if mesh and texture then
-			return "mesh:" .. tostring(mesh) .. "|texture:" .. tostring(texture) .. "|name:" .. name
-		end
-		return "name:" .. name
-	end
-	local function CachePersistentAccessory(accessory)
-		local key = PersistentAccessoryKey(accessory)
-		if not key then return end
-		local handle = accessory:FindFirstChild("Handle")
-		if not handle or not handle:IsA("BasePart") then return end
-		local entry = PersistentAccessoryTemplates[key]
-		if not entry then
-			local oldArchivable = accessory.Archivable
-			local ok, template = pcall(function()
-				accessory.Archivable = true
-				return accessory:Clone()
-			end)
-			pcall(function() accessory.Archivable = oldArchivable end)
-			if not ok or not template then return end
-			template.Parent = nil
-			entry = {Template = template, LiveInstances = {}}
-			PersistentAccessoryTemplates[key] = entry
-		end
-		entry.LiveInstances[accessory] = true
-	end
-	local function RestorePersistentAccessories(character, humanoid)
-		if not character or not humanoid or not character.Parent then return end
-		local restored = 0
-		for key, entry in pairs(PersistentAccessoryTemplates) do
-			local alreadyOnCharacter = false
-			for _, child in ipairs(character:GetChildren()) do
-				if child:IsA("Accessory") and PersistentAccessoryKey(child) == key then
-					alreadyOnCharacter = true
-					break
-				end
-			end
-			if not alreadyOnCharacter then
-				-- If the original accessory is still alive in Workspace, Hat Reanimation
-				-- can keep using that exact instance; only recreate truly lost accessories.
-				local originalStillAlive = false
-				for instance in pairs(entry.LiveInstances) do
-					if instance and instance.Parent and instance:IsDescendantOf(workspace) then
-						originalStillAlive = true
-					else
-						entry.LiveInstances[instance] = nil
-					end
-				end
-				if not originalStillAlive and entry.Template then
-					local ok, clone = pcall(function() return entry.Template:Clone() end)
-					if ok and clone then
-						clone.Name = entry.Template.Name
-						local handle = clone:FindFirstChild("Handle")
-						local oldWeld = handle and handle:FindFirstChild("AccessoryWeld")
-						if oldWeld then pcall(function() oldWeld:Destroy() end) end
-						local added = pcall(function() humanoid:AddAccessory(clone) end)
-						if not added or clone.Parent ~= character then
-							clone.Parent = character
-						end
-						entry.LiveInstances[clone] = true
-						restored += 1
-					end
-				end
-			end
-		end
-		if restored > 0 then
-			HatReanimator.RebuildRequired = true
-			HatReanimator.Status.ReanimState = ("Restored %d cached accessory(s) after respawn."):format(restored)
-		end
-	end
 
 	local CharOnDesc = function(v)
 		if v:IsA("BasePart") then
@@ -4285,7 +4287,7 @@ HatReanimator.HatCollideMethod = SaveData.Reanimator.HatsCollideMethod
 -- 7 - idk honestly but this is just modified heavily for now
 HatReanimator.IWantAllHats = SaveData.Reanimator.IWantAllHats
 HatReanimator.IWantHatCollide = SaveData.Reanimator.IWantHatCollide
-HatReanimator.Permadeath = false--not SaveData.Reanimator.HatsPatchmahub
+HatReanimator.Permadeath = not SaveData.Reanimator.HatsPatchmahub
 HatReanimator.HatFling = SaveData.Reanimator.HatsFling
 HatReanimator.HatSpin = SaveData.Reanimator.HatsSpin
 HatReanimator.FlingMethod = SaveData.Reanimator.HatsFlingMethod
