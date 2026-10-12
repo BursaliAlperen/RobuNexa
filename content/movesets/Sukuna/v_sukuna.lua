@@ -656,11 +656,28 @@ AddModule(function()
         end
         setHatWorldCFrame(101090904148116, accessoryFrame)
 
-        -- Do not render the equipped red ring/slash accessory: it was the red
-        -- circle appearing at the target when attacks fired. Keep it hidden always.
-        slashBurstTarget = nil
-        slashBurstCount = 0
-        setHatWorldCFrame(18908729586, CFrame.new(0, 0, -5000))
+        -- Render the actual catalog Cleave Slash accessory (18908729586) during
+        -- each attack pulse. Previously this block reset the burst state every
+        -- frame and parked the accessory 5,000 studs away, so no slash could show.
+        local slashFrame = CFrame.new(0, 0, -5000)
+        if slashBurstTarget and t < slashBurstUntil and root and root.Parent then
+            local elapsed = math.max(0, t - slashBurstStartedAt)
+            local pulseIndex = math.floor(elapsed / 0.22)
+            local pulseOn = (elapsed % 0.22) < 0.15
+            if pulseIndex < math.max(1, slashBurstCount) and pulseOn then
+                local side = (pulseIndex % 3) - 1
+                local lift = 1.5 + (pulseIndex % 2) * 0.8
+                local worldPosition = slashBurstTarget + Vector3.new(side * 1.7, lift, 0)
+                local facing = root.CFrame.LookVector
+                local worldFrame = CFrame.lookAt(worldPosition, worldPosition + facing)
+                    * CFrame.Angles(0, 0, math.rad((pulseIndex % 2 == 0) and -28 or 28))
+                slashFrame = root.CFrame:ToObjectSpace(worldFrame)
+            end
+        else
+            slashBurstTarget = nil
+            slashBurstCount = 0
+        end
+        setHatWorldCFrame(18908729586, slashFrame)
 
         if active then
             local pulse = math.sin(t * rate)
