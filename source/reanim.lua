@@ -8095,6 +8095,35 @@ local function ForceModuleReload(force)
 	IsNAMFullyLoaded = false
 	InitLogsText.Text = "Init Logs -- This is where you check what happened."
 	ClearModules()
+
+	-- Purge legacy Sukuna module caches before every refresh/reload.
+	-- This handles old user modules and builtin files left by previous versions.
+	for _, folder in ipairs({"NAMReanim/Modules/", "NAMReanim/BuiltinModules/"}) do
+		local ok, cachedFiles = pcall(listfiles, folder)
+		if ok and type(cachedFiles) == "table" then
+			for _, cachedPath in ipairs(cachedFiles) do
+				local fileName = string.lower(string.match(cachedPath, "([^/\\\\]+)$") or cachedPath)
+				local removeFile = string.find(fileName, "sukuna", 1, true) ~= nil
+				if not removeFile and isfile(cachedPath) then
+					local readOk, cachedText = pcall(readfile, cachedPath)
+					if readOk and type(cachedText) == "string" then
+						removeFile = string.find(string.lower(cachedText), "sukuna", 1, true) ~= nil
+					end
+				end
+				if removeFile then
+					pcall(delfile, cachedPath)
+					InitLogsText.Text ..= "\n[LOG] Removed legacy Sukuna cache: " .. fileName
+				end
+			end
+		end
+	end
+	if type(SaveData.ContentHash) == "table" then
+		for key in pairs(SaveData.ContentHash) do
+			if string.find(string.lower(tostring(key)), "sukuna", 1, true) then
+				SaveData.ContentHash[key] = nil
+			end
+		end
+	end
 	Util.Notify("Loading...")
 	InitLogsText.Text ..= "\n[LOG] Checking SHA1 hashes..."
 	-- Gojo is a built-in moveset on desktop and mobile. Sukuna is intentionally excluded.
