@@ -4,12 +4,12 @@ This NAM moveset keeps Cleave as the primary skill and adds three Dismantle butt
 
 ## Separate animation files
 
-The former Cleave animation is reassigned to Combo and should be stored as `Combo.anim`. Dismantle remains a separate optional animation.
+The former Cleave animation has been renamed to `Combo.anim` and is used by all three Combo buttons. Dismantle remains a separate optional animation.
 
 - `content/animations/Sukuna/Combo.anim` — the former Cleave animation, used by all three Combo buttons.
 - `content/animations/Sukuna/Dismantle.anim` — separate Dismantle animation file.
 
-Combo will use the former Cleave animation after its binary file is moved to `Combo.anim`. Dismantle remains optional; if its file is absent, the moveset still loads but Dismantle custom animation will not play.
+The binary animation file is now present at `content/animations/Sukuna/Combo.anim`. Dismantle remains optional; if its file is absent, the moveset still loads but Dismantle custom animation will not play.
 
 ## Equipped accessory
 
