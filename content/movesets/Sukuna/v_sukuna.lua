@@ -661,7 +661,7 @@ AddModule(function()
             if targetMarker == folder then targetMarker = nil end
             if folder.Parent then folder:Destroy() end
         end)
-        notify(abilityName .. ": hedef client tarafında işaretlendi.")
+        notify(abilityName .. ": target marked on the client.")
     end
 
     local function playSkillAnimation(animationId)
@@ -925,7 +925,7 @@ AddModule(function()
             if not item or not item:IsA("Accessory") then return false end
             if tonumber(item:GetAttribute("AssetId")) == FINGER_ID then return true end
             return string.find(string.lower(item.Name), "finger", 1, true) ~= nil
-                or string.find(string.lower(item.Name), "parmak", 1, true) ~= nil
+                or string.find(string.lower(item.Name), "finger", 1, true) ~= nil
         end
 
         local accessory
@@ -1123,7 +1123,7 @@ AddModule(function()
             if not collected then
                 local base = getRootPosition()
                 if base then
-                    label.Text = ("☯ SUKUNA PARMAĞI  •  %d m"):format(math.floor((base - spawnPosition).Magnitude + 0.5))
+                    label.Text = ("☯ SUKUNA FINGER  •  %d m"):format(math.floor((base - spawnPosition).Magnitude + 0.5))
                 end
             end
         end
@@ -1163,7 +1163,7 @@ AddModule(function()
             fingersFound += 1
             local collectedAt = spawnPosition
             chatMessage(string.format("Sukuna Finger collected! (%d) • It will reappear somewhere else in 8 seconds.", fingersFound))
-            announceFinger(string.format("[Sukuna] PARMAK TOPLANDI  •  %d", fingersFound))
+            announceFinger(string.format("[Sukuna] FINGER COLLECTED  •  %d", fingersFound))
             playFingerFoundCutscene(collectedAt)
             task.spawn(function()
                 if laughAnimationTrack then
