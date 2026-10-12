@@ -11,14 +11,15 @@ AddModule(function()
     m.ModuleType = "MOVESET"
     m.Name = "Sukuna"
     m.Description = "Malevolent Shrine, Cleave, Dismantle, and Fuuga Flame Arrow."
-    -- NAM downloads these repository assets before calling Init.
+    -- Match Gojo's asset loader contract: logical local path @ raw GitHub URL.
+    -- These are NAM AnimLib binary .anim files, not .rbxm models.
     m.Assets = {
-        "Sukuna/Cleave.rbxm",
-        "Sukuna/FlameArrow.rbxm",
-        "Sukuna/Domain Expansion: Malevolent Shrine.rbxm",
-        "Sukuna/Sukuna Laugh.rbxm",
-        "Sukuna/Walk.rbxm",
-        "Sukuna/Combo.rbxm",
+        "Sukuna/Cleave.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Cleave.anim",
+        "Sukuna/FlameArrow.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/FlameArrow.anim",
+        "Sukuna/MalevolentShrine.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/MalevolentShrine.anim",
+        "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
+        "Sukuna/Walk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Walk.anim",
+        "Sukuna/DomainCombo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/DomainCombo.anim",
     }
 
     local TARGETS = {
@@ -96,87 +97,69 @@ AddModule(function()
         return part and part:IsA("BasePart") and part or nil
     end
 
-    -- Load a KeyframeSequence/Animation stored inside a downloaded .rbxm model.
-    -- This keeps the source assets in GitHub and avoids inventing animation IDs.
+    -- Load through NAM's exact AnimLib pipeline, the same pattern used by Gojo.
+    -- All sources are downloaded .anim binary files declared in m.Assets above.
     local function playBundledAnimation(filename, preferredName, looped)
         if not activeFigure or not activeFigure.Parent then return false end
-        local humanoid = activeFigure:FindFirstChildOfClass("Humanoid")
-        if not humanoid then return false end
-
         local path = AssetGetPathFromFilename(filename)
-        if not isfile or not isfile(path) then return false end
-
-        local okLoad, objects = pcall(function()
-            local assetUri = getcustomasset(path)
-            return game:GetObjects(assetUri)
-        end)
-        if not okLoad or type(objects) ~= "table" then
-            -- Some executors expose local model loading through InsertService instead.
-            okLoad, objects = pcall(function()
-                return {game:GetService("InsertService"):LoadLocalAsset(path)}
-            end)
+        if not isfile or not isfile(path) then
+            notify("Animasyon dosyası bulunamadı: " .. filename)
+            return false
         end
-        if not okLoad or type(objects) ~= "table" then return false end
 
-        local selected
-        local wanted = string.lower(preferredName or "")
-        for _, object in ipairs(objects) do
-            for _, item in ipairs(object:GetDescendants()) do
-                if item:IsA("KeyframeSequence") or item:IsA("Animation") then
-                    if string.find(string.lower(item.Name), wanted, 1, true) then
-                        selected = item
-                        break
-                    elseif not selected then
-                        selected = item
+        local okTrack, track = pcall(function() return AnimLib.Track.fromfile(path) end)
+        if not okTrack or not track or type(track.Keyframes) ~= "table" or #track.Keyframes == 0 then
+            notify("Geçersiz .anim dosyası: " .. filename)
+            return false
+        end
+
+        if laughAnimationTrack and type(laughAnimationTrack.Stop) == "function" then
+            pcall(function() laughAnimationTrack:Stop() end)
+            laughAnimationTrack = nil
+        end
+
+        local animator = AnimLib.Animator.new()
+        animator.rig = activeFigure
+        animator.track = track
+        animator.looped = looped == true
+        local duration = 0
+        for _, keyframe in ipairs(track.Keyframes) do
+            if type(keyframe.Time) == "number" then duration = math.max(duration, keyframe.Time) end
+        end
+        local startedAt = os.clock()
+        local stopped = false
+        local stepConnection
+        local controller = {}
+        function controller:Stop()
+            if stopped then return end
+            stopped = true
+            if stepConnection then stepConnection:Disconnect(); stepConnection = nil end
+            if activeFigure and activeFigure.Parent then
+                for _, item in ipairs(activeFigure:GetDescendants()) do
+                    if item:IsA("Motor6D") then
+                        pcall(function() item.Transform = CFrame.identity end)
                     end
                 end
             end
-            if selected and string.find(string.lower(selected.Name), wanted, 1, true) then break end
         end
-        if not selected then
-            for _, object in ipairs(objects) do pcall(function() object:Destroy() end) end
-            return false
-        end
-
-        local animation = Instance.new("Animation")
-        animation.Name = "SukunaBundled_" .. tostring(preferredName or "Animation")
-        if selected:IsA("Animation") and selected.AnimationId ~= "" then
-            animation.AnimationId = selected.AnimationId
-        elseif selected:IsA("KeyframeSequence") then
-            local okId, contentId = pcall(function()
-                return game:GetService("KeyframeSequenceProvider"):RegisterKeyframeSequence(selected)
-            end)
-            if not okId or not contentId then
-                animation:Destroy()
-                for _, object in ipairs(objects) do pcall(function() object:Destroy() end) end
-                return false
+        stepConnection = game:GetService("RunService").RenderStepped:Connect(function()
+            if stopped or not activeFigure or not activeFigure.Parent then
+                controller:Stop()
+                return
             end
-            animation.AnimationId = contentId
-        else
-            animation:Destroy()
-            for _, object in ipairs(objects) do pcall(function() object:Destroy() end) end
-            return false
-        end
-
-        local animator = humanoid:FindFirstChildOfClass("Animator")
-        if not animator then
-            animator = Instance.new("Animator")
-            animator.Parent = humanoid
-        end
-        local okTrack, track = pcall(function() return animator:LoadAnimation(animation) end)
-        if not okTrack or not track then
-            animation:Destroy()
-            for _, object in ipairs(objects) do pcall(function() object:Destroy() end) end
-            return false
-        end
-        track.Priority = Enum.AnimationPriority.Action
-        track.Looped = looped == true
-        track:Play(0.12, 1, 1)
-        task.delay(12, function()
-            for _, object in ipairs(objects) do pcall(function() object:Destroy() end) end
-            pcall(function() animation:Destroy() end)
+            local elapsed = os.clock() - startedAt
+            if duration > 0 and elapsed > duration then
+                if animator.looped then
+                    startedAt = os.clock()
+                    elapsed = 0
+                else
+                    controller:Stop()
+                    return
+                end
+            end
+            pcall(function() animator:Step(elapsed) end)
         end)
-        return track
+        return controller
     end
 
     local function getLocalCharacter()
@@ -548,7 +531,7 @@ AddModule(function()
         -- Two-clip sequence: Combo intro, then Domain Expansion. Both clips are
         -- loaded from the bundled Roblox models; no placeholder asset IDs.
         task.spawn(function()
-            local first = playBundledAnimation("Sukuna/Combo.rbxm", "combo", false)
+            local first = playBundledAnimation("Sukuna/DomainCombo.anim", "combo", false)
             if first then
                 local timeout = os.clock() + 1.8
                 while first.IsPlaying and os.clock() < timeout and cutsceneActive do
@@ -557,7 +540,7 @@ AddModule(function()
                 pcall(function() first:Stop(0.08); first:Destroy() end)
             end
             if cutsceneActive then
-                local second = playBundledAnimation("Sukuna/Domain Expansion: Malevolent Shrine.rbxm", "domain", false)
+                local second = playBundledAnimation("Sukuna/MalevolentShrine.anim", "domain", false)
                 if second then
                     local timeout = os.clock() + 2.8
                     while second.IsPlaying and os.clock() < timeout and cutsceneActive do
@@ -902,7 +885,7 @@ AddModule(function()
                         pcall(function() laughAnimationTrack:Stop(0.05); laughAnimationTrack:Destroy() end)
                         laughAnimationTrack = nil
                     end
-                    local track = playBundledAnimation("Sukuna/Sukuna Laugh.rbxm", "laugh", false)
+                    local track = playBundledAnimation("Sukuna/SukunaLaugh.anim", "laugh", false)
                     if track then
                         laughAnimationTrack = track
                     else
@@ -1134,7 +1117,7 @@ AddModule(function()
             if domainEnabled then domainStartedAt = os.clock(); notify("Malevolent Shrine açıldı.") else notify("Domain kapatıldı.") end
             applyAccessoryPositions()
         elseif name == "Cleave" then
-            playBundledAnimation("Sukuna/Cleave.rbxm", "cleave", false)
+            playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
             cleaveUntil = os.clock() + 2.5
             applyAccessoryPositions()
         elseif name == "Dismantle" then
