@@ -7085,8 +7085,15 @@ local function AssetDownload(filename)
 			Method = "GET",
 			Url = source,
 		})
-		if s and resp and resp.StatusCode == 200 then
-			pcall(writefile, path, resp.Body)
+		if s and resp and resp.StatusCode == 200 and type(resp.Body) == "string" and #resp.Body > 0 then
+			-- Preserve the response bytes exactly: .anim files are binary KeyframeSequence data.
+			local wrote = pcall(writefile, path, resp.Body)
+			local saved = false
+			pcall(function() saved = wrote and isfile(path) end)
+			if not saved then
+				pcall(function() if isfile(path) then delfile(path) end end)
+				Util.Notify("Failed to save downloaded asset " .. filename .. "!")
+			end
 		else
 			Util.Notify("Failed to download " .. filename .. "!")
 		end
