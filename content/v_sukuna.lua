@@ -298,13 +298,14 @@ AddModule(function()
   if inputConn then inputConn:Disconnect() end
   -- BindAction's createTouchButton flag creates native mobile/virtual buttons.
   -- Position each button in a compact right-side cluster, and unbind on teardown.
+  -- Keep Sukuna's touch buttons grouped at the top-right.
   local buttonPositions = {
-   Awaken = UDim2.new(1, -250, 1, -310),
-   Shrine = UDim2.new(1, -175, 1, -310),
-   Furnance = UDim2.new(1, -100, 1, -310),
-   WorldCut = UDim2.new(1, -250, 1, -235),
-   Rush = UDim2.new(1, -175, 1, -235),
-   Laugh = UDim2.new(1, -100, 1, -235),
+   Awaken = UDim2.new(1, -250, 0, 90),
+   Shrine = UDim2.new(1, -175, 0, 90),
+   Furnance = UDim2.new(1, -100, 0, 90),
+   WorldCut = UDim2.new(1, -250, 0, 165),
+   Rush = UDim2.new(1, -175, 0, 165),
+   Laugh = UDim2.new(1, -100, 0, 165),
   }
   for name, key in pairs(keys) do
    local bindName = "RobuNexa_Sukuna_" .. name
