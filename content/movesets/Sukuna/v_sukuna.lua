@@ -872,14 +872,14 @@ AddModule(function()
             end)
         elseif isDismantle or isCombo then
             cleaveUntil = now + (isCombo and 1.8 or 1.2)
+            slashBurstStartedAt = now
+            slashBurstUntil = now + (isCombo and 1.5 or 0.48)
+            slashBurstCount = isCombo and 5 or 2
+            slashBurstTarget = targetPosition
             if isCombo then
                 comboAccessoryStartedAt = now
                 comboAccessoryUntil = now + 1.45
                 cleaveAccessoryUntil = 0
-                slashBurstStartedAt = now
-                slashBurstUntil = now + 1.5
-                slashBurstCount = 5
-                slashBurstTarget = targetPosition
             end
             abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
