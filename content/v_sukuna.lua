@@ -59,15 +59,11 @@ AddModule(function()
   s.Volume = 1
   s.RollOffMaxDistance = 100
   s.Parent = parent or root or workspace
-  local ok = pcall(function()
-   game:GetService("ContentProvider"):PreloadAsync({s})
-   s:Play()
+  -- Play immediately; preload failure must not suppress the sound.
+  s:Play()
+  task.spawn(function()
+   pcall(function() game:GetService("ContentProvider"):PreloadAsync({s}) end)
   end)
-  if not ok then
-   pcall(function() Util.Notify("Sukuna sound failed to load: " .. name) end)
-   s:Destroy()
-   return nil
-  end
   Debris:AddItem(s, 30)
   return s
  end
@@ -132,6 +128,18 @@ AddModule(function()
   activeAnimator.looped = looped == true
   activeAnimator.speed = speed or 1
   activeAnimName = name
+  -- Release the animation controller after one-shot tracks so locomotion
+  -- does not stay frozen on the last keyframe.
+  if looped ~= true then
+   local lastTime = 0
+   for _, keyframe in ipairs(track.Keyframes) do
+    local t = tonumber(keyframe.Time) or 0
+    if t > lastTime then lastTime = t end
+   end
+   task.delay(math.max(0.2, lastTime / math.max(0.1, speed or 1) + 0.15), function()
+    if activeAnimName == name and activeTrack == track then stopAnimation() end
+   end)
+  end
  end
  local function cloneEffect(name, parentFolder, targetCF, seconds)
   local template = findDeep(parentFolder or effects, name)
@@ -308,7 +316,13 @@ AddModule(function()
    end)
   end
   task.defer(function()
-   if activeFigure == figure then sound("Laugh") end
+   if activeFigure == figure then
+    sound("Laugh")
+    playAnimation("Awaken", 1.1, false)
+    task.delay(2.6, function()
+     if activeFigure == figure and activeAnimName == "Awaken" then stopAnimation() end
+    end)
+   end
   end)
   effects=Instance.new("Folder")
   effects.Name="SukunaEffectsRuntime"
