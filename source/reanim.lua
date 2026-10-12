@@ -6017,9 +6017,9 @@ function HatReanimator.Start()
 		local h = Player.Character:FindFirstChildOfClass("Humanoid")
 		if h and h.RootPart then
 			InitCFrame = h.RootPart.CFrame
-			pcall(function() Player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Dead) end)
-			pcall(function() Player.Character.Humanoid.Health = 0 end)
-			pcall(replicatesignal, Player.Character.Humanoid.ServerBreakJoints)
+			-- Do not kill the live character during startup. The reanimation state
+			-- machine owns its one controlled transition; doing it here as well can
+			-- trigger CharacterAdded before initialization and create a respawn loop.
 			--pcall(replicatesignal, Player.ConnectDiedSignalBackend)
 			Player.Character.DescendantAdded:Connect(CharOnDesc)
 			for _,v in Player.Character:GetDescendants() do
