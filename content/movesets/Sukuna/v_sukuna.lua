@@ -13,6 +13,8 @@ AddModule(function()
     -- Match Gojo's asset loader contract: logical local path @ raw GitHub URL.
     -- These are NAM AnimLib binary .anim files, not .rbxm models.
     m.Assets = {
+        "Sukuna/Cleave.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Cleave.anim",
+        "Sukuna/Combo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Combo.anim",
         "Sukuna/MalevolentShrine.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/MalevolentShrine.anim",
         "Sukuna/FlameArrow.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/FlameArrow.anim",
         "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
@@ -868,7 +870,7 @@ AddModule(function()
             -- Combo must use its converted .anim clip; the procedural shoulder swing
             -- can override the clip on the same Motor6D, so only use it as a fallback.
             if isCombo then
-                local comboTrack = playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
+                local comboTrack = playBundledAnimation("Sukuna/Combo.anim", "combo", false)
                 if not comboTrack then
                     notify("Combo animation failed to load; using fallback arm swing.")
                     playSkillAnimation()
