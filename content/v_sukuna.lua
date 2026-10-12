@@ -35,8 +35,8 @@ AddModule(function()
  local moveSine = 0
  local startupLaughUntil = 0
  local busy = false
- local keys = {Awaken="Z", Shrine="X", Furnance="C", WorldCut="V", Rush="B", Laugh="N"}
- local abilityNames = {Awaken="Awaken", Shrine="Malevolent Shrine", WorldCut="Dismantle", Rush="Rush", Furnance="Fuuga", Laugh="Laugh"}
+ local keys = {Awaken="Z", Shrine="X", Furnance="C", WorldCut="V", Rush="B"}
+ local abilityNames = {Awaken="Awaken", Shrine="Malevolent Shrine", WorldCut="Dismantle", Rush="Rush", Furnance="Fuuga"}
 
  local function findDeep(parent, name)
   return parent and parent:FindFirstChild(name, true)
@@ -96,7 +96,22 @@ AddModule(function()
   local fileName = animationFiles[name]
   local ok, track = false, nil
   if fileName then
-   ok, track = pcall(function() return AnimLib.Track.fromfile(getAssetPath(fileName)) end)
+   -- AssetEnsure downloads asynchronously; wait for the cache file before parsing it.
+   local assetPath = getAssetPath(fileName)
+   local deadline = os.clock() + 12
+   while os.clock() < deadline do
+    local exists = false
+    pcall(function() exists = isfile(assetPath) end)
+    if exists then break end
+    task.wait(0.15)
+   end
+   local exists = false
+   pcall(function() exists = isfile(assetPath) end)
+   if exists then
+    ok, track = pcall(function() return AnimLib.Track.fromfile(assetPath) end)
+   else
+    ok, track = false, "asset did not finish downloading: " .. fileName
+   end
    if not ok then
     pcall(function() Util.Notify("Sukuna animation load error (" .. name .. "): " .. tostring(track)) end)
    end
@@ -261,11 +276,6 @@ AddModule(function()
   end)
  end
  local actions = {Awaken=awaken, Shrine=shrine, Furnance=furnace, WorldCut=worldCut, Rush=rush}
- local function laugh()
-  if busy then return end
-  sound("Laugh")
- end
- actions.Laugh = laugh
  local function activate(name) local f=actions[name]; if f then f() end end
 
  m.Config = function(parent: GuiBase2d)
@@ -274,7 +284,7 @@ AddModule(function()
   local layout=Instance.new("UIListLayout"); layout.FillDirection=Enum.FillDirection.Horizontal
   layout.HorizontalAlignment=Enum.HorizontalAlignment.Left; layout.VerticalAlignment=Enum.VerticalAlignment.Center
   layout.Padding=UDim.new(0,5); layout.Parent=panel
-  for _,name in ipairs({"Awaken","Shrine","Furnance","WorldCut","Rush","Laugh"}) do
+  for _,name in ipairs({"Awaken","Shrine","Furnance","WorldCut","Rush"}) do
    local button=Instance.new("TextButton"); button.Name=name.."Button"; button.Size=UDim2.new(0,100,0,34)
    button.BackgroundColor3=Color3.fromRGB(90,22,32); button.BorderSizePixel=0
    button.Text=abilityNames[name].." ["..keys[name].."]"; button.TextColor3=Color3.new(1,1,1)
