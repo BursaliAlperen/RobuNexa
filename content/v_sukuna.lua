@@ -367,7 +367,9 @@ AddModule(function()
  end
  local moveJoints = {r=CFrame.identity,n=CFrame.identity,rs=CFrame.identity,ls=CFrame.identity,rh=CFrame.identity,lh=CFrame.identity}
  local function applyLinkedSwordLocomotion(dt, figure)
-  if not figure or busy or (activeAnimator and activeTrack) then return end
+  -- Busy locks ability input, not locomotion: once a one-shot animation ends,
+  -- walking/jumping must resume even while the VFX cooldown is still running.
+  if not figure or (activeAnimator and activeTrack) then return end
   local hum = figure:FindFirstChildOfClass("Humanoid")
   local rootPart = figure:FindFirstChild("HumanoidRootPart") or figure:FindFirstChild("Torso")
   local torso = figure:FindFirstChild("Torso")
