@@ -427,25 +427,44 @@ do
 				end
 			end
 
-			local url = meta.download_url
-			if type(url) ~= "string" or url == "" then
-				url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/uiassets/" .. meta.name
+			local urls = {}
+			if type(meta.download_url) == "string" and meta.download_url ~= "" then
+				table.insert(urls, meta.download_url)
 			end
-			local ok, body = pcall(function()
-				local response = request({ Url = url, Method = "GET" })
-				if type(response) ~= "table" then error("HTTP request returned no response") end
-				local status = tonumber(response.StatusCode or response.Status or 0)
-				if status < 200 or status >= 300 then error("HTTP status " .. tostring(status)) end
-				local data = response.Body
-				if type(data) ~= "string" or #data == 0 then error("empty response body") end
-				return data
-			end)
-			if ok and type(body) == "string" and #body > 0 then
-				local writeOk = pcall(writefile, fil, body)
-				if not writeOk then skipped += 1 end
+			table.insert(urls, "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/uiassets/" .. meta.name)
+			local body, lastError
+			for attempt = 1, 3 do
+				for _, url in ipairs(urls) do
+					local ok, result = pcall(function()
+						local response = request({ Url = url, Method = "GET" })
+						if type(response) ~= "table" then error("HTTP request returned no response") end
+						local status = tonumber(response.StatusCode or response.Status or 0)
+						if status < 200 or status >= 300 then error("HTTP status " .. tostring(status)) end
+						local data = response.Body
+						if type(data) ~= "string" or #data == 0 then error("empty response body") end
+						return data
+					end)
+					if ok and type(result) == "string" and #result > 0 then
+						body = result
+						break
+					else
+						lastError = tostring(result)
+					end
+				end
+				if body then break end
+				task.wait(0.35 * attempt)
+			end
+			if body then
+				pcall(makefolder, "NAMReanim")
+				pcall(makefolder, "NAMReanim/Assets")
+				local writeOk, writeError = pcall(writefile, fil, body)
+				if not writeOk then
+					skipped += 1
+					warn("[NAM] Asset write failed: " .. tostring(meta.name) .. " :: " .. tostring(writeError))
+				end
 			else
 				skipped += 1
-				warn("[NAM] Asset download failed: " .. tostring(meta.name) .. " from " .. tostring(url))
+				warn("[NAM] Asset download failed: " .. tostring(meta.name) .. " :: " .. tostring(lastError))
 			end
 			downloaded += 1
 		end
@@ -489,6 +508,7 @@ do
 						-- waiting forever for a counter that will not advance.
 						local ok = pcall(downloadfile, file)
 						if not ok then
+							warn("[NAM] Unexpected asset downloader error: " .. tostring(file.name))
 							skipped += 1
 							downloaded += 1
 						end
