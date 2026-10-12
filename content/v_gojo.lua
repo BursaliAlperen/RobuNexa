@@ -214,9 +214,11 @@ AddModule(function()
 		root = resolveRoot(activeFigure)
 		if not root then notify("Hat reanimation karakterinde bağlanılabilir parça bulunamadı."); return end
 		flightEnabled = true
-		originalAutoRotate = humanoid.AutoRotate
-		humanoid.AutoRotate = false
-		humanoid.PlatformStand = true
+		originalAutoRotate = humanoid and humanoid.AutoRotate
+		if humanoid then
+			humanoid.AutoRotate = false
+			humanoid.PlatformStand = true
+		end
 		flightVelocity = Instance.new("BodyVelocity")
 		flightVelocity.Name = "GojoFlightVelocity"
 		flightVelocity.MaxForce = Vector3.new(1e7, 1e7, 1e7)
