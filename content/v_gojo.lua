@@ -11,25 +11,20 @@ AddModule(function()
 	m.ModuleType = "MOVESET"
 	m.Name = "Gojo"
 	m.Description = "Gojo moveset: Lapse Blue, Red Reversal, Hollow Purple, Infinity and Flight."
+	-- Map Gojo movement slots to real .anim files already present in this repository.
+	-- The Gojo .rbxm files are model assets, not files AnimLib.Track.fromfile can parse directly.
 	m.Assets = {
-		"GojoIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoIdle.anim",
-		"GojoWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoWalk.anim",
-		"GojoRun.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoRun.anim",
-		"GojoJump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoJump.anim",
-		"GojoBlue.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoBlue.anim",
-		"GojoRed.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoRed.anim",
-		"GojoPurple.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoPurple.anim",
-		"GojoInfinity.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/GojoInfinity.anim",
+		"GojoIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/IDLEDOGSMOOTH.anim",
+		"GojoWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/KDRV3Walk.anim",
+		"GojoRun.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/DOGRUN.anim",
+		"GojoJump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/JUMPDOG.anim",
 	}
 	local animationFiles = {
 		Idle = "GojoIdle.anim",
 		Walk = "GojoWalk.anim",
 		Run = "GojoRun.anim",
 		Jump = "GojoJump.anim",
-		Blue = "GojoBlue.anim",
-		Red = "GojoRed.anim",
-		Purple = "GojoPurple.anim",
-		Infinity = "GojoInfinity.anim",
+		-- Ability animation files will be mapped after the Gojo .rbxm sequences are converted.
 	}
 	local abilityNames = { "Blue", "Red", "Purple", "Infinity", "Flight" }
 	local activeFigure, humanoid, root
