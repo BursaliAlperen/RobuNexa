@@ -9,7 +9,12 @@ AddModule(function()
     m.ModuleType = "MOVESET"
     m.Name = "Sukuna"
     m.Description = "Malevolent Shrine, Cleave, Dismantle, and Fuuga Flame Arrow."
-    m.Assets = {}
+    -- NAM downloads these repository assets before calling Init.
+    m.Assets = {
+        "Sukuna/Cleave.rbxm",
+        "Sukuna/FlameArrow.rbxm",
+        "Sukuna/sukunadomain.rbxm",
+    }
 
     local TARGETS = {
         [18726352770] = {
@@ -268,6 +273,7 @@ AddModule(function()
         return nil
     end
 
+    local scaleShrineAccessory
     local function ensureHatOverrides()
         if not HatReanimator then return end
         if type(HatReanimator.HatCFrameOverride) ~= "table" then
@@ -315,20 +321,50 @@ AddModule(function()
         end
     end
 
-    local function scaleShrineAccessory(accessory)
+    scaleShrineAccessory = function(accessory)
         if not accessory then return end
         local handle = accessory:FindFirstChild("Handle")
         if not handle or not handle:IsA("BasePart") then return end
         if not scaledMeshes[handle] then
             local mesh = handle:FindFirstChildOfClass("SpecialMesh")
             if mesh then
-                scaledMeshes[handle] = {instance = mesh, kind = "mesh", original = mesh.Scale}
-                mesh.Scale = mesh.Scale * 1.75
+                scaledMeshes[handle] = {instance = mesh, kind = "mesh", original = mesh.Scale, factor = 1}
             elseif handle:IsA("MeshPart") then
-                scaledMeshes[handle] = {instance = handle, kind = "part", original = handle.Size}
-                handle.Size = handle.Size * 1.75
+                scaledMeshes[handle] = {instance = handle, kind = "part", original = handle.Size, factor = 1}
             end
         end
+        local saved = scaledMeshes[handle]
+        if saved and saved.factor ~= 1.75 then
+            pcall(function()
+                if saved.kind == "mesh" then saved.instance.Scale = saved.original * 1.75
+                elseif saved.kind == "part" then saved.instance.Size = saved.original * 1.75 end
+            end)
+            saved.factor = 1.75
+            if HatReanimator then HatReanimator.RebuildRequired = true end
+        end
+    end
+
+    local function setAccessoryScale(id, multiplier)
+        local accessory = accessoryInstances[id]
+        if not accessory then return end
+        local handle = accessory:FindFirstChild("Handle")
+        if not handle or not handle:IsA("BasePart") then return end
+        if not scaledMeshes[handle] then
+            local mesh = handle:FindFirstChildOfClass("SpecialMesh")
+            if mesh then
+                scaledMeshes[handle] = {instance = mesh, kind = "mesh", original = mesh.Scale, factor = 1}
+            elseif handle:IsA("MeshPart") then
+                scaledMeshes[handle] = {instance = handle, kind = "part", original = handle.Size, factor = 1}
+            end
+        end
+        local saved = scaledMeshes[handle]
+        if not saved or saved.factor == multiplier then return end
+        pcall(function()
+            if saved.kind == "mesh" then saved.instance.Scale = saved.original * multiplier
+            elseif saved.kind == "part" then saved.instance.Size = saved.original * multiplier end
+        end)
+        saved.factor = multiplier
+        if HatReanimator then HatReanimator.RebuildRequired = true end
     end
 
     local function setHatWorldCFrame(id, targetCFrame)
@@ -350,11 +386,15 @@ AddModule(function()
     local function applyAccessoryPositions()
         if not root or not root.Parent then return end
         local t = os.clock()
-        local center = effectCenter()
+        local center = root.CFrame * CFrame.new(0, 4, -22)
         local hiddenCenter = root.CFrame * CFrame.new(0, 0, -320)
         local active = domainEnabled or os.clock() < cleaveUntil
         local fast = os.clock() < cleaveUntil
         local rate = fast and 7.5 or 1.8
+
+        -- Domain slash accessories grow 20x while Domain is active, then restore.
+        setAccessoryScale(100475161263482, domainEnabled and 20 or 1)
+        setAccessoryScale(97087028126781, domainEnabled and 20 or 1)
 
         -- The Shrine itself rises slowly from below ground while Domain is active.
         if domainEnabled then
