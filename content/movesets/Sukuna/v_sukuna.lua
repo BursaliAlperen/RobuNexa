@@ -832,7 +832,11 @@ AddModule(function()
             slashBurstUntil = now + 0.3
             slashBurstCount = 1
             slashBurstTarget = targetPosition
-            playSkillAnimation()
+            local cleaveTrack = playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
+            if not cleaveTrack then
+                notify("Cleave animation failed to load; using fallback arm swing.")
+                playSkillAnimation()
+            end
             showTargetMarker(targetPosition, "Cleave")
             chatAbilityMessage("Cleave!")
             task.delay(1.35, function()
