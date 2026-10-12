@@ -784,7 +784,7 @@ AddModule(function()
             end
         elseif name == "Cleave" then
             cleaveUntil = now + 1.2
-            setHatWorldCFrame(100475161263482, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
+            setHatWorldCFrame(101090904148116, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
             playSkillAnimation()
             playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
             showTargetMarker(targetPosition, "Cleave")
