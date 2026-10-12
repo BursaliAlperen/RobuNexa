@@ -40,6 +40,8 @@ AddModule(function()
 	local flightVelocity, flightGyro
 	local guiConnections = {}
 	local buttons = {}
+	local cooldownUntil = {}
+	local COOLDOWNS = { Blue = 5, Red = 8, Purple = 18, Infinity = 12, Flight = 2 }
 	local updateFlightConnection
 	local FLIGHT_SPEED = 55
 	local SOUND_IDS = {
@@ -161,7 +163,7 @@ AddModule(function()
 			weld.Parent = visual
 		end
 		if buttons.Infinity then
-			buttons.Infinity.Text = infinityEnabled and "∞" or "∞"
+			buttons.Infinity.Text = "∞"
 			buttons.Infinity.BackgroundColor3 = infinityEnabled and Color3.fromRGB(28, 105, 150) or Color3.fromRGB(22, 30, 48)
 		end
 		notify(infinityEnabled and "Infinity etkinleştirildi." or "Infinity kapatıldı.")
@@ -221,9 +223,52 @@ AddModule(function()
 		notify("Uçuş açıldı. WASD + Space/Ctrl.")
 	end
 
+	local function refreshAbilityButton(name)
+		local button = buttons[name]
+		if not button then return end
+		local remaining = math.max(0, (cooldownUntil[name] or 0) - os.clock())
+		if remaining > 0 then
+			button.Active = false
+			button.AutoButtonColor = false
+			button.BackgroundColor3 = Color3.fromRGB(55, 60, 75)
+			button.Text = (name == "Purple" and "PURP" or (name == "Infinity" and "∞" or name)) .. "\\n" .. string.format("%.1f s", remaining)
+		else
+			button.Active = true
+			button.AutoButtonColor = true
+			button.BackgroundColor3 = (name == "Infinity" and infinityEnabled) and Color3.fromRGB(28, 105, 150) or (name == "Flight" and flightEnabled) and Color3.fromRGB(28, 105, 150) or Color3.fromRGB(22, 30, 48)
+			button.Text = name == "Purple" and "PURP" or (name == "Infinity" and "∞" or name == "Flight" and (flightEnabled and "FLY ON" or "FLIGHT") or name)
+		end
+	end
+
+	local function beginCooldown(name)
+		cooldownUntil[name] = os.clock() + (COOLDOWNS[name] or 5)
+		task.spawn(function()
+			while buttons[name] and os.clock() < (cooldownUntil[name] or 0) do
+				refreshAbilityButton(name)
+				task.wait(0.1)
+			end
+			refreshAbilityButton(name)
+		end)
+	end
+
 	local function useAbility(name)
-		if name == "Infinity" then toggleInfinity(); return end
-		if name == "Flight" then toggleFlight(); return end
+		local remaining = (cooldownUntil[name] or 0) - os.clock()
+		if remaining > 0 and not (name == "Infinity" and infinityEnabled) and not (name == "Flight" and flightEnabled) then
+			notify(name .. " bekleme süresi: " .. string.format("%.1f", remaining) .. " sn")
+			return
+		end
+		if name == "Infinity" then
+			if infinityEnabled then toggleInfinity(); refreshAbilityButton(name); return end
+			toggleInfinity()
+			if infinityEnabled then beginCooldown(name) end
+			return
+		end
+		if name == "Flight" then
+			if flightEnabled then toggleFlight(); refreshAbilityButton(name); return end
+			toggleFlight()
+			if flightEnabled then beginCooldown(name) end
+			return
+		end
 		if name == "Red" then
 			playSound(SOUND_IDS.RedExplosion, false, 1)
 			local target = nearestOtherPlayer()
@@ -249,7 +294,8 @@ AddModule(function()
 			task.delay(0.35, function() if root and root.Parent then playSound(SOUND_IDS.HollowPurple, false, 1) end end)
 		end
 		playAnimation(name, false)
-		notify(name .. " animasyonu oynatılıyor (dosya mevcutsa).")
+		beginCooldown(name)
+		notify(name .. " kullanıldı.")
 	end
 
 	m.Config = function(parent: GuiBase2d)
