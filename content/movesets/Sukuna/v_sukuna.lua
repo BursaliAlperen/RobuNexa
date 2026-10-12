@@ -50,6 +50,21 @@ AddModule(function()
     }
 
     local EFFECT_IDS = {100475161263482, 97087028126781}
+    -- Strict catalog allowlist: only these seven supplied accessory IDs are accepted.
+    -- 18445594182 is the active Domain/Shrine asset; 18726352770 is retained as
+    -- an allowed legacy asset ID but is not used as the Domain target.
+    local ALLOWED_ASSET_IDS = {
+        [18445594182] = true,
+        [131873641508713] = true,
+        [18762839664] = true,
+        [18726352770] = true,
+        [124144353587446] = true,
+        [100475161263482] = true,
+        [97087028126781] = true,
+    }
+    local function isAllowedAssetId(id)
+        return ALLOWED_ASSET_IDS[tonumber(id)] == true
+    end
     local FINGER_ID = 18762839664
     local activeFigure, root
     local hud
@@ -324,7 +339,11 @@ AddModule(function()
             end
             if not fingerEquipped then
                 for _, child in ipairs(character:GetChildren()) do
-                    if child:IsA("Accessory") and tonumber(child:GetAttribute("AssetId")) == FINGER_ID then
+                    if child:IsA("Accessory") and (
+                        tonumber(child:GetAttribute("AssetId")) == FINGER_ID
+                        or tonumber(child:GetAttribute("_RobuNexaSukunaAssetId")) == FINGER_ID
+                        or string.find(string.lower(child.Name), "finger", 1, true) ~= nil
+                    ) then
                         fingerEquipped = true
                         break
                     end
@@ -924,9 +943,12 @@ AddModule(function()
 
         local function isFingerAccessory(item)
             if not item or not item:IsA("Accessory") then return false end
-            if tonumber(item:GetAttribute("AssetId")) == FINGER_ID then return true end
-            return string.find(string.lower(item.Name), "finger", 1, true) ~= nil
-                or string.find(string.lower(item.Name), "finger", 1, true) ~= nil
+            local itemAssetId = tonumber(item:GetAttribute("AssetId"))
+                or tonumber(item:GetAttribute("_RobuNexaSukunaAssetId"))
+            if itemAssetId == FINGER_ID and isAllowedAssetId(itemAssetId) then return true end
+            local itemName = string.lower(item.Name)
+            return string.find(itemName, "finger", 1, true) ~= nil
+                or string.find(itemName, "sukuna", 1, true) ~= nil
         end
 
         local accessory
