@@ -51,10 +51,20 @@ AddModule(function()
   local asset = soundIds[name]
   if not asset then return end
   local s = Instance.new("Sound")
+  s.Name = "Sukuna_" .. name
   s.SoundId = asset
   s.Volume = 1
+  s.RollOffMaxDistance = 100
   s.Parent = parent or root or workspace
-  s:Play()
+  local ok = pcall(function()
+   game:GetService("ContentProvider"):PreloadAsync({s})
+   s:Play()
+  end)
+  if not ok then
+   pcall(function() Util.Notify("Sukuna sound failed to load: " .. name) end)
+   s:Destroy()
+   return nil
+  end
   Debris:AddItem(s, 30)
   return s
  end
@@ -77,12 +87,17 @@ AddModule(function()
  end
  local animationFiles = {Awaken="SukunaAwaken.anim", Shrine="SukunaShrine.anim", Open="SukunaOpen.anim", WorldCut="SukunaWorldCut.anim", Rush="SukunaRush.anim"}
  local function playAnimation(name, speed, looped)
-  if not activeFigure or not anims then return end
+  if not activeFigure then return end
   local sequence = anims and anims:FindFirstChild(name, true)
   stopAnimation()
   local fileName = animationFiles[name]
   local ok, track = false, nil
-  if fileName then ok, track = pcall(function() return AnimLib.Track.fromfile(getAssetPath(fileName)) end) end
+  if fileName then
+   ok, track = pcall(function() return AnimLib.Track.fromfile(getAssetPath(fileName)) end)
+   if not ok then
+    pcall(function() Util.Notify("Sukuna animation load error (" .. name .. "): " .. tostring(track)) end)
+   end
+  end
   if (not ok or not track) and sequence and sequence:IsA("KeyframeSequence") then
    ok, track = pcall(function() return AnimLib.Track.frominstance(sequence) end)
   end
