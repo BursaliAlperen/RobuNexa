@@ -561,16 +561,16 @@ AddModule(function()
             end
         end
         if not shoulder then return end
-        local original = shoulder.Transform
+        local original = shoulder.C0
         local tweenService = game:GetService("TweenService")
         local swing = tweenService:Create(shoulder, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Transform = original * CFrame.Angles(math.rad(-85), math.rad(10), math.rad(35))
+            C0 = original * CFrame.Angles(math.rad(-85), math.rad(10), math.rad(35))
         })
         swing:Play()
         task.delay(0.13, function()
             if shoulder and shoulder.Parent then
                 tweenService:Create(shoulder, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
-                    Transform = original
+                    C0 = original
                 }):Play()
             end
         end)
