@@ -6357,14 +6357,14 @@ _G_NAM.Fling = function(part)
 end
 
 do
-	-- Only expose the maintained upstream engine as an external option.
-	-- Gelatek's own README warns its legacy reanimator no longer works in modern games.
+	-- Syntax-Reanimate is used as the external option; Krypton was removed.
+	-- Keep the native NAM Limb and Hats reanimators unchanged.
 	local EXTERNAL_ENGINES = {
-		[3] = {Name = "KRYPTON", Url = "https://raw.githubusercontent.com/KadeTheExploiter/Krypton/main/Module.luau"},
+		[3] = {Name = "Syntax-Reanimate", Url = "https://raw.githubusercontent.com/Memeboiyot/Syntax-Reanimate/main/main.lua"},
 	}
 	SaveData.SelectedReanimator = math.clamp(tonumber(SaveData.SelectedReanimator) or 1, 1, 3)
 	local ReanimateMethodSelect = UI.CreateDropdown(MainPage, "Reanimator", {
-		"Limb Reanimator", "Hats Reanimator", "KRYPTON (recommended external)"
+		"Limb Reanimator", "Hats Reanimator", "Syntax-Reanimate"
 	}, SaveData.SelectedReanimator)
 	local ReanimatorConfigTitle = UI.CreateText(MainPage, "-=+ Limb Reanimator Config +=-", 15, Enum.TextXAlignment.Center)
 	local SelectedReanimator = LimbReanimator
@@ -6382,10 +6382,10 @@ do
 			SelectedReanimator.Config(ReanimatorConfigCanvas)
 		else
 			SelectedReanimator = {Name = EXTERNAL_ENGINES[value].Name, External = true}
-			ReanimatorConfigTitle.Text = "-=+ " .. EXTERNAL_ENGINES[value].Name .. " External Engine +=-"
+			ReanimatorConfigTitle.Text = "-=+ Syntax-Reanimate Config +=-"
 			Util.ClearAllChildrenGui(ReanimatorConfigCanvas)
-			UI.CreateText(ReanimatorConfigCanvas, "External engine: " .. EXTERNAL_ENGINES[value].Name, 14, Enum.TextXAlignment.Center)
-			UI.CreateText(ReanimatorConfigCanvas, "This engine runs separately from NAM. Stop is not supported by its upstream loader; restart your client to switch/stop safely. Never run two reanimation engines together.", 11, Enum.TextXAlignment.Center)
+			UI.CreateText(ReanimatorConfigCanvas, "Syntax-Reanimate (R6/R15)", 14, Enum.TextXAlignment.Center)
+			UI.CreateText(ReanimatorConfigCanvas, "External engine; restart the client before switching or stopping. Do not run it alongside another reanimation engine.", 11, Enum.TextXAlignment.Center)
 		end
 	end
 	ApplyReanimatorSelection(SaveData.SelectedReanimator)
@@ -6399,25 +6399,24 @@ do
 		ApplyReanimatorSelection(value)
 	end)
 	local function StartExternalEngine(engine)
-		local Global = (getgenv and getgenv()) or shared
-		if engine.Name == "KRYPTON" then
-			Global.KryptonConfiguration = {
-				WaitTime = 0.251, FakeRigScale = 1, DestroyHeightOffset = 50, TeleportOffsetRadius = 20,
-				RefitHatCount = 2, RigName = "RobuNexa", ReturnOnDeath = true,
-				Flinging = {Enabled = false, MethodUsed = "Tool", FlingMagnitude = 8000},
-				Reclaim = false, Refit = true, SetCharacter = true, Animations = true, NoCollisions = true,
-				AntiVoiding = false, SetSimulationRadius = false, DisableCharacterScripts = true,
-				AccessoryFallbackDefaults = true, OverlayFakeCharacter = false, LimitHatsPerLimb = false,
-				NoBodyNearby = true, PermanentDeath = true, Hats = {},
-			}
-		elseif engine.Name == "GELATEK" or engine.Name == "GELATEK_EDIT" then
-			Global.GelatekReanimateConfig = {
-				AnimationsDisabled = false, R15ToR6 = false, DontBreakHairWelds = true,
-				PermanentDeath = true, Headless = false, TeleportBackWhenVoided = false,
-				AlignReanimate = false, FullForceAlign = false, FasterHeartbeat = false,
-				DynamicalVelocity = false, DisableTweaks = false, OptimizeGame = false,
-				LoadLibrary = false, DetailedCredits = false, TorsoFling = false, BulletEnabled = false,
-				BulletConfig = {RunAfterReanimate = false, LockBulletOnTorso = false, ElementalCrystalBullet = false},
+		local Global = (getgenv and getgenv()) or _G
+		if engine.Name == "Syntax-Reanimate" then
+			Global.Settings = {
+				VelocityForce = 10,
+				AntiSleepForce = 1,
+				DisableMovementVelocity = false,
+				SingleThread = true,
+				AntiVoid = true,
+				LoadLibrary = true,
+				R15ToR6 = false,
+				EnableAnims = true,
+				FullNoclip = false,
+				KeepWeldedHair = true,
+				HeadMovementMethod = false,
+				BulletOnLoad = false,
+				Bullet = false,
+				RainbowFlingPart = false,
+				FlingHat = "",
 			}
 		end
 		local source = game:HttpGet(engine.Url)
