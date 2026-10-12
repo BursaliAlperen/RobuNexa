@@ -9,7 +9,7 @@ NAM — maintained and rebranded by mamalalanam.
 Original-source and third-party notices are preserved in the README.
 ]]
 
-local NAMVersion = "1.0.17 BETA"
+local NAMVersion = "1.0.18 BETA"
 if _G.NAMLoaded or _G["U" .. "hhhhhhLoaded"] then
 	warn("[NAM] v" .. NAMVersion .. " did not start: v" .. tostring(_G.NAMVersion or "older/unknown") .. " is already active. Leave and rejoin to apply the update.")
 	return
@@ -7590,24 +7590,10 @@ local function AddMoveset(m, moduleFileName, moduleSource)
 				equiptext.Text = "* ACTIVE *"
 				MovementStyleIndex = table.find(MovementStyles, m)
 			end)
-			UI.CreateSeparator(page)
-			UI.CreateText(page, "* Configuration *", 15, Enum.TextXAlignment.Center)
-			m.Config(page)
-			UI.CreateSeparator(page)
-			local favoriteButton, favoriteButtonText = UI.CreateButton(page, "", 18)
-			local function RefreshDanceFavoriteState()
-				local isFavorite = SaveData.FavoriteDances[m._NAMFavoriteKey]
-				favoriteButtonText.Text = isFavorite and "★ REMOVE FROM FAVORITES" or "☆ ADD TO FAVORITES"
-				RefreshRowFavoriteState()
-			end
-			RefreshDanceFavoriteState()
-			favoriteButton.Activated:Connect(function()
-				SaveData.FavoriteDances[m._NAMFavoriteKey] = not SaveData.FavoriteDances[m._NAMFavoriteKey]
-				RefreshDanceFavoriteState()
-				UpdateDanceListOrder()
-				UpdateDanceListVisibility()
-			end)
-			MovesetsPage.Interactable = false
+				UI.CreateSeparator(page)
+				UI.CreateText(page, "* Configuration *", 15, Enum.TextXAlignment.Center)
+				m.Config(page)
+				MovesetsPage.Interactable = false
 			local tween = TweenService:Create(page, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
 				Position = UDim2.new(0.5, 0, 0.5, 0),
 			})
