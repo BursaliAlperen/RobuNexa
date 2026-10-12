@@ -1,6 +1,5 @@
--- RobuNexa / NAM - Sukuna accessory-driven Domain and Cleave.
--- Uses equipped catalog accessories as HatReanimator targets with eased transitions.
--- Fuuga projectile/aura are local visual prototypes; shared visibility requires server replication.
+-- RobuNexa / NAM - One-Finger Sukuna, Cleave-focused.
+-- No Domain, Fuuga, or chat output. Uses the user's equipped Cleave accessory.
 local modules = {}
 -- Keep factories intact: NAM's loader injects its API before invoking each factory.
 local function AddModule(fn) table.insert(modules, fn) end
@@ -10,16 +9,13 @@ AddModule(function()
     local UserInputService = game:GetService("UserInputService")
     m.ModuleType = "MOVESET"
     m.Name = "Sukuna"
-    m.Description = "Malevolent Shrine, Cleave, Dismantle, and Fuuga Flame Arrow."
+    m.Description = "One-Finger Sukuna: Cleave-focused slashes. No Domain or Fuuga."
     -- Match Gojo's asset loader contract: logical local path @ raw GitHub URL.
     -- These are NAM AnimLib binary .anim files, not .rbxm models.
     m.Assets = {
         "Sukuna/Cleave.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Cleave.anim",
-        "Sukuna/FlameArrow.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/FlameArrow.anim",
-        "Sukuna/MalevolentShrine.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/MalevolentShrine.anim",
         "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
         "Sukuna/Walk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Walk.anim",
-        "Sukuna/DomainCombo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/DomainCombo.anim",
     }
 
     local TARGETS = {
@@ -41,6 +37,12 @@ AddModule(function()
             hints = {"cleave and dismantle", "dismantle animated aura"},
             hiddenHeight = 0,
         },
+        [101090904148116] = {
+            key = "cleaveAura",
+            label = "Equipped Cleave",
+            hints = {"cleave"},
+            hiddenHeight = 0,
+        },
         [97087028126781] = {
             key = "whiteSlashes",
             label = "White Domain Slashes",
@@ -49,11 +51,12 @@ AddModule(function()
         },
     }
 
-    local EFFECT_IDS = {100475161263482, 97087028126781}
+    local EFFECT_IDS = {101090904148116, 100475161263482, 97087028126781}
     -- Strict catalog allowlist: only these seven supplied accessory IDs are accepted.
     -- 18445594182 is the active Domain/Shrine asset; 18726352770 is retained as
     -- an allowed legacy asset ID but is not used as the Domain target.
     local ALLOWED_ASSET_IDS = {
+        [101090904148116] = true,
         [18445594182] = true,
         [131873641508713] = true,
         [18762839664] = true,
@@ -70,7 +73,7 @@ AddModule(function()
     local hud
     local skillButtons = {}
     local activateAbility
-    local abilityCooldowns = {Domain = 12, Cleave = 3, Dismantle = 2.5, Fuuga = 8}
+    local abilityCooldowns = {Domain = math.huge, Cleave = 2.25, Dismantle = 3.5, Fuuga = math.huge}
     local abilityReadyAt = {}
     local abilityTargets = {}
     local targetMarker
@@ -727,6 +730,7 @@ AddModule(function()
     end
 
     local function chatAbilityMessage(message)
+        return -- Chat output intentionally disabled.
         local sent = false
         pcall(function()
             local service = game:GetService("TextChatService")
@@ -749,13 +753,15 @@ AddModule(function()
     end
 
     local function activateSukunaAbility(name, targetPosition)
+        if name == "Domain" or name == "Fuuga" then return end
+        if name ~= "Cleave" and name ~= "Dismantle" then return end
         if not activeFigure or not activeFigure.Parent or not root or not root.Parent then
             notify("Moveset is not ready yet; waiting for the Hat Reanimation rig.")
             return
         end
         local now = os.clock()
         if now < (abilityReadyAt[name] or 0) then return end
-        abilityReadyAt[name] = now + (abilityCooldowns[name] or 2)
+        abilityReadyAt[name] = now + (abilityCooldowns[name] or 3)
         targetPosition = typeof(targetPosition) == "Vector3" and targetPosition
             or (root.Position + root.CFrame.LookVector * 32)
         abilityTargets[name] = targetPosition
@@ -814,7 +820,7 @@ AddModule(function()
     activateAbility = activateSukunaAbility
 
     local KEYBINDS = {Domain = Enum.KeyCode.Z, Cleave = Enum.KeyCode.X, Dismantle = Enum.KeyCode.C, Fuuga = Enum.KeyCode.V}
-    local LABELS = {Domain = "DOMAIN", Cleave = "CLEAVE", Dismantle = "DISM.", Fuuga = "FUUGA"}
+    local LABELS = {Cleave = "CLEAVE", Dismantle = "DISMANTLE"}
     local function createSkillControls()
         local player = game:GetService("Players").LocalPlayer
         local playerGui = player and (player:FindFirstChildOfClass("PlayerGui") or player:WaitForChild("PlayerGui", 5))
@@ -854,7 +860,7 @@ AddModule(function()
         -- Keep the mobile ability panel visible on touch devices; don't depend on
         -- an outer/global UserInputService variable injected by the loader.
         panel.Visible = mobile
-        for index, name in ipairs({"Domain", "Cleave", "Dismantle", "Fuuga"}) do
+        for index, name in ipairs({"Cleave", "Dismantle"}) do
             local button = Instance.new("TextButton")
             button.Name = name .. "Key"
             button.LayoutOrder = index
@@ -993,6 +999,7 @@ AddModule(function()
         end
 
         local function chatMessage(message)
+            return -- Chat output intentionally disabled.
             local sent = false
             pcall(function()
                 local channels = TextChatService:FindFirstChild("TextChannels")
@@ -1226,7 +1233,6 @@ AddModule(function()
         ensureHatOverrides()
         applyAccessoryPositions()
         createSkillControls()
-        createFingerSearch()
 
         -- Laugh is the one-shot intro as soon as the reanimated figure is ready.
         task.spawn(function()
