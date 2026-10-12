@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "content/models/Sukuna/*.rbxm"
+      - "content/animations/Sukuna/*.rbxm"
       - "tools/extract_sukuna_anims.py"
       - ".github/workflows/extract-sukuna-anims.yml"
   workflow_dispatch:
