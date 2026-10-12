@@ -29,7 +29,7 @@ Gojo and Sukuna stay **separate** in NAM's module list:
 - `content/movesets/Gojo/module.lua`
 - `content/movesets/Sukuna/v_sukuna.lua`
 
-The external selector does **not** automatically adapt the NAM-specific `Reanimate`, `HatReanimator`, or `LimbReanimator` APIs. Therefore, using an external engine does not imply that NAM's movesets are compatible with it. For NAM movesets and their existing hat/limb handling, use `source/reanim.lua) alone.
+The external selector does **not** automatically adapt the NAM-specific `Reanimate`, `HatReanimator`, or `LimbReanimator` APIs. Therefore, using an external engine does not imply that NAM's movesets are compatible with it. For NAM movesets and their existing hat/limb handling, use `source/reanim.lua` alone.
 
 ## Sources
 
