@@ -48,9 +48,7 @@ AddModule(function()
     local FINGER_ID = 18762839664
     local activeFigure, root
     local hud
-    local abilityTools = {}
-    local equippedAbilityTool
-    local inventoryTool
+    local skillButtons = {}
     local activateAbility
     local abilityCooldowns = {Domain = 12, Cleave = 3, Dismantle = 2.5, Fuuga = 8}
     local abilityReadyAt = {}
@@ -436,12 +434,11 @@ AddModule(function()
     end
 
     local function refreshButtons()
-        -- Ability cooldown state is reflected in each inventory Tool tooltip.
-        for name, tool in pairs(abilityTools) do
-            if tool and tool.Parent then
+        for name, button in pairs(skillButtons) do
+            if button and button.Parent then
                 local remaining = math.max(0, (abilityReadyAt[name] or 0) - os.clock())
-                tool.ToolTip = remaining > 0 and string.format("%s cooldown: %.1fs", name, remaining)
-                    or ("Click/tap a map location to cast " .. name)
+                button.Text = LABELS[name] .. "\\n" .. (remaining > 0 and string.format("%.1fs", remaining) or name)
+                button.BackgroundColor3 = remaining > 0 and Color3.fromRGB(74, 35, 42) or Color3.fromRGB(43, 22, 30)
             end
         end
     end
@@ -479,24 +476,25 @@ AddModule(function()
         end)
     end
 
-    local function getClickedWorldPosition()
+    local function getClickedWorldPosition(useScreenCenter)
         local player = game:GetService("Players").LocalPlayer
         local camera = workspace.CurrentCamera
-        local mouse = player and player:GetMouse()
-        local position
-        pcall(function() if mouse and mouse.Hit then position = mouse.Hit.Position end end)
-        if position and camera and (position - camera.CFrame.Position).Magnitude < 1500 then return position end
-        if camera then
-            local viewport = camera.ViewportSize
-            local ray = camera:ViewportPointToRay(viewport.X * 0.5, viewport.Y * 0.5)
-            local params = RaycastParams.new()
-            params.FilterType = Enum.RaycastFilterType.Exclude
-            params.FilterDescendantsInstances = {activeFigure, getLocalCharacter(), targetMarker}
-            local result = workspace:Raycast(ray.Origin, ray.Direction * 700, params)
-            if result then return result.Position end
-            return ray.Origin + ray.Direction * 80
+        if not camera then return root and (root.Position + root.CFrame.LookVector * 24) or Vector3.new(0, 5, 0) end
+        local ray
+        if not useScreenCenter and player and UserInputService.MouseEnabled then
+            local mouse = player:GetMouse()
+            local position
+            pcall(function() if mouse and mouse.Hit then position = mouse.Hit.Position end end)
+            if position and (position - camera.CFrame.Position).Magnitude < 1500 then return position end
         end
-        return root and (root.Position + root.CFrame.LookVector * 24) or Vector3.new(0, 5, 0)
+        local viewport = camera.ViewportSize
+        ray = camera:ViewportPointToRay(viewport.X * 0.5, viewport.Y * 0.5)
+        local params = RaycastParams.new()
+        params.FilterType = Enum.RaycastFilterType.Exclude
+        params.FilterDescendantsInstances = {activeFigure, getLocalCharacter(), targetMarker}
+        local result = workspace:Raycast(ray.Origin, ray.Direction * 700, params)
+        if result then return result.Position end
+        return ray.Origin + ray.Direction * 80
     end
 
     local function showTargetMarker(position, abilityName)
@@ -576,42 +574,74 @@ AddModule(function()
         end)
     end
 
-    local function createInventoryTool()
+    local KEYBINDS = {Domain = Enum.KeyCode.Z, Cleave = Enum.KeyCode.X, Dismantle = Enum.KeyCode.C, Fuuga = Enum.KeyCode.V}
+    local LABELS = {Domain = "領域", Cleave = "斬", Dismantle = "解", Fuuga = "炎"}
+    local function createSkillControls()
         local player = game:GetService("Players").LocalPlayer
-        local backpack = player and (player:FindFirstChildOfClass("Backpack") or player:WaitForChild("Backpack", 5))
-        if not backpack then notify("Backpack yok; skill Tool'ları oluşturulamadı."); return end
-        for _, name in ipairs({"Sukuna", "Domain", "Cleave", "Dismantle", "Fuuga"}) do
-            local old = backpack:FindFirstChild(name)
-            if old then old:Destroy() end
-            local characterTool = player.Character and player.Character:FindFirstChild(name)
-            if characterTool and characterTool:IsA("Tool") then characterTool:Destroy() end
-        end
-        for _, name in ipairs({"Domain", "Cleave", "Dismantle", "Fuuga"}) do
-            local tool = Instance.new("Tool")
-            tool.Name = name
-            tool.ToolTip = "Click/tap a map location to cast " .. name
-            tool.RequiresHandle = false
-            tool.CanBeDropped = false
-            abilityTools[name] = tool
-            table.insert(connections, tool.Equipped:Connect(function()
-                equippedAbilityTool = name
-                notify(name .. " hazır. Haritada hedefe tıkla.")
+        local playerGui = player and (player:FindFirstChildOfClass("PlayerGui") or player:WaitForChild("PlayerGui", 5))
+        if not playerGui then notify("Skill UI kurulamadı: PlayerGui yok."); return end
+        local old = playerGui:FindFirstChild("SukunaAbilityHUD")
+        if old then old:Destroy() end
+        hud = Instance.new("ScreenGui")
+        hud.Name = "SukunaAbilityHUD"
+        hud.ResetOnSpawn = false
+        hud.IgnoreGuiInset = true
+        hud.DisplayOrder = 50
+        hud.Parent = playerGui
+        local panel = Instance.new("Frame")
+        panel.Name = "MobileSkillKeys"
+        panel.AnchorPoint = Vector2.new(1, 0.5)
+        panel.Position = UDim2.new(1, -16, 0.57, 0)
+        panel.Size = UDim2.fromOffset(66, 300)
+        panel.BackgroundTransparency = 1
+        panel.Parent = hud
+        local layout = Instance.new("UIListLayout")
+        layout.FillDirection = Enum.FillDirection.Vertical
+        layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+        layout.VerticalAlignment = Enum.VerticalAlignment.Center
+        layout.Padding = UDim.new(0, 8)
+        layout.Parent = panel
+        local mobile = UserInputService.TouchEnabled
+        panel.Visible = mobile
+        for index, name in ipairs({"Domain", "Cleave", "Dismantle", "Fuuga"}) do
+            local button = Instance.new("TextButton")
+            button.Name = name .. "Key"
+            button.LayoutOrder = index
+            button.Size = UDim2.fromOffset(58, 58)
+            button.BackgroundColor3 = Color3.fromRGB(43, 22, 30)
+            button.BackgroundTransparency = 0.05
+            button.BorderSizePixel = 0
+            button.Text = LABELS[name] .. "\\n" .. name
+            button.TextColor3 = Color3.fromRGB(255, 239, 239)
+            button.TextSize = 11
+            button.Font = Enum.Font.GothamBold
+            button.TextWrapped = true
+            button.AutoButtonColor = true
+            button.Visible = mobile
+            button.Parent = panel
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(1, 0)
+            corner.Parent = button
+            local stroke = Instance.new("UIStroke")
+            stroke.Color = Color3.fromRGB(210, 64, 82)
+            stroke.Thickness = 1.5
+            stroke.Parent = button
+            skillButtons[name] = button
+            table.insert(connections, button.Activated:Connect(function()
+                if activateAbility then activateAbility(name, getClickedWorldPosition(true)) end
             end))
-            table.insert(connections, tool.Unequipped:Connect(function()
-                if equippedAbilityTool == name then equippedAbilityTool = nil end
-            end))
-            table.insert(connections, tool.Activated:Connect(function()
-                if activateAbility then activateAbility(name, getClickedWorldPosition()) end
-            end))
-            tool.Parent = backpack
         end
         table.insert(connections, UserInputService.InputBegan:Connect(function(input, processed)
-            if processed or not equippedAbilityTool or not activateAbility then return end
-            if input.UserInputType == Enum.UserInputType.MouseButton2 then
-                activateAbility(equippedAbilityTool, getClickedWorldPosition())
+            if processed or UserInputService:GetFocusedTextBox() then return end
+            if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
+            for name, keyCode in pairs(KEYBINDS) do
+                if input.KeyCode == keyCode and activateAbility then
+                    activateAbility(name, getClickedWorldPosition(false))
+                    return
+                end
             end
         end))
-        notify("Skill Tool'ları hazır: Domain, Cleave, Dismantle, Fuuga. Aksesuarlar yakına sabitlendi.")
+        notify("Skill kontrolleri hazır: Z Domain, X Cleave, C Dismantle, V Fuuga. Mobilde sağdaki dairesel tuşları kullan.")
     end
 
     local function announceFinger(text)
@@ -912,7 +942,7 @@ AddModule(function()
         refreshAccessories()
         ensureHatOverrides()
         applyAccessoryPositions()
-        createInventoryTool()
+        createSkillControls()
         createFingerSearch()
     end
 
@@ -986,22 +1016,9 @@ AddModule(function()
         local playerGui = player and player:FindFirstChildOfClass("PlayerGui")
         local old = playerGui and playerGui:FindFirstChild("SukunaAbilityHUD")
         if old then old:Destroy() end
-        local backpack = player and player:FindFirstChildOfClass("Backpack")
-        if backpack then
-            for _, name in ipairs({"Domain", "Cleave", "Dismantle", "Fuuga"}) do
-                local tool = backpack:FindFirstChild(name)
-                if tool then tool:Destroy() end
-            end
-        end
-        if player and player.Character then
-            for _, name in ipairs({"Domain", "Cleave", "Dismantle", "Fuuga"}) do
-                local tool = player.Character:FindFirstChild(name)
-                if tool and tool:IsA("Tool") then tool:Destroy() end
-            end
-        end
+        -- Skill controls are GUI-only; no Backpack Tools are created.
 
-        abilityTools = {}
-        equippedAbilityTool = nil
+        skillButtons = {}
         if targetMarker then targetMarker:Destroy(); targetMarker = nil end
         activeFigure, root = nil, nil
         accessoryInstances, presentIds, overrideById = {}, {}, {}
