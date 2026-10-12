@@ -436,12 +436,12 @@ AddModule(function()
             end
         end
         local saved = scaledMeshes[handle]
-        if saved and saved.factor ~= 4 then
+        if saved and saved.factor ~= 10 then
             pcall(function()
-                if saved.kind == "mesh" then saved.instance.Scale = saved.original * 4
-                elseif saved.kind == "part" then saved.instance.Size = saved.original * 4 end
+                if saved.kind == "mesh" then saved.instance.Scale = saved.original * 10
+                elseif saved.kind == "part" then saved.instance.Size = saved.original * 10 end
             end)
-            saved.factor = 4
+            saved.factor = 10
             if HatReanimator then HatReanimator.RebuildRequired = true end
         end
     end
@@ -502,10 +502,10 @@ AddModule(function()
 
         -- The Shrine itself rises slowly from below ground while Domain is active.
         if domainEnabled then
-            local rise = math.clamp((os.clock() - domainStartedAt) / 1.1, 0, 1)
+            local rise = math.clamp((os.clock() - domainStartedAt) / 2.6, 0, 1)
             local eased = rise * rise * (3 - 2 * rise)
-            -- The 4x domain accessory sits directly above the user's reanimated character.
-            local shrineOffset = CFrame.new(0, 6 + eased * 1.5, 0)
+            -- The 10x domain hat accessory emerges from the ground behind the user's reanimated character.
+            local shrineOffset = CFrame.new(0, -12 + eased * 12, -8)
                 * CFrame.Angles(0, math.rad(180), 0)
             setHatWorldCFrame(18445594182, shrineOffset)
         else
