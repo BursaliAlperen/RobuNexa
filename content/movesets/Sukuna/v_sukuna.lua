@@ -13,7 +13,9 @@ AddModule(function()
     -- Match Gojo's asset loader contract: logical local path @ raw GitHub URL.
     -- These are NAM AnimLib binary .anim files, not .rbxm models.
     m.Assets = {
-        "Sukuna/Combo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Combo.anim",
+        "Sukuna/DomainCombo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/DomainCombo.anim",
+        "Sukuna/MalevolentShrine.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/MalevolentShrine.anim",
+        "Sukuna/FlameArrow.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/FlameArrow.anim",
         "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
         "Sukuna/Walk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Walk.anim",
         "Sukuna/SukunaIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaIdle.anim",
@@ -819,7 +821,7 @@ AddModule(function()
             playSkillAnimation()
             -- Combo uses the supplied bundled animation. Dismantle uses the procedural arm swing.
             if isCombo then
-                playBundledAnimation("Sukuna/Combo.anim", "combo", false)
+                playBundledAnimation("Sukuna/DomainCombo.anim", "combo", false)
             end
             showTargetMarker(targetPosition, isCombo and "Combo" or "Dismantle")
             -- Combo produces three staggered local slash pulses without chat output.
