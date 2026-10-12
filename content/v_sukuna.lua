@@ -10,6 +10,12 @@ AddModule(function()
  m.Description = "King of Curses: Awaken, Malevolent Shrine, Furnance, World Cutting Slash and Rush Beatdown."
  m.Assets = {
   "Sukuna.rbxm@https://raw.githubusercontent.com/ian49972/RBXMS/main/Sukuna.rbxmx",
+  "SukunaAwaken.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaAwaken.anim",
+  "SukunaShrine.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaShrine.anim",
+  "SukunaOpen.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaOpen.anim",
+  "SukunaWorldCut.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaWorldCut.anim",
+  "SukunaRush.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaRush.anim",
+  "SukunaCamera.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaCamera.anim",
   "SUKUNA.mp3@https://raw.githubusercontent.com/ian49972/smth/main/SUKUNA.mp3",
   "LAUGH.mp3@https://raw.githubusercontent.com/ian49972/smth/main/LAUGH.mp3",
   "ArrowExplode.mp3@https://raw.githubusercontent.com/ian49972/smth/main/ArrowExplode.mp3",
@@ -67,15 +73,21 @@ AddModule(function()
    end
   end
  end
+ local animationFiles = {Awaken="SukunaAwaken.anim", Shrine="SukunaShrine.anim", Open="SukunaOpen.anim", WorldCut="SukunaWorldCut.anim", Rush="SukunaRush.anim"}
  local function playAnimation(name, speed, looped)
   if not activeFigure or not anims then return end
-  local sequence = anims:FindFirstChild(name, true)
-  if not sequence or not sequence:IsA("KeyframeSequence") then
+  local sequence = anims and anims:FindFirstChild(name, true)
+  stopAnimation()
+  local fileName = animationFiles[name]
+  local ok, track = false, nil
+  if fileName then ok, track = pcall(function() return AnimLib.Track.fromfile(getAssetPath(fileName)) end) end
+  if (not ok or not track) and sequence and sequence:IsA("KeyframeSequence") then
+   ok, track = pcall(function() return AnimLib.Track.frominstance(sequence) end)
+  end
+  if not ok or not track or not track.Keyframes or #track.Keyframes == 0 then
    pcall(function() Util.Notify("Sukuna animation missing: " .. name) end)
    return
   end
-  stopAnimation()
-  local ok, track = pcall(function() return AnimLib.Track.frominstance(sequence) end)
   if not ok or not track or not track.Keyframes or #track.Keyframes == 0 then return end
   activeTrack = track
   animationStartedAt = os.clock()
