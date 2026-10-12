@@ -822,6 +822,7 @@ AddModule(function()
                 end
             end
             task.delay(1.9, function()
+                if abilityTargets[name] == targetPosition then abilityTargets[name] = nil end
                 if abilityTargets.Dismantle == targetPosition then abilityTargets.Dismantle = nil end
             end)
         elseif name == "Fuuga" then
