@@ -626,10 +626,20 @@ AddModule(function()
         for name, button in pairs(skillButtons) do
             if button and button.Parent then
                 local remaining = math.max(0, (abilityReadyAt[name] or 0) - os.clock())
-                button.Text = remaining > 0
-                    and string.format("%.1fs", remaining)
-                    or (LABELS[name] .. "\n" .. KEYBINDS[name].Name)
-                button.BackgroundColor3 = remaining > 0 and Color3.fromRGB(74, 35, 42) or Color3.fromRGB(43, 22, 30)
+                local coolingDown = remaining > 0
+                button.Text = coolingDown
+                    and string.format("%s\\n%.1fs", LABELS[name], remaining)
+                    or (LABELS[name] .. "\\n" .. KEYBINDS[name].Name)
+                -- A cooling-down skill is visibly grey and cannot be pressed.
+                button.BackgroundColor3 = coolingDown
+                    and Color3.fromRGB(105, 105, 105)
+                    or Color3.fromRGB(43, 22, 30)
+                button.TextColor3 = coolingDown
+                    and Color3.fromRGB(205, 205, 205)
+                    or Color3.fromRGB(255, 239, 239)
+                button.AutoButtonColor = not coolingDown
+                button.Active = not coolingDown
+                button.Interactable = not coolingDown
             end
         end
     end
