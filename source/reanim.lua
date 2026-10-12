@@ -3883,84 +3883,6 @@ function LimbReanimator.Start()
 
 	local BaseParts = {}
 	local UnknownMotor6Ds = {}
-	-- Keep a local in-memory copy of accessories inserted by avatar/export tools.
-	-- These accessories may not exist in the player's HumanoidDescription, so they
-	-- must be restored from the observed instance instead of fetched from the catalog.
-	local PersistentAccessoryTemplates = {}
-	local function PersistentAccessoryKey(accessory)
-		if not accessory or not accessory:IsA("Accessory") then return nil end
-		local mesh, texture = GetHatMeshAndTexture(accessory)
-		local name = string.lower(accessory.Name or "")
-		if mesh and texture then
-			return "mesh:" .. tostring(mesh) .. "|texture:" .. tostring(texture) .. "|name:" .. name
-		end
-		return "name:" .. name
-	end
-	local function CachePersistentAccessory(accessory)
-		local key = PersistentAccessoryKey(accessory)
-		if not key then return end
-		local handle = accessory:FindFirstChild("Handle")
-		if not handle or not handle:IsA("BasePart") then return end
-		local entry = PersistentAccessoryTemplates[key]
-		if not entry then
-			local oldArchivable = accessory.Archivable
-			local ok, template = pcall(function()
-				accessory.Archivable = true
-				return accessory:Clone()
-			end)
-			pcall(function() accessory.Archivable = oldArchivable end)
-			if not ok or not template then return end
-			template.Parent = nil
-			entry = {Template = template, LiveInstances = {}}
-			PersistentAccessoryTemplates[key] = entry
-		end
-		entry.LiveInstances[accessory] = true
-	end
-	local function RestorePersistentAccessories(character, humanoid)
-		if not character or not humanoid or not character.Parent then return end
-		local restored = 0
-		for key, entry in pairs(PersistentAccessoryTemplates) do
-			local alreadyOnCharacter = false
-			for _, child in ipairs(character:GetChildren()) do
-				if child:IsA("Accessory") and PersistentAccessoryKey(child) == key then
-					alreadyOnCharacter = true
-					break
-				end
-			end
-			if not alreadyOnCharacter then
-				-- If the original accessory is still alive in Workspace, Hat Reanimation
-				-- can keep using that exact instance; only recreate truly lost accessories.
-				local originalStillAlive = false
-				for instance in pairs(entry.LiveInstances) do
-					if instance and instance.Parent and instance:IsDescendantOf(workspace) then
-						originalStillAlive = true
-					else
-						entry.LiveInstances[instance] = nil
-					end
-				end
-				if not originalStillAlive and entry.Template then
-					local ok, clone = pcall(function() return entry.Template:Clone() end)
-					if ok and clone then
-						clone.Name = entry.Template.Name
-						local handle = clone:FindFirstChild("Handle")
-						local oldWeld = handle and handle:FindFirstChild("AccessoryWeld")
-						if oldWeld then pcall(function() oldWeld:Destroy() end) end
-						local added = pcall(function() humanoid:AddAccessory(clone) end)
-						if not added or clone.Parent ~= character then
-							clone.Parent = character
-						end
-						entry.LiveInstances[clone] = true
-						restored += 1
-					end
-				end
-			end
-		end
-		if restored > 0 then
-			HatReanimator.RebuildRequired = true
-			HatReanimator.Status.ReanimState = ("Restored %d cached accessory(s) after respawn."):format(restored)
-		end
-	end
-
 	local CharOnDesc = function(v)
 		if v:IsA("BasePart") then
 			if not table.find(BaseParts, v) then
@@ -5282,7 +5204,6 @@ function HatReanimator.Start()
 				if not v.Disabled then v.Disabled = true end
 			end)
 		elseif v:IsA("Accessory") and v.Parent == Player.Character then
-			CachePersistentAccessory(v)
 			if not table.find(CharHats, v) then
 				table.insert(CharHats, v)
 				local conn = nil
@@ -5751,14 +5672,6 @@ function HatReanimator.Start()
 		end
 		local RootPart = character:WaitForChild("HumanoidRootPart", 10)
 		if not RootPart then return end
-		-- Avatar-exported accessories are often injected locally and are absent from
-		-- HumanoidDescription. Give the game's normal appearance a moment to load,
-		-- then restore only cached accessories whose original instances were destroyed.
-		task.delay(3.5, function()
-			if Player.Character == character and character:IsDescendantOf(workspace) then
-				RestorePersistentAccessories(character, Humanoid)
-			end
-		end)
 		local RootPosition = Vector3.new(RootPart.Position.X, FallenPartsDestroyHeight, RootPart.Position.Z)
 		if ReanimCharacter then
 			local root = ReanimCharacter:FindFirstChild("HumanoidRootPart")
@@ -6481,46 +6394,14 @@ do
 		else
 			ReanimateStartButtonText.Text = "Starting"
 			Reanimate.Starting = true
-			Reanimate.Stopping = false
 			Reanimate.Current = SelectedReanimator
 			HumanoidLASetHookState(Reanimate.UseLoadAnimationHook)
-			ReanimateText.Text = "Starting: " .. Reanimate.Current.Name
-
-			local selected = Reanimate.Current
-			local startFinished = false
-			local startError = nil
-			task.spawn(function()
-				local ok, err = xpcall(selected.Start, debug.traceback)
-				if not ok then
-					startError = tostring(err)
-					warn("[NAM Reanimate] Start failed:\\n" .. startError)
-					Reanimate.Stopping = true
-					Reanimate.Starting = false
-				end
-				startFinished = true
-			end)
-
-			local startedAt = os.clock()
-			while Reanimate.Starting and not startFinished and os.clock() - startedAt < 30 do
-				task.wait(0.1)
-			end
-
-			if startError or (Reanimate.Starting and not startFinished) then
-				if not startError then
-					startError = "Startup timed out after 30 seconds. Check the executor console for the first error."
-					warn("[NAM Reanimate] " .. startError)
-				end
-				Reanimate.Stopping = true
-				Reanimate.Starting = false
-				Reanimate.Current = nil
-				HumanoidLASetHookState(false)
-				ReanimateText.Text = "Running: NONE (startup failed)"
-				ReanimateStartButtonText.Text = "Reanimate"
-			else
-				Reanimate.Current.Running = true
-				task.wait(1)
-				ReanimateStartButtonText.Text = "Deanimate"
-			end
+			ReanimateText.Text = "Running: " .. Reanimate.Current.Name
+			task.spawn(Reanimate.Current.Start)
+			repeat task.wait() until not Reanimate.Starting
+			Reanimate.Current.Running = true
+			task.wait(1)
+			ReanimateStartButtonText.Text = "Deanimate"
 		end
 		ReanimateStartButton.Interactable = true
 	end)
