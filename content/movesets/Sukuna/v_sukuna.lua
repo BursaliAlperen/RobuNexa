@@ -711,8 +711,8 @@ AddModule(function()
         local panel = Instance.new("Frame")
         panel.Name = "MobileSkillKeys"
         panel.AnchorPoint = Vector2.new(1, 0.5)
-        panel.Position = UDim2.new(1, -16, 0.57, 0)
-        panel.Size = UDim2.fromOffset(66, 300)
+        panel.Position = UDim2.new(1, -100, 0.55, 0)
+        panel.Size = UDim2.fromOffset(66, 292)
         panel.BackgroundTransparency = 1
         panel.Parent = hud
         local layout = Instance.new("UIListLayout")
@@ -721,7 +721,10 @@ AddModule(function()
         layout.VerticalAlignment = Enum.VerticalAlignment.Center
         layout.Padding = UDim.new(0, 8)
         layout.Parent = panel
-        local mobile = UserInputService.TouchEnabled
+        local userInputService = game:GetService("UserInputService")
+        local mobile = userInputService.TouchEnabled
+        -- Keep the mobile ability panel visible on touch devices; don't depend on
+        -- an outer/global UserInputService variable injected by the loader.
         panel.Visible = mobile
         for index, name in ipairs({"Domain", "Cleave", "Dismantle", "Fuuga"}) do
             local button = Instance.new("TextButton")
@@ -751,7 +754,7 @@ AddModule(function()
                 if activateAbility then activateAbility(name, getClickedWorldPosition(true)) end
             end))
         end
-        table.insert(connections, UserInputService.InputBegan:Connect(function(input, processed)
+        table.insert(connections, userInputService.InputBegan:Connect(function(input, processed)
             if processed or UserInputService:GetFocusedTextBox() then return end
             if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
             for name, keyCode in pairs(KEYBINDS) do
