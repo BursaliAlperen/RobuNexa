@@ -138,8 +138,10 @@ AddModule(function()
         return part and part:IsA("BasePart") and part or nil
     end
 
-    -- Load through NAM's exact AnimLib pipeline, the same pattern used by Gojo.
-    -- All sources are downloaded .anim binary files declared in m.Assets above.
+    -- Use the same AnimLib stepping contract as the working Gojo moveset.
+    -- Keep only one action clip active so concurrent tracks cannot reset each
+    -- other's Motor6D transforms and make Cleave/Combo appear not to play.
+    local activeActionTrack
     local function playBundledAnimation(filename, preferredName, looped)
         if not activeFigure or not activeFigure.Parent then return false end
         local path = AssetGetPathFromFilename(filename)
@@ -154,7 +156,14 @@ AddModule(function()
             return false
         end
 
-        local animator = AnimLib.Animator.new()
+        if activeActionTrack and activeActionTrack.IsPlaying then
+            activeActionTrack:Stop(0.05)
+        end
+        local okAnimator, animator = pcall(function() return AnimLib.Animator.new() end)
+        if not okAnimator or not animator then
+            notify("AnimLib Animator failed for " .. filename)
+            return false
+        end
         animator.rig = activeFigure
         animator.track = track
         animator.looped = looped == true
@@ -162,15 +171,20 @@ AddModule(function()
         for _, keyframe in ipairs(track.Keyframes) do
             if type(keyframe.Time) == "number" then duration = math.max(duration, keyframe.Time) end
         end
+        if duration <= 0 then
+            notify("Animation has no usable duration: " .. filename)
+            return false
+        end
         local startedAt = os.clock()
         local stopped = false
         local stepConnection
-        local controller = {IsPlaying = true, Duration = duration}
-        function controller:Stop(fadeTime)
+        local controller = {IsPlaying = true, Duration = duration, Name = preferredName or filename}
+        function controller:Stop(_fadeTime)
             if stopped then return end
             stopped = true
             self.IsPlaying = false
             if stepConnection then stepConnection:Disconnect(); stepConnection = nil end
+            if activeActionTrack == self then activeActionTrack = nil end
             if activeFigure and activeFigure.Parent then
                 for _, item in ipairs(activeFigure:GetDescendants()) do
                     if item:IsA("Motor6D") then
@@ -182,13 +196,14 @@ AddModule(function()
         function controller:Destroy()
             self:Stop()
         end
+        activeActionTrack = controller
         stepConnection = game:GetService("RunService").RenderStepped:Connect(function()
             if stopped or not activeFigure or not activeFigure.Parent then
                 controller:Stop()
                 return
             end
             local elapsed = os.clock() - startedAt
-            if duration > 0 and elapsed > duration then
+            if duration > 0 and elapsed >= duration then
                 if animator.looped then
                     startedAt = os.clock()
                     elapsed = 0
@@ -197,7 +212,13 @@ AddModule(function()
                     return
                 end
             end
-            pcall(function() animator:Step(elapsed) end)
+            local okStep = pcall(function()
+                animator:Step(elapsed)
+            end)
+            if not okStep then
+                notify("Animation step failed: " .. tostring(controller.Name))
+                controller:Stop()
+            end
         end)
         return controller
     end
@@ -513,9 +534,18 @@ AddModule(function()
 
     local function setHatWorldCFrame(id, targetCFrame)
         local override = overrideById[id]
-        if not override then return end
-        local previous = lastHatCFrames[id] or override.C0 or targetCFrame
-        local eased = previous:Lerp(targetCFrame, 0.18)
+        if not override or typeof(targetCFrame) ~= "CFrame" then return end
+        local previous = lastHatCFrames[id] or override.C0
+        -- Never interpolate from the hidden -5000-stud parking position to a
+        -- short slash pulse: it would remain thousands of studs away until the
+        -- pulse ended. Snap long-distance transitions; ease only local motion.
+        local eased
+        if typeof(previous) ~= "CFrame"
+            or (previous.Position - targetCFrame.Position).Magnitude > 80 then
+            eased = targetCFrame
+        else
+            eased = previous:Lerp(targetCFrame, 0.32)
+        end
         lastHatCFrames[id] = eased
         override.C0 = eased
         override.C1 = CFrame.identity
