@@ -783,352 +783,246 @@ AddModule(function()
     end
 
     local function createFingerSearch()
-        -- If the game's server-owned world is installed, it already creates shared
-        -- collectibles for everyone. Don't duplicate them with local-only executor parts.
-        if workspace:FindFirstChild("SukunaFingerWorld") then
-            if fingerFolder then fingerFolder:Destroy(); fingerFolder = nil end
-            return
-        end
-        -- Executor-created parts are local-only. These are a fallback for solo visuals.
-        if fingerFolder then fingerFolder:Destroy() end
-        fingerFolder = Instance.new("Folder")
-        fingerFolder.Name = "SukunaFingerSearch_Local"
-        fingerFolder.Parent = workspace
+        -- One real equipped finger accessory is used as the collectible. No fake
+        -- Workspace parts and no server-created finger world are spawned by this moveset.
+        if fingerFolder then fingerFolder:Destroy(); fingerFolder = nil end
         fingersFound = 0
 
-        local character = getLocalCharacter()
-        local base = root and root.Position or (character and character:GetPivot().Position) or Vector3.new(0, 10, 0)
-        local ignore = {fingerFolder}
-        if character then table.insert(ignore, character) end
-        if activeFigure then table.insert(ignore, activeFigure) end
-        local rayParams = RaycastParams.new()
-        rayParams.FilterType = Enum.RaycastFilterType.Exclude
-        rayParams.FilterDescendantsInstances = ignore
-        rayParams.IgnoreWater = true
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local TextChatService = game:GetService("TextChatService")
+        local player = Players.LocalPlayer
+        local character = player and player.Character
+        if not character then
+            notify("Parmak bulunamadı: Sukuna parmak aksesuarını karakterine tak.")
+            return
+        end
 
-        local count = 11
-        local rng = Random.new()
-        local placed = 0
-        for i = 1, count do
-            local angle = ((i - 1) / count) * math.pi * 2 + rng:NextNumber(-0.16, 0.16)
-            local radius = 55 + ((i * 37) % 105) + rng:NextInteger(-10, 10)
-            local horizontal = Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
-            local castOrigin = base + horizontal + Vector3.new(0, 240, 0)
-            local result = workspace:Raycast(castOrigin, Vector3.new(0, -700, 0), rayParams)
-            local pos
-            if result and result.Position then
-                pos = result.Position + Vector3.new(0, 2.2, 0)
-            else
-                -- Avoid putting collectibles hundreds of studs in the air if terrain
-                -- is missing; keep them near the player's current level instead.
-                pos = base + horizontal + Vector3.new(0, 3, 0)
+        local function isFingerAccessory(item)
+            if not item or not item:IsA("Accessory") then return false end
+            if tonumber(item:GetAttribute("AssetId")) == FINGER_ID then return true end
+            return string.find(string.lower(item.Name), "finger", 1, true) ~= nil
+                or string.find(string.lower(item.Name), "parmak", 1, true) ~= nil
+        end
+
+        local accessory
+        for _, item in ipairs(character:GetChildren()) do
+            if isFingerAccessory(item) and item:FindFirstChild("Handle") then
+                accessory = item
+                break
             end
+        end
+        if not accessory then
+            notify("Sukuna parmak aksesuarını takman gerekiyor; sahte Part oluşturulmadı.")
+            return
+        end
 
-            local finger = Instance.new("Part")
-            finger.Name = "SukunaFinger_" .. i
-            finger.Shape = Enum.PartType.Cylinder
-            finger.Size = Vector3.new(0.38, 1.15, 0.38)
-            finger.Material = Enum.Material.Neon
-            finger.Color = Color3.fromRGB(122, 20, 34)
-            finger.Anchored = true
-            finger.CanCollide = false
-            finger.CanTouch = false
-            finger.CastShadow = false
-            finger.CFrame = CFrame.new(pos) * CFrame.Angles(0, 0, math.rad(108))
-            finger.Parent = fingerFolder
+        local handle = accessory:FindFirstChild("Handle")
+        if not handle or not handle:IsA("BasePart") then
+            notify("Parmak aksesuarında Handle bulunamadı.")
+            return
+        end
 
-            local light = Instance.new("PointLight")
-            light.Color = Color3.fromRGB(255, 35, 66)
-            light.Range = 13
-            light.Brightness = 1.5
-            light.Parent = finger
+        local function chatMessage(message)
+            local sent = false
+            pcall(function()
+                local channels = TextChatService:FindFirstChild("TextChannels")
+                local channel = channels and (channels:FindFirstChild("RBXGeneral") or channels:GetChildren()[1])
+                if channel and channel.DisplaySystemMessage then
+                    channel:DisplaySystemMessage("[SUKUNA] " .. message)
+                    sent = true
+                end
+            end)
+            if not sent then
+                pcall(function()
+                    game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", {
+                        Text = "[SUKUNA] " .. message,
+                        Color = Color3.fromRGB(255, 70, 90),
+                        Font = Enum.Font.GothamBold,
+                    })
+                end)
+            end
+        end
 
-            local particles = Instance.new("ParticleEmitter")
-            particles.Name = "CurseAura"
-            particles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-            particles.Color = ColorSequence.new(Color3.fromRGB(255, 45, 72), Color3.fromRGB(75, 0, 12))
-            particles.LightEmission = 0.7
-            particles.Rate = 5
-            particles.Lifetime = NumberRange.new(0.45, 0.9)
-            particles.Speed = NumberRange.new(0.2, 0.8)
-            particles.SpreadAngle = Vector2.new(180, 180)
-            particles.Parent = finger
+        local function getRootPosition()
+            local current = getLocalCharacter()
+            local currentRoot = current and (current:FindFirstChild("HumanoidRootPart") or current.PrimaryPart)
+            if currentRoot and currentRoot:IsA("BasePart") then return currentRoot.Position, currentRoot end
+            if root and root:IsA("BasePart") then return root.Position, root end
+            return nil, nil
+        end
 
-            local prompt = Instance.new("ProximityPrompt")
-            prompt.ActionText = "Collect Finger"
-            prompt.ObjectText = "Cursed Finger  " .. i .. "/11"
-            prompt.HoldDuration = 0.35
-            prompt.MaxActivationDistance = 11
+        local function findSmartPosition()
+            local base, currentRoot = getRootPosition()
+            if not base then return nil end
+            local params = RaycastParams.new()
+            params.FilterType = Enum.RaycastFilterType.Exclude
+            local ignore = {character, accessory}
+            if activeFigure then table.insert(ignore, activeFigure) end
+            params.FilterDescendantsInstances = ignore
+            params.IgnoreWater = true
+
+            -- Pick a visible, walk-up-to surface, not a point inside a wall,
+            -- under a ceiling, or on the far side of an obstacle.
+            for attempt = 1, 48 do
+                local angle = math.random() * math.pi * 2
+                local radius = math.random(14, 48)
+                local sample = base + Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
+                local cast = workspace:Raycast(sample + Vector3.new(0, 140, 0), Vector3.new(0, -300, 0), params)
+                if cast and cast.Normal.Y >= 0.72 then
+                    local pos = cast.Position + Vector3.new(0, 1.35, 0)
+                    local ceiling = workspace:Raycast(pos + Vector3.new(0, 0.5, 0), Vector3.new(0, 4.5, 0), params)
+                    local origin = (currentRoot and currentRoot.Position or base) + Vector3.new(0, 2.2, 0)
+                    local target = pos + Vector3.new(0, 0.5, 0)
+                    local sight = workspace:Raycast(origin, target - origin, params)
+                    local visible = not sight or (sight.Position - target).Magnitude < 2.75
+                    if not ceiling and visible then
+                        return pos
+                    end
+                end
+            end
+            return nil
+        end
+
+        local function getMeshTexture()
+            local mesh = handle:FindFirstChildOfClass("SpecialMesh")
+            if mesh then return mesh.MeshId, mesh.TextureId end
+            if handle:IsA("MeshPart") then return handle.MeshId, handle.TextureId end
+            return nil, nil
+        end
+
+        local meshId, textureId = getMeshTexture()
+        local hatOverride
+        if HatReanimator and type(HatReanimator.HatCFrameOverride) == "table" then
+            hatOverride = {
+                Name = accessory.Name,
+                MeshId = meshId,
+                TextureId = textureId,
+                C0 = CFrame.identity,
+                C1 = CFrame.identity,
+                RepRootPart = root,
+            }
+            table.insert(HatReanimator.HatCFrameOverride, hatOverride)
+            HatReanimator.RebuildRequired = true
+        end
+
+        local prompt = handle:FindFirstChild("SukunaFingerPrompt")
+        if not prompt then
+            prompt = Instance.new("ProximityPrompt")
+            prompt.Name = "SukunaFingerPrompt"
+            prompt.ActionText = "Parmağı Topla"
+            prompt.ObjectText = "Sukuna'nın Parmağı"
+            prompt.HoldDuration = 0.4
+            prompt.MaxActivationDistance = 10
             prompt.RequiresLineOfSight = false
-            prompt.Parent = finger
+            prompt.Parent = handle
+        end
 
-            local spin
-            spin = game:GetService("RunService").RenderStepped:Connect(function()
-                if not finger.Parent then
-                    if spin then spin:Disconnect() end
+        local marker = Instance.new("BillboardGui")
+        marker.Name = "SukunaFingerMarker"
+        marker.Adornee = handle
+        marker.Size = UDim2.fromOffset(150, 40)
+        marker.StudsOffsetWorldSpace = Vector3.new(0, 1.6, 0)
+        marker.AlwaysOnTop = true
+        marker.MaxDistance = 250
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.fromScale(1, 1)
+        label.BackgroundColor3 = Color3.fromRGB(35, 4, 12)
+        label.BackgroundTransparency = 0.15
+        label.TextColor3 = Color3.fromRGB(255, 75, 92)
+        label.TextStrokeTransparency = 0.2
+        label.Font = Enum.Font.GothamBold
+        label.TextScaled = true
+        label.Text = "☯ SUKUNA PARMAĞI"
+        label.Parent = marker
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 8)
+        corner.Parent = label
+        marker.Parent = player:WaitForChild("PlayerGui")
+
+        local spawnPosition = findSmartPosition()
+        if not spawnPosition then
+            marker:Destroy()
+            prompt.Enabled = false
+            notify("Parmak için güvenli ve görünür bir yer bulunamadı. Biraz açık alana geç.")
+            return
+        end
+
+        local collected = false
+        local nextSpawnPending = false
+        local spinTime = 0
+        local function updateHatTarget(dt)
+            if not accessory.Parent or not handle.Parent then return end
+            if not spawnPosition then return end
+            spinTime += dt or 0
+            if hatOverride then
+                local _, currentRoot = getRootPosition()
+                if currentRoot then
+                    local worldFrame = CFrame.new(spawnPosition) * CFrame.Angles(0, spinTime * 1.5, math.rad(108))
+                    -- Recalculate relative to the live root so the pickup stays at its
+                    -- chosen world location while the player walks away.
+                    hatOverride.C0 = currentRoot.CFrame:ToObjectSpace(worldFrame)
+                    hatOverride.RepRootPart = currentRoot
+                end
+            end
+            if not collected then
+                local base = getRootPosition()
+                if base then
+                    label.Text = ("☯ SUKUNA PARMAĞI  •  %d m"):format(math.floor((base - spawnPosition).Magnitude + 0.5))
+                end
+            end
+        end
+        table.insert(connections, RunService.RenderStepped:Connect(updateHatTarget))
+
+        local function moveToNewSpot()
+            if nextSpawnPending then return end
+            nextSpawnPending = true
+            task.delay(8, function()
+                if not activeFigure or not activeFigure.Parent or not accessory.Parent then return end
+                local newPosition = findSmartPosition()
+                if not newPosition then
+                    chatMessage("Parmak şu an güvenli bir konum bulamadı; yeniden dene.")
+                    nextSpawnPending = false
+                    prompt.Enabled = true
+                    collected = false
                     return
                 end
-                finger.CFrame = CFrame.new(pos) * CFrame.Angles(0, os.clock() * 1.45, math.rad(108))
-            end)
-            table.insert(connections, spin)
-
-            table.insert(connections, prompt.Triggered:Connect(function(player)
-                if player ~= game:GetService("Players").LocalPlayer or not finger.Parent then return end
-                -- Finger pickups are cosmetic collectibles and don't require an avatar accessory.
-                fingersFound += 1
-                local collectedAt = finger.Position
-                finger:Destroy()
-                announceFinger(string.format("[Sukuna] CURSED FINGER FOUND  %d/%d", fingersFound, count))
-                playFingerFoundCutscene(collectedAt)
-                task.spawn(function()
-                    if laughAnimationTrack then
-                        pcall(function() laughAnimationTrack:Stop(0.05); laughAnimationTrack:Destroy() end)
-                        laughAnimationTrack = nil
-                    end
-                    local track = playBundledAnimation("Sukuna/SukunaLaugh.anim", "laugh", false)
-                    if track then
-                        laughAnimationTrack = track
-                    else
-                        notify("Parmak bulundu; Laugh animasyonu bu executor/model yükleyicisinde açılamadı.")
-                    end
-                end)
-
-                if fingersFound == count then
-                    announceFinger("[Sukuna] ALL FINGERS FOUND — THE KING OF CURSES AWAKENS.")
-                    -- Atmosphere-only climax: no player is killed or forced to respawn.
-                    local finalCamera = workspace.CurrentCamera
-                    if finalCamera and not cutsceneActive then
-                        local oldType, oldSubject, oldCFrame = finalCamera.CameraType, finalCamera.CameraSubject, finalCamera.CFrame
-                        local focus = root and root.Position or collectedAt
-                        finalCamera.CameraType = Enum.CameraType.Scriptable
-                        finalCamera.CFrame = CFrame.lookAt(focus + Vector3.new(0, 8, 18), focus)
-                        game:GetService("TweenService"):Create(finalCamera,
-                            TweenInfo.new(1.2, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut),
-                            {CFrame = CFrame.lookAt(focus + Vector3.new(0, 4, 9), focus)}):Play()
-                        task.delay(2.1, function()
-                            if finalCamera and finalCamera.Parent then
-                                finalCamera.CameraType = oldType or Enum.CameraType.Custom
-                                finalCamera.CameraSubject = oldSubject
-                                if oldCFrame then finalCamera.CFrame = oldCFrame end
-                            end
-                        end)
-                    end
-                end
-            end))
-            placed += 1
-        end
-        notify(string.format("%d cursed fingers placed around nearby ground.", placed))
-    end
-
-    local function launchFuuga()
-        if fuugaBusy or not activeFigure or not root then return end
-        fuugaBusy = true
-        refreshButtons()
-        local humanoid = activeFigure:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            pcall(function()
-                if fuugaAnimationTrack then fuugaAnimationTrack:Stop(0.1); fuugaAnimationTrack:Destroy() end
-                local animator = humanoid:FindFirstChildOfClass("Animator")
-                if not animator then animator = Instance.new("Animator"); animator.Parent = humanoid end
-                local animation = Instance.new("Animation")
-                animation.AnimationId = "rbxassetid://131873641508713"
-                fuugaAnimationTrack = animator:LoadAnimation(animation)
-                fuugaAnimationTrack.Priority = Enum.AnimationPriority.Action
-                fuugaAnimationTrack:Play(0.12, 1, 1)
-                game:GetService("Debris"):AddItem(animation, 8)
+                spawnPosition = newPosition
+                spinTime = 0
+                collected = false
+                nextSpawnPending = false
+                prompt.Enabled = true
+                marker.Enabled = true
+                chatMessage("Parmak haritanın başka bir noktasında yeniden ortaya çıktı!")
+                notify("Sukuna parmağı yeni bir noktada belirdi.")
             end)
         end
 
-        local players = game:GetService("Players")
-        local character = getLocalCharacter()
-        local hand = activeFigure:FindFirstChild("RightHand") or activeFigure:FindFirstChild("Right Arm")
-            or activeFigure:FindFirstChild("RightLowerArm") or root
-        local targetPosition = fuugaTargetPosition
-        local forward = targetPosition and (targetPosition - root.Position).Magnitude > 2
-            and (targetPosition - root.Position).Unit or root.CFrame.LookVector
-        local position = (hand and hand:IsA("BasePart") and hand.Position or root.Position)
-            + forward * 1.4 + Vector3.new(0, 0.25, 0)
-        local started = os.clock()
-        local hitCharacter
-        local projectileFolder = Instance.new("Folder")
-        projectileFolder.Name = "SukunaFuuga_LocalVisual"
-        projectileFolder.Parent = workspace
-        fuugaProjectile = projectileFolder
-
-        local arrow = Instance.new("Part")
-        arrow.Name = "FuugaFlameArrow"
-        arrow.Shape = Enum.PartType.Cylinder
-        arrow.Size = Vector3.new(0.22, 2.8, 0.22)
-        arrow.Material = Enum.Material.Neon
-        arrow.Color = Color3.fromRGB(255, 92, 18)
-        arrow.Anchored = true
-        arrow.CanCollide = false
-        arrow.CanTouch = false
-        arrow.CastShadow = false
-        arrow.Parent = projectileFolder
-
-        local arrowHead = Instance.new("WedgePart")
-        arrowHead.Name = "FlameArrowHead"
-        arrowHead.Size = Vector3.new(0.65, 0.6, 0.65)
-        arrowHead.Material = Enum.Material.Neon
-        arrowHead.Color = Color3.fromRGB(255, 205, 68)
-        arrowHead.Anchored = true
-        arrowHead.CanCollide = false
-        arrowHead.CanTouch = false
-        arrowHead.CastShadow = false
-        arrowHead.Parent = projectileFolder
-
-        local light = Instance.new("PointLight")
-        light.Color = Color3.fromRGB(255, 85, 16)
-        light.Brightness = 3
-        light.Range = 13
-        light.Parent = arrow
-        local flame = Instance.new("ParticleEmitter")
-        flame.Name = "FuugaTrail"
-        flame.Texture = "rbxasset://textures/particles/fire_main.dds"
-        flame.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 235, 116)),
-            ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 96, 12)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 18, 8)),
-        })
-        flame.LightEmission = 0.9
-        flame.Rate = 75
-        flame.Lifetime = NumberRange.new(0.18, 0.42)
-        flame.Speed = NumberRange.new(0.4, 2.2)
-        flame.SpreadAngle = Vector2.new(25, 25)
-        flame.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.8), NumberSequenceKeypoint.new(1, 0)})
-        flame.Parent = arrow
-
-        local function placeArrow(pos)
-            local cf = CFrame.lookAt(pos, pos + forward)
-            arrow.CFrame = cf * CFrame.Angles(math.rad(90), 0, 0)
-            arrowHead.CFrame = cf * CFrame.new(0, 0, -1.45)
-        end
-        placeArrow(position)
-        -- Keep the flame arrow visible in the hand briefly before release.
-        task.wait(0.45)
-
-        task.spawn(function()
-            local runService = game:GetService("RunService")
-            while projectileFolder.Parent and os.clock() - started < 3.2 do
-                local dt = runService.RenderStepped:Wait()
-                if not root or not root.Parent then break end
-                local nextPosition = position + forward * (115 * math.min(dt, 0.05))
-                local rayParams = RaycastParams.new()
-                rayParams.FilterType = Enum.RaycastFilterType.Exclude
-                rayParams.FilterDescendantsInstances = {activeFigure, projectileFolder, character}
-                local hit = workspace:Raycast(position, nextPosition - position, rayParams)
-                if hit then
-                    local model = hit.Instance:FindFirstAncestorOfClass("Model")
-                    local player = model and players:GetPlayerFromCharacter(model)
-                    if player and player ~= players.LocalPlayer then
-                        hitCharacter = model
-                        position = hit.Position
-                        break
-                    elseif hit.Instance.CanCollide then
-                        position = hit.Position
-                        break
-                    end
+        prompt.Enabled = true
+        table.insert(connections, prompt.Triggered:Connect(function(triggeringPlayer)
+            if triggeringPlayer and triggeringPlayer ~= player then return end
+            if collected or not spawnPosition then return end
+            collected = true
+            prompt.Enabled = false
+            marker.Enabled = false
+            fingersFound += 1
+            local collectedAt = spawnPosition
+            chatMessage(string.format("Sukuna parmağı toplandı! (%d)  •  8 saniye sonra başka yerde belirecek.", fingersFound))
+            announceFinger(string.format("[Sukuna] PARMAK TOPLANDI  •  %d", fingersFound))
+            playFingerFoundCutscene(collectedAt)
+            task.spawn(function()
+                if laughAnimationTrack then
+                    pcall(function() laughAnimationTrack:Stop(0.05); laughAnimationTrack:Destroy() end)
+                    laughAnimationTrack = nil
                 end
-                position = nextPosition
-                placeArrow(position)
-            end
-
-            if hitCharacter and hitCharacter.Parent then
-                local targetRoot = hitCharacter:FindFirstChild("HumanoidRootPart")
-                    or hitCharacter:FindFirstChild("Torso") or hitCharacter:FindFirstChild("UpperTorso")
-                if targetRoot and targetRoot:IsA("BasePart") then
-                    local aura = Instance.new("Attachment")
-                    aura.Name = "SukunaFuugaFlameAura_Local"
-                    aura.Parent = targetRoot
-                    table.insert(fuugaAuraInstances, aura)
-                    local fire = Instance.new("ParticleEmitter")
-                    fire.Name = "AnimatedFlameAura"
-                    fire.Texture = "rbxasset://textures/particles/fire_main.dds"
-                    fire.Color = ColorSequence.new({
-                        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 241, 130)),
-                        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 105, 12)),
-                        ColorSequenceKeypoint.new(1, Color3.fromRGB(128, 12, 4)),
-                    })
-                    fire.LightEmission = 0.85
-                    fire.Rate = 110
-                    fire.Lifetime = NumberRange.new(0.35, 0.85)
-                    fire.Speed = NumberRange.new(1, 4)
-                    fire.SpreadAngle = Vector2.new(180, 180)
-                    fire.RotSpeed = NumberRange.new(-180, 180)
-                    fire.Size = NumberSequence.new({
-                        NumberSequenceKeypoint.new(0, 1.25),
-                        NumberSequenceKeypoint.new(0.55, 0.85),
-                        NumberSequenceKeypoint.new(1, 0),
-                    })
-                    fire.Parent = aura
-                    local glow = Instance.new("PointLight")
-                    glow.Color = Color3.fromRGB(255, 84, 12)
-                    glow.Brightness = 2
-                    glow.Range = 12
-                    glow.Parent = aura
-                    task.delay(5, function()
-                        if aura and aura.Parent then
-                            for _, descendant in ipairs(aura:GetDescendants()) do
-                                if descendant:IsA("ParticleEmitter") then descendant.Enabled = false end
-                            end
-                            task.wait(0.8)
-                            if aura then aura:Destroy() end
-                        end
-                    end)
-                end
-            end
-            if projectileFolder then projectileFolder:Destroy() end
-            if fuugaProjectile == projectileFolder then fuugaProjectile = nil end
-            task.delay(1.1, function() fuugaBusy = false; refreshButtons() end)
+                local track = playBundledAnimation("Sukuna/SukunaLaugh.anim", "laugh", false)
+                if track then laughAnimationTrack = track end
+            end)
+            moveToNewSpot()
         end)
-    end
-
-    activateAbility = function(name, targetPosition)
-        if not activeFigure or not activeFigure.Parent or not root then
-            notify("Reanimation karakteri hazır değil.")
-            return
-        end
-        local now = os.clock()
-        local readyAt = abilityReadyAt[name] or 0
-        if now < readyAt then
-            notify(string.format("%s cooldown: %.1f saniye", name, readyAt - now))
-            return
-        end
-        refreshAccessories()
-        local slashEquipped = presentIds[100475161263482] or presentIds[97087028126781]
-        if name == "Domain" and not slashEquipped then
-            notify("Domain için Cleave Aura veya White Domain Slashes aksesuarı tak.")
-            return
-        elseif (name == "Cleave" or name == "Dismantle") and not slashEquipped then
-            notify(name .. " için slash aksesuarlarından biri takılı olmalı.")
-            return
-        elseif name == "Fuuga" and not presentIds[124144353587446] then
-            notify("Fuuga için Fuga Furnace aksesuarını tak.")
-            return
-        end
-        targetPosition = targetPosition or (root.Position + root.CFrame.LookVector * 24)
-        showTargetMarker(targetPosition, name)
-        playDomainCutscene(targetPosition)
-        if name == "Domain" then playSkillAnimation(nil) end
-        abilityReadyAt[name] = now + (abilityCooldowns[name] or 3)
-        if name == "Domain" then
-            domainEnabled = not domainEnabled
-            if domainEnabled then domainStartedAt = os.clock(); notify("Malevolent Shrine açıldı.") else notify("Domain kapatıldı.") end
-            applyAccessoryPositions()
-        elseif name == "Cleave" then
-            playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
-            cleaveUntil = os.clock() + 2.5
-            applyAccessoryPositions()
-        elseif name == "Dismantle" then
-            playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
-            cleaveUntil = os.clock() + 1.6
-            applyAccessoryPositions()
-        elseif name == "Fuuga" then
-            fuugaTargetPosition = targetPosition
-            launchFuuga()
-        end
-        refreshButtons()
+        table.insert(connections, marker)
+        table.insert(connections, prompt)
+        chatMessage("Sukuna parmağı yakın çevrede, açık ve ulaşılabilir bir noktaya yerleştirildi. İşaretçiyi takip et.")
     end
 
     m.Config = function(parent) end
