@@ -10,6 +10,9 @@ AddModule(function()
  m.Description = "King of Curses: Awaken, Malevolent Shrine, Furnance, World Cutting Slash and Rush Beatdown."
  m.Assets = {
   "Sukuna.rbxm@https://raw.githubusercontent.com/ian49972/RBXMS/main/Sukuna.rbxmx",
+  "SukunaDomain.rbxm@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaDomain.rbxm",
+  "SukunaWorldSlash.rbxm@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaWorldSlash.rbxm",
+  "SukunaRushFX.rbxm@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaRushFX.rbxm",
   "SukunaAwaken.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaAwaken.anim",
   "SukunaShrine.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaShrine.anim",
   "SukunaOpen.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/SukunaOpen.anim",
@@ -264,10 +267,20 @@ AddModule(function()
   originalSpeed=humanoid and humanoid.WalkSpeed or 16
   local path=getAssetPath("Sukuna.rbxm")
   local ok, objects=pcall(function() return game:GetObjects(getcustomasset(path)) end)
-  if ok and objects and objects[1] then
-   bundle=objects[1]; anims=findDeep(bundle,"Anims"); effects=findDeep(bundle,"Effects")
+  if ok and objects and objects[1] then bundle=objects[1]; anims=findDeep(bundle,"Anims") end
+  effects=Instance.new("Folder")
+  effects.Name="SukunaEffectsRuntime"
+  local function importModel(fileName)
+   local assetPath=getAssetPath(fileName)
+   local loadedOk, loaded=pcall(function() return game:GetObjects(getcustomasset(assetPath)) end)
+   if loadedOk and loaded and loaded[1] then loaded[1].Parent=effects end
   end
-  if not anims then pcall(function() Util.Notify("Sukuna model failed to load; re-download assets and reload movesets.") end) end
+  importModel("SukunaDomain.rbxm")
+  importModel("SukunaWorldSlash.rbxm")
+  importModel("SukunaRushFX.rbxm")
+  local furnaceFolder=findDeep(bundle,"Furnance")
+  if furnaceFolder then furnaceFolder:Clone().Parent=effects end
+  if not anims then pcall(function() Util.Notify("Sukuna animation bundle failed to load; re-download assets and reload movesets.") end) end
   if inputConn then inputConn:Disconnect() end
   inputConn=UIS.InputBegan:Connect(function(input,processed)
    if processed then return end
@@ -284,6 +297,7 @@ AddModule(function()
   for _,obj in ipairs(spawned) do pcall(function() obj:Destroy() end) end
   table.clear(spawned)
   if bundle then bundle:Destroy(); bundle=nil end
+  if effects then effects:Destroy(); effects=nil end
   if humanoid and humanoid.Parent then humanoid.WalkSpeed=originalSpeed or 16 end
   activeFigure=nil; root=nil; humanoid=nil; anims=nil; effects=nil; busy=false
  end
