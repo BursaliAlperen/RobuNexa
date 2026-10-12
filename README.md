@@ -10,7 +10,7 @@ Uyumlu Roblox istemci ortamında çalıştırılacak komut:
 loadstring(game:HttpGet("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/source/reanim.lua"))()
 ```
 
-> Bu bağlantı Gojo kaydı ve Moveset callback düzeltmelerini içeren commit’e sabitlenmiştir; `main` raw CDN önbelleğinin eski dosya döndürmesini önler. Script, dosya sistemi ve ağ erişimi sağlayan uyumlu bir istemci ortamı gerektirir. Yalnızca güvendiğiniz kodları çalıştırın.
+> Güncel sürümü almak için `main/source/reanim.lua` bağlantısını kullanın. Eski, commit’e sabitlenmiş yükleyiciler yeni Sukuna moveset kaydını içermeyebilir. Güncellemeden sonra eski NAM oturumunu kapatıp bu loadstring’i yeniden çalıştırın. Script, dosya sistemi ve ağ erişimi sağlayan uyumlu bir istemci ortamı gerektirir; yalnızca güvendiğiniz kodları çalıştırın.
 
 ## Depo yapısı
 
