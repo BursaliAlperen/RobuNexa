@@ -4073,7 +4073,7 @@ function LimbReanimator.Start()
 		end
 	end
 	local lastspawn = 0
-	local CharConn = Player.CharacterAdded:Connect(function(character)
+	local function OnCharacterAdded(character)
 		local camcfr = Camera.CFrame
 		RunService.PreRender:Once(function()
 			RunService.PreAnimation:Wait()
@@ -4090,20 +4090,29 @@ function LimbReanimator.Start()
 			task.spawn(CharOnDesc, v)
 		end
 		local humanoid = character:WaitForChild("Humanoid", 5)
-		local stupid = humanoid:FindFirstChildWhichIsA("Animator")
-		if stupid then
-			stupid:Destroy()
+		if humanoid then
+			local stupid = humanoid:FindFirstChildWhichIsA("Animator")
+			if stupid then
+				stupid:Destroy()
+			end
 		end
 		if not Reanimate.UseLoadAnimationHook then
-			stupid = character:FindFirstChild("Animate")
-			while not stupid do
+			local stupid = character:FindFirstChild("Animate")
+			while not stupid and character.Parent do
 				character.ChildAdded:Wait()
 				stupid = character:FindFirstChild("Animate")
 			end
-			stupid:Destroy()
+			if stupid then stupid:Destroy() end
 		end
-	end)
-	Player.CharacterAdded:Wait()
+	end
+	local CharConn = Player.CharacterAdded:Connect(OnCharacterAdded)
+	-- Do not wait for a future respawn when the player already has a character.
+	-- That wait caused startup to time out after the startup-kill was removed.
+	if Player.Character then
+		OnCharacterAdded(Player.Character)
+	else
+		Player.CharacterAdded:Wait()
+	end
 	Reanimate.CreateCharacter(InitCFrame)
 
 	local lastrep = 0
