@@ -805,6 +805,7 @@ AddModule(function()
     -- Cleave.anim and Combo.anim currently have the same Git blob SHA, so they
     -- are byte-for-byte identical and cannot provide distinct attack clips.
     local attackMotionConnection
+    local attackMotionUntil = 0
     local function playSkillAnimation(animationId, variant)
         local humanoid = activeFigure and activeFigure:FindFirstChildOfClass("Humanoid")
         if not humanoid then return end
@@ -823,7 +824,12 @@ AddModule(function()
             return
         end
         -- Drive Motor6D.Transform directly for a visible R6/R15 arm attack.
-        -- This avoids C0 tweens being overwritten by the reanimation animation loop.
+        -- Stop the movement clip first, then prevent Update from recreating it mid-swing.
+        if walkAnimationTrack then
+            pcall(function() walkAnimationTrack:Stop(0.05); walkAnimationTrack:Destroy() end)
+            walkAnimationTrack = nil
+        end
+        movementAnimationName = nil
         if attackMotionConnection then attackMotionConnection:Disconnect(); attackMotionConnection = nil end
         local joints = {}
         for _, descendant in ipairs(activeFigure:GetDescendants()) do
@@ -841,6 +847,7 @@ AddModule(function()
         if #joints == 0 then return end
         local started = os.clock()
         local duration = variant == "combo" and 0.78 or 0.46
+        attackMotionUntil = started + duration + 0.08
         attackMotionConnection = RunService.RenderStepped:Connect(function()
             if not activeFigure or not activeFigure.Parent then
                 if attackMotionConnection then attackMotionConnection:Disconnect(); attackMotionConnection = nil end
@@ -1389,6 +1396,7 @@ AddModule(function()
     end
 
     local function updateWalkAnimation()
+        if os.clock() < attackMotionUntil then return end
         if not activeFigure or not activeFigure.Parent then
             if walkAnimationTrack then
                 pcall(function() walkAnimationTrack:Stop(0.1); walkAnimationTrack:Destroy() end)
@@ -1505,6 +1513,7 @@ AddModule(function()
         if actionAnimationTrack then pcall(function() actionAnimationTrack:Stop(0.05); actionAnimationTrack:Destroy() end); actionAnimationTrack = nil end
         if walkAnimationTrack then pcall(function() walkAnimationTrack:Stop(0.1); walkAnimationTrack:Destroy() end); walkAnimationTrack = nil end
         if attackMotionConnection then pcall(function() attackMotionConnection:Disconnect() end); attackMotionConnection = nil end
+        attackMotionUntil = 0
         movementAnimationName = nil
         if fuugaProjectile then pcall(function() fuugaProjectile:Destroy() end); fuugaProjectile = nil end
         for _, aura in ipairs(fuugaAuraInstances) do pcall(function() aura:Destroy() end) end
