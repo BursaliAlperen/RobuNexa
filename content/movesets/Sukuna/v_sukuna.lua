@@ -78,7 +78,7 @@ AddModule(function()
     local hud
     local skillButtons = {}
     local activateAbility
-    local abilityCooldowns = {Cleave = 2.25, Dismantle = 3.5, Combo = 4.5}
+    local abilityCooldowns = {Cleave = 5, Dismantle = 7, Combo = 15}
     local abilityReadyAt = {}
     local abilityTargets = {}
     local targetMarker
@@ -818,10 +818,16 @@ AddModule(function()
             end
             abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
-            playSkillAnimation()
-            -- Combo uses the supplied bundled animation. Dismantle uses the procedural arm swing.
+            -- Combo must use its converted .anim clip; the procedural shoulder swing
+            -- can override the clip on the same Motor6D, so only use it as a fallback.
             if isCombo then
-                playBundledAnimation("Sukuna/DomainCombo.anim", "combo", false)
+                local comboTrack = playBundledAnimation("Sukuna/DomainCombo.anim", "combo", false)
+                if not comboTrack then
+                    notify("Combo animation failed to load; using fallback arm swing.")
+                    playSkillAnimation()
+                end
+            else
+                playSkillAnimation()
             end
             showTargetMarker(targetPosition, isCombo and "Combo" or "Dismantle")
             -- Combo produces three staggered local slash pulses without chat output.
