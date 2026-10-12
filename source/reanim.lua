@@ -1133,7 +1133,7 @@ do
 	UIList.FillDirection = Enum.FillDirection.Vertical
 	UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	UIList.VerticalAlignment = Enum.VerticalAlignment.Bottom
-	UIList.Padding = UDim.new(0, 0)
+	UIList.Padding = UDim.new(0, 5)
 	UIList.SortOrder = Enum.SortOrder.LayoutOrder
 	
 	local impala = Instance.new("ImageLabel", AWindowContent)
@@ -8180,40 +8180,53 @@ UI.CreateButton(InitLogsPage, "&lt; Hurry back", 20).Activated:Connect(function(
 	end)
 end)
 local InitLogsText = UI.CreateText(InitLogsPage, "Loading...", 12, Enum.TextXAlignment.Left)
+InitLogsPage.AutomaticCanvasSize = Enum.AutomaticSize.Y
+InitLogsPage.CanvasSize = UDim2.new(0, 0, 0, 0)
+InitLogsPage.ScrollingDirection = Enum.ScrollingDirection.Y
+InitLogsPage.ClipsDescendants = true
 local function getgithubraw(path)
-	InitLogsText.Text ..= "\n[LOG] [GitGET] GET api./" .. path
-	local s, resp = pcall(request, {
-		Method = "GET",
-		Url = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/" .. path,
-		Headers = {
-			Accept = "application/vnd.github.VERSION.raw"
-		}
-	})
-	if s and resp and resp.StatusCode == 200 then
-		return resp.Body
-	end
-	if s and resp then
-		InitLogsText.Text ..= "\n[WARN] [GitGET] GET api./" .. path .. " " .. resp.StatusCode
-	elseif s then
-		InitLogsText.Text ..= "\n[WARN] [GitGET] GET api./" .. path .. " NIL"
-	else
-		InitLogsText.Text ..= "\n[WARN] [GitGET] GET api./" .. path .. " ERR " .. resp
-	end
+	-- Prefer raw.githubusercontent.com: it avoids GitHub API rate limits and API 403s.
+	-- Never treat an error page or an empty response as executable Lua.
+	local rawUrl = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. path
 	InitLogsText.Text ..= "\n[LOG] [GitGET] GET raw./" .. path
-	s, resp = pcall(request, {
+	local ok, response = pcall(request, {
 		Method = "GET",
-		Url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. path,
+		Url = rawUrl,
+		Headers = {
+			["User-Agent"] = "RobuNexa-NAM",
+			Accept = "text/plain",
+		},
 	})
-	if s and resp and resp.StatusCode == 200 then
-		return resp.Body
+	if ok and type(response) == "table" and tonumber(response.StatusCode) == 200
+		and type(response.Body) == "string" and #response.Body > 0 then
+		local body = response.Body
+		if not string.find(body, "<html", 1, true) and not string.find(body, "404: Not Found", 1, true) then
+			return body
+		end
 	end
-	if s and resp then
-		InitLogsText.Text ..= "\n[WARN] [GitGET] GET raw./" .. path .. " " .. resp.StatusCode
-	elseif s then
-		InitLogsText.Text ..= "\n[WARN] [GitGET] GET raw./" .. path .. " NIL"
-	else
-		InitLogsText.Text ..= "\n[WARN] [GitGET] GET raw./" .. path .. " ERR " .. resp
+	local rawStatus = ok and type(response) == "table" and tostring(response.StatusCode or "NIL") or tostring(response)
+	InitLogsText.Text ..= "\n[WARN] [GitGET] GET raw./" .. path .. " " .. rawStatus
+
+	-- API fallback for executor environments where raw requests are blocked.
+	local apiUrl = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/" .. path .. "?ref=main"
+	InitLogsText.Text ..= "\n[LOG] [GitGET] GET api./" .. path
+	local apiOk, apiResponse = pcall(request, {
+		Method = "GET",
+		Url = apiUrl,
+		Headers = {
+			["User-Agent"] = "RobuNexa-NAM",
+			Accept = "application/vnd.github.raw+json",
+		},
+	})
+	if apiOk and type(apiResponse) == "table" and tonumber(apiResponse.StatusCode) == 200
+		and type(apiResponse.Body) == "string" and #apiResponse.Body > 0 then
+		local body = apiResponse.Body
+		if not string.find(body, '"message"%s*:%s*"Not Found"') and not string.find(body, "<html", 1, true) then
+			return body
+		end
 	end
+	local apiStatus = apiOk and type(apiResponse) == "table" and tostring(apiResponse.StatusCode or "NIL") or tostring(apiResponse)
+	InitLogsText.Text ..= "\n[WARN] [GitGET] GET api./" .. path .. " " .. apiStatus
 	return nil
 end
 local function ForceModuleReload(force)
