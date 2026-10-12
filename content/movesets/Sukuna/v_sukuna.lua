@@ -728,14 +728,9 @@ AddModule(function()
                 setHatWorldCFrame(100475161263482, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(-5, 2, 0))))
                 setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(5, 2, 0))))
                 playDomainCutscene(targetPosition)
-                playBundledAnimation("Sukuna/DomainCombo.anim", "combo", false)
-                task.delay(1.8, function()
-                    if activeFigure and activeFigure.Parent and domainEnabled then
-                        playBundledAnimation("Sukuna/MalevolentShrine.anim", "domain", false)
-                    end
-                end)
                 chatAbilityMessage("Domain Expansion: Malevolent Shrine!")
             else
+                abilityTargets.Domain = nil
                 chatAbilityMessage("Malevolent Shrine kapatıldı.")
             end
         elseif name == "Cleave" then
@@ -745,6 +740,9 @@ AddModule(function()
             playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
             showTargetMarker(targetPosition, "Cleave")
             chatAbilityMessage("Cleave!")
+            task.delay(1.35, function()
+                if abilityTargets.Cleave == targetPosition then abilityTargets.Cleave = nil end
+            end)
         elseif name == "Dismantle" then
             cleaveUntil = now + 1.2
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
@@ -752,13 +750,19 @@ AddModule(function()
             playBundledAnimation("Sukuna/DomainCombo.anim", "dismantle", false)
             showTargetMarker(targetPosition, "Dismantle")
             chatAbilityMessage("Dismantle!")
+            task.delay(1.35, function()
+                if abilityTargets.Dismantle == targetPosition then abilityTargets.Dismantle = nil end
+            end)
         elseif name == "Fuuga" then
             fuugaBusy = true
             setHatWorldCFrame(124144353587446, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 3, 0))))
             playBundledAnimation("Sukuna/FlameArrow.anim", "flame", false)
             showTargetMarker(targetPosition, "Fuuga / Flame Arrow")
             chatAbilityMessage("Fuuga: Flame Arrow!")
-            task.delay(1.5, function() fuugaBusy = false end)
+            task.delay(1.5, function()
+                fuugaBusy = false
+                if abilityTargets.Fuuga == targetPosition then abilityTargets.Fuuga = nil end
+            end)
         else
             notify("Bilinmeyen yetenek: " .. tostring(name))
         end
@@ -1281,6 +1285,7 @@ AddModule(function()
         activeFigure, root = nil, nil
         accessoryInstances, presentIds, overrideById = {}, {}, {}
         lastHatCFrames = {}
+        abilityTargets = {}
         savedWantAllHats = nil
         lastAccessorySignature = nil
     end
