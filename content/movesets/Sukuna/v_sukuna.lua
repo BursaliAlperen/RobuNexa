@@ -809,10 +809,32 @@ AddModule(function()
         end
 
         local accessory
-        for _, item in ipairs(character:GetChildren()) do
-            if isFingerAccessory(item) and item:FindFirstChild("Handle") then
-                accessory = item
-                break
+        -- Prefer the exact catalog asset ID from the applied HumanoidDescription.
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            local okDescription, description = pcall(function()
+                return humanoid:GetAppliedDescription()
+            end)
+            if okDescription and description then
+                local okList, list = pcall(function()
+                    return description:GetAccessories(true)
+                end)
+                if okList and type(list) == "table" then
+                    for _, entry in ipairs(list) do
+                        if tonumber(entry.AssetId) == FINGER_ID then
+                            accessory = tryAccessoryInstance(entry, character)
+                            if accessory then break end
+                        end
+                    end
+                end
+            end
+        end
+        if not accessory then
+            for _, item in ipairs(character:GetChildren()) do
+                if isFingerAccessory(item) and item:FindFirstChild("Handle") then
+                    accessory = item
+                    break
+                end
             end
         end
         if not accessory then
