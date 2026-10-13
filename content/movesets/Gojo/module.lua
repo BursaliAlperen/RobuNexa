@@ -77,13 +77,8 @@ AddModule(function()
 		-- Parent to SoundService so locally-triggered moveset audio is not lost
 		-- when the reanimated rig is hidden, moved, or outside the 3D rolloff range.
 		sound.Parent = SoundService
-		-- Start immediately; preload/diagnostics must not block ability input.
-		local playOk, playError = pcall(function() sound:Play() end)
-		if not playOk then
-			warn("[Gojo] Sound playback failed for " .. id .. ": " .. tostring(playError))
-			sound:Destroy()
-			return nil
-		end
+		-- Decode before playback: Play-before-load can appear silent on some clients.
+		-- Keep all waits asynchronous so mobile/PC ability input never blocks.
 		task.spawn(function()
 			local preloadOk, preloadError = pcall(function()
 				ContentProvider:PreloadAsync({sound})
@@ -91,12 +86,22 @@ AddModule(function()
 			if not preloadOk then
 				warn("[Gojo] Sound preload failed for " .. id .. ": " .. tostring(preloadError))
 			end
-			if sound.Parent and not sound.IsLoaded then
-				task.delay(5, function()
-					if sound.Parent and not sound.IsLoaded then
-						warn("[Gojo] Sound did not load; check asset permissions: " .. id)
-					end
-				end)
+			local deadline = os.clock() + 5
+			while sound.Parent and not sound.IsLoaded and os.clock() < deadline do
+				task.wait(0.1)
+			end
+			if not sound.Parent then return end
+			if not sound.IsLoaded then
+				warn("[Gojo] Sound did not decode; check asset permissions / executor audio support: " .. id)
+			end
+			local playOk, playError = pcall(function() sound:Play() end)
+			if not playOk then
+				warn("[Gojo] Sound playback failed for " .. id .. ": " .. tostring(playError))
+				if sound.Parent then sound:Destroy() end
+				return
+			end
+			if sound.IsLoaded and sound.TimeLength <= 0 then
+				warn("[Gojo] Sound has no decoded duration; asset may be unavailable: " .. id)
 			end
 		end)
 		if not sound.Looped then
