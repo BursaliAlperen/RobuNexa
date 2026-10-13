@@ -15,10 +15,8 @@ AddModule(function()
     m.Assets = {
         "Sukuna/Cleave.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Cleave.anim",
         "Sukuna/Combo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Combo.anim",
-        "Sukuna/MalevolentShrine.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/MalevolentShrine.anim",
-        "Sukuna/FlameArrow.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/FlameArrow.anim",
         "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
-        "Gojo/GojoWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Gojo/GojoWalk.anim",
+        "Sukuna/SukunaWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaWalk.anim",
         "Sukuna/SukunaIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaIdle.anim",
         "Sukuna/Jump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Jump.anim",
         "Sukuna/Fall.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Fall.anim",
@@ -88,7 +86,7 @@ AddModule(function()
     local hud
     local skillButtons = {}
     local activateAbility
-    local abilityCooldowns = {Cleave = 5, Dismantle = 7, Combo = 15}
+    local abilityCooldowns = {Cleave = 5, Dismantle = 7, Combo = 15, Rush = 18, Laugh = 12}
     local abilityReadyAt = {}
     local abilityTargets = {}
     local fuugaTargetPosition
@@ -848,13 +846,17 @@ AddModule(function()
         Cleave = Enum.KeyCode.X,
         Dismantle = Enum.KeyCode.C,
         Combo = Enum.KeyCode.Z,
+        Rush = Enum.KeyCode.R,
+        Laugh = Enum.KeyCode.L,
     }
     local LABELS = {
         Cleave = "CLEAVE",
         Dismantle = "DISMANTLE",
         Combo = "COMBO",
+        Rush = "RUSH",
+        Laugh = "LAUGH",
     }
-    local SKILL_ORDER = {"Cleave", "Dismantle", "Combo"}
+    local SKILL_ORDER = {"Cleave", "Dismantle", "Combo", "Rush", "Laugh"}
 
     local function refreshButtons()
         if type(skillButtons) ~= "table" or type(abilityReadyAt) ~= "table" then
@@ -881,60 +883,6 @@ AddModule(function()
                 button.Interactable = not coolingDown
             end
         end
-    end
-
-    local function playDomainCutscene(targetPosition)
-        if cutsceneActive or not root then return end
-        local camera = workspace.CurrentCamera
-        if not camera then return end
-        cutsceneActive = true
-        savedCameraType, savedCameraSubject, savedCameraCFrame = camera.CameraType, camera.CameraSubject, camera.CFrame
-        camera.CameraType = Enum.CameraType.Scriptable
-        local focus = root.Position + Vector3.new(0, 3, 0)
-        camera.CFrame = CFrame.lookAt(focus + root.CFrame.LookVector * -12 + Vector3.new(0, 5, 0), focus)
-        game:GetService("TweenService"):Create(camera, TweenInfo.new(0.85, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut), {
-            CFrame = CFrame.lookAt(focus + root.CFrame.LookVector * -7 + Vector3.new(0, 3, 0), focus)
-        }):Play()
-        -- Two-clip sequence: Combo intro, then Domain Expansion. Both clips are
-        -- loaded from the bundled Roblox models; no placeholder asset IDs.
-        task.spawn(function()
-            local first = playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
-            if first then
-                local timeout = os.clock() + math.max((first.Duration or 0) + 1.25, 15)
-                while first.IsPlaying and os.clock() < timeout and cutsceneActive do
-                    task.wait(0.05)
-                end
-                pcall(function() first:Stop(0.08); first:Destroy() end)
-            end
-            if cutsceneActive then
-                local second = playBundledAnimation("Sukuna/MalevolentShrine.anim", "domain", false)
-                if second then
-                    local timeout = os.clock() + math.max((second.Duration or 0) + 1.25, 15)
-                    while second.IsPlaying and os.clock() < timeout and cutsceneActive do
-                        task.wait(0.05)
-                    end
-                    pcall(function() second:Stop(0.1); second:Destroy() end)
-                end
-            end
-            if cutsceneActive then
-                local currentCamera = workspace.CurrentCamera
-                if currentCamera then
-                    currentCamera.CameraType = savedCameraType or Enum.CameraType.Custom
-                    currentCamera.CameraSubject = savedCameraSubject
-                    if savedCameraCFrame then currentCamera.CFrame = savedCameraCFrame end
-                end
-                cutsceneActive = false
-            end
-        end)
-        task.delay(1.05, function()
-            if not cutsceneActive or not targetPosition then return end
-            local currentCamera = workspace.CurrentCamera
-            if currentCamera then
-                game:GetService("TweenService"):Create(currentCamera, TweenInfo.new(0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
-                    CFrame = CFrame.lookAt(targetPosition + Vector3.new(0, 9, 14), targetPosition)
-                }):Play()
-            end
-        end)
     end
 
     -- Awakening intro: temporarily freeze movement, frame Sukuna with the camera,
@@ -1039,9 +987,24 @@ AddModule(function()
 
     local function activateSukunaAbility(name, targetPosition)
         if name == "Domain" or name == "Fuuga" then return end
+        if name == "Laugh" then
+            if not activeFigure or not activeFigure.Parent then
+                notify("Moveset is not ready yet; waiting for the Hat Reanimation rig.")
+                return
+            end
+            local now = os.clock()
+            if now < (abilityReadyAt.Laugh or 0) then return end
+            abilityReadyAt.Laugh = now + abilityCooldowns.Laugh
+            if not playAwakeningIntroCutscene() then
+                notify("Laugh cutscene could not start; check the animation asset log.")
+            end
+            refreshButtons()
+            return
+        end
         local isDismantle = name == "Dismantle"
         local isCombo = name == "Combo"
-        if name ~= "Cleave" and not isDismantle and not isCombo then return end
+        local isRush = name == "Rush"
+        if name ~= "Cleave" and not isDismantle and not isCombo and not isRush then return end
         if not activeFigure or not activeFigure.Parent or not root or not root.Parent then
             notify("Moveset is not ready yet; waiting for the Hat Reanimation rig.")
             return
@@ -1084,30 +1047,47 @@ AddModule(function()
             task.delay(1.35, function()
                 if abilityTargets.Cleave == targetPosition then abilityTargets.Cleave = nil end
             end)
-        elseif isDismantle or isCombo then
-            cleaveUntil = now + (isCombo and 1.8 or 1.2)
+        elseif isDismantle or isCombo or isRush then
+            local rushDuration = 1.2
+            cleaveUntil = now + (isRush and rushDuration or (isCombo and 1.8 or 1.2))
             slashBurstStartedAt = now
-            slashBurstUntil = now + (isCombo and 1.5 or 0.48)
-            slashBurstCount = isCombo and 5 or 2
+            slashBurstUntil = now + (isRush and rushDuration or (isCombo and 1.5 or 0.48))
+            slashBurstCount = isRush and 12 or (isCombo and 5 or 2)
             slashBurstTarget = targetPosition
-            if isCombo then
+            if isCombo or isRush then
                 comboAccessoryStartedAt = now
-                comboAccessoryUntil = now + 1.45
+                comboAccessoryUntil = now + (isRush and rushDuration or 1.45)
                 cleaveAccessoryUntil = 0
             end
             abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
-            -- Use the bundled clip directly. No procedural fallback animation.
             local actionStarted = playBundledAnimation(
                 isCombo and "Sukuna/Combo.anim" or "Sukuna/Cleave.anim",
-                isCombo and "combo" or "dismantle",
-                false
+                isCombo and "combo" or (isRush and "rush" or "dismantle"),
+                isRush
             )
             if not actionStarted then
                 notify((isCombo and "Combo.anim" or "Cleave.anim") .. " failed to start; check the asset-load/AnimLib log.")
             end
-            -- Combo produces three staggered local slash pulses without chat output.
-            if isCombo then
+            if isRush then
+                -- Rapid forward dashes: ten root-position updates per second.
+                task.spawn(function()
+                    local initialSpeed = root and root.Parent and root.AssemblyLinearVelocity.Magnitude or 16
+                    local stepDistance = math.max(1.6, initialSpeed * 2 * 0.1)
+                    for step = 1, 12 do
+                        if not activeFigure or not activeFigure.Parent or not root or not root.Parent or cutsceneActive then break end
+                        local forward = root.CFrame.LookVector
+                        local nextPosition = root.Position + forward * stepDistance
+                        root.CFrame = CFrame.lookAt(nextPosition, nextPosition + forward)
+                        slashBurstStartedAt = os.clock()
+                        task.wait(0.1)
+                    end
+                    if actionAnimationTrack and actionAnimationTrack.IsPlaying then
+                        pcall(function() actionAnimationTrack:Stop(0.08); actionAnimationTrack:Destroy() end)
+                    end
+                    if abilityTargets.Dismantle == targetPosition then abilityTargets.Dismantle = nil end
+                end)
+            elseif isCombo then
                 for hit = 1, 3 do
                     task.delay((hit - 1) * 0.18, function()
                         if activeFigure and activeFigure.Parent and root and root.Parent then
@@ -1121,16 +1101,6 @@ AddModule(function()
             task.delay(1.9, function()
                 if abilityTargets[name] == targetPosition then abilityTargets[name] = nil end
                 if abilityTargets.Dismantle == targetPosition then abilityTargets.Dismantle = nil end
-            end)
-        elseif name == "Fuuga" then
-            fuugaBusy = true
-            setHatWorldCFrame(124144353587446, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 3, 0))))
-            playBundledAnimation("Sukuna/FlameArrow.anim", "flame", false)
-            showTargetMarker(targetPosition, "Fuuga / Flame Arrow")
-            chatAbilityMessage("Fuuga: Flame Arrow!")
-            task.delay(1.5, function()
-                fuugaBusy = false
-                if abilityTargets.Fuuga == targetPosition then abilityTargets.Fuuga = nil end
             end)
         else
             notify("Bilinmeyen yetenek: " .. tostring(name))
@@ -1216,7 +1186,7 @@ AddModule(function()
                 end
             end
         end))
-        notify("Sukuna skills ready: X Cleave, C Dismantle, Z Combo. Exactly 3 skills.")
+        notify("Sukuna skills ready: X Cleave, C Dismantle, Z Combo, R Rush, L Laugh.")
     end
 
     local function announceFinger(text)
@@ -1636,7 +1606,7 @@ AddModule(function()
 
         local filename
         if wanted == "Run" or wanted == "Walk" then
-            filename = "Gojo/GojoWalk.anim"
+            filename = "Sukuna/SukunaWalk.anim"
         elseif wanted == "Idle" then
             filename = "Sukuna/SukunaIdle.anim"
         else
