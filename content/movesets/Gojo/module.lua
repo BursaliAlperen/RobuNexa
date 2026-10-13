@@ -77,8 +77,14 @@ AddModule(function()
 		-- Parent to SoundService so locally-triggered moveset audio is not lost
 		-- when the reanimated rig is hidden, moved, or outside the 3D rolloff range.
 		sound.Parent = SoundService
-		-- Decode before playback: Play-before-load can appear silent on some clients.
-		-- Keep all waits asynchronous so mobile/PC ability input never blocks.
+		-- Start playback immediately, then preload/diagnose in the background.
+		-- Waiting for IsLoaded before Play can make short one-shot effects miss their cue.
+		local playOk, playError = pcall(function() sound:Play() end)
+		if not playOk then
+			warn("[Gojo] Sound playback failed for " .. id .. ": " .. tostring(playError))
+			sound:Destroy()
+			return nil
+		end
 		task.spawn(function()
 			local preloadOk, preloadError = pcall(function()
 				ContentProvider:PreloadAsync({sound})
@@ -86,21 +92,10 @@ AddModule(function()
 			if not preloadOk then
 				warn("[Gojo] Sound preload failed for " .. id .. ": " .. tostring(preloadError))
 			end
-			local deadline = os.clock() + 5
-			while sound.Parent and not sound.IsLoaded and os.clock() < deadline do
-				task.wait(0.1)
-			end
 			if not sound.Parent then return end
 			if not sound.IsLoaded then
-				warn("[Gojo] Sound did not decode; check asset permissions / executor audio support: " .. id)
-			end
-			local playOk, playError = pcall(function() sound:Play() end)
-			if not playOk then
-				warn("[Gojo] Sound playback failed for " .. id .. ": " .. tostring(playError))
-				if sound.Parent then sound:Destroy() end
-				return
-			end
-			if sound.IsLoaded and sound.TimeLength <= 0 then
+				warn("[Gojo] Sound did not decode; verify this Roblox audio ID is public/permitted and supported by the client: " .. id)
+			elseif sound.TimeLength <= 0 then
 				warn("[Gojo] Sound has no decoded duration; asset may be unavailable: " .. id)
 			end
 		end)
@@ -172,6 +167,13 @@ AddModule(function()
 		-- never leave the old dog moveset idle pose stuck on the rig.
 		stopAnimation()
 		local path = AssetGetPathFromFilename(filename)
+		if not isfile or not isfile(path) then
+			local ensureOk, ensured = pcall(function() return AssetEnsure({filename}) end)
+			if not ensureOk or not ensured or not isfile or not isfile(path) then
+				notify(filename .. " indirilemedi; [NAM] asset uyarılarını kontrol et.")
+				return false
+			end
+		end
 		local ok, track = pcall(function() return AnimLib.Track.fromfile(path) end)
 		if not ok or not track or not track.Keyframes or #track.Keyframes == 0 then
 			if name == "Idle" then
