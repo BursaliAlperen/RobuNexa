@@ -18,7 +18,7 @@ AddModule(function()
         "Sukuna/MalevolentShrine.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/MalevolentShrine.anim",
         "Sukuna/FlameArrow.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/FlameArrow.anim",
         "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
-        "Sukuna/Walk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Walk.anim",
+        "Gojo/GojoWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Gojo/GojoWalk.anim",
         "Sukuna/SukunaIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaIdle.anim",
         "Sukuna/Jump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Jump.anim",
         "Sukuna/Fall.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Fall.anim",
@@ -201,10 +201,21 @@ AddModule(function()
                 if not preloadOk then
                     warn("[Sukuna] Awakening preload failed for " .. tostring(selectedPath) .. ": " .. tostring(preloadError))
                 end
+                -- Some clients finish local-file decoding shortly after PreloadAsync.
+                local deadline = os.clock() + 4
+                while not thisSound.IsLoaded and os.clock() < deadline do
+                    if token ~= awakeningStartToken or awakeningSound ~= thisSound or not thisSound.Parent then return end
+                    task.wait(0.1)
+                end
                 if token ~= awakeningStartToken or awakeningSound ~= thisSound or not thisSound.Parent then return end
+                if not thisSound.IsLoaded then
+                    warn("[Sukuna] Awakening sound is not loaded; executor may not support local MP3 assets: " .. tostring(selectedPath))
+                end
                 local playOk, playError = pcall(function() thisSound:Play() end)
                 if not playOk then
                     warn("[Sukuna] Awakening sound playback failed: " .. tostring(playError))
+                elseif thisSound.TimeLength <= 0 then
+                    warn("[Sukuna] Awakening sound has no decoded duration: " .. tostring(selectedPath))
                 end
             end)
             task.delay(30, function()
@@ -1509,7 +1520,7 @@ AddModule(function()
 
         local filename
         if wanted == "Run" or wanted == "Walk" then
-            filename = "Sukuna/Walk.anim"
+            filename = "Gojo/GojoWalk.anim"
         elseif wanted == "Idle" then
             filename = "Sukuna/SukunaIdle.anim"
         else
