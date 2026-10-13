@@ -14,8 +14,10 @@ AddModule(function()
     -- These are NAM AnimLib binary .anim files, not .rbxm models.
     m.Assets = {
         "Sukuna/Cleave.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Cleave.anim",
-        "Sukuna/Combo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Combo.anim",
+        "Sukuna/Dismantle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Dismantle.anim",
+        "Sukuna/Rushbeatdown.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Rushbeatdown.anim",
         "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
+        "sounds/sukuna-slash.mp3@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/sounds/sukuna-slash.mp3",
         "Sukuna/SukunaWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaWalk.anim",
         "Sukuna/SukunaIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaIdle.anim",
         "Sukuna/Jump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Jump.anim",
@@ -254,6 +256,55 @@ AddModule(function()
     -- other's Motor6D transforms and make Cleave/Combo appear not to play.
     local activeActionTrack
     local actionAnimationTrack
+    local slashSound
+    local function playBundledSound(filename, volume)
+        local path = AssetGetPathFromFilename(filename)
+        if not isfile or not isfile(path) then
+            local ensureOk, ensured = pcall(function() return AssetEnsure({filename}) end)
+            if not ensureOk or not ensured or not isfile or not isfile(path) then
+                warn("[Sukuna] Sound download failed: " .. filename)
+                return false
+            end
+        end
+        local resolver = getcustomasset or getsynasset
+        if type(resolver) ~= "function" then
+            warn("[Sukuna] Executor has no getcustomasset/getsynasset for " .. filename)
+            return false
+        end
+        local okId, soundId = pcall(function() return resolver(path) end)
+        if not okId or type(soundId) ~= "string" then
+            warn("[Sukuna] Could not resolve local sound: " .. filename)
+            return false
+        end
+        if slashSound then pcall(function() slashSound:Stop(); slashSound:Destroy() end) end
+        local okSound, sound = pcall(function()
+            local item = Instance.new("Sound")
+            item.Name = "SukunaLocalEffectSound"
+            item.SoundId = soundId
+            item.Volume = volume or 0.75
+            item.Looped = false
+            item.Parent = game:GetService("SoundService")
+            return item
+        end)
+        if not okSound or not sound then return false end
+        slashSound = sound
+        task.spawn(function()
+            local loaded = sound.IsLoaded
+            if not loaded then
+                pcall(function() game:GetService("ContentProvider"):PreloadAsync({sound}) end)
+                loaded = sound.IsLoaded
+            end
+            if loaded and sound.TimeLength > 0 and sound.Parent then
+                pcall(function() sound.TimePosition = 0; sound:Play() end)
+            else
+                warn("[Sukuna] Local sound did not decode: " .. filename)
+            end
+            sound.Ended:Wait()
+            if slashSound == sound then slashSound = nil end
+            pcall(function() sound:Destroy() end)
+        end)
+        return true
+    end
     local function playBundledAnimation(filename, preferredName, looped)
         if not activeFigure or not activeFigure.Parent then return false end
         local path = AssetGetPathFromFilename(filename)
@@ -1015,6 +1066,7 @@ AddModule(function()
             local now = os.clock()
             if now < (abilityReadyAt.Laugh or 0) then return end
             abilityReadyAt.Laugh = now + abilityCooldowns.Laugh
+            playRandomAwakeningSound()
             if not playAwakeningIntroCutscene() then
                 notify("Laugh cutscene could not start; check the animation asset log.")
             end
@@ -1067,6 +1119,7 @@ AddModule(function()
             slashBurstTarget = targetPosition
             -- Play the bundled Sukuna animation only; no procedural fallback animation.
             playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
+            playBundledSound("sounds/sukuna-slash.mp3", 0.75)
             chatAbilityMessage("Cleave!")
             task.delay(1.35, function()
                 if abilityTargets.Cleave == targetPosition then abilityTargets.Cleave = nil end
@@ -1085,11 +1138,15 @@ AddModule(function()
             end
             abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
+            local animationFile = isRush and "Sukuna/Rushbeatdown.anim"
+                or (isCombo and "Sukuna/Rushbeatdown.anim"
+                or (isDismantle and "Sukuna/Dismantle.anim" or "Sukuna/Cleave.anim"))
             local actionStarted = playBundledAnimation(
-                isCombo and "Sukuna/Combo.anim" or "Sukuna/Cleave.anim",
+                animationFile,
                 isCombo and "combo" or (isRush and "rush" or "dismantle"),
                 isRush
             )
+            playBundledSound("sounds/sukuna-slash.mp3", isRush and 0.55 or 0.75)
             if not actionStarted then
                 notify((isCombo and "Combo.anim" or "Cleave.anim") .. " failed to start; check the asset-load/AnimLib log.")
             end
