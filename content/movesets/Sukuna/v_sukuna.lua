@@ -16,6 +16,7 @@ AddModule(function()
         "Sukuna/Cleave.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Cleave.anim",
         "Sukuna/Dismantle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Dismantle.anim",
         "Sukuna/Rushbeatdown.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Rushbeatdown.anim",
+        "Sukuna/SukunaCombo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaCombo.anim",
         "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
         "sounds/sukuna-slash.mp3@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/sounds/sukuna-slash.mp3",
         "Sukuna/SukunaWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaWalk.anim",
@@ -1138,8 +1139,9 @@ AddModule(function()
             end
             abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
+            -- Combo and Rushbeatdown are separate source clips.
             local animationFile = isRush and "Sukuna/Rushbeatdown.anim"
-                or (isCombo and "Sukuna/Rushbeatdown.anim"
+                or (isCombo and "Sukuna/SukunaCombo.anim"
                 or (isDismantle and "Sukuna/Dismantle.anim" or "Sukuna/Cleave.anim"))
             local actionStarted = playBundledAnimation(
                 animationFile,
@@ -1151,17 +1153,33 @@ AddModule(function()
                 notify((isCombo and "Combo.anim" or "Cleave.anim") .. " failed to start; check the asset-load/AnimLib log.")
             end
             if isRush then
-                -- Rapid forward dashes: ten root-position updates per second.
+                -- Automatic forward Rush: no movement input is required.
+                -- Advance the reanimated root at ~32 studs/second in 0.1s steps.
                 task.spawn(function()
-                    local initialSpeed = root and root.Parent and root.AssemblyLinearVelocity.Magnitude or 16
-                    local stepDistance = math.max(1.6, initialSpeed * 2 * 0.1)
-                    for step = 1, 12 do
+                    local rushStartedAt = os.clock()
+                    local rushDuration = math.clamp(
+                        actionAnimationTrack and actionAnimationTrack.Duration or 1.2,
+                        1.2,
+                        3.5
+                    )
+                    local nextStepAt = rushStartedAt
+                    while os.clock() - rushStartedAt < rushDuration do
                         if not activeFigure or not activeFigure.Parent or not root or not root.Parent or cutsceneActive then break end
                         local forward = root.CFrame.LookVector
-                        local nextPosition = root.Position + forward * stepDistance
+                        local nextPosition = root.Position + forward * 3.2
                         root.CFrame = CFrame.lookAt(nextPosition, nextPosition + forward)
+                        pcall(function()
+                            root.AssemblyLinearVelocity = Vector3.new(forward.X * 32, root.AssemblyLinearVelocity.Y, forward.Z * 32)
+                        end)
                         slashBurstStartedAt = os.clock()
-                        task.wait(0.1)
+                        nextStepAt += 0.1
+                        task.wait(math.max(0, nextStepAt - os.clock()))
+                    end
+                    if root and root.Parent then
+                        pcall(function()
+                            local velocity = root.AssemblyLinearVelocity
+                            root.AssemblyLinearVelocity = Vector3.new(0, velocity.Y, 0)
+                        end)
                     end
                     if actionAnimationTrack and actionAnimationTrack.IsPlaying then
                         pcall(function() actionAnimationTrack:Stop(0.08); actionAnimationTrack:Destroy() end)
