@@ -263,7 +263,17 @@ AddModule(function()
 
         local okTrack, track = pcall(function() return AnimLib.Track.fromfile(path) end)
         if not okTrack or not track or type(track.Keyframes) ~= "table" or #track.Keyframes == 0 then
-            notify("Invalid .anim file: " .. filename)
+            -- A stale/truncated local cache can exist even when isfile() is true.
+            -- Remove it, redownload the repository copy, then retry parsing once.
+            pcall(function() if isfile(path) then delfile(path) end end)
+            local retryEnsureOk, retryEnsured = pcall(function() return AssetEnsure({filename}) end)
+            if retryEnsureOk and retryEnsured and isfile(path) then
+                okTrack, track = pcall(function() return AnimLib.Track.fromfile(path) end)
+            end
+        end
+        if not okTrack or not track or type(track.Keyframes) ~= "table" or #track.Keyframes == 0 then
+            warn("[Sukuna] Invalid .anim data after cache refresh: " .. filename)
+            notify("Invalid .anim file: " .. filename .. " (cache refreshed; see [Sukuna] warning).")
             return false
         end
 
