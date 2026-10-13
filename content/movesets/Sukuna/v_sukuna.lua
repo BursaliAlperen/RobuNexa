@@ -22,8 +22,6 @@ AddModule(function()
         "Sukuna/SukunaIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaIdle.anim",
         "Sukuna/Jump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Jump.anim",
         "Sukuna/Fall.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Fall.anim",
-        "sounds/Awaken2.mp3@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/sounds/Awaken2.mp3",
-        "sounds/Awakenw1.mp3@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/sounds/Awakenw1.mp3",
     }
 
     local TARGETS = {
@@ -124,51 +122,86 @@ AddModule(function()
     local fuugaProjectile
     local fuugaAuraInstances = {}
     local awakeningSound
+    local awakeningStartToken = 0
     local STATUS_INTERVAL = 1.25
 
     local function notify(message)
         pcall(function() Util.Notify("Sukuna: " .. message) end)
     end
 
-    -- Exactly one awakening track is chosen per moveset start. These are local
-    -- downloaded assets, not Roblox asset IDs. Always stop/destroy the previous
-    -- instance first so reinitializing Sukuna can never overlap both tracks.
+    -- Exactly one awakening track is selected per start. Audio is optional to
+    -- the moveset: download the selected file on a worker, and fall back to the
+    -- other file only if the first one cannot be fetched. Never play both.
     local function playRandomAwakeningSound()
+        awakeningStartToken += 1
+        local token = awakeningStartToken
         if awakeningSound then
             pcall(function() awakeningSound:Stop(); awakeningSound:Destroy() end)
             awakeningSound = nil
         end
-        local choices = {"sounds/Awaken2.mp3", "sounds/Awakenw1.mp3"}
-        local chosen = choices[math.random(1, #choices)]
-        local soundId = ""
-        pcall(function() soundId = AssetGetContentId(chosen) end)
-        if type(soundId) ~= "string" or soundId == "" then
-            notify("Awakening sound missing: " .. chosen .. " (check download/getcustomasset support).")
-            return
+        local choices = {
+            {
+                path = "sounds/Awaken2.mp3",
+                url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/sounds/Awaken2.mp3",
+            },
+            {
+                path = "sounds/Awakenw1.mp3",
+                url = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/sounds/Awakenw1.mp3",
+            },
+        }
+        if math.random(1, 2) == 2 then
+            choices[1], choices[2] = choices[2], choices[1]
         end
-        local ok, soundOrError = pcall(function()
-            local sound = Instance.new("Sound")
-            sound.Name = "SukunaAwakeningIntro"
-            sound.SoundId = soundId
-            sound.Volume = 1
-            sound.Looped = false
-            sound.Parent = game:GetService("SoundService")
-            return sound
-        end)
-        if ok and soundOrError then
+        task.spawn(function()
+            local selectedId, selectedPath
+            for _, choice in ipairs(choices) do
+                if token ~= awakeningStartToken or not activeFigure or not activeFigure.Parent then return end
+                local ensured = false
+                pcall(function()
+                    ensured = AssetEnsure({choice.path .. "@" .. choice.url})
+                end)
+                if ensured then
+                    local id = ""
+                    pcall(function() id = AssetGetContentId(choice.path) end)
+                    if type(id) == "string" and id ~= "" then
+                        selectedId, selectedPath = id, choice.path
+                        break
+                    end
+                end
+                warn("[Sukuna] Awakening asset unavailable: " .. choice.path)
+            end
+            if token ~= awakeningStartToken or not activeFigure or not activeFigure.Parent then return end
+            if not selectedId then
+                notify("Both awakening sounds failed to load; check GitHub download and getcustomasset support.")
+                return
+            end
+            local ok, soundOrError = pcall(function()
+                local sound = Instance.new("Sound")
+                sound.Name = "SukunaAwakeningIntro"
+                sound.SoundId = selectedId
+                sound.Volume = 1
+                sound.Looped = false
+                sound.Parent = game:GetService("SoundService")
+                return sound
+            end)
+            if not ok or not soundOrError then
+                warn("[Sukuna] Awakening sound creation failed: " .. tostring(soundOrError))
+                return
+            end
+            if token ~= awakeningStartToken then
+                pcall(function() soundOrError:Destroy() end)
+                return
+            end
             awakeningSound = soundOrError
             local thisSound = awakeningSound
-            -- Preload off the startup path so the moveset never freezes while
-            -- waiting for audio. The identity check cancels stale starts after
-            -- a quick moveset switch/reinitialization.
             task.spawn(function()
                 local preloadOk, preloadError = pcall(function()
                     game:GetService("ContentProvider"):PreloadAsync({thisSound})
                 end)
                 if not preloadOk then
-                    warn("[Sukuna] Awakening preload failed: " .. tostring(preloadError))
+                    warn("[Sukuna] Awakening preload failed for " .. tostring(selectedPath) .. ": " .. tostring(preloadError))
                 end
-                if awakeningSound ~= thisSound or not thisSound.Parent then return end
+                if token ~= awakeningStartToken or awakeningSound ~= thisSound or not thisSound.Parent then return end
                 local playOk, playError = pcall(function() thisSound:Play() end)
                 if not playOk then
                     warn("[Sukuna] Awakening sound playback failed: " .. tostring(playError))
@@ -180,9 +213,7 @@ AddModule(function()
                     awakeningSound = nil
                 end
             end)
-        else
-            warn("[Sukuna] Awakening sound creation failed: " .. tostring(soundOrError))
-        end
+        end)
     end
 
     local function resolveRoot(figure)
@@ -1365,6 +1396,7 @@ AddModule(function()
     m.Config = function(parent) end
 
     m.Init = function(figure)
+        awakeningStartToken += 1
         if awakeningSound then
             pcall(function() awakeningSound:Stop(); awakeningSound:Destroy() end)
             awakeningSound = nil
@@ -1523,6 +1555,7 @@ AddModule(function()
     end
 
     m.Destroy = function()
+        awakeningStartToken += 1
         if awakeningSound then
             pcall(function() awakeningSound:Stop(); awakeningSound:Destroy() end)
             awakeningSound = nil
