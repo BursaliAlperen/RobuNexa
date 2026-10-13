@@ -14,7 +14,7 @@ from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 MOVES = ROOT / "content" / "movesets"
-URL_RE = re.compile(r"https?://[^\\s\"'<>]+?\\.(?:anim|mp3)(?:\\?[^\\s\"'<>]*)?", re.IGNORECASE)
+URL_RE = re.compile(r"https?://[^\s\"'<>]+?\.(?:anim|mp3)(?:\?[^\s\"'<>]*)?", re.IGNORECASE)
 USER_AGENT = "RobuNexa-NAM-Asset-Validator/1.0"
 
 
