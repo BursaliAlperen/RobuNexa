@@ -705,13 +705,29 @@ AddModule(function()
         if HatReanimator then HatReanimator.RebuildRequired = true end
     end
 
+    local slashOriginalTransparency = {}
+    local function setSlashAccessoryVisibility(visibleAlpha)
+        local accessory = accessoryInstances[18908729586]
+        if not accessory then return end
+        local transparency = 1 - math.clamp(visibleAlpha or 0, 0, 1)
+        for _, item in ipairs(accessory:GetDescendants()) do
+            if item:IsA("BasePart") then
+                if slashOriginalTransparency[item] == nil then
+                    slashOriginalTransparency[item] = item.LocalTransparencyModifier
+                end
+                item.LocalTransparencyModifier = math.clamp(slashOriginalTransparency[item] + transparency, 0, 1)
+            elseif item:IsA("Decal") or item:IsA("Texture") then
+                if slashOriginalTransparency[item] == nil then slashOriginalTransparency[item] = item.Transparency end
+                item.Transparency = math.clamp(slashOriginalTransparency[item] + transparency, 0, 1)
+            end
+        end
+    end
+
     local function setHatWorldCFrame(id, targetCFrame)
         local override = overrideById[id]
         if not override or typeof(targetCFrame) ~= "CFrame" then return end
         local previous = lastHatCFrames[id] or override.C0
-        -- Never interpolate from the hidden -5000-stud parking position to a
-        -- short slash pulse: it would remain thousands of studs away until the
-        -- pulse ended. Snap long-distance transitions; ease only local motion.
+        -- Snap long-distance transitions; ease only local motion.
         local eased
         if typeof(previous) ~= "CFrame"
             or (previous.Position - targetCFrame.Position).Magnitude > 80 then
@@ -797,23 +813,27 @@ AddModule(function()
             local pulseTime = elapsed - pulseIndex * pulseDuration
             if pulseIndex < count and pulseTime < 0.22 then
                 local travel = math.clamp(pulseTime / 0.22, 0, 1)
+                local envelope = math.sin(travel * math.pi)
                 local side = count > 1 and ((pulseIndex % 3) - 1) * 1.35 or 0
                 local startPosition = root.Position + root.CFrame.LookVector * 2.5
                     + root.CFrame.RightVector * side + Vector3.new(0, 2, 0)
                 local endPosition = slashBurstTarget + Vector3.new(side, 2, 0)
                 local worldPosition = startPosition:Lerp(endPosition, travel)
+                local shake = Vector3.new(math.sin(t * 79) * 0.12, math.cos(t * 91) * 0.1, math.sin(t * 67) * 0.08)
+                worldPosition += shake
                 local direction = endPosition - startPosition
                 if direction.Magnitude < 0.01 then direction = root.CFrame.LookVector end
                 local worldFrame = CFrame.lookAt(worldPosition, worldPosition + direction.Unit)
                     * CFrame.Angles(0, 0, math.rad((pulseIndex % 2 == 0) and -35 or 35))
                 slashFrame = root.CFrame:ToObjectSpace(worldFrame)
-                -- Keep the catalog accessory at its original scale. Resizing it
-                -- during every slash pulse forces HatReanimator rebuilds and can
-                -- interrupt the effect on some clients.
+                setSlashAccessoryVisibility(envelope)
+            else
+                setSlashAccessoryVisibility(0)
             end
         else
             slashBurstTarget = nil
             slashBurstCount = 0
+            setSlashAccessoryVisibility(0)
         end
         setHatWorldCFrame(18908729586, slashFrame)
 
@@ -1014,6 +1034,10 @@ AddModule(function()
         abilityReadyAt[name] = now + (abilityCooldowns[name] or 3)
         targetPosition = typeof(targetPosition) == "Vector3" and targetPosition
             or (root.Position + root.CFrame.LookVector * 32)
+        if name == "Dismantle" then
+            -- Dismantle always travels a short, predictable six studs forward.
+            targetPosition = root.Position + root.CFrame.LookVector * 6
+        end
         abilityTargets[name] = targetPosition
 
         if name == "Domain" then
