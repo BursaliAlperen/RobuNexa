@@ -1095,8 +1095,8 @@ AddModule(function()
         targetPosition = typeof(targetPosition) == "Vector3" and targetPosition
             or (root.Position + root.CFrame.LookVector * 32)
         if name == "Dismantle" then
-            -- Place the Dismantle target 3.3 studs behind the player.
-            targetPosition = root.Position - root.CFrame.LookVector * 3.3
+            -- The slash effect is positioned 3.5 studs behind the player.
+            targetPosition = root.Position - root.CFrame.LookVector * 3.5
         end
         abilityTargets[name] = targetPosition
 
@@ -1177,6 +1177,25 @@ AddModule(function()
             if not actionStarted then
                 notify((isCombo and "Combo.anim" or "Cleave.anim") .. " failed to start; check the asset-load/AnimLib log.")
             end
+            if isDismantle then
+                -- Dismantle has a short 3.5-stud backward recoil, spread across
+                -- several frames instead of teleporting. This does not stop the clip.
+                task.spawn(function()
+                    local recoilDuration = 0.18
+                    local recoilDistance = 3.5
+                    local started = os.clock()
+                    local previousAlpha = 0
+                    while previousAlpha < 1 do
+                        if not activeFigure or not activeFigure.Parent or not root or not root.Parent then break end
+                        local alpha = math.min((os.clock() - started) / recoilDuration, 1)
+                        local delta = (alpha - previousAlpha) * recoilDistance
+                        local backward = -root.CFrame.LookVector
+                        root.CFrame = root.CFrame + backward * delta
+                        previousAlpha = alpha
+                        if alpha < 1 then game:GetService("RunService").RenderStepped:Wait() end
+                    end
+                end)
+            end
             if isRush then
                 -- Automatic forward Rush: no movement input is required.
                 -- Advance the reanimated root at ~32 studs/second in 0.1s steps.
@@ -1220,7 +1239,10 @@ AddModule(function()
                     end)
                 end
             end
-            task.delay(1.9, function()
+            -- Keep attack target/effects alive for the entire source clip, even
+            -- when its converted animation is longer than the old fixed 1.9s window.
+            local clipDuration = actionStarted and actionStarted.Duration or 1.9
+            task.delay(math.max(clipDuration, 1.9) + 0.1, function()
                 if abilityTargets[name] == targetPosition then abilityTargets[name] = nil end
                 if abilityTargets.Dismantle == targetPosition then abilityTargets.Dismantle = nil end
             end)
