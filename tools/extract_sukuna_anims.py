@@ -9,9 +9,11 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTENT = ROOT / "content"
 OUT = CONTENT / "animations" / "Sukuna"
 ASSETS = [
-    # The user's latest Cleave animation source. Converted to the NAM AnimLib
-    # binary format by the repository workflow; never copy/rename raw RBXM bytes.
+    # Existing converted Cleave is retained when its original source has been cleaned up.
     ("animations/Sukuna/Kai.rbxm", "cleave", "Cleave.anim"),
+    # Extract the real KeyframeSequence clips from the committed RBXM assets.
+    ("animations/Sukuna/Dismantle.rbxm", "dismantle", "Dismantle.anim"),
+    ("animations/Sukuna/Rushbeatdown.rbxm", "rush", "Rushbeatdown.anim"),
 ]
 STYLE = {0: "Linear", 1: "Constant", 2: "Elastic", 3: "Cubic", 4: "Bounce",
          5: "Sine", 6: "Exponential", 7: "Quad", 8: "Quart", 9: "Quint",
