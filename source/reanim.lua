@@ -991,6 +991,10 @@ local function SetUITheme(index)
 	end
 end
 SaveData.UITheme = SaveData.UITheme or 1
+if not SaveData.UIThemeIndexMigrated then
+	if SaveData.UITheme >= 4 then SaveData.UITheme -= 1 end
+	SaveData.UIThemeIndexMigrated = true
+end
 SetUITheme(SaveData.UITheme)
 
 local ReanimPage
@@ -4211,7 +4215,6 @@ HatReanimator.HatCollideMethod = SaveData.Reanimator.HatsCollideMethod
 HatReanimator.IWantAllHats = SaveData.Reanimator.IWantAllHats
 HatReanimator.IWantHatCollide = SaveData.Reanimator.IWantHatCollide
 
-HatReanimator.Permadeath = false
 HatReanimator.HatFling = SaveData.Reanimator.HatsFling
 HatReanimator.HatSpin = SaveData.Reanimator.HatsSpin
 HatReanimator.FlingMethod = SaveData.Reanimator.HatsFlingMethod
@@ -4230,7 +4233,7 @@ HatReanimator.RebuildRequired = true
 HatReanimator.HatMapSummary = "(no hat map yet, please * Reanimate * to build)"
 HatReanimator.HatCFrameOverride = {}
 HatReanimator.Status = {
-	Permadeath = "(no status)",
+	Recovery = "(no status)",
 	HatCollide = "(no status)",
 	RespawnFling = "(no status)",
 }
@@ -4369,10 +4372,10 @@ function HatReanimator.Config(parent)
 	end)
 	UI.CreateText(parent, "^^^ if ur rig built wrong or u switched to a new rig ^^^\nthis button is for you", 10, Enum.TextXAlignment.Center)
 	UI.CreateButton(parent, "Respawn", 20).Activated:Connect(function()
-		HatReanimator.Status.Permadeath = "Fired CDSB Signal!"
+		HatReanimator.Status.Recovery = "Manual respawn requested."
 		--replicatesignal(Player.ConnectDiedSignalBackend)
 		if RejectCharacterDeletionsDisabled then
-			HatReanimator.Status.Permadeath = "RCDless mode, did old technique!"
+			HatReanimator.Status.Recovery = "Using legacy recovery method."
 			local old = Player.Character
 			for _,v in old:GetChildren() do
 				if v:IsA("Accoutrement") then continue end
@@ -5653,12 +5656,11 @@ function HatReanimator.Start()
 			CharOnDesc(v)
 		end
 		HatReanimator.Status.ReanimState = "Respawned."
-		HatReanimator.Status.Permadeath = "Respawn detected."
+		HatReanimator.Status.Recovery = "Respawn detected."
 		HatReanimator.Status.HatCollide = "Respawn detected."
 		HatReanimator.Status.RespawnFling = "Respawn detected."
 		local hatcols = HatReanimator.HatCollide
-		local perma = false
-		HatReanimator.HasPermadeath, HatReanimator.HasHatCollide = false, hatcols
+				HatReanimator.HasPermadeath, HatReanimator.HasHatCollide = false, hatcols
 		local hatcolmeth = HatReanimator.HatCollideMethod
 		if not hatcols then hatcolmeth = -1 end
 		if hatcols and RejectCharacterDeletionsDisabled then
@@ -5725,9 +5727,7 @@ function HatReanimator.Start()
 		else
 			HatReanimator.Status.HatCollide = "Disabled, nothing to do!"
 		end
-		local cdsbeffect = os.clock()
-		local cdsbtime = os.clock()
-		HatReanimator.Status.RespawnFling = "Flinging targets..."
+				HatReanimator.Status.RespawnFling = "Flinging targets..."
 		if HatReanimator.UseNaNFling and HatReanimator.FlingTargets[1] then
 			task.wait(0.2)
 		end
@@ -5880,7 +5880,7 @@ function HatReanimator.Start()
 				end
 				if hatcols and collidable <= atleast then
 					if perma then
-						HatReanimator.Status.Permadeath = "No hat collide. Respawning!"
+						HatReanimator.Status.Recovery = "No hat collide. Respawning!"
 						Respawn()
 					end
 				end
@@ -5905,14 +5905,14 @@ function HatReanimator.Start()
 		HatReanimator.Status.ReanimState = "Done."
 		if #CharHats == 0 then
 			if perma then
-				HatReanimator.Status.Permadeath = "All hats died. Respawning!"
+				HatReanimator.Status.Recovery = "All hats died. Respawning!"
 				Respawn()
 			end
 		end
 		if perma and hatcols then
 			if HatReanimator.IWantAllHats and NumHats > #CharHats then
 				if perma then
-					HatReanimator.Status.Permadeath = "Some hats died. Respawning!"
+					HatReanimator.Status.Recovery = "Some hats died. Respawning!"
 					Respawn()
 				end
 			else
@@ -5959,7 +5959,7 @@ function HatReanimator.Start()
 				end
 				if HatReanimator.HasPermadeath and not IsRespawning and HatReanimator.IWantAllHats then
 					if NumHats > #CharHats then
-						HatReanimator.Status.Permadeath = "Some hats died. Respawning!"
+						HatReanimator.Status.Recovery = "Some hats died. Respawning!"
 						Respawn()
 					else
 						local midpoint = Vector3.zero
@@ -5980,7 +5980,7 @@ function HatReanimator.Start()
 							-- Give long-range accessories time to enter the expanded
 							-- simulation radius before declaring them unclaimable.
 							if (v.Position - midpoint).Magnitude > 10000 then
-								HatReanimator.Status.Permadeath = "Some hats unclaimable. Respawning!"
+								HatReanimator.Status.Recovery = "Some hats unclaimable. Respawning!"
 								Respawn()
 								break
 							end
@@ -5998,7 +5998,7 @@ function HatReanimator.Start()
 					Humanoid.JumpPower = 50
 				end
 				if Camera then
-					if (ReanimOkay and ReanimCharacter) or not HatReanimator.Permadeath then
+					if (ReanimOkay and ReanimCharacter) then
 						Camera.CameraSubject = ReanimCharacter:FindFirstChildOfClass("Humanoid")
 					else
 						Camera.CameraSubject = Humanoid
