@@ -5851,8 +5851,6 @@ function HatReanimator.Start()
 			end
 			return
 		end
-			PermadeathLoadedTime = nil
-		end
 		replicatesignal(Humanoid.ServerBreakJoints)
 		Humanoid.EvaluateStateMachine = true
 		Humanoid.BreakJointsOnDeath = true
