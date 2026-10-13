@@ -915,8 +915,7 @@ local function SetUITheme(index)
 		{Fore = Color3.new(1, 1, 1), SndClick = "rbxassetid://81715128969224"},
 		-- Oxide
 		{Fore = Color3.fromRGB(49, 203, 233), Back = Color3.fromRGB(38, 38, 38), Text = Color3.fromRGB(49, 203, 233)},
-		-- Patchma-like
-		{Fore = Color3.new(0.0941177, 0.317647, 0.878431), Text = Color3.new(0.560784, 0.560784, 0.560784)},
+
 		-- Genesis V4 - Neptunian V
 		{Fore = Color3.fromHex("7733FF"), Back = Color3.fromHex("161330"), SndClick = "rbxassetid://80526571264304"},
 		-- Crimson
@@ -2414,7 +2413,6 @@ UI.CreateDropdown(MainPage, "UI Theme", {
 	"RGB/Default",
 	"ALONE",
 	"Oxide",
-	"Patchma Hub",
 	"Genesis V4",
 	"Crimson",
 	"r/masterhacker",
@@ -2710,9 +2708,7 @@ SaveData.ShiftlockDisabled = not not SaveData.ShiftlockDisabled
 SaveData.NoLoadAnimationHook = not not SaveData.NoLoadAnimationHook
 SaveData.NoPhysicsRepRootPart = not not SaveData.NoPhysicsRepRootPart
 SaveData.NetlessVelocity = SaveData.NetlessVelocity or 25.01
-SaveData.UsePatchmaLikeNetless = not not SaveData.UsePatchmaLikeNetless
 SaveData.UseAngularVelocity = not not SaveData.UseAngularVelocity
-SaveData.PatchmaVoidFloat = not not SaveData.PatchmaVoidFloat
 SaveData.PlaceholderTransparency = SaveData.PlaceholderTransparency or 0.5
 
 -- empyrean-like thing
@@ -2734,7 +2730,6 @@ local Reanimate = {
 	UsePhysicsRepRootPart = not SaveData.NoPhysicsRepRootPart,
 	PhysicsRepRootPartFling = 1 / 10,
 	NetlessVelocity = SaveData.NetlessVelocity,
-	UsePatchmaLikeNetless = SaveData.UsePatchmaLikeNetless,
 	UseAngularVelocity = SaveData.UseAngularVelocity,
 	InfiniteJump = not SaveData.NoInfiniteJump,
 	Noclip = SaveData.NoclipEnabled,
@@ -2744,7 +2739,6 @@ local Reanimate = {
 	SeatSit = not SaveData.NoSeatSitEnabled,
 	ToolGrab = SaveData.ToolGrabEnabled,
 	ScaleGravity = SaveData.ScaleGravityEnabled,
-	PatchmaVoidFloat = SaveData.PatchmaVoidFloat,
 	AntiExplosions = true,
 	CharacterScale = SaveData.CharacterScale,
 	PlaceholderTransparency = SaveData.PlaceholderTransparency,
@@ -3476,10 +3470,6 @@ Reanimate.CreateCharacter = function(InitCFrame)
 		else
 			IsFloat = true
 		end
-		if Reanimate.PatchmaVoidFloat and IsFloat then
-			pos = Vector3.new(pos.X, SafeY, pos.Z)
-			RCRootPart.Velocity *= Vector3.new(1, 0, 1)
-		end
 		if Reanimate:ShouldRotationType() then
 			local ax, ay, az = Reanimate.Camera.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
 			local bx, by, bz = RCRootPart.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
@@ -4205,7 +4195,6 @@ SaveData.Reanimator.HatsCollide = not not SaveData.Reanimator.HatsCollide
 SaveData.Reanimator.HatsCollideMethod = SaveData.Reanimator.HatsCollideMethod or 6
 SaveData.Reanimator.IWantAllHats = not not SaveData.Reanimator.IWantAllHats
 SaveData.Reanimator.IWantHatCollide = SaveData.Reanimator.IWantHatCollide or 3
-SaveData.Reanimator.HatsPatchmahub = not not SaveData.Reanimator.HatsPatchmahub
 SaveData.Reanimator.HatsFling = not not SaveData.Reanimator.HatsFling
 SaveData.Reanimator.HatsSpin = not not SaveData.Reanimator.HatsSpin
 SaveData.Reanimator.HatsFlingMethod = SaveData.Reanimator.HatsFlingMethod or 1
@@ -4222,7 +4211,7 @@ HatReanimator.HatCollideMethod = SaveData.Reanimator.HatsCollideMethod
 -- 7 - idk honestly but this is just modified heavily for now
 HatReanimator.IWantAllHats = SaveData.Reanimator.IWantAllHats
 HatReanimator.IWantHatCollide = SaveData.Reanimator.IWantHatCollide
-HatReanimator.Permadeath = false--not SaveData.Reanimator.HatsPatchmahub
+HatReanimator.Permadeath = false
 HatReanimator.HatFling = SaveData.Reanimator.HatsFling
 HatReanimator.HatSpin = SaveData.Reanimator.HatsSpin
 HatReanimator.FlingMethod = SaveData.Reanimator.HatsFlingMethod
@@ -4305,7 +4294,6 @@ function HatReanimator.Config(parent)
 	UI.CreateText(parent, "permadeath is patched, enable this switch if you want to", 10, Enum.TextXAlignment.Center)
 	UI.CreateSwitch(parent, "Permadeath", HatReanimator.Permadeath).Changed:Connect(function(val)
 		HatReanimator.Permadeath = val
-		SaveData.Reanimator.HatsPatchmahub = not val
 	end)
 	UI.CreateSwitch(parent, "Hat Collide", HatReanimator.HatCollide).Changed:Connect(function(val)
 		HatReanimator.HatCollide = val
@@ -5193,22 +5181,12 @@ function HatReanimator.Start()
 					if fling then
 						handle.AssemblyLinearVelocity = Vector3.new(16384, 16384, 16384)
 					else
-						-- so Patchma's netless doesn't need the velocity of the hat, just where its attached to.
-						if Reanimate.UsePatchmaLikeNetless then
-							vel = tvel
-							vel *= Vector3.new(1, 0, 1)
-							if vel.Magnitude > netless then
-								vel = vel.Unit * netless
-							end
-							handle.AssemblyLinearVelocity = Vector3.new(vel.X * 10, netless, vel.Z * 10)
-						else
-							vel += tvel
-							vel *= Vector3.new(1, 0, 1)
-							if vel.Magnitude > netless then
-								vel = vel.Unit * netless
-							end
-							handle.AssemblyLinearVelocity = Vector3.new(vel.X, math.max(vel.Y, netless), vel.Z)
+						vel += tvel
+						vel *= Vector3.new(1, 0, 1)
+						if vel.Magnitude > netless then
+							vel = vel.Unit * netless
 						end
+						handle.AssemblyLinearVelocity = Vector3.new(vel.X, math.max(vel.Y, netless), vel.Z)
 					end
 				end
 			else
@@ -6570,10 +6548,6 @@ do
 		Reanimate.ScaleGravity = val
 		SaveData.ScaleGravityEnabled = val
 	end)
-	UI.CreateSwitch(MainPage, "Void Float", Reanimate.PatchmaVoidFloat).Changed:Connect(function(val)
-		Reanimate.PatchmaVoidFloat = val
-		SaveData.PatchmaVoidFloat = val
-	end)
 	UI.CreateButton(MainPage, "Force Sit (2x to remove gyro)", 20).Activated:Connect(function()
 		local ch = Reanimate.Character or Player.Character
 		if ch then
@@ -6762,10 +6736,6 @@ do
 		SaveData.NoPhysicsRepRootPart = not val
 	end)
 	UI.CreateText(MainPage, "internals for physics based reanimation\n(like hat reanimator)", 10, Enum.TextXAlignment.Center)
-	UI.CreateSwitch(MainPage, "Patchma-like Netless", Reanimate.UsePatchmaLikeNetless).Changed:Connect(function(val)
-		Reanimate.UsePatchmaLikeNetless = val
-		SaveData.UsePatchmaLikeNetless = val
-	end)
 	local NetVelSlider = UI.CreateSlider(MainPage, "Netless Velocity", Reanimate.NetlessVelocity, 25.01, 30, 0.1)
 	NetVelSlider.Changed:Connect(function(val)
 		val = math.clamp(val, 25.01, 30)
