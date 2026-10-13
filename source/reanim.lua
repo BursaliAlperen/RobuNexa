@@ -915,8 +915,6 @@ local function SetUITheme(index)
 		{Fore = Color3.new(1, 1, 1), SndClick = "rbxassetid://81715128969224"},
 		-- Oxide
 		{Fore = Color3.fromRGB(49, 203, 233), Back = Color3.fromRGB(38, 38, 38), Text = Color3.fromRGB(49, 203, 233)},
-		-- Patchma-like
-		{Fore = Color3.new(0.0941177, 0.317647, 0.878431), Text = Color3.new(0.560784, 0.560784, 0.560784)},
 		-- Genesis V4 - Neptunian V
 		{Fore = Color3.fromHex("7733FF"), Back = Color3.fromHex("161330"), SndClick = "rbxassetid://80526571264304"},
 		-- Crimson
@@ -2414,7 +2412,6 @@ UI.CreateDropdown(MainPage, "UI Theme", {
 	"RGB/Default",
 	"ALONE",
 	"Oxide",
-	"Patchma Hub",
 	"Genesis V4",
 	"Crimson",
 	"r/masterhacker",
@@ -2710,9 +2707,7 @@ SaveData.ShiftlockDisabled = not not SaveData.ShiftlockDisabled
 SaveData.NoLoadAnimationHook = not not SaveData.NoLoadAnimationHook
 SaveData.NoPhysicsRepRootPart = not not SaveData.NoPhysicsRepRootPart
 SaveData.NetlessVelocity = SaveData.NetlessVelocity or 25.01
-SaveData.UsePatchmaLikeNetless = not not SaveData.UsePatchmaLikeNetless
 SaveData.UseAngularVelocity = not not SaveData.UseAngularVelocity
-SaveData.PatchmaVoidFloat = not not SaveData.PatchmaVoidFloat
 SaveData.PlaceholderTransparency = SaveData.PlaceholderTransparency or 0.5
 
 -- empyrean-like thing
@@ -2734,7 +2729,6 @@ local Reanimate = {
 	UsePhysicsRepRootPart = not SaveData.NoPhysicsRepRootPart,
 	PhysicsRepRootPartFling = 1 / 10,
 	NetlessVelocity = SaveData.NetlessVelocity,
-	UsePatchmaLikeNetless = SaveData.UsePatchmaLikeNetless,
 	UseAngularVelocity = SaveData.UseAngularVelocity,
 	InfiniteJump = not SaveData.NoInfiniteJump,
 	Noclip = SaveData.NoclipEnabled,
@@ -2744,7 +2738,6 @@ local Reanimate = {
 	SeatSit = not SaveData.NoSeatSitEnabled,
 	ToolGrab = SaveData.ToolGrabEnabled,
 	ScaleGravity = SaveData.ScaleGravityEnabled,
-	PatchmaVoidFloat = SaveData.PatchmaVoidFloat,
 	AntiExplosions = true,
 	CharacterScale = SaveData.CharacterScale,
 	PlaceholderTransparency = SaveData.PlaceholderTransparency,
@@ -3476,10 +3469,6 @@ Reanimate.CreateCharacter = function(InitCFrame)
 		else
 			IsFloat = true
 		end
-		if Reanimate.PatchmaVoidFloat and IsFloat then
-			pos = Vector3.new(pos.X, SafeY, pos.Z)
-			RCRootPart.Velocity *= Vector3.new(1, 0, 1)
-		end
 		if Reanimate:ShouldRotationType() then
 			local ax, ay, az = Reanimate.Camera.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
 			local bx, by, bz = RCRootPart.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
@@ -4205,7 +4194,6 @@ SaveData.Reanimator.HatsCollide = not not SaveData.Reanimator.HatsCollide
 SaveData.Reanimator.HatsCollideMethod = SaveData.Reanimator.HatsCollideMethod or 6
 SaveData.Reanimator.IWantAllHats = not not SaveData.Reanimator.IWantAllHats
 SaveData.Reanimator.IWantHatCollide = SaveData.Reanimator.IWantHatCollide or 3
-SaveData.Reanimator.HatsPatchmahub = not not SaveData.Reanimator.HatsPatchmahub
 SaveData.Reanimator.HatsFling = not not SaveData.Reanimator.HatsFling
 SaveData.Reanimator.HatsSpin = not not SaveData.Reanimator.HatsSpin
 SaveData.Reanimator.HatsFlingMethod = SaveData.Reanimator.HatsFlingMethod or 1
@@ -4222,9 +4210,8 @@ HatReanimator.HatCollideMethod = SaveData.Reanimator.HatsCollideMethod
 -- 7 - idk honestly but this is just modified heavily for now
 HatReanimator.IWantAllHats = SaveData.Reanimator.IWantAllHats
 HatReanimator.IWantHatCollide = SaveData.Reanimator.IWantHatCollide
--- RobuNexa Patchma-style permadeath default.
--- This is a client-side reanimation option; it cannot guarantee server-side no-respawn.
-HatReanimator.Permadeath = not not (not SaveData.Reanimator.HatsPatchmahub)
+
+HatReanimator.Permadeath = false
 HatReanimator.HatFling = SaveData.Reanimator.HatsFling
 HatReanimator.HatSpin = SaveData.Reanimator.HatsSpin
 HatReanimator.FlingMethod = SaveData.Reanimator.HatsFlingMethod
@@ -4239,8 +4226,6 @@ HatReanimator.ToolAnimMethod = SaveData.Reanimator.HatsToolAnim
 HatReanimator.UseNaNFling = true
 HatReanimator.HasPermadeath = false
 HatReanimator.HasHatCollide = false
--- Patchma V46 permadeath preload state (same CDSB + RespawnTime deadline pattern).
-local PatchmaPermadeathLoadedTime = nil
 HatReanimator.RebuildRequired = true
 HatReanimator.HatMapSummary = "(no hat map yet, please * Reanimate * to build)"
 HatReanimator.HatCFrameOverride = {}
@@ -4306,11 +4291,6 @@ function HatReanimator.Fling(target, duration)
 end
 HatReanimator.DontFireCharAddOnThisChar = nil
 function HatReanimator.Config(parent)
-	UI.CreateText(parent, "Patchma-style permadeath preload; executor support required", 10, Enum.TextXAlignment.Center)
-	UI.CreateSwitch(parent, "Permadeath", HatReanimator.Permadeath).Changed:Connect(function(val)
-		HatReanimator.Permadeath = val
-		SaveData.Reanimator.HatsPatchmahub = not val
-	end)
 	UI.CreateSwitch(parent, "Hat Collide", HatReanimator.HatCollide).Changed:Connect(function(val)
 		HatReanimator.HatCollide = val
 		SaveData.Reanimator.HatsCollide = val
@@ -5197,22 +5177,12 @@ function HatReanimator.Start()
 					if fling then
 						handle.AssemblyLinearVelocity = Vector3.new(16384, 16384, 16384)
 					else
-						-- so Patchma's netless doesn't need the velocity of the hat, just where its attached to.
-						if Reanimate.UsePatchmaLikeNetless then
-							vel = tvel
-							vel *= Vector3.new(1, 0, 1)
-							if vel.Magnitude > netless then
-								vel = vel.Unit * netless
-							end
-							handle.AssemblyLinearVelocity = Vector3.new(vel.X * 10, netless, vel.Z * 10)
-						else
-							vel += tvel
-							vel *= Vector3.new(1, 0, 1)
-							if vel.Magnitude > netless then
-								vel = vel.Unit * netless
-							end
-							handle.AssemblyLinearVelocity = Vector3.new(vel.X, math.max(vel.Y, netless), vel.Z)
+						vel += tvel
+						vel *= Vector3.new(1, 0, 1)
+						if vel.Magnitude > netless then
+							vel = vel.Unit * netless
 						end
+						handle.AssemblyLinearVelocity = Vector3.new(vel.X, math.max(vel.Y, netless), vel.Z)
 					end
 				end
 			else
@@ -5687,13 +5657,9 @@ function HatReanimator.Start()
 		HatReanimator.Status.HatCollide = "Respawn detected."
 		HatReanimator.Status.RespawnFling = "Respawn detected."
 		local hatcols = HatReanimator.HatCollide
-		-- Patchma-style permadeath integration:
-		-- use the existing CDSB preload + death-state wait flow when the option is enabled.
-		-- This must be selected per character so the UI toggle actually affects runtime.
-		local perma = HatReanimator.Permadeath == true and type(replicatesignal) == "function"
-		HatReanimator.HasPermadeath, HatReanimator.HasHatCollide = perma, hatcols
+		local perma = false
+		HatReanimator.HasPermadeath, HatReanimator.HasHatCollide = false, hatcols
 		local hatcolmeth = HatReanimator.HatCollideMethod
-		if not replicatesignal then perma = false end
 		if not hatcols then hatcolmeth = -1 end
 		if hatcols and RejectCharacterDeletionsDisabled then
 			hatcolmeth = -2
@@ -5761,19 +5727,6 @@ function HatReanimator.Start()
 		end
 		local cdsbeffect = os.clock()
 		local cdsbtime = os.clock()
-		if perma then
-			-- Patchma V46 preload: signal the backend before the intentional death,
-			-- then keep the original character alive until the respawn timer window.
-			local ok = pcall(replicatesignal, Player.ConnectDiedSignalBackend)
-			if ok then
-				PatchmaPermadeathLoadedTime = os.clock() + Players.RespawnTime + 0.07
-				HatReanimator.Status.Permadeath = "Patchma CDSB preload."
-			else
-				PatchmaPermadeathLoadedTime = nil
-				HatReanimator.Status.Permadeath = "CDSB preload failed."
-			end
-			cdsbeffect += Players.RespawnTime
-		end
 		HatReanimator.Status.RespawnFling = "Flinging targets..."
 		if HatReanimator.UseNaNFling and HatReanimator.FlingTargets[1] then
 			task.wait(0.2)
@@ -5854,45 +5807,7 @@ function HatReanimator.Start()
 				tool.Parent = backpack
 			end
 		end
-		HatReanimator.Status.ReanimState = "Loading Permadeath."
-		if perma then
-			if RejectCharacterDeletionsDisabled then
-				HatReanimator.Status.Permadeath = "Doing RCDless Permadeath."
-				cdsbeffect = os.clock() + Players.RespawnTime + 0.05
-				local oldperma = Util.Instance("Model", workspace)
-				Instance.new("Part", oldperma).Name = "Torso"
-				Instance.new("Part", oldperma).Name = "Head"
-				Instance.new("Humanoid", oldperma).Name = "Humanoid"
-				oldperma.PrimaryPart = oldperma.Torso
-				oldperma:PivotTo(CFrame.new(0, 99999, 0))
-				HatReanimator.DontFireCharAddOnThisChar = oldperma
-				Player.Character = oldperma
-				task.wait(3)
-				if not character:IsDescendantOf(workspace) then
-					lgloop:Disconnect()
-					return
-				end
-				HatReanimator.DontFireCharAddOnThisChar = character
-				Player.Character = character
-				while Humanoid:GetState() ~= Enum.HumanoidStateType.Dead and character:IsDescendantOf(workspace) do
-					if os.clock() > cdsbeffect then break end
-					task.wait()
-				end
-				if not character:IsDescendantOf(workspace) then
-					lgloop:Disconnect()
-					return
-				end
-			else
-				HatReanimator.Status.Permadeath = "Waiting for CDSB hack."
-				while Humanoid:GetState() ~= Enum.HumanoidStateType.Dead and character:IsDescendantOf(workspace) do
-					if os.clock() > cdsbeffect then break end
-					task.wait()
-				end
-			end
-			HatReanimator.Status.Permadeath = string.format("Permadeathed after %.3fs.", os.clock() - cdsbtime)
-		else
-			HatReanimator.Status.Permadeath = "Disabled, nothing to do."
-		end
+		HatReanimator.Status.ReanimState = "Preparing reanimation."
 		if not character:IsDescendantOf(workspace) then
 			lgloop:Disconnect()
 			return
@@ -5936,13 +5851,7 @@ function HatReanimator.Start()
 			end
 			return
 		end
-		-- Match Patchma's pdloadedtime gate before triggering the intentional death.
-		if perma and PatchmaPermadeathLoadedTime then
-			local remaining = PatchmaPermadeathLoadedTime - os.clock()
-			if remaining > 0 then
-				task.wait(remaining)
-			end
-			PatchmaPermadeathLoadedTime = nil
+			PermadeathLoadedTime = nil
 		end
 		replicatesignal(Humanoid.ServerBreakJoints)
 		Humanoid.EvaluateStateMachine = true
@@ -6590,10 +6499,6 @@ do
 		Reanimate.ScaleGravity = val
 		SaveData.ScaleGravityEnabled = val
 	end)
-	UI.CreateSwitch(MainPage, "Void Float", Reanimate.PatchmaVoidFloat).Changed:Connect(function(val)
-		Reanimate.PatchmaVoidFloat = val
-		SaveData.PatchmaVoidFloat = val
-	end)
 	UI.CreateButton(MainPage, "Force Sit (2x to remove gyro)", 20).Activated:Connect(function()
 		local ch = Reanimate.Character or Player.Character
 		if ch then
@@ -6782,10 +6687,6 @@ do
 		SaveData.NoPhysicsRepRootPart = not val
 	end)
 	UI.CreateText(MainPage, "internals for physics based reanimation\n(like hat reanimator)", 10, Enum.TextXAlignment.Center)
-	UI.CreateSwitch(MainPage, "Patchma-like Netless", Reanimate.UsePatchmaLikeNetless).Changed:Connect(function(val)
-		Reanimate.UsePatchmaLikeNetless = val
-		SaveData.UsePatchmaLikeNetless = val
-	end)
 	local NetVelSlider = UI.CreateSlider(MainPage, "Netless Velocity", Reanimate.NetlessVelocity, 25.01, 30, 0.1)
 	NetVelSlider.Changed:Connect(function(val)
 		val = math.clamp(val, 25.01, 30)
