@@ -7150,45 +7150,63 @@ end
 local function AssetDownload(filename)
 	local source = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. GetRepoAssetPath(filename)
 	local split = string.split(filename, "@")
-	if #split > 1 then
+	local hasCustomSource = #split > 1
+	if hasCustomSource then
 		filename = table.remove(split, 1)
 		source = table.concat(split, "@")
 	end
 	local path = AssetGetPathFromFilename(filename)
-	if isfile(path) then return true end
+	if isfile(path) then
+		local valid = false
+		pcall(function()
+			local body = readfile(path)
+			valid = type(body) == "string" and #body > 0
+		end)
+		if valid then return true end
+		pcall(function() delfile(path) end)
+	end
 	if _Assetdownloading[filename] then return false end
 	_Assetdownloading[filename] = true
 	task.spawn(function()
 		Util.Notify("Downloading " .. filename .. "...")
-		local s, resp = pcall(request, {
-			Method = "GET",
-			Url = source,
-		})
-		local status = s and resp and tonumber(resp.StatusCode or resp.Status or resp.status_code) or 0
-		local body = s and resp and resp.Body
-		if status >= 200 and status < 300 and type(body) == "string" and #body > 0 then
-			-- GitHub raw files must be stored byte-for-byte: .anim files are binary data.
-			-- Reject HTML/API error bodies instead of caching them as playable assets.
-			local preview = body:sub(1, 256):lower()
-			local looksLikeErrorPage = preview:find("<!doctype html", 1, true) or preview:find("<html", 1, true)
-			if not looksLikeErrorPage then
-				local writeOk = pcall(writefile, path, body)
-				local saved = false
-				pcall(function()
-					if writeOk and isfile(path) then
-						local savedBody = readfile(path)
-						saved = type(savedBody) == "string" and #savedBody == #body
-					end
-				end)
-				if not saved then
-					pcall(function() if isfile(path) then delfile(path) end end)
-					Util.Notify("Failed to verify downloaded asset " .. filename .. "!")
+		local urls = {source}
+		-- Older projects placed audio in content/audio; the current convention is
+		-- content/sounds. Try both paths without changing the local cache filename.
+		if not hasCustomSource and string.lower(filename):sub(-4) == ".mp3" then
+			local audioPath = string.gsub(GetRepoAssetPath(filename), "^sounds/", "audio/")
+			local audioUrl = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. audioPath
+			if audioUrl ~= source then table.insert(urls, audioUrl) end
+		end
+		local body, lastStatus
+		for _, url in ipairs(urls) do
+			local s, resp = pcall(request, {Method = "GET", Url = url})
+			local status = s and resp and tonumber(resp.StatusCode or resp.Status or resp.status_code) or 0
+			local responseBody = s and resp and resp.Body
+			local preview = type(responseBody) == "string" and responseBody:sub(1, 256):lower() or ""
+			local errorPage = preview:find("<!doctype html", 1, true) or preview:find("<html", 1, true)
+			if status >= 200 and status < 300 and type(responseBody) == "string"
+				and #responseBody > 0 and not errorPage then
+				body = responseBody
+				break
+			end
+			lastStatus = status
+		end
+		if body then
+			-- Preserve exact bytes: .anim files are binary KeyframeSequence data.
+			local writeOk = pcall(writefile, path, body)
+			local saved = false
+			pcall(function()
+				if writeOk and isfile(path) then
+					local savedBody = readfile(path)
+					saved = type(savedBody) == "string" and #savedBody == #body
 				end
-			else
-				Util.Notify("GitHub returned an HTML page for " .. filename .. "; check the content path.")
+			end)
+			if not saved then
+				pcall(function() if isfile(path) then delfile(path) end end)
+				Util.Notify("Failed to verify downloaded asset " .. filename .. "!")
 			end
 		else
-			Util.Notify("Download failed for " .. filename .. " (HTTP " .. tostring(status) .. ").")
+			Util.Notify("Download failed for " .. filename .. " (last HTTP status " .. tostring(lastStatus or 0) .. ").")
 		end
 		_Assetdownloading[filename] = nil
 	end)
