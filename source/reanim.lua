@@ -733,16 +733,26 @@ MusicPlayer.PlayMusic = function(i)
 		return
 	end
 	local soundid, soundname = hi[1], hi[2]
-	UISound.Music.SoundId = Util.GetCDNAsset(soundid)
-	UISound.Music.Name = soundname
+	local resolvedSoundId = Util.GetCDNAsset(soundid)
 	UISound.Music:Stop()
-	task.wait()
-	UISound.Music.TimePosition = 0
-	task.wait()
-	UISound.Music:Play()
+	UISound.Music.SoundId = resolvedSoundId
+	UISound.Music.Name = soundname
+	if type(resolvedSoundId) ~= "string" or resolvedSoundId == "" then
+		-- Legacy uiassets are optional and are not present in every repo revision.
+		-- Do not recurse forever through a list whose files are all missing.
+		if not MusicPlayer.MissingAssetsWarned then
+			MusicPlayer.MissingAssetsWarned = true
+			warn("[NAM] Music file unavailable: " .. tostring(soundid) .. ". Check the content URL and local asset permissions.")
+		end
+		MusicPlayer.Switching = false
+		return
+	end
+	pcall(function()
+		UISound.Music.TimePosition = 0
+		UISound.Music:Play()
+	end)
 	task.wait()
 	MusicPlayer.Switching = false
-	if #UISound.Music.SoundId == 0 then MusicPlayer.PlayMusic() end
 end
 UISound.Music.Ended:Connect(function()
 	MusicPlayer.PlayMusic()
@@ -7154,19 +7164,32 @@ local function AssetDownload(filename)
 			Method = "GET",
 			Url = source,
 		})
-		if s and resp and resp.StatusCode == 200 and type(resp.Body) == "string" and #resp.Body > 0 then
-			-- Preserve the response bytes exactly: .anim files are binary KeyframeSequence data.
-			local wrote = pcall(writefile, path, resp.Body)
-			local saved = false
-			pcall(function() saved = wrote and isfile(path) end)
-			if not saved then
-				pcall(function() if isfile(path) then delfile(path) end end)
-				Util.Notify("Failed to save downloaded asset " .. filename .. "!")
+		local status = s and resp and tonumber(resp.StatusCode or resp.Status or resp.status_code) or 0
+		local body = s and resp and resp.Body
+		if status >= 200 and status < 300 and type(body) == "string" and #body > 0 then
+			-- GitHub raw files must be stored byte-for-byte: .anim files are binary data.
+			-- Reject HTML/API error bodies instead of caching them as playable assets.
+			local preview = body:sub(1, 256):lower()
+			local looksLikeErrorPage = preview:find("<!doctype html", 1, true) or preview:find("<html", 1, true)
+			if not looksLikeErrorPage then
+				local writeOk = pcall(writefile, path, body)
+				local saved = false
+				pcall(function()
+					if writeOk and isfile(path) then
+						local savedBody = readfile(path)
+						saved = type(savedBody) == "string" and #savedBody == #body
+					end
+				end)
+				if not saved then
+					pcall(function() if isfile(path) then delfile(path) end end)
+					Util.Notify("Failed to verify downloaded asset " .. filename .. "!")
+				end
+			else
+				Util.Notify("GitHub returned an HTML page for " .. filename .. "; check the content path.")
 			end
 		else
-			Util.Notify("Failed to download " .. filename .. "!")
+			Util.Notify("Download failed for " .. filename .. " (HTTP " .. tostring(status) .. ").")
 		end
-		task.wait(10)
 		_Assetdownloading[filename] = nil
 	end)
 	return false
@@ -7182,9 +7205,34 @@ local function AssetGetContentId(filename)
 end
 local function AssetEnsure(list)
 	local ok = true
-	for _,filename in list do
-		if not AssetDownload(filename) then
+	for _, filename in ipairs(list) do
+		local path = AssetGetPathFromFilename(filename)
+		local valid = false
+		pcall(function()
+			if isfile(path) then
+				local body = readfile(path)
+				valid = type(body) == "string" and #body > 0
+				if not valid then delfile(path) end
+			end
+		end)
+		if not valid then
+			AssetDownload(filename)
+			-- AssetDownload starts HTTP asynchronously; wait before trying to load/play.
+			local deadline = os.clock() + 15
+			while os.clock() < deadline do
+				pcall(function()
+					if isfile(path) then
+						local body = readfile(path)
+						valid = type(body) == "string" and #body > 0
+					end
+				end)
+				if valid or not _Assetdownloading[filename] then break end
+				task.wait(0.1)
+			end
+		end
+		if not valid then
 			ok = false
+			warn("[NAM] Asset unavailable after download wait: " .. tostring(filename))
 		end
 	end
 	return ok
