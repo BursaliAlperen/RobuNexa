@@ -77,25 +77,28 @@ AddModule(function()
 		-- Parent to SoundService so locally-triggered moveset audio is not lost
 		-- when the reanimated rig is hidden, moved, or outside the 3D rolloff range.
 		sound.Parent = SoundService
-		local preloadOk, preloadError = pcall(function()
-			ContentProvider:PreloadAsync({sound})
-		end)
-		if not preloadOk then
-			warn("[Gojo] Sound preload failed for " .. id .. ": " .. tostring(preloadError))
-		end
+		-- Start immediately; preload/diagnostics must not block ability input.
 		local playOk, playError = pcall(function() sound:Play() end)
 		if not playOk then
 			warn("[Gojo] Sound playback failed for " .. id .. ": " .. tostring(playError))
 			sound:Destroy()
 			return nil
 		end
-		if not sound.IsLoaded then
-			task.delay(5, function()
-				if sound.Parent and not sound.IsLoaded then
-					warn("[Gojo] Sound did not load; check asset permissions: " .. id)
-				end
+		task.spawn(function()
+			local preloadOk, preloadError = pcall(function()
+				ContentProvider:PreloadAsync({sound})
 			end)
-		end
+			if not preloadOk then
+				warn("[Gojo] Sound preload failed for " .. id .. ": " .. tostring(preloadError))
+			end
+			if sound.Parent and not sound.IsLoaded then
+				task.delay(5, function()
+					if sound.Parent and not sound.IsLoaded then
+						warn("[Gojo] Sound did not load; check asset permissions: " .. id)
+					end
+				end)
+			end
+		end)
 		if not sound.Looped then
 			game:GetService("Debris"):AddItem(sound, 15)
 		end
