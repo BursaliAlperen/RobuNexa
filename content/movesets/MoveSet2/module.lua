@@ -2978,6 +2978,7 @@ AddModule(function()
 		sw = CFrame.identity,
 	}
 	local sword = {}
+	local swordAccessoryOverride = nil
 	local attacking = false
 	local timingsine = 0
 	local animationOverride = nil
@@ -3265,56 +3266,86 @@ AddModule(function()
 		if not hum then return end
 		if not root then return end
 		if not torso then return end
+		-- Remove stale overrides if this moveset is initialized again.
+		for i = #HatReanimator.HatCFrameOverride, 1, -1 do
+			local item = HatReanimator.HatCFrameOverride[i]
+			if item == sword or item == swordAccessoryOverride then
+				table.remove(HatReanimator.HatCFrameOverride, i)
+			end
+		end
+		swordAccessoryOverride = nil
 		sword = {
 			Group = "Sword",
 			Limb = "Right Arm",
 			Offset = CFrame.identity
 		}
 		table.insert(HatReanimator.HatCFrameOverride, sword)
-		-- Use the first accessory actually worn on the back, regardless of its display name.
-		-- This avoids requiring the accessory to be called "Sword", "Blade", or "Katana".
-		local function IsBackAccessory(accessory)
+
+		-- The intended sword is the "Linked Sword (Waist)" catalog accessory.
+		-- Catalog IDs are not exposed on live Accessory instances, so match its
+		-- worn accessory name first; if absent, accept a waist/back accessory.
+		local function HasSwordAttachment(accessory)
 			local handle = accessory:FindFirstChild("Handle")
 			if not handle then return false end
 			for _, descendant in handle:GetDescendants() do
 				if descendant:IsA("Attachment") then
 					local name = descendant.Name:lower()
-					if name == "bodybackattachment" or name == "backattachment"
-						or name == "waistbackattachment" or name == "capeattachment" then
+					if name == "waistcenterattachment" or name == "waistfrontattachment"
+						or name == "waistbackattachment" or name == "bodybackattachment"
+						or name == "backattachment" or name == "capeattachment" then
 						return true
 					end
 				end
 			end
 			local weld = handle:FindFirstChild("AccessoryWeld")
 			if weld and weld:IsA("Weld") and weld.Part1 == torso then
-				-- R6 back accessories are normally welded behind the torso (local Z offset).
 				return math.abs(weld.C1.Position.Z) >= 0.25
 			end
 			return false
 		end
-		local backAccessoryFound = false
+		local accessories = {}
 		for _, accessory in figure:GetChildren() do
-			if not backAccessoryFound and accessory:IsA("Accessory") and IsBackAccessory(accessory) then
-				local handle = accessory:FindFirstChild("Handle")
-				local mesh = handle and handle:FindFirstChildWhichIsA("SpecialMesh")
-				local override = {
-					Name = accessory.Name,
-					Limb = "Right Arm",
-					C0 = CFrame.new(0, -0.65, 0) * CFrame.Angles(math.rad(90), 0, math.rad(90)),
-					C1 = CFrame.identity,
-				}
-				if handle then
-					if mesh then override.MeshId = mesh.MeshId end
-					if handle:IsA("MeshPart") then override.MeshId = handle.MeshId end
-					if mesh then
-						override.TextureId = mesh.TextureId
-					elseif handle:IsA("MeshPart") then
-						override.TextureId = handle.TextureID
-					end
-				end
-				table.insert(HatReanimator.HatCFrameOverride, override)
-				backAccessoryFound = true
+			if accessory:IsA("Accessory") and accessory:FindFirstChild("Handle") then
+				table.insert(accessories, accessory)
 			end
+		end
+		local selectedAccessory = nil
+		for _, accessory in accessories do
+			local name = accessory.Name:lower()
+			if name == "linked sword (waist)" or name == "linked sword" then
+				selectedAccessory = accessory
+				break
+			end
+		end
+		if not selectedAccessory then
+			for _, accessory in accessories do
+				if HasSwordAttachment(accessory) then
+					selectedAccessory = accessory
+					break
+				end
+			end
+		end
+		if selectedAccessory then
+			local handle = selectedAccessory:FindFirstChild("Handle")
+			local mesh = handle and handle:FindFirstChildWhichIsA("SpecialMesh")
+			swordAccessoryOverride = {
+				Name = selectedAccessory.Name,
+				Limb = "Right Arm",
+				C0 = CFrame.new(0, -0.65, 0) * CFrame.Angles(math.rad(90), 0, math.rad(90)),
+				C1 = CFrame.identity,
+			}
+			if handle then
+				if mesh then swordAccessoryOverride.MeshId = mesh.MeshId end
+				if handle:IsA("MeshPart") then swordAccessoryOverride.MeshId = handle.MeshId end
+				if mesh then
+					swordAccessoryOverride.TextureId = mesh.TextureId
+				elseif handle:IsA("MeshPart") then
+					swordAccessoryOverride.TextureId = handle.TextureID
+				end
+			end
+			table.insert(HatReanimator.HatCFrameOverride, swordAccessoryOverride)
+		else
+			notify("Wear Linked Sword (Waist) for the intended sword look.")
 		end
 		ContextActions:BindAction("Uhhhhhh_LSSword", function(_, state, _)
 			if state == Enum.UserInputState.Begin then LinkedSword() end
@@ -3412,6 +3443,15 @@ AddModule(function()
 	end
 	m.Destroy = function(figure: Model?)
 		ContextActions:UnbindAction("Uhhhhhh_LSSword")
+		if HatReanimator and HatReanimator.HatCFrameOverride then
+			for i = #HatReanimator.HatCFrameOverride, 1, -1 do
+				local item = HatReanimator.HatCFrameOverride[i]
+				if item == sword or item == swordAccessoryOverride then
+					table.remove(HatReanimator.HatCFrameOverride, i)
+				end
+			end
+		end
+		sword, swordAccessoryOverride = {}, nil
 		root, torso, hum = nil, nil, nil
 	end
 	return m
