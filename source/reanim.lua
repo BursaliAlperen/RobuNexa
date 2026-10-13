@@ -7685,6 +7685,9 @@ local function GiveFunctionsToFunction(func)
 	env.ContextActions = ContextActions
 	env.AssetGetPathFromFilename = AssetGetPathFromFilename
 	env.AssetGetContentId = AssetGetContentId
+	-- Expose the verified async-download waiter to built-in movesets so optional
+	-- assets (such as awakening audio) can load lazily without blocking startup.
+	env.AssetEnsure = AssetEnsure
 	env.ProtectedChat = ProtectedChat
 	env.OnPlayerChatted = OnPlayerChatted
 	env.HiddenGui = SCREENGUI
