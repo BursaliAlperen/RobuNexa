@@ -5683,8 +5683,11 @@ function HatReanimator.Start()
 		HatReanimator.Status.HatCollide = "Respawn detected."
 		HatReanimator.Status.RespawnFling = "Respawn detected."
 		local hatcols = HatReanimator.HatCollide
-		local perma = HatReanimator.Permadeath
-		HatReanimator.HasPermadeath, HatReanimator.HasHatCollide = perma, hatcols
+		-- Stable single-pass mode: never trigger the permadeath/respawn recovery cycle.
+		-- Reanimation should keep running instead of rebuilding the character when hats
+		-- are lost or a fling/collision recovery path fires.
+		local perma = false
+		HatReanimator.HasPermadeath, HatReanimator.HasHatCollide = false, hatcols
 		local hatcolmeth = HatReanimator.HatCollideMethod
 		if not replicatesignal then perma = false end
 		if not hatcols then hatcolmeth = -1 end
