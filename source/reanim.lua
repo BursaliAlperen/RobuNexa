@@ -5767,11 +5767,11 @@ function HatReanimator.Start()
 			local ok = pcall(replicatesignal, Player.ConnectDiedSignalBackend)
 			if ok then
 				PatchmaPermadeathLoadedTime = os.clock() + Players.RespawnTime + 0.07
+				HatReanimator.Status.Permadeath = "Patchma CDSB preload."
 			else
 				PatchmaPermadeathLoadedTime = nil
 				HatReanimator.Status.Permadeath = "CDSB preload failed."
 			end
-			HatReanimator.Status.Permadeath = "Patchma CDSB preload."
 			cdsbeffect += Players.RespawnTime
 		end
 		HatReanimator.Status.RespawnFling = "Flinging targets..."
