@@ -204,24 +204,32 @@ AddModule(function()
             end
             awakeningSound = soundOrError
             local thisSound = awakeningSound
-            -- Trigger immediately instead of waiting on a preload that can stall
-            -- forever on executor-local MP3s; preload is diagnostic/background only.
-            local playOk, playError = pcall(function() thisSound:Play() end)
-            if not playOk then
-                warn("[Sukuna] Awakening sound playback failed: " .. tostring(playError))
-            end
+            -- Local executor audio can report a valid SoundId before it has decoded.
+            -- Wait briefly for decoding, then play and log a concrete failure if it did not load.
             task.spawn(function()
-                local preloadOk, preloadError = pcall(function()
-                    game:GetService("ContentProvider"):PreloadAsync({thisSound})
-                end)
-                if not preloadOk then
-                    warn("[Sukuna] Awakening preload failed for " .. tostring(selectedPath) .. ": " .. tostring(preloadError))
+                local loaded = thisSound.IsLoaded
+                local deadline = os.clock() + 8
+                while not loaded and os.clock() < deadline do
+                    if token ~= awakeningStartToken or awakeningSound ~= thisSound or not thisSound.Parent then return end
+                    pcall(function()
+                        game:GetService("ContentProvider"):PreloadAsync({thisSound})
+                    end)
+                    loaded = thisSound.IsLoaded
+                    if not loaded then task.wait(0.2) end
                 end
                 if token ~= awakeningStartToken or awakeningSound ~= thisSound or not thisSound.Parent then return end
-                if not thisSound.IsLoaded then
-                    warn("[Sukuna] Awakening sound is not loaded; verify getcustomasset/getsynasset support and local MP3 decoding: " .. tostring(selectedPath))
-                elseif thisSound.TimeLength <= 0 then
-                    warn("[Sukuna] Awakening sound has no decoded duration: " .. tostring(selectedPath))
+                if not loaded or thisSound.TimeLength <= 0 then
+                    warn("[Sukuna] Awakening audio did not decode: " .. tostring(selectedPath) .. " / " .. tostring(thisSound.SoundId))
+                    notify("Awakening sound failed to decode. Executor must support local MP3 assets.")
+                    return
+                end
+                local playOk, playError = pcall(function()
+                    thisSound.TimePosition = 0
+                    thisSound:Play()
+                end)
+                if not playOk then
+                    warn("[Sukuna] Awakening sound playback failed: " .. tostring(playError))
+                    notify("Awakening sound could not play; see executor console.")
                 end
             end)
             task.delay(30, function()
@@ -929,6 +937,80 @@ AddModule(function()
         end)
     end
 
+    -- Awakening intro: temporarily freeze movement, frame Sukuna with the camera,
+    -- play the bundled laugh animation, then restore the exact previous movement settings.
+    local function playAwakeningIntroCutscene()
+        if cutsceneActive or not activeFigure or not activeFigure.Parent or not root then return false end
+        local camera = workspace.CurrentCamera
+        if not camera then return false end
+
+        local humanoid = activeFigure:FindFirstChildOfClass("Humanoid")
+        local savedMovement
+        if humanoid then
+            savedMovement = {
+                WalkSpeed = humanoid.WalkSpeed,
+                JumpPower = humanoid.JumpPower,
+                JumpHeight = humanoid.JumpHeight,
+                AutoRotate = humanoid.AutoRotate,
+            }
+            humanoid.WalkSpeed = 0
+            humanoid.JumpPower = 0
+            humanoid.JumpHeight = 0
+            humanoid.AutoRotate = false
+        end
+
+        cutsceneActive = true
+        savedCameraType, savedCameraSubject, savedCameraCFrame = camera.CameraType, camera.CameraSubject, camera.CFrame
+        camera.CameraType = Enum.CameraType.Scriptable
+        local focus = root.Position + Vector3.new(0, 2.5, 0)
+        camera.CFrame = CFrame.lookAt(focus + root.CFrame.LookVector * -10 + Vector3.new(0, 3, 0), focus)
+        pcall(function()
+            game:GetService("TweenService"):Create(camera, TweenInfo.new(0.7, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut), {
+                CFrame = CFrame.lookAt(focus + root.CFrame.LookVector * -6 + Vector3.new(0, 2, 0), focus)
+            }):Play()
+        end)
+
+        local track = playBundledAnimation("Sukuna/SukunaLaugh.anim", "laugh", false)
+        if not track then
+            local currentCamera = workspace.CurrentCamera
+            if currentCamera then
+                currentCamera.CameraType = savedCameraType or Enum.CameraType.Custom
+                currentCamera.CameraSubject = savedCameraSubject
+                if savedCameraCFrame then currentCamera.CFrame = savedCameraCFrame end
+            end
+            cutsceneActive = false
+            if humanoid and savedMovement and humanoid.Parent then
+                humanoid.WalkSpeed = savedMovement.WalkSpeed
+                humanoid.JumpPower = savedMovement.JumpPower
+                humanoid.JumpHeight = savedMovement.JumpHeight
+                humanoid.AutoRotate = savedMovement.AutoRotate
+            end
+            return false
+        end
+
+        laughAnimationTrack = track
+        task.spawn(function()
+            local deadline = os.clock() + math.max((track.Duration or 2) + 1, 8)
+            while cutsceneActive and track.IsPlaying and os.clock() < deadline do task.wait(0.05) end
+            pcall(function() track:Stop(0.08); track:Destroy() end)
+            if laughAnimationTrack == track then laughAnimationTrack = nil end
+            local currentCamera = workspace.CurrentCamera
+            if currentCamera then
+                currentCamera.CameraType = savedCameraType or Enum.CameraType.Custom
+                currentCamera.CameraSubject = savedCameraSubject
+                if savedCameraCFrame then currentCamera.CFrame = savedCameraCFrame end
+            end
+            cutsceneActive = false
+            if humanoid and savedMovement and humanoid.Parent then
+                humanoid.WalkSpeed = savedMovement.WalkSpeed
+                humanoid.JumpPower = savedMovement.JumpPower
+                humanoid.JumpHeight = savedMovement.JumpHeight
+                humanoid.AutoRotate = savedMovement.AutoRotate
+            end
+        end)
+        return true
+    end
+
     local function getClickedWorldPosition(useScreenCenter)
         local player = game:GetService("Players").LocalPlayer
         local camera = workspace.CurrentCamera
@@ -1466,21 +1548,21 @@ AddModule(function()
         applyAccessoryPositions()
         createSkillControls()
 
-        -- One random awakening sound per start; never launch both choices.
+        -- Choose exactly one awakening sound and run the intro cutscene.
         playRandomAwakeningSound()
-
-        -- Laugh is the one-shot intro as soon as the reanimated figure is ready.
         task.spawn(function()
+            local started = false
             for attempt = 1, 10 do
                 if not activeFigure or not activeFigure.Parent then return end
-                local track = playBundledAnimation("Sukuna/SukunaLaugh.anim", "laugh", false)
-                if track then
-                    laughAnimationTrack = track
-                    return
+                if playAwakeningIntroCutscene() then
+                    started = true
+                    break
                 end
                 task.wait(0.6)
             end
-            notify("Sukuna Laugh animation failed to load; check the model's KeyframeSequence/Animation.")
+            if not started then
+                notify("Awakening intro failed to start; see animation/asset warnings.")
+            end
         end)
     end
 
@@ -1488,6 +1570,16 @@ AddModule(function()
         if not activeFigure or not activeFigure.Parent then
             if walkAnimationTrack then
                 pcall(function() walkAnimationTrack:Stop(0.1); walkAnimationTrack:Destroy() end)
+                walkAnimationTrack = nil
+            end
+            movementAnimationName = nil
+            return
+        end
+
+        -- Intro/domain cutscenes own the pose and camera; never restart movement clips.
+        if cutsceneActive then
+            if walkAnimationTrack then
+                pcall(function() walkAnimationTrack:Stop(0.05); walkAnimationTrack:Destroy() end)
                 walkAnimationTrack = nil
             end
             movementAnimationName = nil
