@@ -4304,7 +4304,7 @@ function HatReanimator.Fling(target, duration)
 end
 HatReanimator.DontFireCharAddOnThisChar = nil
 function HatReanimator.Config(parent)
-	UI.CreateText(parent, "permadeath is patched, enable this switch if you want to", 10, Enum.TextXAlignment.Center)
+	UI.CreateText(parent, "Patchma-style permadeath preload; executor support required", 10, Enum.TextXAlignment.Center)
 	UI.CreateSwitch(parent, "Permadeath", HatReanimator.Permadeath).Changed:Connect(function(val)
 		HatReanimator.Permadeath = val
 		SaveData.Reanimator.HatsPatchmahub = not val
@@ -5685,11 +5685,11 @@ function HatReanimator.Start()
 		HatReanimator.Status.HatCollide = "Respawn detected."
 		HatReanimator.Status.RespawnFling = "Respawn detected."
 		local hatcols = HatReanimator.HatCollide
-		-- Stable single-pass mode: never trigger the permadeath/respawn recovery cycle.
-		-- Reanimation should keep running instead of rebuilding the character when hats
-		-- are lost or a fling/collision recovery path fires.
-		local perma = false
-		HatReanimator.HasPermadeath, HatReanimator.HasHatCollide = false, hatcols
+		-- Patchma-style permadeath integration:
+		-- use the existing CDSB preload + death-state wait flow when the option is enabled.
+		-- This must be selected per character so the UI toggle actually affects runtime.
+		local perma = HatReanimator.Permadeath == true and type(replicatesignal) == "function"
+		HatReanimator.HasPermadeath, HatReanimator.HasHatCollide = perma, hatcols
 		local hatcolmeth = HatReanimator.HatCollideMethod
 		if not replicatesignal then perma = false end
 		if not hatcols then hatcolmeth = -1 end
