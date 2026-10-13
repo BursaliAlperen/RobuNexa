@@ -1088,8 +1088,8 @@ AddModule(function()
         targetPosition = typeof(targetPosition) == "Vector3" and targetPosition
             or (root.Position + root.CFrame.LookVector * 32)
         if name == "Dismantle" then
-            -- Dismantle always travels a short, predictable six studs forward.
-            targetPosition = root.Position + root.CFrame.LookVector * 6
+            -- Place the Dismantle target 3.3 studs behind the player.
+            targetPosition = root.Position - root.CFrame.LookVector * 3.3
         end
         abilityTargets[name] = targetPosition
 
