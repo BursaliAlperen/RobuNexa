@@ -7137,6 +7137,32 @@ local function AssetGetPathFromFilename(filename)
 	return base .. "/" .. filename
 end
 local _Assetdownloading = {}
+local function AssetBytesValid(filename, body)
+	if type(body) ~= "string" or #body < 1 then return false end
+	local preview = body:sub(1, 256):lower()
+	if preview:find("<!doctype html", 1, true) or preview:find("<html", 1, true) then return false end
+	local lower = string.lower(filename)
+	if lower:sub(-5) == ".anim" then
+		-- NAM .anim files are AnimLib binary tracks, not Roblox XML/RBXM files.
+		local ok, track = pcall(function()
+			return AnimLib.Track.frombuffer(buffer.fromstring(body))
+		end)
+		if not ok or type(track) ~= "table" or type(track.Keyframes) ~= "table" or #track.Keyframes == 0 then
+			return false
+		end
+		local hasPose = false
+		for _, keyframe in ipairs(track.Keyframes) do
+			if type(keyframe.Poses) == "table" and #keyframe.Poses > 0 then hasPose = true break end
+		end
+		return hasPose and type(track.Name) == "string" and track.Name ~= ""
+	elseif lower:sub(-4) == ".mp3" then
+		if #body < 128 then return false end
+		if body:sub(1, 3) == "ID3" then return true end
+		local first, second = string.byte(body, 1, 2)
+		return first == 255 and second ~= nil and bit32.band(second, 224) == 224
+	end
+	return true
+end
 local function GetRepoAssetPath(filename)
 	local lower = string.lower(filename)
 	if lower:sub(1, 11) == "animations/" or lower:sub(1, 7) == "sounds/" or lower:sub(1, 7) == "models/" or lower:sub(1, 7) == "images/" then
@@ -7160,11 +7186,11 @@ local function AssetDownload(filename)
 	if isfile(path) then
 		local valid = false
 		pcall(function()
-			local body = readfile(path)
-			valid = type(body) == "string" and #body > 0
+			valid = AssetBytesValid(filename, readfile(path))
 		end)
 		if valid then return true end
 		pcall(function() delfile(path) end)
+		warn("[NAM] Removed invalid cached asset: " .. tostring(filename))
 	end
 	if _Assetdownloading[filename] then return false end
 	_Assetdownloading[filename] = true
@@ -7195,10 +7221,7 @@ local function AssetDownload(filename)
 			local s, resp = pcall(request, {Method = "GET", Url = url, Headers = {["User-Agent"] = "RobuNexa-NAM"}})
 			local status = s and resp and tonumber(resp.StatusCode or resp.Status or resp.status_code or resp.status) or 0
 			local responseBody = s and resp and (resp.Body or resp.body)
-			local preview = type(responseBody) == "string" and responseBody:sub(1, 256):lower() or ""
-			local errorPage = preview:find("<!doctype html", 1, true) or preview:find("<html", 1, true)
-			if status >= 200 and status < 300 and type(responseBody) == "string"
-				and #responseBody > 0 and not errorPage then
+			if status >= 200 and status < 300 and AssetBytesValid(filename, responseBody) then
 				body = responseBody
 				break
 			end
@@ -7211,7 +7234,7 @@ local function AssetDownload(filename)
 			pcall(function()
 				if writeOk and isfile(path) then
 					local savedBody = readfile(path)
-					saved = type(savedBody) == "string" and #savedBody == #body
+					saved = #savedBody == #body and AssetBytesValid(filename, savedBody)
 				end
 			end)
 			if not saved then
@@ -7254,7 +7277,7 @@ local function AssetEnsure(list)
 		pcall(function()
 			if isfile(path) then
 				local body = readfile(path)
-				valid = type(body) == "string" and #body > 0
+				valid = AssetBytesValid(filename, body)
 				if not valid then delfile(path) end
 			end
 		end)
@@ -7266,16 +7289,23 @@ local function AssetEnsure(list)
 				pcall(function()
 					if isfile(path) then
 						local body = readfile(path)
-						valid = type(body) == "string" and #body > 0
+						valid = AssetBytesValid(filename, body)
 					end
 				end)
 				if valid or not _Assetdownloading[filename] then break end
 				task.wait(0.1)
 			end
 		end
+		if valid then
+			local contentId = AssetGetContentId(filename)
+			if contentId == "" then
+				valid = false
+				warn("[NAM] File downloaded and parsed, but local asset resolution failed: " .. tostring(filename))
+			end
+		end
 		if not valid then
 			ok = false
-			warn("[NAM] Asset unavailable after download wait: " .. tostring(filename))
+			warn("[NAM] Asset unavailable or invalid after download wait: " .. tostring(filename))
 		end
 	end
 	return ok
