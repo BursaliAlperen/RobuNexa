@@ -7170,23 +7170,30 @@ local function AssetDownload(filename)
 	task.spawn(function()
 		Util.Notify("Downloading " .. filename .. "...")
 		local repoPath = GetRepoAssetPath(filename)
-		local urls = {source}
-		-- Fallback for clients/CDN routes that return 404 from raw.githubusercontent.com.
-		local githubRawUrl = "https://github.com/BursaliAlperen/RobuNexa/raw/refs/heads/main/content/" .. repoPath
-		if githubRawUrl ~= source then table.insert(urls, githubRawUrl) end
-		local canonicalRawUrl = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. repoPath
-		if canonicalRawUrl ~= source and canonicalRawUrl ~= githubRawUrl then table.insert(urls, canonicalRawUrl) end
+		local urls = {}
+		local function addUrl(url)
+			if type(url) == "string" and url ~= "" then
+				for _, existing in ipairs(urls) do if existing == url then return end end
+				table.insert(urls, url)
+			end
+		end
+		-- Try jsDelivr first: it serves repository files without the raw GitHub redirect path.
+		addUrl("https://cdn.jsdelivr.net/gh/BursaliAlperen/RobuNexa@main/content/" .. repoPath)
+		-- Keep custom source URLs, then try the standard GitHub raw endpoints.
+		addUrl(source)
+		addUrl("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. repoPath)
+		addUrl("https://github.com/BursaliAlperen/RobuNexa/raw/refs/heads/main/content/" .. repoPath)
 		-- Older projects placed audio in content/audio; current convention is content/sounds.
 		if string.lower(filename):sub(-4) == ".mp3" then
 			local audioPath = string.gsub(repoPath, "^sounds/", "audio/")
-			local audioUrl = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. audioPath
-			if audioUrl ~= source and audioUrl ~= canonicalRawUrl then table.insert(urls, audioUrl) end
+			addUrl("https://cdn.jsdelivr.net/gh/BursaliAlperen/RobuNexa@main/content/" .. audioPath)
+			addUrl("https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. audioPath)
 		end
 		local body, lastStatus
 		for _, url in ipairs(urls) do
-			local s, resp = pcall(request, {Method = "GET", Url = url})
-			local status = s and resp and tonumber(resp.StatusCode or resp.Status or resp.status_code) or 0
-			local responseBody = s and resp and resp.Body
+			local s, resp = pcall(request, {Method = "GET", Url = url, Headers = {["User-Agent"] = "RobuNexa-NAM"}})
+			local status = s and resp and tonumber(resp.StatusCode or resp.Status or resp.status_code or resp.status) or 0
+			local responseBody = s and resp and (resp.Body or resp.body)
 			local preview = type(responseBody) == "string" and responseBody:sub(1, 256):lower() or ""
 			local errorPage = preview:find("<!doctype html", 1, true) or preview:find("<html", 1, true)
 			if status >= 200 and status < 300 and type(responseBody) == "string"
