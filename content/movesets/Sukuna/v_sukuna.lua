@@ -860,11 +860,12 @@ AddModule(function()
         if slashActive then
             local elapsed = math.max(0, t - slashBurstStartedAt)
             local count = math.max(1, slashBurstCount or 1)
-            local pulseDuration = 0.28
+            local pulseDuration = count >= 10 and 0.16 or 0.28
             local pulseIndex = math.floor(elapsed / pulseDuration)
             local pulseTime = elapsed - pulseIndex * pulseDuration
-            if pulseIndex < count and pulseTime < 0.22 then
-                local travel = math.clamp(pulseTime / 0.22, 0, 1)
+            local activePulseLength = count >= 10 and 0.13 or 0.22
+            if pulseIndex < count and pulseTime < activePulseLength then
+                local travel = math.clamp(pulseTime / activePulseLength, 0, 1)
                 local envelope = math.sin(travel * math.pi)
                 local side = count > 1 and ((pulseIndex % 3) - 1) * 1.35 or 0
                 local startPosition = root.Position + root.CFrame.LookVector * 2.5
@@ -960,7 +961,12 @@ AddModule(function()
     -- Awakening intro: temporarily freeze movement, frame Sukuna with the camera,
     -- play the bundled laugh animation, then restore the exact previous movement settings.
     local function playAwakeningIntroCutscene()
+        -- Awakening owns exactly one laugh track/cutscene at a time.
         if cutsceneActive or not activeFigure or not activeFigure.Parent or not root then return false end
+        if laughAnimationTrack then
+            pcall(function() laughAnimationTrack:Stop(0.05); laughAnimationTrack:Destroy() end)
+            laughAnimationTrack = nil
+        end
         local camera = workspace.CurrentCamera
         if not camera then return false end
 
@@ -1129,8 +1135,9 @@ AddModule(function()
             local rushDuration = 1.2
             cleaveUntil = now + (isRush and rushDuration or (isCombo and 1.8 or 1.2))
             slashBurstStartedAt = now
-            slashBurstUntil = now + (isRush and rushDuration or (isCombo and 1.5 or 0.48))
-            slashBurstCount = isRush and 12 or (isCombo and 5 or 2)
+            slashBurstUntil = now + (isRush and rushDuration or (isCombo and 1.6 or 0.48))
+            -- Combo sends a rapid chain of slash accessory passes (~6 per second).
+            slashBurstCount = isRush and 12 or (isCombo and 10 or 2)
             slashBurstTarget = targetPosition
             if isCombo or isRush then
                 comboAccessoryStartedAt = now
@@ -1147,9 +1154,20 @@ AddModule(function()
             local actionStarted = playBundledAnimation(
                 animationFile,
                 isCombo and "combo" or (isRush and "rush" or "dismantle"),
-                isRush
+                false -- Never loop/force-stop a one-shot attack; let its full clip finish.
             )
-            playBundledSound("sounds/sukuna-slash.mp3", isRush and 0.55 or 0.75)
+            if isCombo then
+                -- Re-trigger the bundled slash MP3 throughout the combo instead of only once.
+                task.spawn(function()
+                    for hit = 1, 9 do
+                        if not activeFigure or not activeFigure.Parent then break end
+                        playBundledSound("sounds/sukuna-slash.mp3", 0.75)
+                        task.wait(0.16)
+                    end
+                end)
+            else
+                playBundledSound("sounds/sukuna-slash.mp3", isRush and 0.55 or 0.75)
+            end
             if not actionStarted then
                 notify((isCombo and "Combo.anim" or "Cleave.anim") .. " failed to start; check the asset-load/AnimLib log.")
             end
@@ -1158,13 +1176,11 @@ AddModule(function()
                 -- Advance the reanimated root at ~32 studs/second in 0.1s steps.
                 task.spawn(function()
                     local rushStartedAt = os.clock()
-                    local rushDuration = math.clamp(
-                        actionAnimationTrack and actionAnimationTrack.Duration or 1.2,
-                        1.2,
-                        3.5
-                    )
+                    local rushTrack = actionAnimationTrack
+                    -- Respect the source animation length; the old 3.5s cap cut long clips off.
+                    local rushDuration = math.max(rushTrack and rushTrack.Duration or 1.2, 0.1)
                     local nextStepAt = rushStartedAt
-                    while os.clock() - rushStartedAt < rushDuration do
+                    while os.clock() - rushStartedAt < rushDuration and rushTrack and rushTrack.IsPlaying do
                         if not activeFigure or not activeFigure.Parent or not root or not root.Parent or cutsceneActive then break end
                         local forward = root.CFrame.LookVector
                         local nextPosition = root.Position + forward * 3.2
