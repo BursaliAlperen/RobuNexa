@@ -7223,7 +7223,12 @@ local function AssetGetContentId(filename)
 end
 local function AssetEnsure(list)
 	local ok = true
-	for _, filename in ipairs(list) do
+	for _, requestedName in ipairs(list) do
+		-- Entries may be "relative/path@https://raw..."; cache checks must use
+		-- only the relative path, otherwise every explicit-URL animation times out.
+		local filename = requestedName
+		local at = string.find(filename, "@", 1, true)
+		if at then filename = string.sub(filename, 1, at - 1) end
 		local path = AssetGetPathFromFilename(filename)
 		local valid = false
 		pcall(function()
@@ -7234,7 +7239,7 @@ local function AssetEnsure(list)
 			end
 		end)
 		if not valid then
-			AssetDownload(filename)
+			AssetDownload(requestedName)
 			-- AssetDownload starts HTTP asynchronously; wait before trying to load/play.
 			local deadline = os.clock() + 15
 			while os.clock() < deadline do
