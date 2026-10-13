@@ -103,6 +103,14 @@ def main():
                 print(f"Source {source_name} is absent; keeping existing converted {output_name}.")
                 continue
             raise SystemExit(f"Missing source model and no existing {output_name}: {source}")
+        source_bytes = source.read_bytes()
+        if not source_bytes or not any(source_bytes):
+            # The current SukunaCombo.rbxm in the repository is a 117 KB all-zero placeholder,
+            # not a Roblox model. Do not rename it to .anim or generate fabricated keyframes.
+            if source_name.endswith("SukunaCombo.rbxm"):
+                print(f"WARNING: {source_name} is all-zero/corrupt; skipping {output_name}. Upload the original RBXM to extract real keyframes.")
+                continue
+            raise SystemExit(f"Invalid all-zero RBXM source: {source_name}")
         converted = converted_dir / (source.stem + ".rbxmx")
         subprocess.run([str(ROOT / "target/release/rbx_util"), "convert", str(source), str(converted)], cwd=ROOT, check=True)
         root = ET.parse(converted).getroot()
@@ -117,6 +125,15 @@ def main():
                 names = ", ".join(sequence_name(node) for node in candidates)
                 raise SystemExit(f"Cannot select {preferred!r} sequence from {source_name}: {names}")
         binary, count = pack_animation(chosen)
+        # Verify the generated AnimLib payload is not empty and has the expected header/count.
+        if len(binary) < 8 or struct.unpack_from("<H", binary, 0)[0] == 0:
+            raise SystemExit(f"Generated invalid .anim payload from {source_name}; refusing to write it")
+        encoded_name_len = struct.unpack_from("<H", binary, 0)[0]
+        if 2 + encoded_name_len + 4 > len(binary):
+            raise SystemExit(f"Generated truncated .anim payload from {source_name}; refusing to write it")
+        keyframe_count = struct.unpack_from("<I", binary, 2 + encoded_name_len)[0]
+        if keyframe_count != count or keyframe_count < 1:
+            raise SystemExit(f"Generated .anim keyframe count mismatch for {source_name}")
         output = OUT / output_name
         output.write_bytes(binary)
         print(f"Extracted {source_name} [{sequence_name(chosen)}]: {count} keyframes -> {output.relative_to(ROOT)} ({len(binary)} bytes)")
