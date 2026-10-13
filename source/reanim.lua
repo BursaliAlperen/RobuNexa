@@ -237,7 +237,7 @@ end
 Util.ForceTextSize = function(inst)
 	if inst:IsA("TextLabel") then
 		local original = inst.TextSize
-		local conn conn = RunService.PreRender:Connect(function()
+		local conn = RunService.PreRender:Connect(function()
 			local size = GuiService.PreferredTextSize.Name
 			if size == "Medium" then
 				inst.TextSize = original
