@@ -1140,9 +1140,9 @@ AddModule(function()
             abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
             -- Combo and Rushbeatdown are separate source clips.
-            -- Temporary valid-clip fallback: the repository has no recoverable SukunaCombo keyframes.
-            -- Use the real bundled Rushbeatdown clip for Combo rather than aborting all Sukuna assets on a 404.
-            local animationFile = (isRush or isCombo) and "Sukuna/Rushbeatdown.anim"
+            -- Use the separately converted Combo clip for Combo, and Rushbeatdown for Rush.
+            local animationFile = isCombo and "Sukuna/Combo.anim"
+                or (isRush and "Sukuna/Rushbeatdown.anim")
                 or (isDismantle and "Sukuna/Dismantle.anim" or "Sukuna/Cleave.anim")
             local actionStarted = playBundledAnimation(
                 animationFile,
