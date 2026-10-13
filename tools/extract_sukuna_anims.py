@@ -97,10 +97,12 @@ def main():
     for source_name, preferred, output_name in ASSETS:
         source = CONTENT / source_name
         if not source.is_file():
-            if output_name == "Cleave.anim" and (OUT / output_name).is_file():
-                print(f"Source {source_name} has been cleaned up; keeping existing converted {output_name}.")
+            # Older source RBXMs may have been removed after their .anim was generated.
+            # Preserve any existing converted animation, but fail if the requested output is missing.
+            if (OUT / output_name).is_file():
+                print(f"Source {source_name} is absent; keeping existing converted {output_name}.")
                 continue
-            raise SystemExit(f"Missing source model: {source}")
+            raise SystemExit(f"Missing source model and no existing {output_name}: {source}")
         converted = converted_dir / (source.stem + ".rbxmx")
         subprocess.run([str(ROOT / "target/release/rbx_util"), "convert", str(source), str(converted)], cwd=ROOT, check=True)
         root = ET.parse(converted).getroot()
