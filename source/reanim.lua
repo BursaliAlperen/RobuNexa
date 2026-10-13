@@ -18,6 +18,13 @@ _G.NAMLoaded = true
 _G["U" .. "hhhhhhLoaded"] = true
 _G.NAMVersion = NAMVersion
 
+-- Define executor compatibility fallbacks BEFORE the first use.
+-- Some executors do not expose cloneref; in that case use the service instance directly.
+cloneref = cloneref or function(o) return o end
+getcustomasset = getcustomasset or getsynasset
+gethiddengui = get_hidden_gui or gethui
+request = request or (http and http.request)
+
 local Debris = cloneref(game:GetService("Debris"))
 local CoreGui = cloneref(game:GetService("CoreGui"))
 local Players = cloneref(game:GetService("Players"))
@@ -62,11 +69,6 @@ Util.Notify = function(text)
 		Duration = 5
 	})
 end
-
-cloneref = cloneref or function(o) return o end
-getcustomasset = getcustomasset or getsynasset
-gethiddengui = get_hidden_gui or gethui
-request = request or (http and http.request)
 
 do
 	local function diefatal(msg)
