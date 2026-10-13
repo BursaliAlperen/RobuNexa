@@ -1,0 +1,26 @@
+name: Validate NAM animation and sound assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "content/movesets/**/*.lua"
+      - "content/animations/**/*.anim"
+      - "content/sounds/**/*.mp3"
+      - "tools/validate_moveset_assets.py"
+      - ".github/workflows/validate-moveset-assets.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check every referenced animation and sound URL
+        run: python tools/validate_moveset_assets.py
