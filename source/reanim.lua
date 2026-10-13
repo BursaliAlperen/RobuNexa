@@ -4222,7 +4222,9 @@ HatReanimator.HatCollideMethod = SaveData.Reanimator.HatsCollideMethod
 -- 7 - idk honestly but this is just modified heavily for now
 HatReanimator.IWantAllHats = SaveData.Reanimator.IWantAllHats
 HatReanimator.IWantHatCollide = SaveData.Reanimator.IWantHatCollide
-HatReanimator.Permadeath = false--not SaveData.Reanimator.HatsPatchmahub
+-- RobuNexa Patchma-style permadeath default.
+-- This is a client-side reanimation option; it cannot guarantee server-side no-respawn.
+HatReanimator.Permadeath = not not (not SaveData.Reanimator.HatsPatchmahub)
 HatReanimator.HatFling = SaveData.Reanimator.HatsFling
 HatReanimator.HatSpin = SaveData.Reanimator.HatsSpin
 HatReanimator.FlingMethod = SaveData.Reanimator.HatsFlingMethod
