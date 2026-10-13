@@ -5124,6 +5124,26 @@ function HatReanimator.Start()
 		if newcf.Y < ylimit then
 			newcf += Vector3.new(0, ylimit - newcf.Y, 0)
 		end
+
+		-- Long-range recovery: a worn accessory can be thousands of studs away,
+		-- outside the normal netless/ownership path. That path otherwise never
+		-- brings it back because it only updates owned, non-grounded handles.
+		-- Reposition far handles directly toward their mapped body attachment,
+		-- then let the regular netless logic take over once they are nearby.
+		local recoveryDistance = 250
+		if (handle.Position - newcf.Position).Magnitude > recoveryDistance then
+			local recovered = pcall(function()
+				handle.CFrame = newcf
+				handle.AssemblyLinearVelocity = Vector3.zero
+				handle.AssemblyAngularVelocity = Vector3.zero
+				handle:SetAttribute("_NAM_LastPosition", newcf)
+				handle:SetAttribute("_NAM_ClaimTime", timing)
+			end)
+			if recovered then
+				return false
+			end
+		end
+
 		local speedlimit = 16384
 		if fling then
 			speedlimit = math.huge
@@ -5133,7 +5153,7 @@ function HatReanimator.Start()
 		local lastcf = handle:GetAttribute("_NAM_LastPosition")
 		local claimtime = handle:GetAttribute("_NAM_ClaimTime")
 		if typeof(lastcf) ~= "CFrame" then lastcf = handle.CFrame end
-		if not handle:IsGrounded() and IsNetworkOwner(handle) then
+		if IsNetworkOwner(handle) then
 			local newpos = newcf.Position
 			local lastpos = lastcf.Position
 			local vel = (newpos - lastpos) / dt
