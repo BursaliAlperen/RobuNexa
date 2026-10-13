@@ -5042,7 +5042,11 @@ function HatReanimator.Start()
 				setsimrad(plr, 0)
 			end
 		end
-		local r = #Players:GetPlayers() * 1000
+		-- Accessories may be displaced thousands of studs from the character.
+		-- A player-count-only radius (often 1000 in a solo server) leaves a
+			-- 5000-stud accessory outside the client's attempted simulation range.
+		-- Keep a 10000-stud minimum and reassert it while reanimation is running.
+		local r = math.max(10000, #Players:GetPlayers() * 1000)
 		setsimrad(Player, r)
 		if os.clock() > lastsimradchange then
 			lastsimradchange = os.clock() + 0.5
@@ -6013,7 +6017,9 @@ function HatReanimator.Start()
 						end
 						midpoint /= hatsowned
 						for _,v in hatsnotowned do
-							if (v.Position - midpoint).Magnitude > 2000 then
+							-- Give long-range accessories time to enter the expanded
+							-- simulation radius before declaring them unclaimable.
+							if (v.Position - midpoint).Magnitude > 10000 then
 								HatReanimator.Status.Permadeath = "Some hats unclaimable. Respawning!"
 								Respawn()
 								break
