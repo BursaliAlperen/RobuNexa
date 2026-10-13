@@ -392,8 +392,12 @@ AddModule(function()
         function controller:Destroy()
             self:Stop()
         end
-        activeActionTrack = controller
-        if not isMovementClip then actionAnimationTrack = controller end
+        -- Only one-shot skills own the exclusive action slot. Movement tracks
+        -- must not mark the character as busy or block later walk/idle transitions.
+        if not isMovementClip then
+            activeActionTrack = controller
+            actionAnimationTrack = controller
+        end
         stepConnection = game:GetService("RunService").RenderStepped:Connect(function()
             if stopped or not activeFigure or not activeFigure.Parent then
                 controller:Stop()
