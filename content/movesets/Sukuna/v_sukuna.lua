@@ -656,24 +656,36 @@ AddModule(function()
         end
         setHatWorldCFrame(101090904148116, accessoryFrame)
 
-        -- Render the actual catalog Cleave Slash accessory (18908729586) during
-        -- each attack pulse. Previously this block reset the burst state every
-        -- frame and parked the accessory 5,000 studs away, so no slash could show.
+        -- Animate the equipped catalog Cleave Slash accessory (18908729586).
+        -- It must be moved from the rig toward the selected target, not just placed
+        -- at the target. Keep it hidden only when no attack pulse is active.
         local slashFrame = CFrame.new(0, 0, -5000)
-        if slashBurstTarget and t < slashBurstUntil and root and root.Parent then
+        local slashActive = slashBurstTarget ~= nil and t < slashBurstUntil
+            and root and root.Parent
+        if slashActive then
             local elapsed = math.max(0, t - slashBurstStartedAt)
-            local pulseIndex = math.floor(elapsed / 0.22)
-            local pulseOn = (elapsed % 0.22) < 0.15
-            if pulseIndex < math.max(1, slashBurstCount) and pulseOn then
-                local side = (pulseIndex % 3) - 1
-                local lift = 1.5 + (pulseIndex % 2) * 0.8
-                local worldPosition = slashBurstTarget + Vector3.new(side * 1.7, lift, 0)
-                local facing = root.CFrame.LookVector
-                local worldFrame = CFrame.lookAt(worldPosition, worldPosition + facing)
-                    * CFrame.Angles(0, 0, math.rad((pulseIndex % 2 == 0) and -28 or 28))
+            local count = math.max(1, slashBurstCount or 1)
+            local pulseDuration = 0.28
+            local pulseIndex = math.floor(elapsed / pulseDuration)
+            local pulseTime = elapsed - pulseIndex * pulseDuration
+            if pulseIndex < count and pulseTime < 0.22 then
+                local travel = math.clamp(pulseTime / 0.22, 0, 1)
+                local side = count > 1 and ((pulseIndex % 3) - 1) * 1.35 or 0
+                local startPosition = root.Position + root.CFrame.LookVector * 2.5
+                    + root.CFrame.RightVector * side + Vector3.new(0, 2, 0)
+                local endPosition = slashBurstTarget + Vector3.new(side, 2, 0)
+                local worldPosition = startPosition:Lerp(endPosition, travel)
+                local direction = endPosition - startPosition
+                if direction.Magnitude < 0.01 then direction = root.CFrame.LookVector end
+                local worldFrame = CFrame.lookAt(worldPosition, worldPosition + direction.Unit)
+                    * CFrame.Angles(0, 0, math.rad((pulseIndex % 2 == 0) and -35 or 35))
                 slashFrame = root.CFrame:ToObjectSpace(worldFrame)
+                setAccessoryScale(18908729586, 2)
+            else
+                setAccessoryScale(18908729586, 1)
             end
         else
+            setAccessoryScale(18908729586, 1)
             slashBurstTarget = nil
             slashBurstCount = 0
         end
