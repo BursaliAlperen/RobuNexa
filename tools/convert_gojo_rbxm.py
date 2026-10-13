@@ -31,6 +31,9 @@ SOURCES = {
     "models/Gojo/Cursed Technique Red.rbxm": "CursedTechniqueRed.anim",
     "models/Gojo/Red Reversal.rbxm": "RedReversal.anim",
     "models/Gojo/Hollow Purple.rbxm": "HollowPurple.anim",
+    # This repository entry is an RBXM binary mistakenly stored with an .anim suffix.
+    # Parse it as a model first, then overwrite it with real AnimLib bytes.
+    "animations/Gojo/Sokamona.anim": "Sokamona.anim",
 }
 
 EASING_STYLE = {
