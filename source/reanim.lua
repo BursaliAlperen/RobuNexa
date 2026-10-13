@@ -3720,8 +3720,8 @@ LimbReanimator.Velocity = SaveData.Reanimator.LimbVelocity
 -- 2 = fling-y velocity
 LimbReanimator.InitMode = SaveData.Reanimator.LimbInitMode
 -- 0 = just reset
--- 1 = time permadeath, and reset
--- 2 = time permadeath, "without reset"
+-- 1 = timed death and reset
+-- 2 = timed death, without reset
 LimbReanimator.ReplicateFPS10 = SaveData.Reanimator.LimbReplicateFPS10
 LimbReanimator.FlingEnabled = not SaveData.Reanimator.LimbRoleplay
 LimbReanimator.UseNaNFling = SaveData.Reanimator.LimbUseNaNFling
@@ -5660,7 +5660,7 @@ function HatReanimator.Start()
 		HatReanimator.Status.HatCollide = "Respawn detected."
 		HatReanimator.Status.RespawnFling = "Respawn detected."
 		local hatcols = HatReanimator.HatCollide
-				HatReanimator.HasPermadeath, HatReanimator.HasHatCollide = false, hatcols
+		HatReanimator.HasPermadeath, HatReanimator.HasHatCollide = false, hatcols
 		local hatcolmeth = HatReanimator.HatCollideMethod
 		if not hatcols then hatcolmeth = -1 end
 		if hatcols and RejectCharacterDeletionsDisabled then
@@ -5723,11 +5723,11 @@ function HatReanimator.Start()
 		end
 		--pcall(function() Player.ReplicationFocus = character end)
 		if hatcols then
-			HatReanimator.Status.HatCollide = "Waiting for Permadeath."
+			HatReanimator.Status.HatCollide = "Preparing reanimation."
 		else
 			HatReanimator.Status.HatCollide = "Disabled, nothing to do!"
 		end
-				HatReanimator.Status.RespawnFling = "Flinging targets..."
+		HatReanimator.Status.RespawnFling = "Flinging targets..."
 		if HatReanimator.UseNaNFling and HatReanimator.FlingTargets[1] then
 			task.wait(0.2)
 		end
@@ -6151,7 +6151,7 @@ function HatReanimator.Start()
 					flingtarget = HatReanimator.FlingTargets[1]
 					if flingtarget then
 						if not HatReanimator.HasPermadeath then
-							-- Permadeath is disabled: discard this respawn-based fling request
+							-- Respawn recovery is disabled: discard this respawn-based fling request
 							-- instead of rebuilding the character and interrupting reanimation.
 							flingtarget.Time = nil
 							flingtarget = nil
