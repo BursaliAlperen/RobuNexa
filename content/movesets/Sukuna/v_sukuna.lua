@@ -153,18 +153,27 @@ AddModule(function()
             sound.Volume = 1
             sound.Looped = false
             sound.Parent = game:GetService("SoundService")
-            local preloadOk, preloadError = pcall(function()
-                game:GetService("ContentProvider"):PreloadAsync({sound})
-            end)
-            if not preloadOk then
-                warn("[Sukuna] Awakening preload failed: " .. tostring(preloadError))
-            end
-            sound:Play()
             return sound
         end)
         if ok and soundOrError then
             awakeningSound = soundOrError
             local thisSound = awakeningSound
+            -- Preload off the startup path so the moveset never freezes while
+            -- waiting for audio. The identity check cancels stale starts after
+            -- a quick moveset switch/reinitialization.
+            task.spawn(function()
+                local preloadOk, preloadError = pcall(function()
+                    game:GetService("ContentProvider"):PreloadAsync({thisSound})
+                end)
+                if not preloadOk then
+                    warn("[Sukuna] Awakening preload failed: " .. tostring(preloadError))
+                end
+                if awakeningSound ~= thisSound or not thisSound.Parent then return end
+                local playOk, playError = pcall(function() thisSound:Play() end)
+                if not playOk then
+                    warn("[Sukuna] Awakening sound playback failed: " .. tostring(playError))
+                end
+            end)
             task.delay(30, function()
                 if awakeningSound == thisSound then
                     pcall(function() thisSound:Destroy() end)
@@ -172,7 +181,7 @@ AddModule(function()
                 end
             end)
         else
-            warn("[Sukuna] Awakening sound playback failed: " .. tostring(soundOrError))
+            warn("[Sukuna] Awakening sound creation failed: " .. tostring(soundOrError))
         end
     end
 
