@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate every animation/sound URL referenced by NAM moveset Lua files."""
+"""Validate every animation/sound URL referenced by NAM moveset Lua files. Runs in CI after asset-path fixes."""
 from __future__ import annotations
 
 import math
