@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "content/*.rbxm"
+      - "content/models/Dog/*.rbxm"
       - "tools/convert_dog_rbxm.py"
       - "tools/rbxm2anim.py"
       - ".github/workflows/convert-dog-anims.yml"
@@ -24,7 +24,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add content/*.anim
+          git add content/animations/Dog/*.anim
           if git diff --cached --quiet; then
             echo "No generated animation changes."
           else
