@@ -4512,6 +4512,16 @@ function HatReanimator.Start()
 					end
 				end
 			end
+			-- Rolimon's catalog item 18908729586: Sukuna (Back Accessory).
+			-- Catalog IDs are not the same as the Handle mesh ID, so classify this
+			-- accessory by its equipped display name and attach it to the R6 torso.
+			if hat.Name:lower() == "sukuna" then
+				mapdata.Limb = "Torso"
+				mapdata.C0 = CFrame.new(0, 0, 0.5)
+				mapdata.C1 = CFrame.identity
+				mapdata.Group = "SukunaBackAccessory"
+				return mapdata, "Torso", 2
+			end
 			for _,data in HatKnownAccessoriesDatabase do
 				if AssetIdMatch(mesh, data.MeshId) and AssetIdMatch(tex, data.TextureId) then
 					mapdata.C0 = data.C0
