@@ -7215,10 +7215,17 @@ end
 local function AssetGetContentId(filename)
 	local path = AssetGetPathFromFilename(filename)
 	if not isfile(path) then return "" end
-	local s, id = pcall(getcustomasset, path)
-	if s and id then
-		return id
+	-- Executor APIs differ: some expose getcustomasset, others getsynasset.
+	-- Try both, and return an empty ID only after both APIs fail.
+	if type(getcustomasset) == "function" then
+		local ok, id = pcall(getcustomasset, path)
+		if ok and type(id) == "string" and id ~= "" then return id end
 	end
+	if type(getsynasset) == "function" then
+		local ok, id = pcall(getsynasset, path)
+		if ok and type(id) == "string" and id ~= "" then return id end
+	end
+	warn("[NAM] No supported local asset API could resolve: " .. tostring(path))
 	return ""
 end
 local function AssetEnsure(list)
