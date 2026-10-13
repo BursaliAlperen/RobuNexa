@@ -4239,6 +4239,8 @@ HatReanimator.ToolAnimMethod = SaveData.Reanimator.HatsToolAnim
 HatReanimator.UseNaNFling = true
 HatReanimator.HasPermadeath = false
 HatReanimator.HasHatCollide = false
+-- Patchma V46 permadeath preload state (same CDSB + RespawnTime deadline pattern).
+local PatchmaPermadeathLoadedTime = nil
 HatReanimator.RebuildRequired = true
 HatReanimator.HatMapSummary = "(no hat map yet, please * Reanimate * to build)"
 HatReanimator.HatCFrameOverride = {}
@@ -5760,8 +5762,16 @@ function HatReanimator.Start()
 		local cdsbeffect = os.clock()
 		local cdsbtime = os.clock()
 		if perma then
-			--replicatesignal(Player.ConnectDiedSignalBackend)
-			HatReanimator.Status.Permadeath = "Fired CDSB Signal."
+			-- Patchma V46 preload: signal the backend before the intentional death,
+			-- then keep the original character alive until the respawn timer window.
+			local ok = pcall(replicatesignal, Player.ConnectDiedSignalBackend)
+			if ok then
+				PatchmaPermadeathLoadedTime = os.clock() + Players.RespawnTime + 0.07
+			else
+				PatchmaPermadeathLoadedTime = nil
+				HatReanimator.Status.Permadeath = "CDSB preload failed."
+			end
+			HatReanimator.Status.Permadeath = "Patchma CDSB preload."
 			cdsbeffect += Players.RespawnTime
 		end
 		HatReanimator.Status.RespawnFling = "Flinging targets..."
@@ -5925,6 +5935,14 @@ function HatReanimator.Start()
 				c:Disconnect()
 			end
 			return
+		end
+		-- Match Patchma's pdloadedtime gate before triggering the intentional death.
+		if perma and PatchmaPermadeathLoadedTime then
+			local remaining = PatchmaPermadeathLoadedTime - os.clock()
+			if remaining > 0 then
+				task.wait(remaining)
+			end
+			PatchmaPermadeathLoadedTime = nil
 		end
 		replicatesignal(Humanoid.ServerBreakJoints)
 		Humanoid.EvaluateStateMachine = true
