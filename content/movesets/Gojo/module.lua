@@ -61,16 +61,41 @@ AddModule(function()
 		Sokamona = "rbxassetid://138159090575293",
 	}
 	local footstepSound
+	local SoundService = game:GetService("SoundService")
+	local ContentProvider = game:GetService("ContentProvider")
 	local function playSound(id, looped, volume)
+		if type(id) ~= "string" or id == "" then
+			warn("[Gojo] Sound skipped: missing SoundId")
+			return nil
+		end
 		if not root or not root.Parent then return nil end
 		local sound = Instance.new("Sound")
 		sound.Name = "GojoAbilitySound"
 		sound.SoundId = id
 		sound.Looped = looped == true
 		sound.Volume = volume or 1
-		sound.RollOffMaxDistance = 90
-		sound.Parent = root
-		sound:Play()
+		-- Parent to SoundService so locally-triggered moveset audio is not lost
+		-- when the reanimated rig is hidden, moved, or outside the 3D rolloff range.
+		sound.Parent = SoundService
+		local preloadOk, preloadError = pcall(function()
+			ContentProvider:PreloadAsync({sound})
+		end)
+		if not preloadOk then
+			warn("[Gojo] Sound preload failed for " .. id .. ": " .. tostring(preloadError))
+		end
+		local playOk, playError = pcall(function() sound:Play() end)
+		if not playOk then
+			warn("[Gojo] Sound playback failed for " .. id .. ": " .. tostring(playError))
+			sound:Destroy()
+			return nil
+		end
+		if not sound.IsLoaded then
+			task.delay(5, function()
+				if sound.Parent and not sound.IsLoaded then
+					warn("[Gojo] Sound did not load; check asset permissions: " .. id)
+				end
+			end)
+		end
 		if not sound.Looped then
 			game:GetService("Debris"):AddItem(sound, 15)
 		end
