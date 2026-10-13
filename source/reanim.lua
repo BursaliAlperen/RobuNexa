@@ -7169,13 +7169,18 @@ local function AssetDownload(filename)
 	_Assetdownloading[filename] = true
 	task.spawn(function()
 		Util.Notify("Downloading " .. filename .. "...")
+		local repoPath = GetRepoAssetPath(filename)
 		local urls = {source}
-		-- Older projects placed audio in content/audio; the current convention is
-		-- content/sounds. Try both paths without changing the local cache filename.
-		if not hasCustomSource and string.lower(filename):sub(-4) == ".mp3" then
-			local audioPath = string.gsub(GetRepoAssetPath(filename), "^sounds/", "audio/")
+		-- Fallback for clients/CDN routes that return 404 from raw.githubusercontent.com.
+		local githubRawUrl = "https://github.com/BursaliAlperen/RobuNexa/raw/refs/heads/main/content/" .. repoPath
+		if githubRawUrl ~= source then table.insert(urls, githubRawUrl) end
+		local canonicalRawUrl = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. repoPath
+		if canonicalRawUrl ~= source and canonicalRawUrl ~= githubRawUrl then table.insert(urls, canonicalRawUrl) end
+		-- Older projects placed audio in content/audio; current convention is content/sounds.
+		if string.lower(filename):sub(-4) == ".mp3" then
+			local audioPath = string.gsub(repoPath, "^sounds/", "audio/")
 			local audioUrl = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. audioPath
-			if audioUrl ~= source then table.insert(urls, audioUrl) end
+			if audioUrl ~= source and audioUrl ~= canonicalRawUrl then table.insert(urls, audioUrl) end
 		end
 		local body, lastStatus
 		for _, url in ipairs(urls) do
