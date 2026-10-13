@@ -277,7 +277,8 @@ AddModule(function()
             warn("[Sukuna] Could not resolve local sound: " .. filename)
             return false
         end
-        if slashSound then pcall(function() slashSound:Stop(); slashSound:Destroy() end) end
+        -- Do not stop the previous slash sound: Combo/Rush intentionally fire
+        -- several hits rapidly, and each sound must be allowed to finish.
         local okSound, sound = pcall(function()
             local item = Instance.new("Sound")
             item.Name = "SukunaLocalEffectSound"
@@ -1156,6 +1157,11 @@ AddModule(function()
                 isCombo and "combo" or (isRush and "rush" or "dismantle"),
                 false -- Never loop/force-stop a one-shot attack; let its full clip finish.
             )
+            if isRush then
+                -- Rush also gets one of the two awakening voice clips, chosen randomly.
+                -- This is independent from the slash-hit sounds below.
+                playRandomAwakeningSound()
+            end
             if isCombo then
                 -- Re-trigger the bundled slash MP3 throughout the combo instead of only once.
                 task.spawn(function()
