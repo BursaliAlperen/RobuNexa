@@ -16,7 +16,7 @@ AddModule(function()
         "Sukuna/Cleave.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Cleave.anim",
         "Sukuna/Dismantle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Dismantle.anim",
         "Sukuna/Rushbeatdown.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Rushbeatdown.anim",
-        -- SukunaCombo.anim source in the repo is zero-filled/corrupt; do not gate the whole moveset on its 404.
+        "Sukuna/Combo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Combo.anim",
         "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
         "sounds/sukuna-slash.mp3@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/sounds/sukuna-slash.mp3",
         "Sukuna/SukunaWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaWalk.anim",
