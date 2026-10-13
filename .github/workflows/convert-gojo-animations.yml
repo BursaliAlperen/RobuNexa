@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - "content/models/**/*.rbxm"
+      - "content/animations/Gojo/Sokamona.anim"
       - "tools/convert_gojo_rbxm.py"
       - ".github/workflows/convert-gojo-animations.yml"
   workflow_dispatch:
