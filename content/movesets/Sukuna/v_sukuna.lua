@@ -680,12 +680,11 @@ AddModule(function()
                 local worldFrame = CFrame.lookAt(worldPosition, worldPosition + direction.Unit)
                     * CFrame.Angles(0, 0, math.rad((pulseIndex % 2 == 0) and -35 or 35))
                 slashFrame = root.CFrame:ToObjectSpace(worldFrame)
-                setAccessoryScale(18908729586, 2)
-            else
-                setAccessoryScale(18908729586, 1)
+                -- Keep the catalog accessory at its original scale. Resizing it
+                -- during every slash pulse forces HatReanimator rebuilds and can
+                -- interrupt the effect on some clients.
             end
         else
-            setAccessoryScale(18908729586, 1)
             slashBurstTarget = nil
             slashBurstCount = 0
         end
