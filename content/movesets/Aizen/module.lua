@@ -126,10 +126,20 @@ AddModule(function()
         if not container then return false end
         local accessory = container:FindFirstChildWhichIsA("Accessory", true)
         if accessory and target then
-            accessory.Parent = target
-            table.insert(accessoryInstances, accessory)
-            container:Destroy()
-            return true
+            -- Accessory attachment must go through Humanoid:AddAccessory so Roblox
+            -- can match Handle attachments to the character rig.
+            local targetHumanoid = target:FindFirstChildOfClass("Humanoid")
+            if targetHumanoid then
+                accessory.Parent = container
+                local okAttach = pcall(function()
+                    targetHumanoid:AddAccessory(accessory)
+                end)
+                if okAttach and accessory.Parent == target then
+                    table.insert(accessoryInstances, accessory)
+                    container:Destroy()
+                    return true
+                end
+            end
         end
         -- Do not parent arbitrary models onto the character; unknown asset structure is unsafe.
         container:Destroy()
@@ -248,18 +258,22 @@ AddModule(function()
             -- Keep the feature usable without pretending a missing animation exists.
             notify("Aizen uyanışı tetiklendi; StandUp/Awakening .anim dosyaları henüz eklenmemiş.")
         end
-        task.delay(activeDuration or 3, function()
-            if not activeFigure then return end
-            awakened = true
-            awakening = false
-            actionLock = false
-            if humanoid and savedWalkSpeed then humanoid.WalkSpeed = savedWalkSpeed end
-            addAccessoryAsset(ASSET_IDS.Goryutenmetsu, activeFigure)
-            addAccessoryAsset(ASSET_IDS.PurpleAura, activeFigure)
-            addAccessoryAsset(ASSET_IDS.AizenHead, activeFigure)
-            updateBar()
-            if not playAnimation("Idle", true) then stopAnimation() end
-        end)
+        if not played then
+            -- No animation clip exists yet, so use a short transition rather than
+            -- passing nil to task.delay. Accessories still appear after the fallback.
+            task.delay(3, function()
+                if not activeFigure then return end
+                awakened = true
+                awakening = false
+                actionLock = false
+                if humanoid and savedWalkSpeed then humanoid.WalkSpeed = savedWalkSpeed end
+                addAccessoryAsset(ASSET_IDS.Goryutenmetsu, activeFigure)
+                addAccessoryAsset(ASSET_IDS.PurpleAura, activeFigure)
+                addAccessoryAsset(ASSET_IDS.AizenHead, activeFigure)
+                updateBar()
+                if not playAnimation("Idle", true) then stopAnimation() end
+            end)
+        end
         updateBar()
     end
 
@@ -308,9 +322,19 @@ AddModule(function()
         if activeAnimator and startedAt then
             activeAnimator:Step(os.clock() - startedAt)
             if not activeAnimator.looped and activeDuration and os.clock() - startedAt >= activeDuration then
-                if awakening then return end
-                actionLock = false
-                if awakened then
+                if awakening then
+                    -- Finish the awakening transition only once the current clip ends.
+                    awakened = true
+                    awakening = false
+                    actionLock = false
+                    if humanoid and savedWalkSpeed then humanoid.WalkSpeed = savedWalkSpeed end
+                    addAccessoryAsset(ASSET_IDS.Goryutenmetsu, activeFigure)
+                    addAccessoryAsset(ASSET_IDS.PurpleAura, activeFigure)
+                    addAccessoryAsset(ASSET_IDS.AizenHead, activeFigure)
+                    updateBar()
+                    if not playAnimation("Idle", true) then stopAnimation() end
+                elseif awakened then
+                    actionLock = false
                     if not playAnimation("Idle", true) then stopAnimation() end
                 end
             end
@@ -318,16 +342,14 @@ AddModule(function()
 
         if actionLock or awakening then return end
         if not awakened then
-            if activeName ~= "ChairIdle" and not humanoid.MoveDirection.Magnitude then
+            if humanoid and activeName ~= "ChairIdle" and humanoid.MoveDirection.Magnitude < 0.05 then
                 playAnimation("ChairIdle", true)
             end
             return
         end
 
         local wanted = "Idle"
-        if humanoid and humanoid.FloorMaterial == Enum.Material.Air then
-            wanted = "Idle"
-        elseif humanoid and humanoid.MoveDirection.Magnitude > 0.05 then
+        if humanoid and humanoid.MoveDirection.Magnitude > 0.05 then
             wanted = "Walk"
         end
         if wanted ~= activeName then
