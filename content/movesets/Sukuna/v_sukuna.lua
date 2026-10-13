@@ -16,7 +16,7 @@ AddModule(function()
         "Sukuna/Cleave.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Cleave.anim",
         "Sukuna/Dismantle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Dismantle.anim",
         "Sukuna/Rushbeatdown.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Rushbeatdown.anim",
-        "Sukuna/SukunaCombo.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaCombo.anim",
+        -- SukunaCombo.anim source in the repo is zero-filled/corrupt; do not gate the whole moveset on its 404.
         "Sukuna/SukunaLaugh.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaLaugh.anim",
         "sounds/sukuna-slash.mp3@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/sounds/sukuna-slash.mp3",
         "Sukuna/SukunaWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaWalk.anim",
@@ -1140,9 +1140,10 @@ AddModule(function()
             abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
             -- Combo and Rushbeatdown are separate source clips.
-            local animationFile = isRush and "Sukuna/Rushbeatdown.anim"
-                or (isCombo and "Sukuna/SukunaCombo.anim"
-                or (isDismantle and "Sukuna/Dismantle.anim" or "Sukuna/Cleave.anim"))
+            -- Temporary valid-clip fallback: the repository has no recoverable SukunaCombo keyframes.
+            -- Use the real bundled Rushbeatdown clip for Combo rather than aborting all Sukuna assets on a 404.
+            local animationFile = (isRush or isCombo) and "Sukuna/Rushbeatdown.anim"
+                or (isDismantle and "Sukuna/Dismantle.anim" or "Sukuna/Cleave.anim")
             local actionStarted = playBundledAnimation(
                 animationFile,
                 isCombo and "combo" or (isRush and "rush" or "dismantle"),
