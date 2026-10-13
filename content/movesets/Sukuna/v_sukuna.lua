@@ -22,6 +22,8 @@ AddModule(function()
         "Sukuna/SukunaIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaIdle.anim",
         "Sukuna/Jump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Jump.anim",
         "Sukuna/Fall.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Fall.anim",
+        "sounds/Awaken2.mp3@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/sounds/Awaken2.mp3",
+        "sounds/Awakenw1.mp3@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/sounds/Awakenw1.mp3",
     }
 
     local TARGETS = {
@@ -121,10 +123,57 @@ AddModule(function()
     local movementAnimationName
     local fuugaProjectile
     local fuugaAuraInstances = {}
+    local awakeningSound
     local STATUS_INTERVAL = 1.25
 
     local function notify(message)
         pcall(function() Util.Notify("Sukuna: " .. message) end)
+    end
+
+    -- Exactly one awakening track is chosen per moveset start. These are local
+    -- downloaded assets, not Roblox asset IDs. Always stop/destroy the previous
+    -- instance first so reinitializing Sukuna can never overlap both tracks.
+    local function playRandomAwakeningSound()
+        if awakeningSound then
+            pcall(function() awakeningSound:Stop(); awakeningSound:Destroy() end)
+            awakeningSound = nil
+        end
+        local choices = {"sounds/Awaken2.mp3", "sounds/Awakenw1.mp3"}
+        local chosen = choices[math.random(1, #choices)]
+        local soundId = ""
+        pcall(function() soundId = AssetGetContentId(chosen) end)
+        if type(soundId) ~= "string" or soundId == "" then
+            notify("Awakening sound missing: " .. chosen .. " (check download/getcustomasset support).")
+            return
+        end
+        local ok, soundOrError = pcall(function()
+            local sound = Instance.new("Sound")
+            sound.Name = "SukunaAwakeningIntro"
+            sound.SoundId = soundId
+            sound.Volume = 1
+            sound.Looped = false
+            sound.Parent = game:GetService("SoundService")
+            local preloadOk, preloadError = pcall(function()
+                game:GetService("ContentProvider"):PreloadAsync({sound})
+            end)
+            if not preloadOk then
+                warn("[Sukuna] Awakening preload failed: " .. tostring(preloadError))
+            end
+            sound:Play()
+            return sound
+        end)
+        if ok and soundOrError then
+            awakeningSound = soundOrError
+            local thisSound = awakeningSound
+            task.delay(30, function()
+                if awakeningSound == thisSound then
+                    pcall(function() thisSound:Destroy() end)
+                    awakeningSound = nil
+                end
+            end)
+        else
+            warn("[Sukuna] Awakening sound playback failed: " .. tostring(soundOrError))
+        end
     end
 
     local function resolveRoot(figure)
@@ -1307,6 +1356,10 @@ AddModule(function()
     m.Config = function(parent) end
 
     m.Init = function(figure)
+        if awakeningSound then
+            pcall(function() awakeningSound:Stop(); awakeningSound:Destroy() end)
+            awakeningSound = nil
+        end
         activeFigure = figure
         root = resolveRoot(figure)
         domainEnabled = false
@@ -1336,6 +1389,9 @@ AddModule(function()
         ensureHatOverrides()
         applyAccessoryPositions()
         createSkillControls()
+
+        -- One random awakening sound per start; never launch both choices.
+        playRandomAwakeningSound()
 
         -- Laugh is the one-shot intro as soon as the reanimated figure is ready.
         task.spawn(function()
@@ -1458,6 +1514,10 @@ AddModule(function()
     end
 
     m.Destroy = function()
+        if awakeningSound then
+            pcall(function() awakeningSound:Stop(); awakeningSound:Destroy() end)
+            awakeningSound = nil
+        end
         domainEnabled = false
         cleaveUntil = 0
         cleaveAccessoryUntil = 0
