@@ -204,6 +204,12 @@ AddModule(function()
             end
             awakeningSound = soundOrError
             local thisSound = awakeningSound
+            -- Trigger immediately instead of waiting on a preload that can stall
+            -- forever on executor-local MP3s; preload is diagnostic/background only.
+            local playOk, playError = pcall(function() thisSound:Play() end)
+            if not playOk then
+                warn("[Sukuna] Awakening sound playback failed: " .. tostring(playError))
+            end
             task.spawn(function()
                 local preloadOk, preloadError = pcall(function()
                     game:GetService("ContentProvider"):PreloadAsync({thisSound})
@@ -211,19 +217,9 @@ AddModule(function()
                 if not preloadOk then
                     warn("[Sukuna] Awakening preload failed for " .. tostring(selectedPath) .. ": " .. tostring(preloadError))
                 end
-                -- Some clients finish local-file decoding shortly after PreloadAsync.
-                local deadline = os.clock() + 4
-                while not thisSound.IsLoaded and os.clock() < deadline do
-                    if token ~= awakeningStartToken or awakeningSound ~= thisSound or not thisSound.Parent then return end
-                    task.wait(0.1)
-                end
                 if token ~= awakeningStartToken or awakeningSound ~= thisSound or not thisSound.Parent then return end
                 if not thisSound.IsLoaded then
-                    warn("[Sukuna] Awakening sound is not loaded; executor may not support local MP3 assets: " .. tostring(selectedPath))
-                end
-                local playOk, playError = pcall(function() thisSound:Play() end)
-                if not playOk then
-                    warn("[Sukuna] Awakening sound playback failed: " .. tostring(playError))
+                    warn("[Sukuna] Awakening sound is not loaded; verify getcustomasset/getsynasset support and local MP3 decoding: " .. tostring(selectedPath))
                 elseif thisSound.TimeLength <= 0 then
                     warn("[Sukuna] Awakening sound has no decoded duration: " .. tostring(selectedPath))
                 end
