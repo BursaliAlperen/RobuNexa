@@ -256,8 +256,13 @@ AddModule(function()
         if not activeFigure or not activeFigure.Parent then return false end
         local path = AssetGetPathFromFilename(filename)
         if not isfile or not isfile(path) then
-            notify("Animation file not found: " .. filename)
-            return false
+            -- A moveset may be selected before its background asset queue finishes.
+            -- Ensure the exact requested clip before reporting a missing animation.
+            local ensureOk, ensured = pcall(function() return AssetEnsure({filename}) end)
+            if not ensureOk or not ensured or not isfile or not isfile(path) then
+                notify("Animation download failed: " .. filename .. " (check [NAM] asset warnings).")
+                return false
+            end
         end
 
         local okTrack, track = pcall(function() return AnimLib.Track.fromfile(path) end)
