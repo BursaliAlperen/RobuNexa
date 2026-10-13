@@ -22,6 +22,8 @@ AddModule(function()
         "Sukuna/SukunaIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/SukunaIdle.anim",
         "Sukuna/Jump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Jump.anim",
         "Sukuna/Fall.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Sukuna/Fall.anim",
+        "sounds/Awaken2.mp3@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/sounds/Awaken2.mp3",
+        "sounds/Awakenw1.mp3@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/sounds/Awakenw1.mp3",
     }
 
     local TARGETS = {
@@ -162,7 +164,15 @@ AddModule(function()
                 end)
                 if ensured then
                     local id = ""
+                    -- Executor builds expose different local-asset helpers. Try NAM's
+                    -- resolver first, then the common getcustomasset/getsynasset APIs.
                     pcall(function() id = AssetGetContentId(choice.path) end)
+                    if type(id) ~= "string" or id == "" then
+                        local resolver = getcustomasset or getsynasset
+                        if type(resolver) == "function" then
+                            pcall(function() id = resolver(AssetGetPathFromFilename(choice.path)) end)
+                        end
+                    end
                     if type(id) == "string" and id ~= "" then
                         selectedId, selectedPath = id, choice.path
                         break
@@ -995,11 +1005,14 @@ AddModule(function()
             abilityTargets.Dismantle = targetPosition
             setHatWorldCFrame(97087028126781, root.CFrame:ToObjectSpace(CFrame.new(targetPosition + Vector3.new(0, 2, 0))))
             -- Use the bundled clip directly. No procedural fallback animation.
-            playBundledAnimation(
+            local actionStarted = playBundledAnimation(
                 isCombo and "Sukuna/Combo.anim" or "Sukuna/Cleave.anim",
                 isCombo and "combo" or "dismantle",
                 false
             )
+            if not actionStarted then
+                notify((isCombo and "Combo.anim" or "Cleave.anim") .. " failed to start; check the asset-load/AnimLib log.")
+            end
             -- Combo produces three staggered local slash pulses without chat output.
             if isCombo then
                 for hit = 1, 3 do
