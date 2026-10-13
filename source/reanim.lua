@@ -1541,8 +1541,9 @@ local UI = {}
 function UI.CreatePage()
 	local Frame = Util.Instance("ScrollingFrame", WindowContent)
 	Frame.AnchorPoint = Vector2.new(0.5, 0.5)
-	Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Frame.Size = UDim2.new(0, 360, 0, 245)
+	-- Keep page controls clear of the top window border/title area.
+	Frame.Position = UDim2.new(0.5, 0, 0.5, 8)
+	Frame.Size = UDim2.new(0, 360, 0, 229)
 	Frame.BackgroundTransparency = 0
 	Frame.BackgroundColor3 = Color3.new(0, 0, 0)
 	Frame.BorderSizePixel = 1
