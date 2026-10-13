@@ -6220,7 +6220,12 @@ function HatReanimator.Start()
 				if t > letitgo then
 					flingtarget = HatReanimator.FlingTargets[1]
 					if flingtarget then
-						if not HatReanimator.HasPermadeath or HatReanimator.FlingMethod == 0 then
+						if not HatReanimator.HasPermadeath then
+							-- Permadeath is disabled: discard this respawn-based fling request
+							-- instead of rebuilding the character and interrupting reanimation.
+							flingtarget.Time = nil
+							flingtarget = nil
+						elseif HatReanimator.FlingMethod == 0 then
 							Respawn()
 							flingtarget.Time = nil
 							flingtarget = nil
