@@ -915,6 +915,8 @@ local function SetUITheme(index)
 		{Fore = Color3.new(1, 1, 1), SndClick = "rbxassetid://81715128969224"},
 		-- Oxide
 		{Fore = Color3.fromRGB(49, 203, 233), Back = Color3.fromRGB(38, 38, 38), Text = Color3.fromRGB(49, 203, 233)},
+		-- Patchma-like
+		{Fore = Color3.new(0.0941177, 0.317647, 0.878431), Text = Color3.new(0.560784, 0.560784, 0.560784)},
 		-- Genesis V4 - Neptunian V
 		{Fore = Color3.fromHex("7733FF"), Back = Color3.fromHex("161330"), SndClick = "rbxassetid://80526571264304"},
 		-- Crimson
@@ -991,10 +993,6 @@ local function SetUITheme(index)
 	end
 end
 SaveData.UITheme = SaveData.UITheme or 1
-if not SaveData.UIThemeIndexMigrated then
-	if SaveData.UITheme >= 4 then SaveData.UITheme -= 1 end
-	SaveData.UIThemeIndexMigrated = true
-end
 SetUITheme(SaveData.UITheme)
 
 local ReanimPage
@@ -2416,6 +2414,7 @@ UI.CreateDropdown(MainPage, "UI Theme", {
 	"RGB/Default",
 	"ALONE",
 	"Oxide",
+	"Patchma Hub",
 	"Genesis V4",
 	"Crimson",
 	"r/masterhacker",
@@ -2711,7 +2710,9 @@ SaveData.ShiftlockDisabled = not not SaveData.ShiftlockDisabled
 SaveData.NoLoadAnimationHook = not not SaveData.NoLoadAnimationHook
 SaveData.NoPhysicsRepRootPart = not not SaveData.NoPhysicsRepRootPart
 SaveData.NetlessVelocity = SaveData.NetlessVelocity or 25.01
+SaveData.UsePatchmaLikeNetless = not not SaveData.UsePatchmaLikeNetless
 SaveData.UseAngularVelocity = not not SaveData.UseAngularVelocity
+SaveData.PatchmaVoidFloat = not not SaveData.PatchmaVoidFloat
 SaveData.PlaceholderTransparency = SaveData.PlaceholderTransparency or 0.5
 
 -- empyrean-like thing
@@ -2733,6 +2734,7 @@ local Reanimate = {
 	UsePhysicsRepRootPart = not SaveData.NoPhysicsRepRootPart,
 	PhysicsRepRootPartFling = 1 / 10,
 	NetlessVelocity = SaveData.NetlessVelocity,
+	UsePatchmaLikeNetless = SaveData.UsePatchmaLikeNetless,
 	UseAngularVelocity = SaveData.UseAngularVelocity,
 	InfiniteJump = not SaveData.NoInfiniteJump,
 	Noclip = SaveData.NoclipEnabled,
@@ -2742,6 +2744,7 @@ local Reanimate = {
 	SeatSit = not SaveData.NoSeatSitEnabled,
 	ToolGrab = SaveData.ToolGrabEnabled,
 	ScaleGravity = SaveData.ScaleGravityEnabled,
+	PatchmaVoidFloat = SaveData.PatchmaVoidFloat,
 	AntiExplosions = true,
 	CharacterScale = SaveData.CharacterScale,
 	PlaceholderTransparency = SaveData.PlaceholderTransparency,
@@ -3473,6 +3476,10 @@ Reanimate.CreateCharacter = function(InitCFrame)
 		else
 			IsFloat = true
 		end
+		if Reanimate.PatchmaVoidFloat and IsFloat then
+			pos = Vector3.new(pos.X, SafeY, pos.Z)
+			RCRootPart.Velocity *= Vector3.new(1, 0, 1)
+		end
 		if Reanimate:ShouldRotationType() then
 			local ax, ay, az = Reanimate.Camera.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
 			local bx, by, bz = RCRootPart.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
@@ -3720,8 +3727,8 @@ LimbReanimator.Velocity = SaveData.Reanimator.LimbVelocity
 -- 2 = fling-y velocity
 LimbReanimator.InitMode = SaveData.Reanimator.LimbInitMode
 -- 0 = just reset
--- 1 = timed death and reset
--- 2 = timed death, without reset
+-- 1 = time permadeath, and reset
+-- 2 = time permadeath, "without reset"
 LimbReanimator.ReplicateFPS10 = SaveData.Reanimator.LimbReplicateFPS10
 LimbReanimator.FlingEnabled = not SaveData.Reanimator.LimbRoleplay
 LimbReanimator.UseNaNFling = SaveData.Reanimator.LimbUseNaNFling
@@ -4198,6 +4205,7 @@ SaveData.Reanimator.HatsCollide = not not SaveData.Reanimator.HatsCollide
 SaveData.Reanimator.HatsCollideMethod = SaveData.Reanimator.HatsCollideMethod or 6
 SaveData.Reanimator.IWantAllHats = not not SaveData.Reanimator.IWantAllHats
 SaveData.Reanimator.IWantHatCollide = SaveData.Reanimator.IWantHatCollide or 3
+SaveData.Reanimator.HatsPatchmahub = not not SaveData.Reanimator.HatsPatchmahub
 SaveData.Reanimator.HatsFling = not not SaveData.Reanimator.HatsFling
 SaveData.Reanimator.HatsSpin = not not SaveData.Reanimator.HatsSpin
 SaveData.Reanimator.HatsFlingMethod = SaveData.Reanimator.HatsFlingMethod or 1
@@ -4214,7 +4222,7 @@ HatReanimator.HatCollideMethod = SaveData.Reanimator.HatsCollideMethod
 -- 7 - idk honestly but this is just modified heavily for now
 HatReanimator.IWantAllHats = SaveData.Reanimator.IWantAllHats
 HatReanimator.IWantHatCollide = SaveData.Reanimator.IWantHatCollide
-
+HatReanimator.Permadeath = false--not SaveData.Reanimator.HatsPatchmahub
 HatReanimator.HatFling = SaveData.Reanimator.HatsFling
 HatReanimator.HatSpin = SaveData.Reanimator.HatsSpin
 HatReanimator.FlingMethod = SaveData.Reanimator.HatsFlingMethod
@@ -4233,7 +4241,7 @@ HatReanimator.RebuildRequired = true
 HatReanimator.HatMapSummary = "(no hat map yet, please * Reanimate * to build)"
 HatReanimator.HatCFrameOverride = {}
 HatReanimator.Status = {
-	Recovery = "(no status)",
+	Permadeath = "(no status)",
 	HatCollide = "(no status)",
 	RespawnFling = "(no status)",
 }
@@ -4294,6 +4302,11 @@ function HatReanimator.Fling(target, duration)
 end
 HatReanimator.DontFireCharAddOnThisChar = nil
 function HatReanimator.Config(parent)
+	UI.CreateText(parent, "permadeath is patched, enable this switch if you want to", 10, Enum.TextXAlignment.Center)
+	UI.CreateSwitch(parent, "Permadeath", HatReanimator.Permadeath).Changed:Connect(function(val)
+		HatReanimator.Permadeath = val
+		SaveData.Reanimator.HatsPatchmahub = not val
+	end)
 	UI.CreateSwitch(parent, "Hat Collide", HatReanimator.HatCollide).Changed:Connect(function(val)
 		HatReanimator.HatCollide = val
 		SaveData.Reanimator.HatsCollide = val
@@ -4372,10 +4385,10 @@ function HatReanimator.Config(parent)
 	end)
 	UI.CreateText(parent, "^^^ if ur rig built wrong or u switched to a new rig ^^^\nthis button is for you", 10, Enum.TextXAlignment.Center)
 	UI.CreateButton(parent, "Respawn", 20).Activated:Connect(function()
-		HatReanimator.Status.Recovery = "Manual respawn requested."
+		HatReanimator.Status.Permadeath = "Fired CDSB Signal!"
 		--replicatesignal(Player.ConnectDiedSignalBackend)
 		if RejectCharacterDeletionsDisabled then
-			HatReanimator.Status.Recovery = "Using legacy recovery method."
+			HatReanimator.Status.Permadeath = "RCDless mode, did old technique!"
 			local old = Player.Character
 			for _,v in old:GetChildren() do
 				if v:IsA("Accoutrement") then continue end
@@ -5180,12 +5193,22 @@ function HatReanimator.Start()
 					if fling then
 						handle.AssemblyLinearVelocity = Vector3.new(16384, 16384, 16384)
 					else
-						vel += tvel
-						vel *= Vector3.new(1, 0, 1)
-						if vel.Magnitude > netless then
-							vel = vel.Unit * netless
+						-- so Patchma's netless doesn't need the velocity of the hat, just where its attached to.
+						if Reanimate.UsePatchmaLikeNetless then
+							vel = tvel
+							vel *= Vector3.new(1, 0, 1)
+							if vel.Magnitude > netless then
+								vel = vel.Unit * netless
+							end
+							handle.AssemblyLinearVelocity = Vector3.new(vel.X * 10, netless, vel.Z * 10)
+						else
+							vel += tvel
+							vel *= Vector3.new(1, 0, 1)
+							if vel.Magnitude > netless then
+								vel = vel.Unit * netless
+							end
+							handle.AssemblyLinearVelocity = Vector3.new(vel.X, math.max(vel.Y, netless), vel.Z)
 						end
-						handle.AssemblyLinearVelocity = Vector3.new(vel.X, math.max(vel.Y, netless), vel.Z)
 					end
 				end
 			else
@@ -5656,12 +5679,17 @@ function HatReanimator.Start()
 			CharOnDesc(v)
 		end
 		HatReanimator.Status.ReanimState = "Respawned."
-		HatReanimator.Status.Recovery = "Respawn detected."
+		HatReanimator.Status.Permadeath = "Respawn detected."
 		HatReanimator.Status.HatCollide = "Respawn detected."
 		HatReanimator.Status.RespawnFling = "Respawn detected."
 		local hatcols = HatReanimator.HatCollide
+		-- Stable single-pass mode: never trigger the permadeath/respawn recovery cycle.
+		-- Reanimation should keep running instead of rebuilding the character when hats
+		-- are lost or a fling/collision recovery path fires.
+		local perma = false
 		HatReanimator.HasPermadeath, HatReanimator.HasHatCollide = false, hatcols
 		local hatcolmeth = HatReanimator.HatCollideMethod
+		if not replicatesignal then perma = false end
 		if not hatcols then hatcolmeth = -1 end
 		if hatcols and RejectCharacterDeletionsDisabled then
 			hatcolmeth = -2
@@ -5723,9 +5751,16 @@ function HatReanimator.Start()
 		end
 		--pcall(function() Player.ReplicationFocus = character end)
 		if hatcols then
-			HatReanimator.Status.HatCollide = "Preparing reanimation."
+			HatReanimator.Status.HatCollide = "Waiting for Permadeath."
 		else
 			HatReanimator.Status.HatCollide = "Disabled, nothing to do!"
+		end
+		local cdsbeffect = os.clock()
+		local cdsbtime = os.clock()
+		if perma then
+			--replicatesignal(Player.ConnectDiedSignalBackend)
+			HatReanimator.Status.Permadeath = "Fired CDSB Signal."
+			cdsbeffect += Players.RespawnTime
 		end
 		HatReanimator.Status.RespawnFling = "Flinging targets..."
 		if HatReanimator.UseNaNFling and HatReanimator.FlingTargets[1] then
@@ -5807,7 +5842,45 @@ function HatReanimator.Start()
 				tool.Parent = backpack
 			end
 		end
-		HatReanimator.Status.ReanimState = "Preparing reanimation."
+		HatReanimator.Status.ReanimState = "Loading Permadeath."
+		if perma then
+			if RejectCharacterDeletionsDisabled then
+				HatReanimator.Status.Permadeath = "Doing RCDless Permadeath."
+				cdsbeffect = os.clock() + Players.RespawnTime + 0.05
+				local oldperma = Util.Instance("Model", workspace)
+				Instance.new("Part", oldperma).Name = "Torso"
+				Instance.new("Part", oldperma).Name = "Head"
+				Instance.new("Humanoid", oldperma).Name = "Humanoid"
+				oldperma.PrimaryPart = oldperma.Torso
+				oldperma:PivotTo(CFrame.new(0, 99999, 0))
+				HatReanimator.DontFireCharAddOnThisChar = oldperma
+				Player.Character = oldperma
+				task.wait(3)
+				if not character:IsDescendantOf(workspace) then
+					lgloop:Disconnect()
+					return
+				end
+				HatReanimator.DontFireCharAddOnThisChar = character
+				Player.Character = character
+				while Humanoid:GetState() ~= Enum.HumanoidStateType.Dead and character:IsDescendantOf(workspace) do
+					if os.clock() > cdsbeffect then break end
+					task.wait()
+				end
+				if not character:IsDescendantOf(workspace) then
+					lgloop:Disconnect()
+					return
+				end
+			else
+				HatReanimator.Status.Permadeath = "Waiting for CDSB hack."
+				while Humanoid:GetState() ~= Enum.HumanoidStateType.Dead and character:IsDescendantOf(workspace) do
+					if os.clock() > cdsbeffect then break end
+					task.wait()
+				end
+			end
+			HatReanimator.Status.Permadeath = string.format("Permadeathed after %.3fs.", os.clock() - cdsbtime)
+		else
+			HatReanimator.Status.Permadeath = "Disabled, nothing to do."
+		end
 		if not character:IsDescendantOf(workspace) then
 			lgloop:Disconnect()
 			return
@@ -5880,7 +5953,7 @@ function HatReanimator.Start()
 				end
 				if hatcols and collidable <= atleast then
 					if perma then
-						HatReanimator.Status.Recovery = "No hat collide. Respawning!"
+						HatReanimator.Status.Permadeath = "No hat collide. Respawning!"
 						Respawn()
 					end
 				end
@@ -5905,14 +5978,14 @@ function HatReanimator.Start()
 		HatReanimator.Status.ReanimState = "Done."
 		if #CharHats == 0 then
 			if perma then
-				HatReanimator.Status.Recovery = "All hats died. Respawning!"
+				HatReanimator.Status.Permadeath = "All hats died. Respawning!"
 				Respawn()
 			end
 		end
 		if perma and hatcols then
 			if HatReanimator.IWantAllHats and NumHats > #CharHats then
 				if perma then
-					HatReanimator.Status.Recovery = "Some hats died. Respawning!"
+					HatReanimator.Status.Permadeath = "Some hats died. Respawning!"
 					Respawn()
 				end
 			else
@@ -5959,7 +6032,7 @@ function HatReanimator.Start()
 				end
 				if HatReanimator.HasPermadeath and not IsRespawning and HatReanimator.IWantAllHats then
 					if NumHats > #CharHats then
-						HatReanimator.Status.Recovery = "Some hats died. Respawning!"
+						HatReanimator.Status.Permadeath = "Some hats died. Respawning!"
 						Respawn()
 					else
 						local midpoint = Vector3.zero
@@ -5980,7 +6053,7 @@ function HatReanimator.Start()
 							-- Give long-range accessories time to enter the expanded
 							-- simulation radius before declaring them unclaimable.
 							if (v.Position - midpoint).Magnitude > 10000 then
-								HatReanimator.Status.Recovery = "Some hats unclaimable. Respawning!"
+								HatReanimator.Status.Permadeath = "Some hats unclaimable. Respawning!"
 								Respawn()
 								break
 							end
@@ -5998,7 +6071,7 @@ function HatReanimator.Start()
 					Humanoid.JumpPower = 50
 				end
 				if Camera then
-					if (ReanimOkay and ReanimCharacter) then
+					if (ReanimOkay and ReanimCharacter) or not HatReanimator.Permadeath then
 						Camera.CameraSubject = ReanimCharacter:FindFirstChildOfClass("Humanoid")
 					else
 						Camera.CameraSubject = Humanoid
@@ -6151,7 +6224,7 @@ function HatReanimator.Start()
 					flingtarget = HatReanimator.FlingTargets[1]
 					if flingtarget then
 						if not HatReanimator.HasPermadeath then
-							-- Respawn recovery is disabled: discard this respawn-based fling request
+							-- Permadeath is disabled: discard this respawn-based fling request
 							-- instead of rebuilding the character and interrupting reanimation.
 							flingtarget.Time = nil
 							flingtarget = nil
@@ -6497,6 +6570,10 @@ do
 		Reanimate.ScaleGravity = val
 		SaveData.ScaleGravityEnabled = val
 	end)
+	UI.CreateSwitch(MainPage, "Void Float", Reanimate.PatchmaVoidFloat).Changed:Connect(function(val)
+		Reanimate.PatchmaVoidFloat = val
+		SaveData.PatchmaVoidFloat = val
+	end)
 	UI.CreateButton(MainPage, "Force Sit (2x to remove gyro)", 20).Activated:Connect(function()
 		local ch = Reanimate.Character or Player.Character
 		if ch then
@@ -6685,6 +6762,10 @@ do
 		SaveData.NoPhysicsRepRootPart = not val
 	end)
 	UI.CreateText(MainPage, "internals for physics based reanimation\n(like hat reanimator)", 10, Enum.TextXAlignment.Center)
+	UI.CreateSwitch(MainPage, "Patchma-like Netless", Reanimate.UsePatchmaLikeNetless).Changed:Connect(function(val)
+		Reanimate.UsePatchmaLikeNetless = val
+		SaveData.UsePatchmaLikeNetless = val
+	end)
 	local NetVelSlider = UI.CreateSlider(MainPage, "Netless Velocity", Reanimate.NetlessVelocity, 25.01, 30, 0.1)
 	NetVelSlider.Changed:Connect(function(val)
 		val = math.clamp(val, 25.01, 30)
