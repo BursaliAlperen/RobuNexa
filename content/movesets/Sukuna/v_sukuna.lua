@@ -339,17 +339,20 @@ AddModule(function()
         local clipName = string.lower(tostring(preferredName or filename))
         local isMovementClip = clipName == "walk" or clipName == "run" or clipName == "idle"
             or clipName == "jump" or clipName == "fall"
-        if not isMovementClip then
-            -- Stop movement before an attack; otherwise the next Update recreates
-            -- the walk/idle track and immediately overwrites the attack pose.
+        if isMovementClip then
+            -- Never let the movement updater replace an in-progress attack.
+            if activeActionTrack and activeActionTrack.IsPlaying then return false end
+        else
+            -- Stop movement before an attack; otherwise walk/idle can overwrite
+            -- the attack pose on the next update.
             if walkAnimationTrack and walkAnimationTrack.IsPlaying then
                 pcall(function() walkAnimationTrack:Stop(0.05); walkAnimationTrack:Destroy() end)
             end
             walkAnimationTrack = nil
             movementAnimationName = nil
-        end
-        if activeActionTrack and activeActionTrack.IsPlaying then
-            activeActionTrack:Stop(0.05)
+            if activeActionTrack and activeActionTrack.IsPlaying then
+                activeActionTrack:Stop(0.05)
+            end
         end
         local okAnimator, animator = pcall(function() return AnimLib.Animator.new() end)
         if not okAnimator or not animator then
@@ -1090,6 +1093,9 @@ AddModule(function()
             return
         end
         local now = os.clock()
+        -- One-shot attacks are exclusive: do not let another skill replace the
+        -- active clip before its final keyframe has played.
+        if activeActionTrack and activeActionTrack.IsPlaying then return end
         if now < (abilityReadyAt[name] or 0) then return end
         abilityReadyAt[name] = now + (abilityCooldowns[name] or 3)
         targetPosition = typeof(targetPosition) == "Vector3" and targetPosition
@@ -1126,10 +1132,10 @@ AddModule(function()
             slashBurstCount = 1
             slashBurstTarget = targetPosition
             -- Play the bundled Sukuna animation only; no procedural fallback animation.
-            playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
+            local cleaveTrack = playBundledAnimation("Sukuna/Cleave.anim", "cleave", false)
             playBundledSound("sounds/sukuna-slash.mp3", 0.75)
             chatAbilityMessage("Cleave!")
-            task.delay(1.35, function()
+            task.delay(math.max(cleaveTrack and cleaveTrack.Duration or 1.35, 1.35) + 0.1, function()
                 if abilityTargets.Cleave == targetPosition then abilityTargets.Cleave = nil end
             end)
         elseif isDismantle or isCombo or isRush then
@@ -1175,7 +1181,7 @@ AddModule(function()
                 playBundledSound("sounds/sukuna-slash.mp3", isRush and 0.55 or 0.75)
             end
             if not actionStarted then
-                notify((isCombo and "Combo.anim" or "Cleave.anim") .. " failed to start; check the asset-load/AnimLib log.")
+                notify(animationFile .. " failed to start; check the asset-load/AnimLib log.")
             end
             if isDismantle then
                 -- Dismantle has a short 3.5-stud backward recoil, spread across
@@ -1201,8 +1207,9 @@ AddModule(function()
                 -- Advance the reanimated root at ~32 studs/second in 0.1s steps.
                 task.spawn(function()
                     local rushStartedAt = os.clock()
-                    local rushTrack = actionAnimationTrack
-                    -- Respect the source animation length; the old 3.5s cap cut long clips off.
+                    -- Capture the exact Rush controller returned above. Never read or
+                    -- stop the global action track here: it may belong to a later skill.
+                    local rushTrack = actionStarted
                     local rushDuration = math.max(rushTrack and rushTrack.Duration or 1.2, 0.1)
                     local nextStepAt = rushStartedAt
                     while os.clock() - rushStartedAt < rushDuration and rushTrack and rushTrack.IsPlaying do
@@ -1223,8 +1230,10 @@ AddModule(function()
                             root.AssemblyLinearVelocity = Vector3.new(0, velocity.Y, 0)
                         end)
                     end
-                    if actionAnimationTrack and actionAnimationTrack.IsPlaying then
-                        pcall(function() actionAnimationTrack:Stop(0.08); actionAnimationTrack:Destroy() end)
+                    -- The controller stops itself on its final keyframe. Do not stop
+                    -- actionAnimationTrack globally; that could be a newer skill's clip.
+                    if rushTrack and rushTrack.IsPlaying and os.clock() - rushStartedAt >= rushDuration then
+                        pcall(function() rushTrack:Stop(0.08); rushTrack:Destroy() end)
                     end
                     if abilityTargets.Dismantle == targetPosition then abilityTargets.Dismantle = nil end
                 end)
