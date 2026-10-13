@@ -133,14 +133,18 @@ do
 	end
 end
 
--- WILL THIS FIX CRASHES IDK ????????
+-- Preserve the executor's native protected-call functions before wrapping them.
+-- Calling the local wrappers recursively here causes a stack overflow on startup.
+local nativePcall = pcall
+local nativeXpcall = xpcall
+
 local pcall = function(func, ...)
-	return pcall(function(...)
+	return nativePcall(function(...)
 		return func(...)
 	end, ...)
 end
 local xpcall = function(func, ...)
-	return xpcall(function(...)
+	return nativeXpcall(function(...)
 		return func(...)
 	end, ...)
 end
