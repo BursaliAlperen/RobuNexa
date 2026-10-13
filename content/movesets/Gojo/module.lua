@@ -15,7 +15,7 @@ AddModule(function()
 	-- The Gojo .rbxm files are model assets, not files AnimLib.Track.fromfile can parse directly.
 	m.Assets = {
 		"Gojo/GojoIdle.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Gojo/GojoIdle.anim",
-		"Gojo/Sokamona.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Gojo/Sokamona.anim",
+		"Gojo/SokamonaFixed.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Gojo/SokamonaFixed.anim",
 		"Gojo/GojoWalk.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Gojo/GojoWalk.anim",
 		"Gojo/GojoJump.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Gojo/GojoJump.anim",
 		"Gojo/GojoFall.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Gojo/GojoFall.anim",
@@ -25,7 +25,7 @@ AddModule(function()
 		"Gojo/HollowPurple.anim@https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/animations/Gojo/HollowPurple.anim",
 	}
 	local animationFiles = {
-		Sokamona = "Gojo/Sokamona.anim",
+		Sokamona = "Gojo/SokamonaFixed.anim",
 		Idle = "Gojo/GojoIdle.anim",
 		Walk = "Gojo/GojoWalk.anim",
 		-- No separate Gojo Run.rbxm exists in the repository yet; use Walk instead of a broken URL.
