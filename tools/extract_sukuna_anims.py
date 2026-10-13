@@ -15,7 +15,7 @@ ASSETS = [
     ("animations/Sukuna/Dismantle.rbxm", "dismantle", "Dismantle.anim"),
     ("animations/Sukuna/Rushbeatdown.rbxm", "rush", "Rushbeatdown.anim"),
     # Dedicated Combo animation supplied by the user.
-    ("animations/Sukuna/SukunaCombo.rbxm", "combo", "SukunaCombo.anim"),
+    ("animations/Sukuna/Combo.rbxm", "combo", "Combo.anim"),
 ]
 STYLE = {0: "Linear", 1: "Constant", 2: "Elastic", 3: "Cubic", 4: "Bounce",
          5: "Sine", 6: "Exponential", 7: "Quad", 8: "Quart", 9: "Quint",
@@ -107,8 +107,8 @@ def main():
         if not source_bytes or not any(source_bytes):
             # The current SukunaCombo.rbxm in the repository is a 117 KB all-zero placeholder,
             # not a Roblox model. Do not rename it to .anim or generate fabricated keyframes.
-            if source_name.endswith("SukunaCombo.rbxm"):
-                print(f"WARNING: {source_name} is all-zero/corrupt; skipping {output_name}. Upload the original RBXM to extract real keyframes.")
+            if source_name.endswith("Combo.rbxm"):
+                raise SystemExit(f"Invalid all-zero/corrupt RBXM source: {source_name}")
                 continue
             raise SystemExit(f"Invalid all-zero RBXM source: {source_name}")
         converted = converted_dir / (source.stem + ".rbxmx")
