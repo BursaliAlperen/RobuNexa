@@ -1,0 +1,2 @@
+--!strict
+-- Compatibility shim. Tool activation is now handled server-side by SkillController.

@@ -1,0 +1,3 @@
+--!strict
+-- Compatibility shim. Real RBXM skills are handled by SkillController.
+-- No decoded VFX, procedural VFX, teleport, or fake animation remains here.
