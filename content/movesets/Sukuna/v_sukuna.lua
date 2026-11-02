@@ -87,7 +87,7 @@ AddModule(function()
     local hud
     local skillButtons = {}
     local activateAbility
-    local abilityCooldowns = {Cleave = 5, Dismantle = 7, Combo = 15, Rush = 18, Laugh = 12, Fling = 10}
+    local abilityCooldowns = {Cleave = 5, Dismantle = 7, Combo = 15, Rush = 18, Laugh = 12}
     local abilityReadyAt = {}
     local abilityTargets = {}
     local fuugaTargetPosition
@@ -889,7 +889,6 @@ AddModule(function()
         Combo = Enum.KeyCode.Z,
         Rush = Enum.KeyCode.R,
         Laugh = Enum.KeyCode.L,
-        Fling = Enum.KeyCode.F,
     }
     local LABELS = {
         Cleave = "CLEAVE",
@@ -897,9 +896,8 @@ AddModule(function()
         Combo = "COMBO",
         Rush = "RUSH",
         Laugh = "LAUGH",
-        Fling = "NPC FLING",
     }
-    local SKILL_ORDER = {"Cleave", "Dismantle", "Combo", "Rush", "Laugh", "Fling"}
+    local SKILL_ORDER = {"Cleave", "Dismantle", "Combo", "Rush", "Laugh"}
 
     local function refreshButtons()
         if type(skillButtons) ~= "table" or type(abilityReadyAt) ~= "table" then
@@ -1035,105 +1033,6 @@ AddModule(function()
 
     -- Find one living NPC in front of the reanimated rig. Player characters,
     -- the local avatar, and the reanimation rig are always excluded.
-    local function findNearestNPCForFling(maxDistance)
-        if not root or not root.Parent then return nil end
-
-        local players = game:GetService("Players")
-        local player = players.LocalPlayer
-        local localCharacter = player and player.Character
-        local exclusions = {}
-        if activeFigure then table.insert(exclusions, activeFigure) end
-        if localCharacter and localCharacter ~= activeFigure then
-            table.insert(exclusions, localCharacter)
-        end
-
-        local params = OverlapParams.new()
-        params.FilterType = Enum.RaycastFilterType.Exclude
-        params.FilterDescendantsInstances = exclusions
-        params.MaxParts = 300
-
-        local ok, nearbyParts = pcall(function()
-            return workspace:GetPartBoundsInRadius(root.Position, maxDistance, params)
-        end)
-        if not ok or type(nearbyParts) ~= "table" then
-            warn("[Sukuna] NPC Fling target scan failed: " .. tostring(nearbyParts))
-            return nil
-        end
-
-        local checkedModels = {}
-        local nearestModel, nearestHumanoid, nearestRoot
-        local nearestDistance = maxDistance
-        local forward = root.CFrame.LookVector
-
-        for _, part in ipairs(nearbyParts) do
-            if part:IsA("BasePart") then
-                local model = part:FindFirstAncestorOfClass("Model")
-                if model and not checkedModels[model] then
-                    checkedModels[model] = true
-
-                    local isPlayerCharacter = players:GetPlayerFromCharacter(model) ~= nil
-                    if not isPlayerCharacter then
-                        for _, otherPlayer in ipairs(players:GetPlayers()) do
-                            local character = otherPlayer.Character
-                            if character and (model == character or model:IsDescendantOf(character)) then
-                                isPlayerCharacter = true
-                                break
-                            end
-                        end
-                    end
-
-                    if not isPlayerCharacter and model ~= activeFigure and model ~= localCharacter then
-                        local humanoid = model:FindFirstChildOfClass("Humanoid")
-                        local npcRoot = resolveRoot(model)
-                        if humanoid and humanoid.Health > 0 and npcRoot
-                            and npcRoot:IsA("BasePart") and not npcRoot.Anchored then
-                            local offset = npcRoot.Position - root.Position
-                            local distance = offset.Magnitude
-                            if distance > 2 and distance <= nearestDistance then
-                                local direction = offset.Unit
-                                if forward:Dot(direction) >= 0.15 then
-                                    nearestModel = model
-                                    nearestHumanoid = humanoid
-                                    nearestRoot = npcRoot
-                                    nearestDistance = distance
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
-
-        return nearestModel, nearestHumanoid, nearestRoot
-    end
-
-    local function showFlingImpact(model)
-        if not model or not model.Parent then return end
-        local ok, highlight = pcall(function()
-            local item = Instance.new("Highlight")
-            item.Name = "RobuNexaSukunaFlingImpact"
-            item.Adornee = model
-            item.DepthMode = Enum.HighlightDepthMode.Occluded
-            item.FillColor = Color3.fromRGB(210, 35, 58)
-            item.OutlineColor = Color3.fromRGB(255, 220, 220)
-            item.FillTransparency = 0.42
-            item.OutlineTransparency = 0.08
-            item.Parent = model
-            return item
-        end)
-        if not ok or not highlight then return end
-
-        pcall(function()
-            local tween = game:GetService("TweenService"):Create(
-                highlight,
-                TweenInfo.new(0.42, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-                {FillTransparency = 1, OutlineTransparency = 1}
-            )
-            tween:Play()
-            game:GetService("Debris"):AddItem(highlight, 0.48)
-        end)
-    end
-
     local function activateSukunaAbility(name, targetPosition)
         if name == "Domain" or name == "Fuuga" then return end
         if name == "Laugh" then
@@ -1151,73 +1050,6 @@ AddModule(function()
             refreshButtons()
             return
         end
-        if name == "Fling" then
-            if not activeFigure or not activeFigure.Parent or not root or not root.Parent then
-                notify("Moveset is not ready yet; waiting for the Hat Reanimation rig.")
-                return
-            end
-            local now = os.clock()
-            if now < (abilityReadyAt.Fling or 0) then return end
-            if activeActionTrack and activeActionTrack.IsPlaying then return end
-
-            local npc, npcHumanoid, npcRoot = findNearestNPCForFling(32)
-            if not npc or not npcHumanoid or not npcRoot then
-                notify("No living NPC in front of you (32-stud range). Players are excluded.")
-                return
-            end
-
-            abilityReadyAt.Fling = now + abilityCooldowns.Fling
-            local targetPosition = npcRoot.Position
-            abilityTargets.Cleave = targetPosition
-            cleaveUntil = now + 0.85
-            cleaveAccessoryStartedAt = now
-            cleaveAccessoryUntil = now + 0.7
-            comboAccessoryUntil = 0
-            slashBurstStartedAt = now
-            slashBurstUntil = now + 0.56
-            slashBurstCount = 2
-            slashBurstTarget = targetPosition
-
-            playBundledAnimation("Sukuna/Cleave.anim", "fling", false)
-            playBundledSound("sounds/sukuna-slash.mp3", 0.95)
-            showFlingImpact(npc)
-
-            local offset = npcRoot.Position - root.Position
-            local flatDirection = Vector3.new(offset.X, 0, offset.Z)
-            if flatDirection.Magnitude < 0.01 then
-                local look = root.CFrame.LookVector
-                flatDirection = Vector3.new(look.X, 0, look.Z)
-            end
-            if flatDirection.Magnitude < 0.01 then
-                flatDirection = Vector3.new(0, 0, -1)
-            end
-            flatDirection = flatDirection.Unit
-
-            -- Apply a real bounded physics impulse, plus a small spin. This is
-            -- client-side: replication depends on who owns the NPC's physics.
-            local mass = math.clamp(npcRoot.AssemblyMass, 1, 100)
-            local impulseOk, impulseError = pcall(function()
-                npcRoot:ApplyImpulse((flatDirection * 88 + Vector3.new(0, 58, 0)) * mass)
-            end)
-            pcall(function()
-                npcRoot:ApplyAngularImpulse(root.CFrame.RightVector * mass * 18)
-            end)
-            if not impulseOk then
-                warn("[Sukuna] NPC Fling impulse failed: " .. tostring(impulseError))
-                notify("NPC impulse failed; check the physics/ownership warning.")
-            else
-                notify("Fling hit: " .. npc.Name)
-            end
-
-            task.delay(0.95, function()
-                if abilityTargets.Cleave == targetPosition then
-                    abilityTargets.Cleave = nil
-                end
-            end)
-            refreshButtons()
-            return
-        end
-
         local isDismantle = name == "Dismantle"
         local isCombo = name == "Combo"
         local isRush = name == "Rush"
@@ -1422,7 +1254,7 @@ AddModule(function()
         panel.Name = "MobileSkillKeys"
         panel.AnchorPoint = Vector2.new(1, 0.5)
         panel.Position = UDim2.new(1, -100, 0.55, 0)
-        panel.Size = UDim2.fromOffset(70, 366)
+        panel.Size = UDim2.fromOffset(70, 310)
         panel.BackgroundTransparency = 1
         panel.Parent = hud
         local layout = Instance.new("UIListLayout")
@@ -1474,7 +1306,7 @@ AddModule(function()
                 end
             end
         end))
-        notify("Sukuna skills ready: X Cleave, C Dismantle, Z Combo, R Rush, L Laugh, F NPC Fling.")
+        notify("Sukuna skills ready: X Cleave, C Dismantle, Z Combo, R Rush, L Laugh. Equipped Cleave accessory auto-detected.")
     end
 
     m.Config = function(parent) end
