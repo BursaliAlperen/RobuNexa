@@ -1,35 +1,41 @@
-# Sukuna Moveset — One-Finger / Cleave Focus
+# Sukuna Moveset — Cleave Focus
 
-This NAM moveset keeps Cleave as the primary skill and adds three Dismantle buttons plus three Combo buttons. It sends no chat messages and does not expose Domain or Fuuga abilities.
+This NAM moveset keeps Cleave as the signature animated slash and includes Dismantle, Combo, Rush, and Laugh. Domain and Fuuga remain disabled. Fling and all knockback/physics-impulse behaviour have been removed.
 
-## Separate animation files
+## Automatic equipped-accessory discovery
 
-The Kai source was intended to replace the old Cleave clip. `Cleave.anim` is now used by the Cleave skill and all three Combo buttons. Dismantle remains a separate optional animation.
+- The moveset scans the character's currently equipped accessories during initialization and refreshes the scan while running.
+- It first checks the applied avatar description and catalog AssetIds, then checks accessory instances and their names as a fallback.
+- The Cleave weapon accessory is matched by its known catalog ID `101090904148116` or a case-insensitive accessory name containing `cleave`.
+- The slash-effect accessory is matched separately by its known catalog ID `18908729586`, explicit ID/name metadata, or a name containing `cleave slash` / `slash effect`.
+- It uses only accessories already equipped on the character (including the supported reanimated figure lookup). It does not insert, clone, download, or create a replacement accessory.
+- If the required accessory is not equipped, the moveset leaves that effect unavailable rather than silently choosing an unrelated hat.
 
-- `content/animations/Sukuna/Cleave.anim` — the clip used by Cleave and all three Combo buttons.
-- `content/animations/Sukuna/Dismantle.anim` — separate Dismantle animation file.
+## Animation and effects
 
-The binary animation file is stored at `content/animations/Sukuna/Cleave.anim`. Dismantle remains optional; if its file is absent, the moveset still loads but Dismantle custom animation will not play.
-
-## Equipped accessory
-
-- Cleave accessory: `101090904148116`
-- The moveset uses the accessory already equipped on the character; it does not create a replacement accessory.
+- `content/animations/Sukuna/Cleave.anim` — Cleave action animation.
+- `content/animations/Sukuna/Dismantle.anim` — Dismantle animation.
+- `content/animations/Sukuna/Combo.anim` — Combo animation.
+- `content/animations/Sukuna/Rushbeatdown.anim` — Rush animation.
+- `content/sounds/sukuna-slash.mp3` — slash sound.
+- Cleave drives the existing equipped accessory through timed slash passes. No duplicate animation or accessory assets are created.
 
 ## Skills and cooldowns
 
 | Skill | Key | Cooldown |
 |---|---|---:|
-| Cleave | X | 2.25 s |
-| Dismantle 1 | C | 3.5 s |
-| Dismantle 2 | V | 3.5 s |
-| Dismantle 3 | B | 3.5 s |
-| Combo 1 | Z | 4.5 s |
-| Combo 2 | G | 4.5 s |
-| Combo 3 | H | 4.5 s |
+| Cleave | X | 5 s |
+| Dismantle | C | 7 s |
+| Combo | Z | 15 s |
+| Rush | R | 18 s |
+| Laugh | L | 12 s |
 
-Each Dismantle and Combo button has its own cooldown timestamp. Combo variants use the former Cleave animation through `Cleave.anim` and trigger three staggered local slash-effect pulses. On mobile, the seven skills appear as circular buttons on the right.
+Each skill has an independent cooldown. On touch devices, the five available skills appear in the Sukuna ability panel.
 
-- **Domain** and **Fuuga** are disabled; their buttons are not shown.
-- No chat announcements or finger-pickup chat system is started.
-- Visibility of client-side visuals to other players depends on Roblox replication and the execution environment.
+## Removed behaviour
+
+- No Fling ability, NPC scan, player targeting, knockback, physics impulse, or angular impulse.
+- No automatic target damage or hitbox logic is added by this accessory animation pass.
+- Domain and Fuuga remain disabled; their buttons are not shown.
+- No chat announcements or finger-pickup mechanic is started.
+- The moveset does not delete normal avatar accessories when it is destroyed.
