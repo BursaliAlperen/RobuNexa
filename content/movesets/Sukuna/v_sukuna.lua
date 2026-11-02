@@ -1038,7 +1038,8 @@ AddModule(function()
     local function findNearestNPCForFling(maxDistance)
         if not root or not root.Parent then return nil end
 
-        local player = game:GetService("Players").LocalPlayer
+        local players = game:GetService("Players")
+        local player = players.LocalPlayer
         local localCharacter = player and player.Character
         local exclusions = {}
         if activeFigure then table.insert(exclusions, activeFigure) end
@@ -1070,13 +1071,18 @@ AddModule(function()
                 if model and not checkedModels[model] then
                     checkedModels[model] = true
 
-                    local isPlayer = player and player.Character == model
-                    if not isPlayer then
-                        local players = game:GetService("Players")
-                        isPlayer = players:GetPlayerFromCharacter(model) ~= nil
+                    local isPlayerCharacter = players:GetPlayerFromCharacter(model) ~= nil
+                    if not isPlayerCharacter then
+                        for _, otherPlayer in ipairs(players:GetPlayers()) do
+                            local character = otherPlayer.Character
+                            if character and (model == character or model:IsDescendantOf(character)) then
+                                isPlayerCharacter = true
+                                break
+                            end
+                        end
                     end
 
-                    if not isPlayer and model ~= activeFigure and model ~= localCharacter then
+                    if not isPlayerCharacter and model ~= activeFigure and model ~= localCharacter then
                         local humanoid = model:FindFirstChildOfClass("Humanoid")
                         local npcRoot = resolveRoot(model)
                         if humanoid and humanoid.Health > 0 and npcRoot
