@@ -8400,7 +8400,9 @@ InitLogsPage.ClipsDescendants = true
 local function getgithubraw(path)
 	-- Prefer raw.githubusercontent.com: it avoids GitHub API rate limits and API 403s.
 	-- Never treat an error page or an empty response as executable Lua.
-	local rawUrl = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/main/content/" .. path
+	-- Sukuna's reviewed module currently lives on the feature branch until PR #13 is merged.
+	local sourceRef = string.find(path, "^movesets/Sukuna/") and "maintenance/sukuna-cleave-audit" or "main"
+	local rawUrl = "https://raw.githubusercontent.com/BursaliAlperen/RobuNexa/" .. sourceRef .. "/content/" .. path
 	InitLogsText.Text ..= "\n[LOG] [GitGET] GET raw./" .. path
 	local ok, response = pcall(request, {
 		Method = "GET",
@@ -8421,7 +8423,7 @@ local function getgithubraw(path)
 	InitLogsText.Text ..= "\n[WARN] [GitGET] GET raw./" .. path .. " " .. rawStatus
 
 	-- API fallback for executor environments where raw requests are blocked.
-	local apiUrl = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/" .. path .. "?ref=main"
+	local apiUrl = "https://api.github.com/repos/BursaliAlperen/RobuNexa/contents/content/" .. path .. "?ref=" .. sourceRef
 	InitLogsText.Text ..= "\n[LOG] [GitGET] GET api./" .. path
 	local apiOk, apiResponse = pcall(request, {
 		Method = "GET",
