@@ -1,6 +1,6 @@
-# Sukuna Moveset — One-Finger / Cleave Focus
+# Sukuna Moveset — Cleave Focus
 
-This NAM moveset keeps Cleave as the primary skill and adds three Dismantle buttons plus three Combo buttons. It sends no chat messages and does not expose Domain or Fuuga abilities.
+This NAM moveset keeps Cleave as the primary skill and adds Dismantle, Combo, Rush and Laugh actions. Domain, Fuuga and the unused finger-pickup prototype are not started.
 
 ## Separate animation files
 
@@ -31,5 +31,5 @@ The binary animation file is stored at `content/animations/Sukuna/Cleave.anim`. 
 Each Dismantle and Combo button has its own cooldown timestamp. Combo variants use the former Cleave animation through `Cleave.anim` and trigger three staggered local slash-effect pulses. On mobile, the seven skills appear as circular buttons on the right.
 
 - **Domain** and **Fuuga** are disabled; their buttons are not shown.
-- No chat announcements or finger-pickup chat system is started.
+- No chat announcements or finger-pickup mechanic is started.
 - Visibility of client-side visuals to other players depends on Roblox replication and the execution environment.
