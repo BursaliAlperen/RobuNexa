@@ -1,15 +1,16 @@
 # Sukuna Moveset — Cleave Focus
 
-This NAM moveset keeps Cleave as the primary skill and adds Dismantle, Combo, Rush and Laugh actions. Domain, Fuuga and the unused finger-pickup prototype are not started.
+This NAM moveset keeps Cleave as the signature slash and includes Dismantle, Combo, Rush, Laugh, and an NPC-only Fling skill. Domain and Fuuga remain disabled.
 
-## Separate animation files
+## Animation and effects
 
-The Kai source was intended to replace the old Cleave clip. `Cleave.anim` is now used by the Cleave skill and all three Combo buttons. Dismantle remains a separate optional animation.
+- `content/animations/Sukuna/Cleave.anim` — used by Cleave and the NPC Fling impact.
+- `content/animations/Sukuna/Dismantle.anim` — Dismantle animation.
+- `content/animations/Sukuna/Combo.anim` — Combo animation.
+- `content/animations/Sukuna/Rushbeatdown.anim` — Rush animation.
+- `content/sounds/sukuna-slash.mp3` — slash and impact sound.
 
-- `content/animations/Sukuna/Cleave.anim` — the clip used by Cleave and all three Combo buttons.
-- `content/animations/Sukuna/Dismantle.anim` — separate Dismantle animation file.
-
-The binary animation file is stored at `content/animations/Sukuna/Cleave.anim`. Dismantle remains optional; if its file is absent, the moveset still loads but Dismantle custom animation will not play.
+Cleave now drives three timed slash-effect passes using the existing equipped accessory. This adds hit rhythm without introducing duplicate animation assets.
 
 ## Equipped accessory
 
@@ -20,16 +21,25 @@ The binary animation file is stored at `content/animations/Sukuna/Cleave.anim`. 
 
 | Skill | Key | Cooldown |
 |---|---|---:|
-| Cleave | X | 2.25 s |
-| Dismantle 1 | C | 3.5 s |
-| Dismantle 2 | V | 3.5 s |
-| Dismantle 3 | B | 3.5 s |
-| Combo 1 | Z | 4.5 s |
-| Combo 2 | G | 4.5 s |
-| Combo 3 | H | 4.5 s |
+| Cleave | X | 5 s |
+| Dismantle | C | 7 s |
+| Combo | Z | 15 s |
+| Rush | R | 18 s |
+| Laugh | L | 12 s |
+| NPC Fling | F | 10 s |
 
-Each Dismantle and Combo button has its own cooldown timestamp. Combo variants use the former Cleave animation through `Cleave.anim` and trigger three staggered local slash-effect pulses. On mobile, the seven skills appear as circular buttons on the right.
+Each skill has an independent cooldown. On touch devices, all six skills appear in the Sukuna ability panel.
 
-- **Domain** and **Fuuga** are disabled; their buttons are not shown.
+## NPC Fling behaviour and limits
+
+- Searches a 32-stud radius, then selects the nearest living Humanoid NPC in front of Sukuna.
+- Player characters and the local/reanimated character are explicitly excluded.
+- Uses Roblox `BasePart:ApplyImpulse()` and a small angular impulse; it does not use a fake teleport or repeatedly overwrite the NPC's position.
+- Adds a short local impact highlight and reuses the existing Cleave animation and slash sound.
+- This moveset is client-side. The impulse is a real physics call, but whether other players see the NPC move depends on network ownership. A server-owned NPC needs the impulse applied by a server Script in the experience for reliable replicated knockback.
+
+## Disabled / excluded systems
+
+- **Domain** and **Fuuga** remain disabled; their buttons are not shown.
 - No chat announcements or finger-pickup mechanic is started.
-- Visibility of client-side visuals to other players depends on Roblox replication and the execution environment.
+- The old standalone FlingLab and player-targeting UniversalFling modules are removed; NPC Fling now lives in the Sukuna moveset and cannot select player characters.
