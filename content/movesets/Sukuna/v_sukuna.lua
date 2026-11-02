@@ -1,4 +1,4 @@
--- RobuNexa / NAM - One-Finger Sukuna, Cleave-focused.
+-- RobuNexa / NAM - Cleave-focused Sukuna moveset.
 -- No Domain, Fuuga, or chat output. Uses the user's equipped Cleave accessory.
 local modules = {}
 -- Keep factories intact: NAM's loader injects its API before invoking each factory.
@@ -9,7 +9,7 @@ AddModule(function()
     local UserInputService = game:GetService("UserInputService")
     m.ModuleType = "MOVESET"
     m.Name = "Sukuna"
-    m.Description = "One-Finger Sukuna: Cleave-focused slashes. No Domain or Fuuga."
+    m.Description = "Cleave-focused Sukuna: slashes, combos and rush attacks. No Domain or Fuuga."
     -- Match Gojo's asset loader contract: logical local path @ raw GitHub URL.
     -- These are NAM AnimLib binary .anim files, not .rbxm models.
     m.Assets = {
@@ -771,7 +771,6 @@ AddModule(function()
         local t = os.clock()
         -- Keep every inactive Sukuna effect accessory 5,000 studs away from the rig.
         -- These overrides use rig-local CFrames, so this is a local-space offset.
-        -- The Sukuna Finger is handled separately and is intentionally excluded.
         local center = root.CFrame * CFrame.new(0, 2, -5)
         local hiddenCenter = CFrame.new(0, 0, -5000)
         local active = domainEnabled or os.clock() < cleaveUntil
