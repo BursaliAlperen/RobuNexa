@@ -74,7 +74,6 @@ AddModule(function()
         [101090904148116] = true,
         [18445594182] = true,
         [131873641508713] = true,
-        [18762839664] = true,
         [18726352770] = true,
         [124144353587446] = true,
         [100475161263482] = true,
@@ -84,7 +83,6 @@ AddModule(function()
     local function isAllowedAssetId(id)
         return ALLOWED_ASSET_IDS[tonumber(id)] == true
     end
-    local FINGER_ID = 18762839664
     local activeFigure, root
     local hud
     local skillButtons = {}
@@ -96,12 +94,6 @@ AddModule(function()
     local domainStartedAt = 0
     local cutsceneActive = false
     local savedCameraType, savedCameraSubject, savedCameraCFrame
-    local fingerFolder
-    local fingerMarker
-    local fingerPrompt
-    local fingerOverride
-    local fingersFound = 0
-    local fingerEquipped = false
     local connections = {}
     local domainEnabled = false
     local cleaveUntil = 0
@@ -1346,297 +1338,6 @@ AddModule(function()
         notify("Sukuna skills ready: X Cleave, C Dismantle, Z Combo, R Rush, L Laugh.")
     end
 
-    local function announceFinger(text)
-        pcall(function()
-            game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", {
-                Text = text,
-                Color = Color3.fromRGB(255, 60, 70),
-                Font = Enum.Font.GothamBold,
-                TextSize = 18,
-            })
-        end)
-    end
-
-    local function playFingerFoundCutscene(fingerPosition)
-        -- This is a local presentation cutscene; the game server must own shared state.
-        local camera = workspace.CurrentCamera
-        if not camera or cutsceneActive then return end
-        local oldType, oldSubject, oldCFrame = camera.CameraType, camera.CameraSubject, camera.CFrame
-        local focus = fingerPosition + Vector3.new(0, 1.5, 0)
-        camera.CameraType = Enum.CameraType.Scriptable
-        camera.CFrame = CFrame.lookAt(focus + Vector3.new(0, 5, 10), focus)
-        local tween = game:GetService("TweenService"):Create(camera,
-            TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-            {CFrame = CFrame.lookAt(focus + Vector3.new(0, 2.6, 5), focus)})
-        tween:Play()
-        task.delay(1.15, function()
-            if not camera or not camera.Parent then return end
-            camera.CameraType = oldType or Enum.CameraType.Custom
-            camera.CameraSubject = oldSubject
-            if oldCFrame then camera.CFrame = oldCFrame end
-        end)
-    end
-
-    local function createFingerSearch()
-        -- One real equipped finger accessory is used as the collectible. No fake
-        -- Workspace parts and no server-created finger world are spawned by this moveset.
-        if fingerFolder then fingerFolder:Destroy(); fingerFolder = nil end
-        fingersFound = 0
-
-        local Players = game:GetService("Players")
-        local RunService = game:GetService("RunService")
-        local TextChatService = game:GetService("TextChatService")
-        local player = Players.LocalPlayer
-        local character = player and player.Character
-        if not character then
-            notify("Finger accessory not found. Equip the Sukuna Finger accessory on your character.")
-            return
-        end
-
-        local function isFingerAccessory(item)
-            if not item or not item:IsA("Accessory") then return false end
-            local itemAssetId = tonumber(item:GetAttribute("AssetId"))
-                or tonumber(item:GetAttribute("_RobuNexaSukunaAssetId"))
-            if itemAssetId == FINGER_ID and isAllowedAssetId(itemAssetId) then return true end
-            local itemName = string.lower(item.Name)
-            return itemName == "sukuna's finger"
-                or itemName == "sukuna finger"
-        end
-
-        local accessory
-        -- Prefer the exact catalog asset ID from the applied HumanoidDescription.
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            local okDescription, description = pcall(function()
-                return humanoid:GetAppliedDescription()
-            end)
-            if okDescription and description then
-                local okList, list = pcall(function()
-                    return description:GetAccessories(true)
-                end)
-                if okList and type(list) == "table" then
-                    for _, entry in ipairs(list) do
-                        if tonumber(entry.AssetId) == FINGER_ID then
-                            accessory = tryAccessoryInstance(entry, character)
-                            if accessory then break end
-                        end
-                    end
-                end
-            end
-        end
-        if not accessory then
-            for _, item in ipairs(character:GetChildren()) do
-                if isFingerAccessory(item) and item:FindFirstChild("Handle") then
-                    accessory = item
-                    break
-                end
-            end
-        end
-        if not accessory then
-            notify("Equip the Sukuna Finger accessory. No fake Part was created.")
-            return
-        end
-
-        local handle = accessory:FindFirstChild("Handle")
-        if not handle or not handle:IsA("BasePart") then
-            notify("The finger accessory has no Handle.")
-            return
-        end
-
-        -- Intentionally silent: chat output is disabled to avoid polluting public chat.
-        local function chatMessage(_message)
-            return nil
-        end
-
-        local function getRootPosition()
-            -- The accessory is mapped onto the reanimated rig, so use that rig's root
-            -- for world-space HatCFrameOverride calculations.
-            local rigRoot = (activeFigure and resolveRoot(activeFigure)) or root
-            if rigRoot and rigRoot:IsA("BasePart") then return rigRoot.Position, rigRoot end
-            local current = getLocalCharacter()
-            local currentRoot = current and (current:FindFirstChild("HumanoidRootPart") or current.PrimaryPart)
-            if currentRoot and currentRoot:IsA("BasePart") then return currentRoot.Position, currentRoot end
-            return nil, nil
-        end
-
-        local function findSmartPosition()
-            local base, currentRoot = getRootPosition()
-            if not base then return nil end
-            local params = RaycastParams.new()
-            params.FilterType = Enum.RaycastFilterType.Exclude
-            local ignore = {character, accessory}
-            if activeFigure then table.insert(ignore, activeFigure) end
-            params.FilterDescendantsInstances = ignore
-            params.IgnoreWater = true
-
-            -- Pick a visible, walk-up-to surface, not a point inside a wall,
-            -- under a ceiling, or on the far side of an obstacle.
-            for attempt = 1, 48 do
-                local angle = math.random() * math.pi * 2
-                local radius = math.random(14, 48)
-                local sample = base + Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
-                local cast = workspace:Raycast(sample + Vector3.new(0, 140, 0), Vector3.new(0, -300, 0), params)
-                if cast and cast.Normal.Y >= 0.72 then
-                    local pos = cast.Position + Vector3.new(0, 1.35, 0)
-                    local ceiling = workspace:Raycast(pos + Vector3.new(0, 0.5, 0), Vector3.new(0, 4.5, 0), params)
-                    local origin = (currentRoot and currentRoot.Position or base) + Vector3.new(0, 2.2, 0)
-                    local target = pos + Vector3.new(0, 0.5, 0)
-                    local sight = workspace:Raycast(origin, target - origin, params)
-                    local visible = not sight or (sight.Position - target).Magnitude < 2.75
-                    if not ceiling and visible then
-                        return pos
-                    end
-                end
-            end
-            return nil
-        end
-
-        local function getMeshTexture()
-            local mesh = handle:FindFirstChildOfClass("SpecialMesh")
-            if mesh then return mesh.MeshId, mesh.TextureId end
-            if handle:IsA("MeshPart") then return handle.MeshId, handle.TextureId end
-            return nil, nil
-        end
-
-        local meshId, textureId = getMeshTexture()
-        local hatOverride
-        if not HatReanimator or type(HatReanimator.HatCFrameOverride) ~= "table" then
-            notify("Hat Reanimation was not found; the accessory cannot be anchored in the world.")
-            return
-        end
-        if HatReanimator and type(HatReanimator.HatCFrameOverride) == "table" then
-            hatOverride = {
-                Name = accessory.Name,
-                MeshId = meshId,
-                TextureId = textureId,
-                C0 = CFrame.identity,
-                C1 = CFrame.identity,
-                RepRootPart = root,
-            }
-            table.insert(HatReanimator.HatCFrameOverride, hatOverride)
-            fingerOverride = hatOverride
-            HatReanimator.RebuildRequired = true
-        end
-
-        local prompt = handle:FindFirstChild("SukunaFingerPrompt")
-        if not prompt then
-            prompt = Instance.new("ProximityPrompt")
-            prompt.Name = "SukunaFingerPrompt"
-            prompt.ActionText = "Collect Finger"
-            prompt.ObjectText = "Sukuna Finger"
-            prompt.HoldDuration = 0.4
-            prompt.MaxActivationDistance = 10
-            prompt.RequiresLineOfSight = false
-            prompt.Parent = handle
-        end
-
-        local marker = Instance.new("BillboardGui")
-        fingerMarker = marker
-        fingerPrompt = prompt
-        marker.Name = "SukunaFingerMarker"
-        marker.Adornee = handle
-        marker.Size = UDim2.fromOffset(150, 40)
-        marker.StudsOffsetWorldSpace = Vector3.new(0, 1.6, 0)
-        marker.AlwaysOnTop = true
-        marker.MaxDistance = 250
-        local label = Instance.new("TextLabel")
-        label.Size = UDim2.fromScale(1, 1)
-        label.BackgroundColor3 = Color3.fromRGB(35, 4, 12)
-        label.BackgroundTransparency = 0.15
-        label.TextColor3 = Color3.fromRGB(255, 75, 92)
-        label.TextStrokeTransparency = 0.2
-        label.Font = Enum.Font.GothamBold
-        label.TextScaled = true
-        label.Text = "☯ SUKUNA FINGER"
-        label.Parent = marker
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 8)
-        corner.Parent = label
-        marker.Parent = player:WaitForChild("PlayerGui")
-
-        local spawnPosition = findSmartPosition()
-        if not spawnPosition then
-            marker:Destroy()
-            prompt.Enabled = false
-            notify("Could not find a safe, visible spot for the finger. Move to a more open area.")
-            return
-        end
-
-        local collected = false
-        local nextSpawnPending = false
-        local spinTime = 0
-        local function updateHatTarget(dt)
-            if not accessory.Parent or not handle.Parent then return end
-            if not spawnPosition then return end
-            spinTime += dt or 0
-            if hatOverride then
-                local _, currentRoot = getRootPosition()
-                if currentRoot then
-                    local worldFrame = CFrame.new(spawnPosition) * CFrame.Angles(0, spinTime * 1.5, math.rad(108))
-                    -- Recalculate relative to the live root so the pickup stays at its
-                    -- chosen world location while the player walks away.
-                    hatOverride.C0 = currentRoot.CFrame:ToObjectSpace(worldFrame)
-                    hatOverride.RepRootPart = currentRoot
-                end
-            end
-            if not collected then
-                local base = getRootPosition()
-                if base then
-                    label.Text = ("☯ SUKUNA FINGER  •  %d m"):format(math.floor((base - spawnPosition).Magnitude + 0.5))
-                end
-            end
-        end
-        table.insert(connections, RunService.RenderStepped:Connect(updateHatTarget))
-
-        local function moveToNewSpot()
-            if nextSpawnPending then return end
-            nextSpawnPending = true
-            task.delay(8, function()
-                if not activeFigure or not activeFigure.Parent or not accessory.Parent then return end
-                local newPosition = findSmartPosition()
-                if not newPosition then
-                    chatMessage("Could not find a safe location for the finger. Try again.")
-                    nextSpawnPending = false
-                    prompt.Enabled = true
-                    collected = false
-                    return
-                end
-                spawnPosition = newPosition
-                spinTime = 0
-                collected = false
-                nextSpawnPending = false
-                prompt.Enabled = true
-                marker.Enabled = true
-                chatMessage("The finger has reappeared at another location on the map!")
-                notify("The Sukuna Finger has appeared at a new location.")
-            end)
-        end
-
-        prompt.Enabled = true
-        table.insert(connections, prompt.Triggered:Connect(function(triggeringPlayer)
-            if triggeringPlayer and triggeringPlayer ~= player then return end
-            if collected or not spawnPosition then return end
-            collected = true
-            prompt.Enabled = false
-            marker.Enabled = false
-            fingersFound += 1
-            local collectedAt = spawnPosition
-            chatMessage(string.format("Sukuna Finger collected! (%d) • It will reappear somewhere else in 8 seconds.", fingersFound))
-            announceFinger(string.format("[Sukuna] FINGER COLLECTED  •  %d", fingersFound))
-            playFingerFoundCutscene(collectedAt)
-            task.spawn(function()
-                if laughAnimationTrack then
-                    pcall(function() laughAnimationTrack:Stop(0.05); laughAnimationTrack:Destroy() end)
-                    laughAnimationTrack = nil
-                end
-                local track = playBundledAnimation("Sukuna/SukunaLaugh.anim", "laugh", false)
-                if track then laughAnimationTrack = track end
-            end)
-            moveToNewSpot()
-        end))
-        chatMessage("The Sukuna Finger has been placed nearby in an open, accessible spot. Follow the marker.")
-    end
-
     m.Config = function(parent) end
 
     m.Init = function(figure)
@@ -1837,17 +1538,6 @@ AddModule(function()
             end
         end
         scaledMeshes = {}
-        if inventoryTool then pcall(function() inventoryTool:Destroy() end); inventoryTool = nil end
-        if fingerFolder then fingerFolder:Destroy(); fingerFolder = nil end
-        if fingerMarker then pcall(function() fingerMarker:Destroy() end); fingerMarker = nil end
-        if fingerPrompt and fingerPrompt.Parent then pcall(function() fingerPrompt:Destroy() end) end
-        fingerPrompt = nil
-        if HatReanimator and fingerOverride and type(HatReanimator.HatCFrameOverride) == "table" then
-            local index = table.find(HatReanimator.HatCFrameOverride, fingerOverride)
-            if index then table.remove(HatReanimator.HatCFrameOverride, index) end
-            HatReanimator.RebuildRequired = true
-        end
-        fingerOverride = nil
         if cutsceneActive then
             local camera = workspace.CurrentCamera
             if camera then
