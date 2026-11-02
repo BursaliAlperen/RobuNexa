@@ -588,37 +588,6 @@ AddModule(function()
             end
         end
 
-        -- The Finger catalog item is expected to remain equipped on the character.
-        fingerEquipped = false
-        if character then
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                local okDescription, description = pcall(function() return humanoid:GetAppliedDescription() end)
-                if okDescription and description then
-                    local okList, list = pcall(function() return description:GetAccessories(true) end)
-                    if okList and type(list) == "table" then
-                        for _, entry in ipairs(list) do
-                            local id
-                            pcall(function() id = tonumber(entry.AssetId) end)
-                            if id == FINGER_ID then fingerEquipped = true; break end
-                        end
-                    end
-                end
-            end
-            if not fingerEquipped then
-                for _, child in ipairs(character:GetChildren()) do
-                    if child:IsA("Accessory") and (
-                        tonumber(child:GetAttribute("AssetId")) == FINGER_ID
-                        or tonumber(child:GetAttribute("_RobuNexaSukunaAssetId")) == FINGER_ID
-                        or string.lower(child.Name) == "sukuna's finger"
-                        or string.lower(child.Name) == "sukuna finger"
-                    ) then
-                        fingerEquipped = true
-                        break
-                    end
-                end
-            end
-        end
         accessoryInstances = nextInstances
         presentIds = nextPresent
         local matched = {}
