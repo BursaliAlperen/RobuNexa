@@ -30,3 +30,7 @@ In the NAM loader's built-in module list, add:
 ```
 
 Then reload built-in modules. Confirm the client log reports one Aizen moveset registered, equip Aizen, and verify all seven HUD buttons and cleanup on unequip.
+
+## HUD refresh
+
+The ability HUD uses a dark indigo/purple theme, Aizen title/emblem, technique section label, responsive compact sizing for narrow screens, live cooldown text with a progress fill, hover feedback, and a collapse/expand control. All button and toggle connections are disconnected during `Destroy`.
