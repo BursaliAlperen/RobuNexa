@@ -1,254 +1,170 @@
--- Fling System for RobuNexa - AAA Quality Physics-Based Movement
--- Implements realistic fling mechanics with cooldown management and visual feedback
+--[[
+    Fling System for RobuNexa
+    Provides powerful fling mechanics for knocking players
+    Supports multiple fling modes and configurations
+]]
 
 local FlingSystem = {}
 
--- Global cooldown management
-local cooldowns = {}
-local cooldownDurations = {
-    Cero = 1.0,
-    Shunpo = 2.0,
-    Illusion = 5.0,
-    Hierro = 10.0,
-    CeroOscuro = 15.0,
-    KyokaSuigetsu = 30.0,
-    Ultimate = 60.0,
+-- Fling configuration
+FlingSystem.Config = {
+    DefaultDuration = 0.5,
+    MaxForceMultiplier = 1000,
+    SafeFallDistance = 50,
+    EnableAngularFling = true,
 }
 
--- Advanced fling configuration with physics properties
-FlingConfig = {
-    -- Basic fling parameters
-    defaultForce = 100000,
-    defaultAngular = 500,
-    defaultHeight = 30,
-    defaultDuration = 1.0,
-    
-    -- Skill-specific configurations
-    skills = {
-        Cero = {
-            force = 150000,
-            angular = 300,
-            height = 40,
-            duration = 0.5,
-            powerMultiplier = 1.5,
-            visualEffect = "energyBlast"
-        },
-        Shunpo = {
-            force = 200000,
-            angular = 1000,
-            height = 60,
-            duration = 1.0,
-            powerMultiplier = 2.0,
-            visualEffect = "dashWind"
-        },
-        Illusion = {
-            force = 80000,
-            angular = 200,
-            height = 25,
-            duration = 0.3,
-            powerMultiplier = 1.0,
-            visualEffect = "cloneSpawn"
-        },
-        Hierro = {
-            force = 50000,
-            angular = 100,
-            height = 15,
-            duration = 0.2,
-            powerMultiplier = 0.5,
-            visualEffect = "shieldUp"
-        },
-        CeroOscuro = {
-            force = 250000,
-            angular = 500,
-            height = 80,
-            duration = 0.7,
-            powerMultiplier = 2.5,
-            visualEffect = "darkEnergy"
-        },
-        KyokaSuigetsu = {
-            force = 120000,
-            angular = 800,
-            height = 50,
-            duration = 0.4,
-            powerMultiplier = 1.8,
-            visualEffect = "illusionWave"
-        },
-        Ultimate = {
-            force = 400000,
-            angular = 2000,
-            height = 100,
-            duration = 1.5,
-            powerMultiplier = 4.0,
-            visualEffect = "ultimateBlast"
-        }
-    }
+-- Available fling modes
+FlingSystem.Modes = {
+    ["Standard"] = {
+        Name = "Standard",
+        Description = "Basic fling that throws the target forward",
+        Force = 80000,
+        Direction = Vector3.new(0, 1, 0),
+        Height = 25,
+        Angular = 300,
+    },
+    ["Headshot"] = {
+        Name = "Headshot",
+        Description = "Fling targets high into the air (head-focused)",
+        Force = 60000,
+        Direction = Vector3.new(0, 1, 0),
+        Height = 40,
+        Angular = 800,
+    },
+    ["Orbital"] = {
+        Name = "Orbital",
+        Description = "Fling target in orbital motion around sender",
+        Force = 50000,
+        Direction = Vector3.new(1, 0, 0),
+        Height = 60,
+        Angular = 1200,
+    },
+    ["Gravity"] = {
+        Name = "Gravity",
+        Description = "Fling target with strong gravitational pull",
+        Force = 200000,
+        Direction = Vector3.new(0, -1, 0),
+        Height = 100,
+        Angular = 0,
+    },
+    ["Quake"] = {
+        Name = "Quake",
+        Description = "Ground pound effect that flings nearby targets",
+        Force = 150000,
+        Direction = Vector3.new(1, 0, 0),
+        Height = 10,
+        Angular = 100,
+    },
 }
 
--- Enhanced fling function with visual effects and sound
-function FlingSystem.Fling(target, skillName)
-    skillName = skillName or "Cero"
-    local config = FlingConfig.skills[skillName] or FlingConfig.skills.Cero
-    
-    -- Get target's root part with fallback logic
-    local rootPart = target:FindFirstChild("HumanoidRootPart") or 
-                    target:FindFirstChild("Torso") or 
-                    target:FindFirstChild("Head")
-    
-    if not rootPart then return false end
-    
-    -- Check cooldown
-    local now = tick()
-    local cooldownTime = cooldownDurations[skillName] or 1.0
-    
-    if cooldowns[target] and cooldowns[target] > now then
-        local remaining = math.ceil(cooldowns[target] - now)
-        Util.Notify("Skill on cooldown! Wait " .. remaining .. "s")
+-- Apply fling to a target
+function FlingSystem.Fling(target, mode, duration, customDirection)
+    local config = FlingSystem.Modes[mode]
+    if not config then
+        warn("[FlingSystem] Invalid fling mode: " .. tostring(mode))
         return false
     end
     
-    -- Set cooldown
-    cooldowns[target] = now + cooldownTime
+    local duration = duration or FlingSystem.Config.DefaultDuration
     
-    -- Create enhanced body velocity with physics properties
-    local bv = Instance.new("BodyVelocity")
-    bv.MaxForce = Vector3.new(config.force * 3, config.force * 3, config.force * 3)
+    -- Find the root part to apply fling to
+    local rootPart = target:FindFirstChild("HumanoidRootPart")
+        or target:FindFirstChild("Torso")
+        or target:FindFirstChild("UpperTorso")
     
-    -- Calculate fling direction with target movement prediction
-    local targetPosition = target:GetPrimaryPartCFrame().Position
-    local direction = Vector3.new(
-        math.random(-1, 1),
-        0.5,
-        math.random(-1, 1)
-    )
-    
-    bv.Velocity = direction * config.force * config.powerMultiplier + Vector3.new(0, config.height, 0)
-    bv.Parent = rootPart
-    
-    -- Create enhanced angular velocity for spin effects
-    if config.angular > 0 then
-        local bag = Instance.new("BodyAngularVelocity")
-        bag.MaxTorque = Vector3.new(config.angular * 3, config.angular * 3, config.angular * 3)
-        bag.AngularVelocity = Vector3.new(
-            math.random(-config.angular, config.angular),
-            math.random(-config.angular, config.angular),
-            math.random(-config.angular, config.angular)
-        )
-        bag.Parent = rootPart
-        
-        -- Store reference for cleanup
-        bag._fling = bv
+    if not rootPart then
+        warn("[FlingSystem] No root part found on target")
+        return false
     end
     
-    -- Create visual effects based on skill
-    FlingSystem.CreateVisualEffect(target, skillName, rootPart)
+    -- Create body velocity for linear fling
+    local bodyVel = Instance.new("BodyVelocity")
+    bodyVel.MaxForce = Vector3.new(
+        config.Force * 3,
+        config.Force * 3,
+        config.Force * 3
+    )
     
-    -- Create sound effect
-    FlingSystem.CreateSoundEffect(skillName, target)
+    -- Calculate direction with height adjustment
+    local direction = (customDirection or config.Direction)
+    local velocity = direction * config.Force + Vector3.new(0, config.Height, 0)
     
-    -- Enhanced cleanup with visual effects
-    task.delay(config.duration, function()
-        if bv and bv.Parent then bv:Destroy() end
-        -- Find and destroy associated angular velocity
-        for _, part in pairs(rootPart:GetChildren()) do
-            if part:IsA("BodyAngularVelocity") and part._fling == bv then
-                part:Destroy()
-            end
+    bodyVel.Velocity = velocity
+    bodyVel.Parent = rootPart
+    
+    -- Create angular velocity for spinning
+    if FlingSystem.Config.EnableAngularFling then
+        local bodyAngVel = Instance.new("BodyAngularVelocity")
+        bodyAngVel.MaxTorque = Vector3.new(
+            config.Angular * 3,
+            config.Angular * 3,
+            config.Angular * 3
+        )
+        
+        -- Random initial angular velocity for realistic spinning
+        local randAng = Vector3.new(
+            math.random(-100, 100),
+            math.random(-100, 100),
+            math.random(-100, 100)
+        )
+        
+        -- Add mode-specific angular velocity
+        if mode == "Orbital" then
+            randAng = Vector3.new(0, config.Angular * 2, 0)
         end
         
-        -- Clean up visual effects
-        FlingSystem.CleanupVisualEffects(target)
+        bodyAngVel.AngularVelocity = randAng
+        bodyAngVel.Parent = rootPart
+    end
+    
+    -- Clean up after duration
+    task.delay(duration, function()
+        if bodyVel.Parent then
+            bodyVel:Destroy()
+        end
+        local bag = rootPart:FindFirstChildWhichIsA("BodyAngularVelocity")
+        if bag then
+            bag:Destroy()
+        end
     end)
     
     return true
 end
 
--- Create visual effects for fling
-function FlingSystem.CreateVisualEffect(target, skillName, rootPart)
-    local config = FlingConfig.skills[skillName] or FlingConfig.skills.Cero
-    
-    -- Create particle effects
-    local particle = Instance.new("ParticleEmitter")
-    particle.Parent = rootPart
-    particle.Texture = "rbxassetid://1362239204" -- Energy particles
-    particle.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
-    particle.LightEmission = 1
-    particle.Size = NumberSequence.new(0.5, 1.0)
-    particle.Transparency = NumberSequence.new(0.5, 1)
-    particle.Lifetime = NumberRange.new(0.5, 1)
-    particle.Rate = 50
-    particle.Speed = NumberRange.new(50, 100)
-    particle.VelocitySpread = 45
-    
-    -- Create screen shake effect for powerful skills
-    if config.force > 200000 then
-        local screenShake = Instance.new("ScreenShakeEffect")
-        screenShake.Intensity = 2
-        screenShake.Frequency = 30
-        screenShake.Duration = config.duration
-        screenShake.Parent = workspace.CurrentCamera
-        task.delay(config.duration, function()
-            if screenShake.Parent then screenShake:Destroy() end
-        end)
-    end
+-- Quick fling function for common use cases
+function FlingSystem.QuickFling(target, direction, power)
+    power = power or 80000
+    return FlingSystem.Fling(target, "Standard", 0.5, direction * power)
 end
 
--- Create sound effects
-function FlingSystem.CreateSoundEffect(skillName, target)
-    local soundId = "rbxassetid://" .. FlingSystem.GetSoundId(skillName)
+-- Area fling - affects multiple targets in radius
+function FlingSystem.AreaFling(centerPosition, radius, mode, power)
+    power = power or 80000
+    local targets = {}
     
-    local sound = Instance.new("Sound")
-    sound.SoundId = soundId
-    sound.Volume = 0.8
-    sound.Parent = target
-    
-    -- Play sound with pitch variation
-    sound.PlaybackSpeed = 1 + math.random(-0.2, 0.2)
-    sound:Play()
-    
-    task.delay(2, function()
-        if sound.Parent then sound:Destroy() end
-    end)
-end
-
--- Get sound ID based on skill
-function FlingSystem.GetSoundId(skillName)
-    local soundMap = {
-        Cero = "1362239204",
-        Shunpo = "1362239204",
-        Illusion = "1362239204",
-        Hierro = "1362239204",
-        CeroOscuro = "1362239204",
-        KyokaSuigetsu = "1362239204",
-        Ultimate = "1362239204"
-    }
-    return soundMap[skillName] or soundMap.Cero
-end
-
--- Cleanup visual effects
-function FlingSystem.CleanupVisualEffects(target)
-    for _, child in pairs(target:GetChildren()) do
-        if child:IsA("ParticleEmitter") then
-            child:Destroy()
+    -- Find all players in radius
+    local players = game:GetService("Players"):GetPlayers()
+    for _, player in ipairs(players) do
+        local character = player.Character
+        if character then
+            local humRoot = character:FindFirstChild("HumanoidRootPart")
+            if humRoot then
+                local distance = (humRoot.Position - centerPosition).Magnitude
+                if distance <= radius then
+                    table.insert(targets, character)
+                end
+            end
         end
     end
-end
-
--- Reset cooldown for a target
-function FlingSystem.ResetCooldown(target)
-    cooldowns[target] = 0
-end
-
--- Check if target is in cooldown
-function FlingSystem.IsOnCooldown(target)
-    return cooldowns[target] and cooldowns[target] > tick()
-end
-
--- Get remaining cooldown time
-function FlingSystem.GetRemainingCooldown(target)
-    if cooldowns[target] and cooldowns[target] > tick() then
-        return cooldowns[target] - tick()
+    
+    -- Fling each target
+    for _, target in ipairs(targets) do
+        FlingSystem.Fling(target, mode, 0.5, Vector3.new(0, power, 0))
     end
-    return 0
+    
+    return #targets
 end
 
+-- Return the module
 return FlingSystem

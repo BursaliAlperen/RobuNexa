@@ -1,166 +1,143 @@
--- Passive Features for RobuNexa - AAA Quality Background Effects and Ambient Sounds
--- Implements passive abilities that enhance gameplay without requiring player input
+--[[
+    Passive Features for RobuNexa
+    Provides background effects, ambient sounds, and passive abilities
+    Runs continuously while the moveset is active
+]]
 
 local PassiveFeatures = {}
 
--- Global state for passive features
-local passiveState = {
-    ambientSounds = {},
-    backgroundEffects = {},
-    visualEffects = {},
-    soundIds = {
-        ambient = "rbxassetid://1362239204", -- Energy ambient
-        combat = "rbxassetid://1362239204", -- Combat sounds
-        victory = "rbxassetid://1362239204", -- Victory sounds
+-- Ambient sound configuration
+PassiveFeatures.Sounds = {
+    Ambient = {
+        Enabled = true,
+        Volume = 0.3,
+        Loop = true,
+        Sounds = {
+            "rbxassetid://616118832", -- Background hum
+            "rbxassetid://616119256", -- Low frequency
+            "rbxassetid://616119532", -- Atmospheric
+        }
+    },
+    AbilitySounds = {
+        Enabled = true,
+        Volume = 0.8,
+        Loop = false,
     }
 }
 
--- Initialize passive features
+-- Particle effects configuration
+PassiveFeatures.Particles = {
+    Enabled = true,
+    Size = 5,
+    Opacity = 0.5,
+    Colors = {
+        Color3.fromRGB(255, 215, 0), -- Gold
+        Color3.fromRGB(255, 255, 255), -- White
+        Color3.fromRGB(200, 150, 255), -- Purple
+    }
+}
+
+-- Player tracking and effects
+PassiveFeatures.TrackedPlayers = {}
+
+-- Initialize ambient effects
 function PassiveFeatures.Initialize()
-    -- Start ambient sounds
-    PassiveFeatures.StartAmbientSounds()
+    print("[PassiveFeatures] Initializing ambient effects...")
     
-    -- Start background effects
-    PassiveFeatures.StartBackgroundEffects()
-    
-    -- Start visual effects
-    PassiveFeatures.StartVisualEffects()
-    
-    -- Start passive cooldown reduction
-    PassiveFeatures.StartCooldownReduction()
-    
-    Util.Notify("Passive features activated!")
-end
-
--- Start ambient sounds
-function PassiveFeatures.StartAmbientSounds()
-    local sound = Instance.new("Sound")
-    sound.SoundId = passiveState.soundIds.ambient
-    sound.Volume = 0.3
-    sound.Looped = true
-    sound.Parent = workspace
-    
-    table.insert(passiveState.ambientSounds, sound)
-    sound:Play()
-end
-
--- Start background effects
-function PassiveFeatures.StartBackgroundEffects()
-    -- Create atmospheric lighting
-    local lighting = game:GetService("Lighting")
-    
-    -- Create ambient color transitions
-    local function updateLighting()
-        local h = tick() % 20 / 20
-        local color = Color3.fromHSV(h, 0.3, 0.5)
-        lighting.Ambient = color
-        lighting.Brightness = 0.8 + math.sin(tick() * 0.001) * 0.2
+    -- Setup ambient sound loop
+    if PassiveFeatures.Sounds.Ambient.Enabled then
+        local sound = Instance.new("Sound")
+        sound.Name = "AmbientSound"
+        sound.Volume = PassiveFeatures.Sounds.Ambient.Volume
+        sound.Loop = PassiveFeatures.Sounds.Ambient.Loop
+        sound.SoundId = PassiveFeatures.Sounds.Ambient.Sounds[1]
+        sound.Parent = game:GetService("SoundService")
+        sound:Play()
+        print("[PassiveFeatures] Ambient sound started")
     end
     
-    local lightingConnection = RunService.RenderStepped:Connect(updateLighting)
-    table.insert(passiveState.backgroundEffects, lightingConnection)
+    -- Track player for passive effects
+    local Players = game:GetService("Players")
+    Players.PlayerAdded:Connect(function(player)
+        PassiveFeatures.TrackedPlayers[player] = true
+        print("[PassiveFeatures] Player added: " .. player.Name)
+    end)
     
-    -- Create particle effects
-    local particleSystem = Instance.new("ParticleEmitter")
-    particleSystem.Parent = workspace
-    particleSystem.Texture = "rbxassetid://1362239204"
-    particleSystem.Color = ColorSequence.new(Color3.fromRGB(100, 100, 255))
-    particleSystem.LightEmission = 0.5
-    particleSystem.Size = NumberSequence.new(0.5, 1.0)
-    particleSystem.Transparency = NumberSequence.new(0.5, 1)
-    particleSystem.Lifetime = NumberRange.new(2, 4)
-    particleSystem.Rate = 20
-    particleSystem.Speed = NumberRange.new(10, 30)
-    particleSystem.VelocitySpread = 90
-    particleSystem.EmissionDirection = Enum.NormalId.Top
+    Players.PlayerRemoving:Connect(function(player)
+        PassiveFeatures.TrackedPlayers[player] = nil
+        print("[PassiveFeatures] Player removed: " .. player.Name)
+    end)
     
-    table.insert(passiveState.particleEffects, particleSystem)
+    return true
 end
 
--- Start visual effects
-function PassiveFeatures.StartVisualEffects()
-    -- Create screen effects
-    local screenEffect = Instance.new("BloomEffect")
-    screenEffect.Intensity = 0.5
-    screenEffect.Size = 24
-    screenEffect.Threshold = 0.5
-    screenEffect.Parent = workspace.CurrentCamera
-    
-    table.insert(passiveState.visualEffects, screenEffect)
-    
-    -- Create color correction
-    local colorCorrection = Instance.new("ColorCorrectionEffect")
-    colorCorrection.Brightness = 1.0
-    colorCorrection.Contrast = 0.2
-    colorCorrection.Saturation = 0.8
-    colorCorrection.Parent = workspace.CurrentCamera
-    
-    table.insert(passiveState.visualEffects, colorCorrection)
-end
-
--- Start passive cooldown reduction
-function PassiveFeatures.StartCooldownReduction()
-    local function reduceCooldowns()
-        for _, player in Players:GetPlayers() do
-            local character = player.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                -- Reduce cooldowns by 10%
-                local currentCooldown = FlingSystem.GetRemainingCooldown(character)
-                if currentCooldown > 0 then
-                    FlingSystem.ResetCooldown(character)
-                end
-            end
-        end
-    end
-    
-    local cooldownConnection = RunService.RenderStepped:Connect(reduceCooldowns)
-    table.insert(passiveState.cooldownConnections, cooldownConnection)
-end
-
--- Create visual effect for specific skill
-function PassiveFeatures.CreateSkillEffect(skillName, target)
+-- Add ambient particle effect
+function PassiveFeatures.AddParticleEffect(position, color, duration)
     local effect = Instance.new("ParticleEmitter")
-    effect.Parent = target
-    effect.Texture = "rbxassetid://1362239204"
-    effect.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
-    effect.LightEmission = 1
-    effect.Size = NumberSequence.new(1.0, 2.0)
-    effect.Transparency = NumberSequence.new(0, 1)
-    effect.Lifetime = NumberRange.new(1, 2)
-    effect.Rate = 100
-    effect.Speed = NumberRange.new(50, 150)
-    effect.VelocitySpread = 180
+    effect.Name = "PassiveParticle"
+    effect.Position = position
+    effect.Color = ColorSequence.new(color or PassiveFeatures.Particles.Colors[1])
+    effect.Size = NumberSequence.new(PassiveFeatures.Particles.Size)
+    effect.Opacity = NumberSequence.new(PassiveFeatures.Particles.Opacity)
+    effect.Lifetime = NumberRange.new(duration or 5)
+    effect.Rate = 10
+    effect.Parent = workspace.Terrain
+    
+    -- Clean up after duration
+    task.delay(duration or 5, function()
+        if effect.Parent then
+            effect:Destroy()
+        end
+    end)
     
     return effect
 end
 
--- Cleanup passive features
-function PassiveFeatures.Cleanup()
-    for _, sound in passiveState.ambientSounds do
-        if sound.Parent then sound:Destroy() end
+-- Apply passive ability to a player
+function PassiveFeatures.ApplyPassiveAbility(player, abilityName)
+    local character = player.Character
+    if not character then
+        return false
     end
     
-    for _, connection in passiveState.backgroundEffects do
-        connection:Disconnect()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then
+        return false
     end
     
-    for _, effect in passiveState.visualEffects do
-        if effect.Parent then effect:Destroy() end
+    -- Apply ability based on name
+    if abilityName == "Regeneration" then
+        -- Regeneration passive - slowly restore health
+        local connection
+        connection = game:GetService("RunService").Heartbeat:Connect(function()
+            if humanoid.Health < humanoid.MaxHealth then
+                humanoid.Health = math.min(humanoid.Health + 1, humanoid.MaxHealth)
+            else
+                connection:Disconnect()
+            end
+        end)
+        return true
+    
+    elseif abilityName == "Strength" then
+        -- Strength passive - increase damage
+        -- This would be handled by the moveset system
+        return true
+    
+    elseif abilityName == "Shield" then
+        -- Shield passive - damage reduction
+        -- This would be handled by the moveset system
+        return true
     end
     
-    for _, connection in passiveState.cooldownConnections do
-        connection:Disconnect()
-    end
-    
-    passiveState.ambientSounds = {}
-    passiveState.backgroundEffects = {}
-    passiveState.visualEffects = {}
-    passiveState.cooldownConnections = {}
+    warn("[PassiveFeatures] Unknown ability: " .. tostring(abilityName))
+    return false
 end
 
--- Check if player has passive features active
-function PassiveFeatures.IsActive()
-    return #passiveState.ambientSounds > 0
+-- Toggle all passive features on/off
+function PassiveFeatures.Toggle(enabled)
+    -- This would toggle the entire passive system
+    print("[PassiveFeatures] Passive features " .. (enabled and "enabled" or "disabled"))
 end
 
+-- Return the module
 return PassiveFeatures

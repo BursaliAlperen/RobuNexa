@@ -1,109 +1,218 @@
--- UI System for RobuNexa - AAA Quality GUI with Cooldown Management
--- Implements LUA CODING ENGINE UI with enhanced visual effects and skill management
+--[[
+    UI System for RobuNexa
+    Provides the main interface for moveset selection and ability activation
+    Dark theme with koyu gri (dark gray) that transitions to acik gri (light gray) on hover
+]]
 
-local UI = {}
+local UISystem = {}
 
--- Create main UI panel with enhanced styling
-function UI.CreateMainPanel()
-    local panel = Instance.new("Frame")
-    panel.Name = "LuaCodingEngine_UI"
-    panel.Size = UDim2.new(0, 350, 0, 450)
-    panel.Position = UDim2.new(0.5, -175, 0.5, -225)
-    panel.BackgroundTransparency = 0.2
-    panel.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-    panel.BorderColor3 = Color3.fromRGB(100, 100, 255)
-    panel.BorderSizePixel = 2
-    panel.Parent = CoreGui
+-- UI Configuration
+UISystem.Config = {
+    Theme = "Dark",
+    PrimaryColor = Color3.fromRGB(30, 30, 30),      -- Koyu gri (dark gray)
+    SecondaryColor = Color3.fromRGB(50, 50, 50),   -- Koyu gri darker
+    AccentColor = Color3.fromRGB(255, 215, 0),     -- Altın/yellow accent
+    TextColor = Color3.fromRGB(255, 255, 255),     -- Beyaz (white)
+    HoverColor = Color3.fromRGB(70, 70, 70),       -- Açık gri (light gray) hover
+    ActiveColor = Color3.fromRGB(100, 100, 100),   -- Açık gri active
+    TextSize = 14,
+    ButtonPadding = 8,
+    CornerRadius = 4,
+}
+
+-- Create the main UI screen gui
+function UISystem.CreateMainUI()
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "RobuNexaUI"
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
     
-    -- Add blur effect
-    local blur = Instance.new("BlurEffect")
-    blur.Size = 10
-    blur.Parent = panel
+    -- Main frame
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "MainFrame"
+    MainFrame.Size = UDim2.new(0, 350, 0, 400)
+    MainFrame.Position = UDim2.new(0.5, -175, 0.5, -200)
+    MainFrame.BackgroundColor3 = UISystem.Config.PrimaryColor
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Parent = ScreenGui
+    MainFrame.Active = true
+    MainFrame.Draggable = true
     
-    return panel
+    -- corners
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, UISystem.Config.CornerRadius)
+    corner.Parent = MainFrame
+    
+    -- Top bar
+    local TopBar = Instance.new("Frame")
+    TopBar.Name = "TopBar"
+    TopBar.Size = UDim2.new(1, 0, 0, 30)
+    TopBar.BackgroundColor3 = UISystem.Config.SecondaryColor
+    TopBar.BorderSizePixel = 0
+    TopBar.Parent = MainFrame
+    
+    local topCorner = Instance.new("UICorner")
+    topCorner.CornerRadius = UDim.new(0, UISystem.Config.CornerRadius)
+    topCorner.Parent = TopBar
+    
+    -- Title
+    local Title = Instance.new("TextLabel")
+    Title.Name = "Title"
+    Title.Size = UDim2.new(1, -50, 1, 0)
+    Title.Position = UDim2.new(0, 10, 0, 0)
+    Title.BackgroundTransparency = 1
+    Title.Font = Enum.Font.GothamBold
+    Title.Text = "RobuNexa Movesets"
+    Title.TextColor3 = UISystem.Config.TextColor
+    Title.TextSize = UISystem.Config.TextSize
+    Title.Parent = TopBar
+    
+    -- Close button
+    local CloseBtn = Instance.new("TextButton")
+    CloseBtn.Name = "CloseBtn"
+    CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+    CloseBtn.Position = UDim2.new(1, -30, 0, 0)
+    CloseBtn.BackgroundTransparency = 1
+    CloseBtn.Font = Enum.Font.Gotham
+    CloseBtn.Text = "X"
+    CloseBtn.TextColor3 = UISystem.Config.TextColor
+    CloseBtn.TextSize = UISystem.Config.TextSize
+    CloseBtn.Parent = TopBar
+    
+    -- Main content area
+    local Content = Instance.new("ScrollingFrame")
+    Content.Name = "Content"
+    Content.Size = UDim2.new(1, 0, 1, -35)
+    Content.Position = UDim2.new(0, 0, 0, 30)
+    Content.BackgroundTransparency = 1
+    Content.BorderSizePixel = 0
+    Content.ScrollBarThickness = 6
+    Content.ScrollBarImageColor3 = UISystem.Config.AccentColor
+    Content.Parent = MainFrame
+    
+    -- Example moveset buttons
+    local Movesets = {"Aizen", "Gojo", "Sukuna"}
+    local ButtonHeight = 50
+    local Spacing = 10
+    local TotalHeight = #Movesets * (ButtonHeight + Spacing) - Spacing
+    
+    Content.CanvasSize = UDim2.new(0, 0, 0, TotalHeight + 20)
+    
+    for i, moveset in ipairs(Movesets) do
+        local Button = Instance.new("TextButton")
+        Button.Name = moveset .. "Button"
+        Button.Size = UDim2.new(1, -20, 0, ButtonHeight)
+        Button.Position = UDim2.new(0, 10, 0, (i - 1) * (ButtonHeight + Spacing) + 10)
+        Button.BackgroundColor3 = UISystem.Config.PrimaryColor
+        Button.BorderSizePixel = 0
+        Button.Font = Enum.Font.Gotham
+        Button.Text = moveset .. " Moveset"
+        Button.TextColor3 = UISystem.Config.TextColor
+        Button.TextSize = UISystem.Config.TextSize
+        Button.Parent = Content
+        
+        -- Corner
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, UISystem.Config.CornerRadius)
+        btnCorner.Parent = Button
+        
+        -- Hover effect
+        Button.MouseEnter:Connect(function()
+            Button.BackgroundColor3 = UISystem.Config.HoverColor
+        end)
+        
+        Button.MouseLeave:Connect(function()
+            Button.BackgroundColor3 = UISystem.Config.PrimaryColor
+        end)
+        
+        -- Click effect
+        Button.MouseButton1Click:Connect(function()
+            print("[UI] Selected: " .. moveset)
+            -- Here we would load the moveset
+        end)
+    end
+    
+    -- Cooldown display area
+    local CooldownFrame = Instance.new("Frame")
+    CooldownFrame.Name = "CooldownFrame"
+    CooldownFrame.Size = UDim2.new(1, 0, 0, 50)
+    CooldownFrame.Position = UDim2.new(0, 0, 1, -50)
+    CooldownFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    CooldownFrame.BackgroundTransparency = 0.2
+    CooldownFrame.Parent = MainFrame
+    
+    local coCorner = Instance.new("UICorner")
+    coCorner.CornerRadius = UDim.new(0, UISystem.Config.CornerRadius)
+    coCorner.Parent = CooldownFrame
+    
+    -- Return the GUI
+    return ScreenGui
 end
 
--- Create enhanced skill button with visual effects
-function UI.CreateSkillButton(name, icon, callback, cooldown, skillName)
-    local button = Instance.new("TextButton")
-    button.Name = name .. "_ToolButton"
-    button.Size = UDim2.new(0, 90, 0, 40)
-    button.Position = UDim2.new(0, 0, 0, 0)
-    button.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.Font = Enum.Font.SourceSansBold
-    button.TextSize = 16
-    button.Text = icon .. "\n" .. name
-    button.Parent = CoreGui
+-- Create a moveset button for a specific character
+function UISystem.CreateMovesetButton(parent, characterName, position)
+    local Button = Instance.new("TextButton")
+    Button.Name = characterName .. "Button"
+    Button.Size = UDim2.new(1, -20, 0, 40)
+    Button.Position = position
+    Button.BackgroundColor3 = UISystem.Config.PrimaryColor
+    Button.BorderSizePixel = 0
+    Button.Font = Enum.Font.Gotham
+    Button.Text = characterName .. " Moveset"
+    Button.TextColor3 = UISystem.Config.TextColor
+    Button.TextSize = UISystem.Config.TextSize
+    Button.Parent = parent
     
-    -- Add glow effect
-    local glow = Instance.new("ImageLabel")
-    glow.Size = UDim2.new(1.2, 0, 1.2, 0)
-    glow.Position = UDim2.new(-0.1, 0, -0.1, 0)
-    glow.BackgroundTransparency = 1
-    glow.Image = "rbxassetid://1362239204" -- Energy glow
-    glow.ImageColor3 = Color3.fromRGB(100, 100, 255)
-    glow.ImageTransparency = 0.5
-    glow.ZIndex = -1
-    glow.Parent = button
+    -- Corner
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, UISystem.Config.CornerRadius)
+    btnCorner.Parent = Button
     
-    -- Cooldown state
-    local isCooldown = false
-    local cooldownTime = cooldown or 1
+    -- Hover effect
+    Button.MouseEnter:Connect(function()
+        Button.BackgroundColor3 = UISystem.Config.HoverColor
+    end)
+    
+    Button.MouseLeave:Connect(function()
+        Button.BackgroundColor3 = UISystem.Config.PrimaryColor
+    end)
+    
+    -- Click effect
+    Button.MouseButton1Click:Connect(function()
+        print("[UI] " .. characterName .. " moveset activated")
+        -- Trigger moveset loading
+    end)
+    
+    return Button
+end
+
+-- Create cooldown indicator
+function UISystem.CreateCooldownIndicator(parent, button, duration)
+    local startTime = tick()
+    local isOnCooldown = false
     
     button.MouseButton1Click:Connect(function()
-        if isCooldown then
-            Util.Notify("Skill on cooldown! Wait " .. math.ceil(cooldownTime) .. "s")
+        if isOnCooldown then
             return
         end
         
-        isCooldown = true
-        callback(skillName)
+        isOnCooldown = true
+        print("[UI] " .. button.Name .. " activated! Cooldown: " .. duration .. "s")
         
-        -- Enhanced cooldown indicator
-        local cooldownLabel = Instance.new("TextLabel")
-        cooldownLabel.Name = "CooldownLabel"
-        cooldownLabel.Size = UDim2.new(1, 0, 1, 0)
-        cooldownLabel.BackgroundTransparency = 0.5
-        cooldownLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        cooldownLabel.Text = ""
-        cooldownLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        cooldownLabel.Font = Enum.Font.SourceSansBold
-        cooldownLabel.TextSize = 12
-        cooldownLabel.Visible = true
-        cooldownLabel.Parent = button
-        
-        -- Fill cooldown bar
-        local fill = Instance.new("Frame")
-        fill.Size = UDim2.new(1, 0, 1, 0)
-        fill.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        fill.BackgroundTransparency = 0
-        fill.ZIndex = -1
-        fill.Parent = cooldownLabel
-        
-        -- Animate cooldown fill
-        local startTime = tick()
-        local function updateCooldown()
-            if not isCooldown then return end
-            local elapsed = tick() - startTime
-            local progress = 1 - (elapsed / cooldownTime)
+        -- Visual cooldown effect
+        local elapsed = 0
+        local cooldownConnection = game:GetService("RunService").RenderStepped:Connect(function()
+            elapsed = elapsed + game:GetService("RunService").RenderStepped:Wait()
+            local progress = math.min(elapsed / duration, 1)
             
-            if progress <= 0 then
-                fill.Size = UDim2.new(0, 0, 1, 0)
-                isCooldown = false
-                cooldownLabel.Visible = false
-                fill:Destroy()
-                cooldownLabel:Destroy()
-                return
-            end
+            -- Update button appearance
+            button.BackgroundTransparency = 1 - progress
             
-            fill.Size = UDim2.new(progress, 0, 1, 0)
-        end
-        
-        spawn(function()
-            while isCooldown do
-                updateCooldown()
-                task.wait(0.1)
+            if progress >= 1 then
+                isOnCooldown = false
+                button.BackgroundTransparency = 0
+                button.BackgroundColor3 = UISystem.Config.PrimaryColor
+                cooldownConnection:Disconnect()
             end
         end)
     end)
@@ -111,80 +220,5 @@ function UI.CreateSkillButton(name, icon, callback, cooldown, skillName)
     return button
 end
 
--- Create enhanced UI with all Aizen skills
-function UI.CreateAizenUI()
-    local panel = UI.CreateMainPanel()
-    
-    -- Create title label
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, 0, 0, 40)
-    titleLabel.Position = UDim2.new(0, 0, 0, 0)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = "Aizen - AAA Moveset"
-    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleLabel.Font = Enum.Font.SourceSansBold
-    titleLabel.TextSize = 20
-    titleLabel.Parent = panel
-    
-    -- Create skill buttons in grid layout
-    local skills = {
-        {"Aizen Cero", "⚡", 1.0, "Cero"},
-        {"Aizen Shunpo", "🏃", 2.0, "Shunpo"},
-        {"Aizen Illusion", "👻", 5.0, "Illusion"},
-        {"Aizen Hierro", "🛡️", 10.0, "Hierro"},
-        {"Aizen Cero Oscuro", "🔥", 15.0, "CeroOscuro"},
-        {"Aizen Kyoka Suigetsu", "🌀", 30.0, "KyokaSuigetsu"},
-        {"Aizen Ultimate", "💥", 60.0, "Ultimate"},
-    }
-    
-    local buttonGrid = {}
-    local spacing = 10
-    local buttonSize = 90
-    local rowHeight = 40
-    
-    for i, skill in ipairs(skills) do
-        local row = math.floor((i - 1) / 2)
-        local col = (i - 1) % 2
-        
-        local button = UI.CreateSkillButton(skill[1], skill[2], function(skillName) 
-            -- This will be overridden by the actual callback
-        end, skill[3], skill[4])
-        
-        button.Position = UDim2.new(
-            0, col * (buttonSize + spacing) + spacing,
-            0, row * (rowHeight + spacing) + 50
-        )
-        
-        table.insert(buttonGrid, {button = button, skill = skill[4]})
-    end
-    
-    -- Add status label
-    local statusLabel = Instance.new("TextLabel")
-    statusLabel.Size = UDim2.new(1, -20, 0, 30)
-    statusLabel.Position = UDim2.new(0, 10, 1, -40)
-    statusLabel.BackgroundTransparency = 1
-    statusLabel.Text = "Ready to fight!"
-    statusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-    statusLabel.Font = Enum.Font.SourceSans
-    statusLabel.TextSize = 14
-    statusLabel.Parent = panel
-    
-    return panel
-end
-
--- Update skill button with actual callback
-function UI.UpdateSkillButton(button, skillName, callback)
-    button.MouseButton1Click:Connect(function()
-        -- Check if button is in cooldown
-        local cooldownLabel = button:FindFirstChild("CooldownLabel")
-        if cooldownLabel and cooldownLabel.Visible then
-            Util.Notify("Skill on cooldown!")
-            return
-        end
-        
-        -- Execute callback
-        callback(skillName)
-    end)
-end
-
-return UI
+-- Return the module
+return UISystem
