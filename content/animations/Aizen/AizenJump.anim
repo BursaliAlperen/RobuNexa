@@ -1,0 +1,37 @@
+-- Aizen Jump Animation
+-- AAA Quality Animation for RobuNexa
+
+-- Animation Metadata
+local metadata = {
+    name = "AizenJump",
+    duration = 0.6,
+    loop = false,
+    fps = 60,
+    format = "NAMAnimation"
+}
+
+-- Animation Tracks
+local tracks = {
+    {
+        name = "AizenJumpTrack",
+        keyframes = {
+            {time = 0, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0, 0)},
+            {time = 0.1, position = CFrame.new(0, 1.5, 0), rotation = CFrame.fromEulerAnglesXYZ(-0.5, 0, 0)},
+            {time = 0.2, position = CFrame.new(0, 2.0, 0), rotation = CFrame.fromEulerAnglesXYZ(-0.8, 0.2, 0)},
+            {time = 0.3, position = CFrame.new(0, 1.8, 0), rotation = CFrame.fromEulerAnglesXYZ(-0.5, 0.4, 0)},
+            {time = 0.4, position = CFrame.new(0, 1.0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0.6, 0)},
+            {time = 0.5, position = CFrame.new(0, 0.5, 0), rotation = CFrame.fromEulerAnglesXYZ(0.2, 0.8, 0)},
+            {time = 0.6, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 1.0, 0)},
+        }
+    }
+}
+
+-- Animation Export Function
+local function exportAnimation()
+    return {
+        metadata = metadata,
+        tracks = tracks
+    }
+end
+
+return exportAnimation()

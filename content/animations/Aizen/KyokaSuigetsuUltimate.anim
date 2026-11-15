@@ -1,0 +1,37 @@
+-- Aizen Kyoka Suigetsu Ultimate Animation
+-- AAA Quality Animation for RobuNexa
+
+-- Animation Metadata
+local metadata = {
+    name = "AizenKyokaSuigetsuUltimate",
+    duration = 3.0,
+    loop = false,
+    fps = 60,
+    format = "NAMAnimation"
+}
+
+-- Animation Tracks
+local tracks = {
+    {
+        name = "AizenKyokaSuigetsuUltimateTrack",
+        keyframes = {
+            {time = 0, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0, 0)},
+            {time = 0.5, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0.5, 0)},
+            {time = 1.0, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 1.0, 0)},
+            {time = 1.5, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 1.5, 0)},
+            {time = 2.0, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 2.0, 0)},
+            {time = 2.5, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 2.5, 0)},
+            {time = 3.0, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 3.0, 0)},
+        }
+    }
+}
+
+-- Animation Export Function
+local function exportAnimation()
+    return {
+        metadata = metadata,
+        tracks = tracks
+    }
+end
+
+return exportAnimation()

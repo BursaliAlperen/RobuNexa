@@ -1,0 +1,97 @@
+-- Aizen Cero Oscuro Animation
+-- AAA Quality Animation for RobuNexa
+
+-- Animation Metadata
+local metadata = {
+    name = "AizenCeroOscuro",
+    duration = 1.5,
+    loop = false,
+    fps = 60,
+    format = "NAMAnimation"
+}
+
+-- Animation Tracks
+local tracks = {
+    {
+        name = "AizenCeroOscuroTrack",
+        keyframes = {
+            {time = 0, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0, 0)},
+            {time = 0.3, position = CFrame.new(1.0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0.5, 0)},
+            {time = 0.6, position = CFrame.new(2.0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 1.0, 0)},
+            {time = 0.9, position = CFrame.new(3. callback_function() end
+    local function executeUltimate(target)
+        -- Ultimate skill with passive effects
+        if FlingSystem.IsOnCooldown(target) then
+            Util.Notify("Cooldown active! Wait " .. math.ceil(FlingSystem.GetRemainingCooldown(target)) .. "s (reduced by passive)")
+        end
+        
+        -- TODO: Implement actual ultimate logic
+        FlingSystem.Fling(target, "Ultimate")
+        Util.Notify("Ultimate executed!")
+    end
+    
+    -- Update UI buttons with actual callbacks
+    local skillButtons = CoreGui:FindFirstChildrenWhichAreA("TextButton")
+    for _, button in skillButtons do
+        local skillName = button.Name
+        if skillName == "Aizen_Cero_ToolButton" then
+            button.MouseButton1Click:Connect(function()
+                if FlingSystem.IsOnCooldown(target) then
+                    Util.Notify("Cooldown active! Wait " .. math.ceil(FlingSystem.GetRemainingCooldown(target)) .. "s")
+                    return
+                end
+                executeCero(target)
+            end)
+        elseif skillName == "Aizen_Shunpo_ToolButton" then
+            button.MouseButton1Click:Connect(function()
+                if FlingSystem.IsOnCooldown(target) then
+                    Util.Notify("Cooldown active! Wait " .. math.ceil(FlingSystem.GetRemainingCooldown(target)) .. "s")
+                    return
+                end
+                executeShunpo(target)
+            end)
+        elseif skillName == "Aizen_Illusion_ToolButton" then
+            button.MouseButton1Click:Connect(function()
+                if FlingSystem.IsOnCooldown(target) then
+                    Util.Notify("Cooldown active! Wait " .. math.ceil(FlingSystem.GetRemainingCooldown(target)) .. "s")
+                    return
+                end
+                executeIllusion(target)
+            end)
+        elseif skillName == "Aizen_Herro_ToolButton" then
+            button.MouseButton1Click:Connect(function()
+                if FlingSystem.IsOnCooldown(target) then
+                    Util.Notify("Cooldown active! Wait " .. math.ceil(FlingSystem.GetRemainingCooldown(target)) .. "s")
+                    return
+                end
+                executeHierro(target)
+            end)
+        elseif skillName == "Aizen_CeroOscuro_ToolButton" then
+            button.MouseButton1Click:Connect(function()
+                if FlingSystem.IsOnCooldown(target) then
+                    Util.Notify("Cooldown active! Wait " .. math.ceil(FlingSystem.GetRemainingCooldown(target)) .. "s")
+                    return
+                end
+                executeCeroOscuro(target)
+            end)
+        elseif skillName == "Aizen_KyokaSuigetsu_ToolButton" then
+            button.MouseButton1Click:Connect(function()
+                if FlingSystem.IsOnCooldown(target) then
+                    Util.Notify("Cooldown active! Wait " .. math.ceil(FlingSystem.GetRemainingCooldown(target)) .. "s")
+                    return
+                end
+                executeKyokaSuigetsu(target)
+            end)
+        elseif skillName == "Aizen_Ultimate_ToolButton" then
+            button.MouseButton1Click:Connect(function()
+                if FlingSystem.IsOnCooldown(target) then
+                    Util.Notify("Cooldown active! Wait " .. math.ceil(FlingSystem.GetRemainingCooldown(target)) .. "s")
+                    return
+                end
+                executeUltimate(target)
+            end)
+        end
+    end
+    
+    return m
+end)

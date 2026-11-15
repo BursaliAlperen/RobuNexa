@@ -1,0 +1,36 @@
+-- Aizen Idle Animation
+-- AAA Quality Animation for RobuNexa
+
+-- Animation Metadata
+local metadata = {
+    name = "AizenIdle",
+    duration = 0.5,
+    loop = true,
+    fps = 60,
+    format = "NAMAnimation"
+}
+
+-- Animation Tracks
+local tracks = {
+    {
+        name = "AizenIdleTrack",
+        keyframes = {
+            {time = 0, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0, 0)},
+            {time = 0.1, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0.1, 0)},
+            {time = 0.2, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0, 0.1)},
+            {time = 0.3, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, -0.1, 0)},
+            {time = 0.4, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0, -0.1)},
+            {time = 0.5, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0, 0)},
+        }
+    }
+}
+
+-- Animation Export Function
+local function exportAnimation()
+    return {
+        metadata = metadata,
+        tracks = tracks
+    }
+end
+
+return exportAnimation()

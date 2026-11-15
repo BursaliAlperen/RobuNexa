@@ -1,0 +1,39 @@
+-- Aizen Walk Animation
+-- AAA Quality Animation for RobuNexa
+
+-- Animation Metadata
+local metadata = {
+    name = "AizenWalk",
+    duration = 0.8,
+    loop = true,
+    fps = 60,
+    format = "NAMAnimation"
+}
+
+-- Animation Tracks
+local tracks = {
+    {
+        name = "AizenWalkTrack",
+        keyframes = {
+            {time = 0, position = CFrame.new(0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0, 0)},
+            {time = 0.1, position = CFrame.new(0.5, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0.5, 0)},
+            {time = 0.2, position = CFrame.new(1.0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 1.0, 0)},
+            {time = 0.3, position = CFrame.new(1.5, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 1.5, 0)},
+            {time = 0.4, position = CFrame.new(2.0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 2.0, 0)},
+            {time = 0.5, position = CFrame.new(2.5, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 1.5, 0)},
+            {time = 0.6, position = CFrame.new(3.0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 1.0, 0)},
+            {time = 0.7, position = CFrame.new(3.5, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0.5, 0)},
+            {time = 0.8, position = CFrame.new(4.0, 0, 0), rotation = CFrame.fromEulerAnglesXYZ(0, 0, 0)},
+        }
+    }
+}
+
+-- Animation Export Function
+local function exportAnimation()
+    return {
+        metadata = metadata,
+        tracks = tracks
+    }
+end
+
+return exportAnimation()
